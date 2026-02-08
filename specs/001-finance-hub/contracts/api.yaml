@@ -1,0 +1,1136 @@
+openapi: 3.1.0
+info:
+  title: Finance Hub API
+  version: 1.0.0
+  description: Self-hosted financial management API
+  contact:
+    name: Finance Hub
+  license:
+    name: MIT
+
+servers:
+  - url: /api/v1
+    description: API v1
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Common
+    UUID:
+      type: string
+      format: uuid
+
+    Pagination:
+      type: object
+      properties:
+        cursor:
+          type: string
+          description: Cursor for next page
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+        nextCursor:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+
+    # Auth
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        deviceName:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        requiresMfa:
+          type: boolean
+        mfaMethods:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                $ref: '#/components/schemas/UUID'
+              type:
+                type: string
+                enum: [totp, webauthn]
+              name:
+                type: string
+        tempToken:
+          type: string
+          description: Temporary token for MFA step
+
+    MfaVerifyRequest:
+      type: object
+      required: [tempToken, mfaId]
+      properties:
+        tempToken:
+          type: string
+        mfaId:
+          $ref: '#/components/schemas/UUID'
+        code:
+          type: string
+          description: TOTP code (for totp type)
+        credential:
+          type: object
+          description: WebAuthn credential (for webauthn type)
+
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+        tokenType:
+          type: string
+          default: Bearer
+
+    # User
+    User:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        email:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+        locale:
+          type: string
+        timezone:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    # Workspace
+    Workspace:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        type:
+          type: string
+          enum: [personal, family, flatshare, company]
+        currency:
+          type: string
+        role:
+          type: string
+          enum: [owner, admin, accountant, member, readonly]
+        memberCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateWorkspaceRequest:
+      type: object
+      required: [name, type]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        type:
+          type: string
+          enum: [personal, family, flatshare, company]
+        currency:
+          type: string
+          default: EUR
+
+    # Account
+    Account:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        type:
+          type: string
+          enum: [checking, savings, cash, credit, investment, loan]
+        currency:
+          type: string
+        currentBalance:
+          type: number
+        institution:
+          type: string
+          nullable: true
+        color:
+          type: string
+          nullable: true
+        icon:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+
+    CreateAccountRequest:
+      type: object
+      required: [name, type, currency]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [checking, savings, cash, credit, investment, loan]
+        currency:
+          type: string
+        initialBalance:
+          type: number
+          default: 0
+        institution:
+          type: string
+        color:
+          type: string
+        icon:
+          type: string
+
+    # Transaction
+    Transaction:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        accountId:
+          $ref: '#/components/schemas/UUID'
+        type:
+          type: string
+          enum: [expense, income, transfer]
+        amount:
+          type: number
+        currency:
+          type: string
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        category:
+          $ref: '#/components/schemas/CategoryRef'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagRef'
+        status:
+          type: string
+          enum: [uncleared, cleared, reconciled]
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentRef'
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateTransactionRequest:
+      type: object
+      required: [accountId, type, amount, date, description]
+      properties:
+        accountId:
+          $ref: '#/components/schemas/UUID'
+        type:
+          type: string
+          enum: [expense, income, transfer]
+        amount:
+          type: number
+          minimum: 0.01
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+        notes:
+          type: string
+        categoryId:
+          $ref: '#/components/schemas/UUID'
+        tagIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/UUID'
+        transferToAccountId:
+          $ref: '#/components/schemas/UUID'
+          description: For transfer type only
+
+    CategoryRef:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        color:
+          type: string
+        icon:
+          type: string
+
+    TagRef:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        color:
+          type: string
+
+    DocumentRef:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        filename:
+          type: string
+        mimeType:
+          type: string
+
+    # Category
+    Category:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        type:
+          type: string
+          enum: [expense, income, both]
+        parentId:
+          $ref: '#/components/schemas/UUID'
+        icon:
+          type: string
+        color:
+          type: string
+        isSystem:
+          type: boolean
+
+    # Budget
+    Budget:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        categoryId:
+          $ref: '#/components/schemas/UUID'
+        category:
+          $ref: '#/components/schemas/CategoryRef'
+        amount:
+          type: number
+        spent:
+          type: number
+        remaining:
+          type: number
+        percentUsed:
+          type: number
+        period:
+          type: string
+          enum: [monthly, yearly]
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+          nullable: true
+
+    CreateBudgetRequest:
+      type: object
+      required: [name, categoryId, amount, period, startDate]
+      properties:
+        name:
+          type: string
+        categoryId:
+          $ref: '#/components/schemas/UUID'
+        amount:
+          type: number
+          minimum: 0.01
+        period:
+          type: string
+          enum: [monthly, yearly]
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        rollover:
+          type: boolean
+          default: false
+        alertThreshold:
+          type: integer
+          minimum: 0
+          maximum: 100
+          default: 80
+
+    # Document
+    Document:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        filename:
+          type: string
+        mimeType:
+          type: string
+        size:
+          type: integer
+        status:
+          type: string
+          enum: [inbox, linked, archived]
+        isVault:
+          type: boolean
+        linkedTransactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UUID'
+        createdAt:
+          type: string
+          format: date-time
+
+    UploadUrlResponse:
+      type: object
+      properties:
+        uploadUrl:
+          type: string
+        documentId:
+          $ref: '#/components/schemas/UUID'
+        expiresAt:
+          type: string
+          format: date-time
+
+    # Import
+    ImportPreview:
+      type: object
+      properties:
+        totalRows:
+          type: integer
+        validRows:
+          type: integer
+        duplicates:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              row:
+                type: integer
+              message:
+                type: string
+        preview:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+          maxItems: 10
+
+    ImportRequest:
+      type: object
+      required: [accountId, mapping]
+      properties:
+        accountId:
+          $ref: '#/components/schemas/UUID'
+        mapping:
+          type: object
+          properties:
+            date:
+              type: string
+            amount:
+              type: string
+            description:
+              type: string
+            category:
+              type: string
+        skipDuplicates:
+          type: boolean
+          default: true
+        applyRules:
+          type: boolean
+          default: true
+
+    ImportResult:
+      type: object
+      properties:
+        jobId:
+          $ref: '#/components/schemas/UUID'
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        imported:
+          type: integer
+        skipped:
+          type: integer
+        errors:
+          type: integer
+
+    # Settlement (Flatshare)
+    Settlement:
+      type: object
+      properties:
+        balances:
+          type: array
+          items:
+            type: object
+            properties:
+              userId:
+                $ref: '#/components/schemas/UUID'
+              userName:
+                type: string
+              balance:
+                type: number
+                description: Positive = owed, negative = owes
+        transfers:
+          type: array
+          items:
+            type: object
+            properties:
+              from:
+                $ref: '#/components/schemas/UUID'
+              fromName:
+                type: string
+              to:
+                $ref: '#/components/schemas/UUID'
+              toName:
+                type: string
+              amount:
+                type: number
+
+paths:
+  # Auth
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email/password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful or MFA required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+
+  /auth/mfa/verify:
+    post:
+      tags: [Auth]
+      summary: Verify MFA code
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MfaVerifyRequest'
+      responses:
+        '200':
+          description: MFA verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid MFA code
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout (invalidate session)
+      responses:
+        '204':
+          description: Logged out
+
+  /auth/lock:
+    post:
+      tags: [Auth]
+      summary: Lock session (require re-auth)
+      responses:
+        '204':
+          description: Session locked
+
+  /auth/unlock:
+    post:
+      tags: [Auth]
+      summary: Unlock session with password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+      responses:
+        '204':
+          description: Session unlocked
+
+  # User
+  /user/me:
+    get:
+      tags: [User]
+      summary: Get current user
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /user/devices:
+    get:
+      tags: [User]
+      summary: List registered devices
+      responses:
+        '200':
+          description: Device list
+
+  /user/devices/{deviceId}:
+    delete:
+      tags: [User]
+      summary: Revoke device
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '204':
+          description: Device revoked
+
+  # Workspaces
+  /workspaces:
+    get:
+      tags: [Workspaces]
+      summary: List user's workspaces
+      responses:
+        '200':
+          description: Workspace list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workspace'
+
+    post:
+      tags: [Workspaces]
+      summary: Create workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkspaceRequest'
+      responses:
+        '201':
+          description: Workspace created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+
+  /workspaces/{workspaceId}:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    get:
+      tags: [Workspaces]
+      summary: Get workspace details
+      responses:
+        '200':
+          description: Workspace details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+
+  /workspaces/{workspaceId}/settlement:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+    get:
+      tags: [Workspaces]
+      summary: Get flatshare settlement
+      description: Only available for flatshare workspaces
+      responses:
+        '200':
+          description: Settlement calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settlement'
+
+  # Accounts
+  /workspaces/{workspaceId}/accounts:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    get:
+      tags: [Accounts]
+      summary: List accounts
+      responses:
+        '200':
+          description: Account list
+
+    post:
+      tags: [Accounts]
+      summary: Create account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '201':
+          description: Account created
+
+  # Transactions
+  /workspaces/{workspaceId}/transactions:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    get:
+      tags: [Transactions]
+      summary: List transactions
+      parameters:
+        - name: accountId
+          in: query
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: categoryId
+          in: query
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Transaction list
+
+    post:
+      tags: [Transactions]
+      summary: Create transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransactionRequest'
+      responses:
+        '201':
+          description: Transaction created
+
+  /workspaces/{workspaceId}/transactions/{transactionId}:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      - name: transactionId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    get:
+      tags: [Transactions]
+      summary: Get transaction
+      responses:
+        '200':
+          description: Transaction details
+
+    patch:
+      tags: [Transactions]
+      summary: Update transaction
+      responses:
+        '200':
+          description: Transaction updated
+
+    delete:
+      tags: [Transactions]
+      summary: Delete transaction
+      responses:
+        '204':
+          description: Transaction deleted
+
+  # Categories
+  /workspaces/{workspaceId}/categories:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    get:
+      tags: [Categories]
+      summary: List categories
+      responses:
+        '200':
+          description: Category tree
+
+  # Budgets
+  /workspaces/{workspaceId}/budgets:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    get:
+      tags: [Budgets]
+      summary: List budgets with current status
+      responses:
+        '200':
+          description: Budget list with spending
+
+    post:
+      tags: [Budgets]
+      summary: Create budget
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBudgetRequest'
+      responses:
+        '201':
+          description: Budget created
+
+  # Documents
+  /workspaces/{workspaceId}/documents:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    get:
+      tags: [Documents]
+      summary: List documents
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [inbox, linked, archived]
+      responses:
+        '200':
+          description: Document list
+
+  /workspaces/{workspaceId}/documents/upload-url:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    post:
+      tags: [Documents]
+      summary: Get presigned upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filename, mimeType, size]
+              properties:
+                filename:
+                  type: string
+                mimeType:
+                  type: string
+                size:
+                  type: integer
+                  maximum: 20971520
+      responses:
+        '200':
+          description: Upload URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadUrlResponse'
+
+  /workspaces/{workspaceId}/documents/{documentId}/link:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      - name: documentId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    post:
+      tags: [Documents]
+      summary: Link document to transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [transactionId]
+              properties:
+                transactionId:
+                  $ref: '#/components/schemas/UUID'
+      responses:
+        '204':
+          description: Document linked
+
+  # Import
+  /workspaces/{workspaceId}/import/preview:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    post:
+      tags: [Import]
+      summary: Preview CSV import
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                accountId:
+                  $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: Import preview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportPreview'
+
+  /workspaces/{workspaceId}/import/execute:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    post:
+      tags: [Import]
+      summary: Execute CSV import
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportRequest'
+      responses:
+        '202':
+          description: Import job started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportResult'
+
+  # Reports
+  /workspaces/{workspaceId}/reports/summary:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    get:
+      tags: [Reports]
+      summary: Get financial summary
+      parameters:
+        - name: period
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [day, month, year]
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Summary report
+
+  /workspaces/{workspaceId}/reports/net-worth:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    get:
+      tags: [Reports]
+      summary: Get net worth
+      responses:
+        '200':
+          description: Net worth calculation
+
+  /workspaces/{workspaceId}/export:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+
+    post:
+      tags: [Reports]
+      summary: Export data
+      description: Requires step-up authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                format:
+                  type: string
+                  enum: [csv, pdf]
+                dateFrom:
+                  type: string
+                  format: date
+                dateTo:
+                  type: string
+                  format: date
+      responses:
+        '202':
+          description: Export job started

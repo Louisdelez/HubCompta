@@ -1,0 +1,263 @@
+# ============================================================================
+# DOCKER COMPOSE PRODUCTION - Finance Hub
+# Self-hosted deployment configuration
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # --------------------------------------------------------------------------
+  # Traefik Reverse Proxy
+  # --------------------------------------------------------------------------
+  traefik:
+    image: traefik:v3.0
+    container_name: hubcompta-traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:ro
+      - ./config/traefik:/etc/traefik:ro
+      - traefik-certs:/letsencrypt
+    environment:
+      - TZ=${TZ:-Europe/Paris}
+    networks:
+      - hubcompta-network
+    labels:
+      - "traefik.enable=true"
+      # Dashboard (optional, disabled by default)
+      # - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)"
+      # - "traefik.http.routers.traefik.service=api@internal"
+      # - "traefik.http.routers.traefik.middlewares=auth"
+
+  # --------------------------------------------------------------------------
+  # Frontend (Nginx serving React SPA)
+  # --------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        - VITE_API_URL=/api/v1
+        - VITE_APP_NAME=${APP_NAME:-Finance Hub}
+    container_name: hubcompta-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - hubcompta-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      # Security headers middleware
+      - "traefik.http.routers.frontend.middlewares=security-headers"
+      - "traefik.http.middlewares.security-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.security-headers.headers.stsPreload=true"
+
+  # --------------------------------------------------------------------------
+  # Backend (Fastify API)
+  # --------------------------------------------------------------------------
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: hubcompta-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://${DB_USER:-hubcompta}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-hubcompta}?schema=public
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - S3_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+      - S3_BUCKET=${S3_BUCKET:-hubcompta}
+      - APP_URL=https://${DOMAIN}
+      - CORS_ORIGINS=https://${DOMAIN}
+      - TZ=${TZ:-Europe/Paris}
+    networks:
+      - hubcompta-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`, `/health`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+
+  # --------------------------------------------------------------------------
+  # Worker (BullMQ Background Jobs)
+  # --------------------------------------------------------------------------
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.worker
+    container_name: hubcompta-worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${DB_USER:-hubcompta}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-hubcompta}?schema=public
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - S3_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+      - S3_BUCKET=${S3_BUCKET:-hubcompta}
+      - TZ=${TZ:-Europe/Paris}
+    networks:
+      - hubcompta-network
+
+  # --------------------------------------------------------------------------
+  # PostgreSQL Database
+  # --------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: hubcompta-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER:-hubcompta}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME:-hubcompta}
+      - TZ=${TZ:-Europe/Paris}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    networks:
+      - hubcompta-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-hubcompta} -d ${DB_NAME:-hubcompta}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # --------------------------------------------------------------------------
+  # Redis Cache
+  # --------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: hubcompta-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - hubcompta-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --------------------------------------------------------------------------
+  # MinIO Object Storage
+  # --------------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: hubcompta-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - minio-data:/data
+    networks:
+      - hubcompta-network
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # --------------------------------------------------------------------------
+  # MinIO Setup (create bucket on first run)
+  # --------------------------------------------------------------------------
+  minio-setup:
+    image: minio/mc:latest
+    container_name: hubcompta-minio-setup
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set local http://minio:9000 ${MINIO_ACCESS_KEY:-minioadmin} ${MINIO_SECRET_KEY:-minioadmin};
+      mc mb --ignore-existing local/${S3_BUCKET:-hubcompta};
+      mc anonymous set none local/${S3_BUCKET:-hubcompta};
+      exit 0;
+      "
+    networks:
+      - hubcompta-network
+
+  # --------------------------------------------------------------------------
+  # Database Backup (optional, runs daily)
+  # --------------------------------------------------------------------------
+  backup:
+    image: postgres:16-alpine
+    container_name: hubcompta-backup
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - PGHOST=postgres
+      - PGUSER=${DB_USER:-hubcompta}
+      - PGPASSWORD=${DB_PASSWORD}
+      - PGDATABASE=${DB_NAME:-hubcompta}
+      - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-7}
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+    entrypoint: >
+      /bin/sh -c "
+      chmod +x /backup.sh;
+      while true; do
+        /backup.sh;
+        sleep 86400;
+      done
+      "
+    networks:
+      - hubcompta-network
+
+# ----------------------------------------------------------------------------
+# Networks
+# ----------------------------------------------------------------------------
+networks:
+  hubcompta-network:
+    driver: bridge
+
+# ----------------------------------------------------------------------------
+# Volumes
+# ----------------------------------------------------------------------------
+volumes:
+  postgres-data:
+  redis-data:
+  minio-data:
+  traefik-certs:

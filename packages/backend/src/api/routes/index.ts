@@ -1,0 +1,172 @@
+// ============================================================================
+// ROUTE REGISTRATION - Finance Hub
+// ============================================================================
+
+import type { FastifyInstance } from 'fastify';
+
+// Import route modules
+import { authRoutes } from './auth.js';
+import { userRoutes } from './user.js';
+import { workspaceRoutes } from './workspaces.js';
+import { accountRoutes } from './accounts.js';
+import { transactionRoutes } from './transactions.js';
+import { categoryRoutes } from './categories.js';
+import { tagRoutes } from './tags.js';
+import { reportRoutes } from './reports.js';
+import { importRoutes } from './import.js';
+import { ruleRoutes } from './rules.js';
+import { budgetRoutes } from './budgets.js';
+import { documentRoutes } from './documents.js';
+import { exportRoutes } from './export.js';
+
+// Pro mode routes
+import { contactRoutes } from './contacts.js';
+import { quoteRoutes } from './quotes.js';
+import { invoiceRoutes } from './invoices.js';
+
+// Investment routes
+import { assetRoutes } from './assets.js';
+import { positionRoutes } from './positions.js';
+import { portfolioRoutes } from './portfolio.js';
+
+// Notification routes
+import { notificationRoutes } from './notifications.js';
+
+// Settings routes
+import settingsRoutes from './settings.js';
+
+// Health routes
+import { healthRoutes } from './health.js';
+
+// Admin routes
+import { adminRoutes } from './admin.js';
+
+// Recurrence routes
+import { recurrenceRoutes } from './recurrences.js';
+
+// Currency routes
+import { currencyRoutes } from './currencies.js';
+
+// Search routes
+import { searchRoutes } from './search.js';
+
+// ----------------------------------------------------------------------------
+// Route Registration
+// ----------------------------------------------------------------------------
+
+export async function registerRoutes(app: FastifyInstance): Promise<void> {
+  // API version prefix
+  const apiPrefix = '/api/v1';
+
+  // ----------------------------------------------------------------------------
+  // Public Routes (no auth required)
+  // ----------------------------------------------------------------------------
+
+  // Auth routes (login, register, MFA)
+  await app.register(authRoutes, { prefix: `${apiPrefix}/auth` });
+
+  // ----------------------------------------------------------------------------
+  // Protected Routes (auth required)
+  // ----------------------------------------------------------------------------
+
+  // User routes
+  await app.register(userRoutes, { prefix: `${apiPrefix}/user` });
+
+  // Workspace routes
+  await app.register(workspaceRoutes, { prefix: `${apiPrefix}/workspaces` });
+
+  // Account routes (workspace scoped)
+  await app.register(accountRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/accounts` });
+
+  // Transaction routes (workspace scoped)
+  await app.register(transactionRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/transactions` });
+
+  // Category routes (workspace scoped)
+  await app.register(categoryRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/categories` });
+
+  // Tag routes (workspace scoped)
+  await app.register(tagRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/tags` });
+
+  // Report routes (workspace scoped)
+  await app.register(reportRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/reports` });
+
+  // Import routes (workspace scoped)
+  await app.register(importRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/import` });
+
+  // Rule routes (workspace scoped)
+  await app.register(ruleRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/rules` });
+
+  // Budget routes (workspace scoped)
+  await app.register(budgetRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/budgets` });
+
+  // Document routes (workspace scoped)
+  await app.register(documentRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/documents` });
+
+  // Recurrence routes (workspace scoped)
+  await app.register(recurrenceRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/recurrences` });
+
+  // Export routes (workspace scoped)
+  await app.register(exportRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/export` });
+
+  // ----------------------------------------------------------------------------
+  // Pro Mode Routes (workspace scoped)
+  // ----------------------------------------------------------------------------
+
+  // Contact routes
+  await app.register(contactRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/contacts` });
+
+  // Quote routes
+  await app.register(quoteRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/quotes` });
+
+  // Invoice routes
+  await app.register(invoiceRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/invoices` });
+
+  // ----------------------------------------------------------------------------
+  // Investment Routes
+  // ----------------------------------------------------------------------------
+
+  // Asset search (global)
+  await app.register(assetRoutes, { prefix: `${apiPrefix}/assets` });
+
+  // Currency routes (global)
+  await app.register(currencyRoutes, { prefix: `${apiPrefix}/currencies` });
+
+  // Position routes (workspace scoped)
+  await app.register(positionRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/positions` });
+
+  // Portfolio routes (workspace scoped)
+  await app.register(portfolioRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/portfolio` });
+
+  // ----------------------------------------------------------------------------
+  // Notification Routes (user scoped)
+  // ----------------------------------------------------------------------------
+
+  await app.register(notificationRoutes, { prefix: `${apiPrefix}/notifications` });
+
+  // ----------------------------------------------------------------------------
+  // Settings Routes (user scoped)
+  // ----------------------------------------------------------------------------
+
+  await app.register(settingsRoutes, { prefix: `${apiPrefix}/settings` });
+
+  // ----------------------------------------------------------------------------
+  // Admin Routes
+  // ----------------------------------------------------------------------------
+
+  // ----------------------------------------------------------------------------
+  // Search Routes
+  // ----------------------------------------------------------------------------
+
+  await app.register(searchRoutes, { prefix: apiPrefix });
+
+  // Health check routes
+  await app.register(healthRoutes, { prefix: '/health' });
+
+  // Admin routes (instance admin only)
+  await app.register(adminRoutes, { prefix: `${apiPrefix}/admin` });
+
+  // Placeholder route for now
+  app.get(`${apiPrefix}/ping`, async () => {
+    return { pong: true, timestamp: new Date().toISOString() };
+  });
+}

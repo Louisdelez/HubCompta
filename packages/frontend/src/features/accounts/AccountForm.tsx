@@ -1,0 +1,249 @@
+// ============================================================================
+// ACCOUNT FORM - Finance Hub
+// ============================================================================
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/lib/api/client';
+import { clsx } from 'clsx';
+import { CurrencySelector } from '@/features/currency';
+
+// ----------------------------------------------------------------------------
+// Types
+// ----------------------------------------------------------------------------
+
+interface AccountFormData {
+  name: string;
+  type: 'checking' | 'savings' | 'cash' | 'credit_card' | 'loan' | 'investment';
+  currency: string;
+  initialBalance: number;
+  icon?: string;
+  color?: string;
+}
+
+interface Account {
+  id: string;
+  name: string;
+  type: AccountFormData['type'];
+  currency: string;
+  icon?: string;
+  color?: string;
+}
+
+interface AccountFormProps {
+  workspaceId: string;
+  account?: Account;
+  onClose: () => void;
+}
+
+// ----------------------------------------------------------------------------
+// Constants
+// ----------------------------------------------------------------------------
+
+const ACCOUNT_TYPES = [
+  { value: 'checking', label: 'Compte courant', icon: '🏦' },
+  { value: 'savings', label: 'Épargne', icon: '🐷' },
+  { value: 'cash', label: 'Espèces', icon: '💵' },
+  { value: 'credit_card', label: 'Carte de crédit', icon: '💳' },
+  { value: 'loan', label: 'Prêt', icon: '📋' },
+  { value: 'investment', label: 'Investissement', icon: '📈' },
+] as const;
+
+const COLORS = [
+  '#EF4444', '#F97316', '#F59E0B', '#EAB308',
+  '#84CC16', '#22C55E', '#10B981', '#14B8A6',
+  '#06B6D4', '#0EA5E9', '#3B82F6', '#6366F1',
+  '#8B5CF6', '#A855F7', '#D946EF', '#EC4899',
+];
+
+// ----------------------------------------------------------------------------
+// Component
+// ----------------------------------------------------------------------------
+
+export function AccountForm({ workspaceId, account, onClose }: AccountFormProps) {
+  const queryClient = useQueryClient();
+  const [error, setError] = useState<string | null>(null);
+
+  const isEditing = !!account;
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<AccountFormData>({
+    defaultValues: {
+      name: account?.name ?? '',
+      type: account?.type ?? 'checking',
+      currency: account?.currency ?? 'EUR',
+      initialBalance: 0,
+      icon: account?.icon,
+      color: account?.color ?? COLORS[0],
+    },
+  });
+
+  const selectedType = watch('type');
+  const selectedColor = watch('color');
+
+  const createMutation = useMutation({
+    mutationFn: (data: AccountFormData) =>
+      api.post(`/workspaces/${workspaceId}/accounts`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
+      onClose();
+    },
+    onError: (err) => {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la création');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (data: Partial<AccountFormData>) =>
+      api.patch(`/workspaces/${workspaceId}/accounts/${account!.id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
+      onClose();
+    },
+    onError: (err) => {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour');
+    },
+  });
+
+  const onSubmit = (data: AccountFormData) => {
+    setError(null);
+    if (isEditing) {
+      updateMutation.mutate({ name: data.name, icon: data.icon, color: data.color });
+    } else {
+      createMutation.mutate(data);
+    }
+  };
+
+  const isPending = createMutation.isPending || updateMutation.isPending;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-auto animate-scale-in">
+        <div className="p-6">
+          <h2 className="text-xl font-bold mb-4">
+            {isEditing ? 'Modifier le compte' : 'Nouveau compte'}
+          </h2>
+
+          {error && (
+            <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm mb-4">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Account Type (only for creation) */}
+            {!isEditing && (
+              <div>
+                <label className="label">Type de compte</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {ACCOUNT_TYPES.map((type) => (
+                    <label
+                      key={type.value}
+                      className={clsx(
+                        'flex flex-col items-center p-3 rounded-lg border-2 cursor-pointer transition-colors',
+                        selectedType === type.value
+                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        value={type.value}
+                        {...register('type')}
+                        className="sr-only"
+                      />
+                      <span className="text-xl">{type.icon}</span>
+                      <span className="text-xs mt-1 text-center">{type.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Name */}
+            <div>
+              <label htmlFor="name" className="label">Nom</label>
+              <input
+                id="name"
+                type="text"
+                className="input"
+                placeholder="Mon compte"
+                {...register('name', { required: 'Nom requis' })}
+              />
+              {errors.name && (
+                <p className="error-text">{errors.name.message}</p>
+              )}
+            </div>
+
+            {/* Currency (only for creation) */}
+            {!isEditing && (
+              <div>
+                <label htmlFor="currency" className="label">Devise</label>
+                <CurrencySelector
+                  value={watch('currency')}
+                  onChange={(code) => setValue('currency', code)}
+                />
+              </div>
+            )}
+
+            {/* Initial Balance (only for creation) */}
+            {!isEditing && (
+              <div>
+                <label htmlFor="initialBalance" className="label">Solde initial</label>
+                <input
+                  id="initialBalance"
+                  type="number"
+                  step="0.01"
+                  className="input"
+                  placeholder="0.00"
+                  {...register('initialBalance', { valueAsNumber: true })}
+                />
+              </div>
+            )}
+
+            {/* Color */}
+            <div>
+              <label className="label">Couleur</label>
+              <div className="flex flex-wrap gap-2">
+                {COLORS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => setValue('color', color)}
+                    className={clsx(
+                      'w-8 h-8 rounded-full transition-transform',
+                      selectedColor === color && 'ring-2 ring-offset-2 ring-primary-500 scale-110'
+                    )}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 pt-4">
+              <button type="button" onClick={onClose} className="btn-secondary flex-1">
+                Annuler
+              </button>
+              <button type="submit" disabled={isPending} className="btn-primary flex-1">
+                {isPending ? 'Enregistrement...' : isEditing ? 'Enregistrer' : 'Créer'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default AccountForm;

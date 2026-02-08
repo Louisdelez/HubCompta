@@ -1,0 +1,360 @@
+// ============================================================================
+// TRANSACTION ROUTES - Finance Hub
+// ============================================================================
+
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { transactionService } from '@/modules/transactions/transaction.service.js';
+import { transferService } from '@/modules/transactions/transfer.service.js';
+import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
+import { authGuard } from '@/core/auth/authGuard.js';
+import { workspaceContextMiddleware, requirePermission } from '@/core/middleware/workspaceContext.js';
+import { transactionCreateSchema, transactionUpdateSchema, transferSchema } from '@finance-hub/shared';
+import type { TransactionType } from '@prisma/client';
+
+// ----------------------------------------------------------------------------
+// Types
+// ----------------------------------------------------------------------------
+
+interface WorkspaceParams {
+  workspaceId: string;
+}
+
+interface TransactionParams extends WorkspaceParams {
+  transactionId: string;
+}
+
+interface TransactionQuery {
+  accountId?: string;
+  categoryId?: string;
+  type?: TransactionType;
+  startDate?: string;
+  endDate?: string;
+  minAmount?: string;
+  maxAmount?: string;
+  search?: string;
+  tagIds?: string;
+  isReconciled?: boolean;
+  page?: string;
+  limit?: string;
+  sortBy?: 'date' | 'amount' | 'description';
+  sortOrder?: 'asc' | 'desc';
+}
+
+// ----------------------------------------------------------------------------
+// Routes
+// ----------------------------------------------------------------------------
+
+export async function transactionRoutes(app: FastifyInstance): Promise<void> {
+  // Apply auth guard and workspace context to all routes
+  app.addHook('preHandler', authGuard);
+  app.addHook('preHandler', workspaceContextMiddleware);
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/transactions - List transactions
+  // --------------------------------------------------------------------------
+  app.get<{ Params: WorkspaceParams; Querystring: TransactionQuery }>(
+    '/',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const query = request.query;
+
+      const filters = {
+        accountId: query.accountId,
+        categoryId: query.categoryId,
+        type: query.type,
+        startDate: query.startDate ? new Date(query.startDate) : undefined,
+        endDate: query.endDate ? new Date(query.endDate) : undefined,
+        minAmount: query.minAmount ? parseFloat(query.minAmount) : undefined,
+        maxAmount: query.maxAmount ? parseFloat(query.maxAmount) : undefined,
+        search: query.search,
+        tagIds: query.tagIds ? query.tagIds.split(',') : undefined,
+        isReconciled: query.isReconciled,
+      };
+
+      const options = {
+        page: query.page ? parseInt(query.page) : 1,
+        limit: query.limit ? parseInt(query.limit) : 50,
+        sortBy: query.sortBy ?? 'date',
+        sortOrder: query.sortOrder ?? 'desc',
+      };
+
+      const { transactions, total } = await transactionService.list(
+        workspaceId,
+        filters,
+        options
+      );
+
+      return reply.send({
+        success: true,
+        data: transactions,
+        meta: {
+          page: options.page,
+          limit: options.limit,
+          total,
+          totalPages: Math.ceil(total / options.limit),
+        },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:workspaceId/transactions - Create transaction
+  // --------------------------------------------------------------------------
+  app.post<{ Params: WorkspaceParams }>(
+    '/',
+    { preHandler: requirePermission('transaction:create') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const input = transactionCreateSchema.parse(request.body);
+
+      const transaction = await transactionService.create(workspaceId, {
+        ...input,
+        date: new Date(input.date),
+      });
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId,
+        action: AUDIT_ACTIONS.TRANSACTION_CREATED,
+        entityType: 'transaction',
+        entityId: transaction.id,
+        changes: {
+          amount: transaction.amount.toNumber(),
+          description: transaction.description,
+        },
+        ipAddress: request.ip,
+      });
+
+      return reply.status(201).send({
+        success: true,
+        data: transaction,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:workspaceId/transactions/transfer - Create transfer
+  // --------------------------------------------------------------------------
+  app.post<{ Params: WorkspaceParams }>(
+    '/transfer',
+    { preHandler: requirePermission('transaction:create') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const input = transferSchema.parse(request.body);
+
+      const result = await transferService.create(workspaceId, {
+        ...input,
+        date: new Date(input.date),
+      });
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId,
+        action: AUDIT_ACTIONS.TRANSFER_CREATED,
+        entityType: 'transfer',
+        entityId: result.fromTransaction.id,
+        changes: {
+          amount: input.amount,
+          fromAccountId: input.fromAccountId,
+          toAccountId: input.toAccountId,
+        },
+        ipAddress: request.ip,
+      });
+
+      return reply.status(201).send({
+        success: true,
+        data: result,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/transactions/:transactionId - Get transaction
+  // --------------------------------------------------------------------------
+  app.get<{ Params: TransactionParams }>(
+    '/:transactionId',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId, transactionId } = request.params;
+
+      const transaction = await transactionService.getById(workspaceId, transactionId);
+
+      if (!transaction) {
+        return reply.status(404).send({
+          success: false,
+          error: { message: 'Transaction not found' },
+        });
+      }
+
+      return reply.send({
+        success: true,
+        data: transaction,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // PATCH /workspaces/:workspaceId/transactions/:transactionId - Update transaction
+  // --------------------------------------------------------------------------
+  app.patch<{ Params: TransactionParams }>(
+    '/:transactionId',
+    { preHandler: requirePermission('transaction:update') },
+    async (request, reply) => {
+      const { workspaceId, transactionId } = request.params;
+      const input = transactionUpdateSchema.parse(request.body);
+
+      const transaction = await transactionService.update(workspaceId, transactionId, {
+        ...input,
+        date: input.date ? new Date(input.date) : undefined,
+      });
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId,
+        action: AUDIT_ACTIONS.TRANSACTION_UPDATED,
+        entityType: 'transaction',
+        entityId: transactionId,
+        changes: input,
+        ipAddress: request.ip,
+      });
+
+      return reply.send({
+        success: true,
+        data: transaction,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:workspaceId/transactions/:transactionId/tags - Add tags
+  // --------------------------------------------------------------------------
+  app.post<{ Params: TransactionParams }>(
+    '/:transactionId/tags',
+    { preHandler: requirePermission('transaction:update') },
+    async (request, reply) => {
+      const { workspaceId, transactionId } = request.params;
+      const { tagIds } = request.body as { tagIds: string[] };
+
+      await transactionService.addTags(workspaceId, transactionId, tagIds);
+
+      return reply.send({
+        success: true,
+        data: { message: 'Tags added' },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // DELETE /workspaces/:workspaceId/transactions/:transactionId/tags - Remove tags
+  // --------------------------------------------------------------------------
+  app.delete<{ Params: TransactionParams }>(
+    '/:transactionId/tags',
+    { preHandler: requirePermission('transaction:update') },
+    async (request, reply) => {
+      const { workspaceId, transactionId } = request.params;
+      const { tagIds } = request.body as { tagIds: string[] };
+
+      await transactionService.removeTags(workspaceId, transactionId, tagIds);
+
+      return reply.send({
+        success: true,
+        data: { message: 'Tags removed' },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:workspaceId/transactions/:transactionId/reconcile - Reconcile
+  // --------------------------------------------------------------------------
+  app.post<{ Params: TransactionParams }>(
+    '/:transactionId/reconcile',
+    { preHandler: requirePermission('transaction:update') },
+    async (request, reply) => {
+      const { workspaceId, transactionId } = request.params;
+
+      const transaction = await transactionService.reconcile(workspaceId, transactionId);
+
+      return reply.send({
+        success: true,
+        data: transaction,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // DELETE /workspaces/:workspaceId/transactions/:transactionId/reconcile - Unreconcile
+  // --------------------------------------------------------------------------
+  app.delete<{ Params: TransactionParams }>(
+    '/:transactionId/reconcile',
+    { preHandler: requirePermission('transaction:update') },
+    async (request, reply) => {
+      const { workspaceId, transactionId } = request.params;
+
+      const transaction = await transactionService.unreconcile(workspaceId, transactionId);
+
+      return reply.send({
+        success: true,
+        data: transaction,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // DELETE /workspaces/:workspaceId/transactions/:transactionId - Delete transaction
+  // --------------------------------------------------------------------------
+  app.delete<{ Params: TransactionParams }>(
+    '/:transactionId',
+    { preHandler: requirePermission('transaction:delete') },
+    async (request, reply) => {
+      const { workspaceId, transactionId } = request.params;
+
+      await transactionService.delete(workspaceId, transactionId);
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId,
+        action: AUDIT_ACTIONS.TRANSACTION_DELETED,
+        entityType: 'transaction',
+        entityId: transactionId,
+        ipAddress: request.ip,
+        severity: 'warning',
+      });
+
+      return reply.send({
+        success: true,
+        data: { message: 'Transaction deleted' },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:workspaceId/transactions/bulk-delete - Bulk delete
+  // --------------------------------------------------------------------------
+  app.post<{ Params: WorkspaceParams }>(
+    '/bulk-delete',
+    { preHandler: requirePermission('transaction:delete') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const { transactionIds } = request.body as { transactionIds: string[] };
+
+      const count = await transactionService.bulkDelete(workspaceId, transactionIds);
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId,
+        action: AUDIT_ACTIONS.TRANSACTION_BULK_DELETED,
+        changes: { count, transactionIds },
+        ipAddress: request.ip,
+        severity: 'warning',
+      });
+
+      return reply.send({
+        success: true,
+        data: { deleted: count },
+      });
+    }
+  );
+}
+
+export default transactionRoutes;

@@ -1,0 +1,338 @@
+// ============================================================================
+// RECURRENCE CARD - Finance Hub
+// ============================================================================
+
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/lib/api/client';
+import { clsx } from 'clsx';
+
+// ----------------------------------------------------------------------------
+// Types
+// ----------------------------------------------------------------------------
+
+interface RecurrenceTemplate {
+  type: 'income' | 'expense';
+  amount: number;
+  description: string;
+  accountId: string;
+  categoryId?: string;
+  tags?: string[];
+  notes?: string;
+  account?: {
+    id: string;
+    name: string;
+  };
+  category?: {
+    id: string;
+    name: string;
+    icon: string | null;
+  };
+}
+
+interface Recurrence {
+  id: string;
+  name: string;
+  frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  interval: number;
+  dayOfMonth?: number;
+  dayOfWeek?: number;
+  template: RecurrenceTemplate;
+  startAt: string;
+  endAt?: string | null;
+  nextRunAt?: string | null;
+  lastRunAt?: string | null;
+  isActive: boolean;
+  executionCount: number;
+}
+
+interface RecurrenceCardProps {
+  recurrence: Recurrence;
+  workspaceId: string;
+  onEdit: () => void;
+  onViewUpcoming: () => void;
+}
+
+// ----------------------------------------------------------------------------
+// Helpers
+// ----------------------------------------------------------------------------
+
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(amount);
+}
+
+function formatDate(date: string | null | undefined): string {
+  if (!date) return '-';
+  return new Date(date).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function formatRelativeDate(date: string | null | undefined): string {
+  if (!date) return '-';
+  const d = new Date(date);
+  const now = new Date();
+  const diff = Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diff === 0) return "Aujourd'hui";
+  if (diff === 1) return 'Demain';
+  if (diff < 7) return `Dans ${diff} jours`;
+  if (diff < 30) return `Dans ${Math.ceil(diff / 7)} semaine${diff >= 14 ? 's' : ''}`;
+  return formatDate(date);
+}
+
+function getFrequencyLabel(
+  frequency: string,
+  interval: number,
+  dayOfMonth?: number,
+  dayOfWeek?: number
+): string {
+  const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+
+  if (interval === 1) {
+    switch (frequency) {
+      case 'daily':
+        return 'Tous les jours';
+      case 'weekly':
+        return dayOfWeek !== undefined ? `Tous les ${dayNames[dayOfWeek]}s` : 'Toutes les semaines';
+      case 'monthly':
+        return dayOfMonth ? `Le ${dayOfMonth} de chaque mois` : 'Tous les mois';
+      case 'yearly':
+        return 'Tous les ans';
+      default:
+        return frequency;
+    }
+  }
+
+  switch (frequency) {
+    case 'daily':
+      return `Tous les ${interval} jours`;
+    case 'weekly':
+      return `Toutes les ${interval} semaines`;
+    case 'monthly':
+      return `Tous les ${interval} mois`;
+    case 'yearly':
+      return `Tous les ${interval} ans`;
+    default:
+      return `${interval} ${frequency}`;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Component
+// ----------------------------------------------------------------------------
+
+export function RecurrenceCard({
+  recurrence,
+  workspaceId,
+  onEdit,
+  onViewUpcoming,
+}: RecurrenceCardProps) {
+  const queryClient = useQueryClient();
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: () => api.delete(`/workspaces/${workspaceId}/recurrences/${recurrence.id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
+    },
+  });
+
+  // Pause mutation
+  const pauseMutation = useMutation({
+    mutationFn: () =>
+      api.post(`/workspaces/${workspaceId}/recurrences/${recurrence.id}/pause`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
+    },
+  });
+
+  // Resume mutation
+  const resumeMutation = useMutation({
+    mutationFn: () =>
+      api.post(`/workspaces/${workspaceId}/recurrences/${recurrence.id}/resume`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
+    },
+  });
+
+  // Skip mutation
+  const skipMutation = useMutation({
+    mutationFn: () =>
+      api.post(`/workspaces/${workspaceId}/recurrences/${recurrence.id}/skip`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
+    },
+  });
+
+  // Execute now mutation
+  const executeMutation = useMutation({
+    mutationFn: () =>
+      api.post<{ transaction: { id: string } }>(
+        `/workspaces/${workspaceId}/recurrences/${recurrence.id}/execute`,
+        {}
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['transactions', workspaceId] });
+    },
+  });
+
+  const handleDelete = () => {
+    if (confirm(`Supprimer la recurrence "${recurrence.name}" ?`)) {
+      deleteMutation.mutate();
+    }
+  };
+
+  const handleToggleActive = () => {
+    if (recurrence.isActive) {
+      pauseMutation.mutate();
+    } else {
+      resumeMutation.mutate();
+    }
+  };
+
+  const handleExecuteNow = () => {
+    if (confirm(`Executer maintenant et creer une transaction ?`)) {
+      executeMutation.mutate();
+    }
+  };
+
+  const handleSkipNext = () => {
+    if (confirm(`Ignorer la prochaine occurrence ?`)) {
+      skipMutation.mutate();
+    }
+  };
+
+  const isExpense = recurrence.template.type === 'expense';
+  const isPending = pauseMutation.isPending || resumeMutation.isPending;
+
+  return (
+    <div
+      className={clsx(
+        'card relative',
+        !recurrence.isActive && 'opacity-60',
+        isExpense ? 'border-l-4 border-l-danger-500' : 'border-l-4 border-l-success-500'
+      )}
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">
+            {recurrence.template.category?.icon ?? (isExpense ? '💸' : '💰')}
+          </span>
+          <div>
+            <h3 className="font-medium">{recurrence.name}</h3>
+            <p className="text-sm text-gray-500">{recurrence.template.description}</p>
+          </div>
+        </div>
+        <span
+          className={clsx(
+            'text-xs px-2 py-1 rounded-full font-medium',
+            recurrence.isActive
+              ? 'bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-300'
+              : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+          )}
+        >
+          {recurrence.isActive ? 'Active' : 'En pause'}
+        </span>
+      </div>
+
+      {/* Amount and Frequency */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <p className="text-sm text-gray-500">Montant</p>
+          <p
+            className={clsx('text-lg font-bold', isExpense ? 'text-danger-600' : 'text-success-600')}
+          >
+            {isExpense ? '-' : '+'}
+            {formatCurrency(Number(recurrence.template.amount))}
+          </p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500">Frequence</p>
+          <p className="font-medium">
+            {getFrequencyLabel(
+              recurrence.frequency,
+              recurrence.interval,
+              recurrence.dayOfMonth,
+              recurrence.dayOfWeek
+            )}
+          </p>
+        </div>
+      </div>
+
+      {/* Next Run & Stats */}
+      <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <div>
+          <p className="text-xs text-gray-500">Prochaine execution</p>
+          <p className="font-medium text-sm">
+            {recurrence.isActive ? formatRelativeDate(recurrence.nextRunAt) : '-'}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-gray-500">Executions</p>
+          <p className="font-medium text-sm">{recurrence.executionCount} fois</p>
+        </div>
+      </div>
+
+      {/* Account */}
+      {recurrence.template.account && (
+        <div className="text-sm text-gray-500 mb-4">
+          Compte: <span className="text-gray-700 dark:text-gray-300">{recurrence.template.account.name}</span>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
+        <button
+          onClick={handleToggleActive}
+          disabled={isPending}
+          className={clsx(
+            'btn-ghost text-xs',
+            recurrence.isActive ? 'text-warning-600' : 'text-success-600'
+          )}
+        >
+          {recurrence.isActive ? '⏸️ Pause' : '▶️ Reprendre'}
+        </button>
+        {recurrence.isActive && (
+          <>
+            <button
+              onClick={handleExecuteNow}
+              disabled={executeMutation.isPending}
+              className="btn-ghost text-xs text-primary-600"
+            >
+              ⚡ Executer
+            </button>
+            <button
+              onClick={handleSkipNext}
+              disabled={skipMutation.isPending}
+              className="btn-ghost text-xs"
+            >
+              ⏭️ Passer
+            </button>
+          </>
+        )}
+        <button onClick={onViewUpcoming} className="btn-ghost text-xs">
+          📅 Prochaines
+        </button>
+        <button onClick={onEdit} className="btn-ghost text-xs">
+          ✏️ Modifier
+        </button>
+        <button
+          onClick={handleDelete}
+          disabled={deleteMutation.isPending}
+          className="btn-ghost text-xs text-danger-600"
+        >
+          🗑️
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default RecurrenceCard;

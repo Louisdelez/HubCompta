@@ -1,0 +1,52 @@
+# ============================================================================
+# TRAEFIK DYNAMIC CONFIGURATION - Security Headers
+# ============================================================================
+
+http:
+  middlewares:
+    # Security headers middleware
+    security-headers:
+      headers:
+        # HSTS
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+
+        # Other security headers
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+
+        # Permissions Policy
+        permissionsPolicy: >-
+          accelerometer=(),
+          camera=(),
+          geolocation=(),
+          gyroscope=(),
+          magnetometer=(),
+          microphone=(),
+          payment=(),
+          usb=()
+
+        # Custom headers
+        customResponseHeaders:
+          X-Robots-Tag: "noindex, nofollow"
+          X-Download-Options: "noopen"
+          X-Permitted-Cross-Domain-Policies: "none"
+
+    # Rate limiting middleware
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 50
+        period: 1m
+        sourceCriterion:
+          ipStrategy:
+            depth: 1
+
+    # Compress middleware
+    compress:
+      compress:
+        excludedContentTypes:
+          - text/event-stream
