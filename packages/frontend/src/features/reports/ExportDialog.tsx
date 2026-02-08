@@ -64,7 +64,7 @@ export function ExportDialog({
 
     try {
       // Build URL
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const baseUrl = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? 'http://localhost:3000/api/v1';
       let url = `${baseUrl}/workspaces/${currentWorkspace.id}/reports/export/${type}?format=${exportFormat}`;
 
       // Add date range if provided
@@ -91,7 +91,7 @@ export function ExportDialog({
       let filename = `${type}_export.${exportFormat}`;
       if (contentDisposition) {
         const match = contentDisposition.match(/filename="(.+)"/);
-        if (match) {
+        if (match && match[1]) {
           filename = match[1];
         }
       }

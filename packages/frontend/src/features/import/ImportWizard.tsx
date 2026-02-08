@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { useState } from 'react';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { FileUploadStep } from './FileUploadStep';
 import { ColumnMappingStep } from './ColumnMappingStep';
 import { PreviewStep } from './PreviewStep';
@@ -63,7 +63,7 @@ interface ImportState {
 // ----------------------------------------------------------------------------
 
 export function ImportWizard() {
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [step, setStep] = useState<WizardStep>('upload');
   const [importState, setImportState] = useState<ImportState>({});
 
@@ -142,23 +142,30 @@ export function ImportWizard() {
           <FileUploadStep
             workspaceId={workspaceId}
             onComplete={(data) => {
-              setImportState((prev) => ({
-                ...prev,
+              const newState: ImportState = {
                 jobId: data.jobId,
                 accountId: data.accountId,
                 fileName: data.fileName,
                 headers: data.headers,
-                detectedFormat: data.detectedFormat,
-                columnMapping: data.detectedFormat
-                  ? {
-                      date: data.detectedFormat.dateColumn,
-                      amount: data.detectedFormat.amountColumn,
-                      description: data.detectedFormat.descriptionColumn,
-                      credit: data.detectedFormat.creditColumn,
-                      debit: data.detectedFormat.debitColumn,
-                    }
-                  : undefined,
-              }));
+              };
+              if (data.detectedFormat !== null) {
+                newState.detectedFormat = data.detectedFormat;
+              }
+              if (data.detectedFormat) {
+                const mapping: NonNullable<ImportState['columnMapping']> = {
+                  date: data.detectedFormat.dateColumn,
+                  amount: data.detectedFormat.amountColumn,
+                  description: data.detectedFormat.descriptionColumn,
+                };
+                if (data.detectedFormat.creditColumn) {
+                  mapping.credit = data.detectedFormat.creditColumn;
+                }
+                if (data.detectedFormat.debitColumn) {
+                  mapping.debit = data.detectedFormat.debitColumn;
+                }
+                newState.columnMapping = mapping;
+              }
+              setImportState(newState);
               setStep('mapping');
             }}
           />
@@ -168,7 +175,7 @@ export function ImportWizard() {
           <ColumnMappingStep
             headers={importState.headers ?? []}
             detectedFormat={importState.detectedFormat}
-            initialMapping={importState.columnMapping}
+            {...(importState.columnMapping ? { initialMapping: importState.columnMapping } : {})}
             onBack={() => setStep('upload')}
             onComplete={(mapping) => {
               setImportState((prev) => ({ ...prev, columnMapping: mapping }));

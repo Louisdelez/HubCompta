@@ -207,7 +207,7 @@ export async function ruleRoutes(app: FastifyInstance): Promise<void> {
       const { conditions } = request.body as {
         conditions: Array<{
           field: 'description' | 'amount';
-          operator: string;
+          operator: 'contains' | 'equals' | 'starts_with' | 'ends_with' | 'regex' | 'greater_than' | 'less_than';
           value: string;
         }>;
       };

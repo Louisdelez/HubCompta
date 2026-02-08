@@ -77,8 +77,9 @@ interface PositionDetailProps {
 export function PositionDetail({ positionId, onBack, onAddTransaction }: PositionDetailProps) {
   const { currentWorkspace } = useWorkspace();
   const queryClient = useQueryClient();
-  const [showAddTransaction, setShowAddTransaction] = useState(false);
-  const [transactionType, setTransactionType] = useState<'buy' | 'sell'>('buy');
+  // Note: These state variables are prepared for future transaction modal implementation
+  const [_showAddTransaction, _setShowAddTransaction] = useState(false);
+  const [_transactionType, _setTransactionType] = useState<'buy' | 'sell'>('buy');
 
   // Fetch position details
   const { data: position, isLoading } = useQuery({

@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { RecurrenceCard } from './RecurrenceCard';
 import { RecurrenceForm } from './RecurrenceForm';
 import { UpcomingOccurrences } from './UpcomingOccurrences';
@@ -88,7 +88,7 @@ function formatMonth(date: Date): string {
 // ----------------------------------------------------------------------------
 
 export function RecurrencesPage() {
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editingRecurrence, setEditingRecurrence] = useState<Recurrence | null>(null);

@@ -3,7 +3,7 @@
 // Investment position management
 // ============================================================================
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { positionService } from '@/modules/invest/position.service.js';
 import { assetService } from '@/modules/invest/asset.service.js';
 import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
@@ -23,16 +23,13 @@ export async function positionRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /positions - List positions
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{
+    Params: { workspaceId: string };
+    Querystring: { accountId?: string };
+  }>(
     '/',
     { preHandler: [requirePermission('transaction:read')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string };
-        Querystring: { accountId?: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const { accountId } = request.query;
 
@@ -48,15 +45,10 @@ export async function positionRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /positions/:id - Get position details
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{ Params: { workspaceId: string; id: string } }>(
     '/:id',
     { preHandler: [requirePermission('transaction:read')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string; id: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       const position = await positionService.getById(workspaceId, id);
@@ -78,15 +70,10 @@ export async function positionRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /positions - Create/open a position
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string } }>(
     '/',
     { preHandler: [requirePermission('transaction:create')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const input = positionCreateSchema.parse(request.body);
 
@@ -133,15 +120,10 @@ export async function positionRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /positions/:id/transactions - Add transaction to position
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string; id: string } }>(
     '/:id/transactions',
     { preHandler: [requirePermission('transaction:create')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string; id: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
       const input = investTransactionCreateSchema.parse(request.body);
 
@@ -178,15 +160,10 @@ export async function positionRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /positions/:id/transactions - Get position transactions
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{ Params: { workspaceId: string; id: string } }>(
     '/:id/transactions',
     { preHandler: [requirePermission('transaction:read')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string; id: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       const transactions = await positionService.getTransactions(workspaceId, id);
@@ -201,15 +178,10 @@ export async function positionRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // DELETE /positions/:id - Delete empty position
   // --------------------------------------------------------------------------
-  app.delete(
+  app.delete<{ Params: { workspaceId: string; id: string } }>(
     '/:id',
     { preHandler: [requirePermission('transaction:delete')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string; id: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       await positionService.delete(workspaceId, id);

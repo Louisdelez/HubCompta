@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { RuleEditor } from './RuleEditor';
 import { clsx } from 'clsx';
 
@@ -55,7 +55,7 @@ const OPERATOR_LABELS: Record<string, string> = {
 // ----------------------------------------------------------------------------
 
 export function RulesPage() {
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
   const [showEditor, setShowEditor] = useState(false);
   const [editingRule, setEditingRule] = useState<Rule | null>(null);
@@ -263,7 +263,7 @@ export function RulesPage() {
       {showEditor && (
         <RuleEditor
           workspaceId={workspaceId}
-          rule={editingRule ?? undefined}
+          {...(editingRule ? { rule: editingRule } : {})}
           onClose={handleClose}
           onSave={() => {
             queryClient.invalidateQueries({ queryKey: ['rules', workspaceId] });

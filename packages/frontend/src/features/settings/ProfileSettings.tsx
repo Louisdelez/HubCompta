@@ -64,7 +64,7 @@ export function ProfileSettings() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['user-profile']);
+      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       setIsEditing(false);
     },
   });
@@ -222,10 +222,10 @@ export function ProfileSettings() {
             </button>
             <button
               type="submit"
-              disabled={updateMutation.isLoading}
+              disabled={updateMutation.isPending}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
-              {updateMutation.isLoading ? (
+              {updateMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Save className="h-4 w-4" />

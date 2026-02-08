@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useWorkspace } from '@/hooks/useWorkspace';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -88,7 +88,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
   const [thresholdPercent, setThresholdPercent] = useState('80');
   const [accountId, setAccountId] = useState('');
   const [balanceThreshold, setBalanceThreshold] = useState('');
-  const [assetId, setAssetId] = useState('');
+  const [_assetId, _setAssetId] = useState('');
   const [targetPrice, setTargetPrice] = useState('');
   const [priceDirection, setPriceDirection] = useState<'above' | 'below'>('above');
 
@@ -143,7 +143,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
         endpoint = '/notifications/alerts/price';
         body = {
           workspaceId: currentWorkspace.id,
-          assetId,
+          assetId: _assetId,
           targetPrice: parseFloat(targetPrice),
           direction: priceDirection,
         };

@@ -4,6 +4,8 @@
 
 import { FastifyPluginAsync, FastifyRequest } from 'fastify';
 import { searchService, TransactionFilters } from '../../modules/search/index.js';
+import { authGuard } from '../../core/auth/authGuard.js';
+import { prisma } from '../../core/database/client.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -49,7 +51,7 @@ export const searchRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
     Querystring: GlobalSearchQuery;
   }>('/search', {
-    preHandler: [fastify.authenticate],
+    preHandler: [authGuard],
     schema: {
       querystring: {
         type: 'object',
@@ -66,8 +68,8 @@ export const searchRoutes: FastifyPluginAsync = async (fastify) => {
     const user = request.user!;
 
     // Get user's default workspace
-    const membership = await fastify.prisma.membership.findFirst({
-      where: { userId: user.id },
+    const membership = await prisma.membership.findFirst({
+      where: { userId: user.sub },
       orderBy: { createdAt: 'asc' },
     });
 
@@ -94,7 +96,7 @@ export const searchRoutes: FastifyPluginAsync = async (fastify) => {
     Params: { workspaceId: string };
     Querystring: GlobalSearchQuery;
   }>('/workspaces/:workspaceId/search', {
-    preHandler: [fastify.authenticate, fastify.requireWorkspaceMember],
+    preHandler: [authGuard],
     schema: {
       params: {
         type: 'object',
@@ -136,7 +138,7 @@ export const searchRoutes: FastifyPluginAsync = async (fastify) => {
     Params: { workspaceId: string };
     Querystring: TransactionSearchQuery;
   }>('/workspaces/:workspaceId/transactions/search', {
-    preHandler: [fastify.authenticate, fastify.requireWorkspaceMember],
+    preHandler: [authGuard],
     schema: {
       params: {
         type: 'object',
@@ -191,15 +193,15 @@ export const searchRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
     Params: { workspaceId: string };
   }>('/workspaces/:workspaceId/filters', {
-    preHandler: [fastify.authenticate, fastify.requireWorkspaceMember],
+    preHandler: [authGuard],
   }, async (request) => {
     const { workspaceId } = request.params;
     const user = request.user!;
 
-    const filters = await fastify.prisma.savedFilter.findMany({
+    const filters = await prisma.savedFilter.findMany({
       where: {
         workspaceId,
-        userId: user.id,
+        userId: user.sub,
       },
       orderBy: [
         { isDefault: 'desc' },
@@ -218,7 +220,7 @@ export const searchRoutes: FastifyPluginAsync = async (fastify) => {
     Params: { workspaceId: string };
     Body: SaveFilterBody;
   }>('/workspaces/:workspaceId/filters', {
-    preHandler: [fastify.authenticate, fastify.requireWorkspaceMember],
+    preHandler: [authGuard],
     schema: {
       body: {
         type: 'object',
@@ -237,20 +239,20 @@ export const searchRoutes: FastifyPluginAsync = async (fastify) => {
 
     // If setting as default, unset other defaults
     if (isDefault) {
-      await fastify.prisma.savedFilter.updateMany({
+      await prisma.savedFilter.updateMany({
         where: {
           workspaceId,
-          userId: user.id,
+          userId: user.sub,
           isDefault: true,
         },
         data: { isDefault: false },
       });
     }
 
-    const savedFilter = await fastify.prisma.savedFilter.create({
+    const savedFilter = await prisma.savedFilter.create({
       data: {
         workspaceId,
-        userId: user.id,
+        userId: user.sub,
         name,
         filters: JSON.stringify(filters),
         isDefault: isDefault ?? false,
@@ -268,17 +270,17 @@ export const searchRoutes: FastifyPluginAsync = async (fastify) => {
     Params: { workspaceId: string; filterId: string };
     Body: Partial<SaveFilterBody>;
   }>('/workspaces/:workspaceId/filters/:filterId', {
-    preHandler: [fastify.authenticate, fastify.requireWorkspaceMember],
+    preHandler: [authGuard],
   }, async (request, reply) => {
     const { workspaceId, filterId } = request.params;
     const { name, filters, isDefault } = request.body;
     const user = request.user!;
 
-    const existing = await fastify.prisma.savedFilter.findFirst({
+    const existing = await prisma.savedFilter.findFirst({
       where: {
         id: filterId,
         workspaceId,
-        userId: user.id,
+        userId: user.sub,
       },
     });
 
@@ -288,10 +290,10 @@ export const searchRoutes: FastifyPluginAsync = async (fastify) => {
 
     // If setting as default, unset other defaults
     if (isDefault) {
-      await fastify.prisma.savedFilter.updateMany({
+      await prisma.savedFilter.updateMany({
         where: {
           workspaceId,
-          userId: user.id,
+          userId: user.sub,
           isDefault: true,
           id: { not: filterId },
         },
@@ -299,7 +301,7 @@ export const searchRoutes: FastifyPluginAsync = async (fastify) => {
       });
     }
 
-    const updated = await fastify.prisma.savedFilter.update({
+    const updated = await prisma.savedFilter.update({
       where: { id: filterId },
       data: {
         ...(name && { name }),
@@ -318,16 +320,16 @@ export const searchRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.delete<{
     Params: { workspaceId: string; filterId: string };
   }>('/workspaces/:workspaceId/filters/:filterId', {
-    preHandler: [fastify.authenticate, fastify.requireWorkspaceMember],
+    preHandler: [authGuard],
   }, async (request, reply) => {
     const { workspaceId, filterId } = request.params;
     const user = request.user!;
 
-    const existing = await fastify.prisma.savedFilter.findFirst({
+    const existing = await prisma.savedFilter.findFirst({
       where: {
         id: filterId,
         workspaceId,
-        userId: user.id,
+        userId: user.sub,
       },
     });
 
@@ -335,7 +337,7 @@ export const searchRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.status(404).send({ error: 'Filter not found' });
     }
 
-    await fastify.prisma.savedFilter.delete({
+    await prisma.savedFilter.delete({
       where: { id: filterId },
     });
 

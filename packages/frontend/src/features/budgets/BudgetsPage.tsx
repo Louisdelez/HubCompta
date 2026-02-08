@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { BudgetCard } from './BudgetCard';
 import { BudgetForm } from './BudgetForm';
 import { BudgetHistory } from './BudgetHistory';
@@ -59,7 +59,7 @@ function formatCurrency(amount: number): string {
 // ----------------------------------------------------------------------------
 
 export function BudgetsPage() {
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editingBudget, setEditingBudget] = useState<BudgetWithProgress | null>(null);

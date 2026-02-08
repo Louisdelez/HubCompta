@@ -135,11 +135,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       if (response.requiresMfa) {
-        return {
+        const result: LoginResult = {
           requiresMfa: true,
-          mfaMethods: response.mfaMethods,
-          tempToken: response.tempToken,
         };
+        if (response.mfaMethods) {
+          result.mfaMethods = response.mfaMethods;
+        }
+        if (response.tempToken) {
+          result.tempToken = response.tempToken;
+        }
+        return result;
       }
 
       // No MFA required, set tokens

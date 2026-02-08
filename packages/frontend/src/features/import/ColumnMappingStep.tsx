@@ -40,7 +40,8 @@ interface ColumnMappingStepProps {
 // Constants
 // ----------------------------------------------------------------------------
 
-const DATE_FORMATS = [
+// Date formats for future use in format selection UI
+export const DATE_FORMATS = [
   { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY (31/12/2024)' },
   { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY (12/31/2024)' },
   { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD (2024-12-31)' },
@@ -59,15 +60,23 @@ export function ColumnMappingStep({
   onBack,
   onComplete,
 }: ColumnMappingStepProps) {
-  const [mapping, setMapping] = useState<ColumnMapping>(
-    initialMapping ?? {
+  const [mapping, setMapping] = useState<ColumnMapping>(() => {
+    if (initialMapping) {
+      return initialMapping;
+    }
+    const baseMapping: ColumnMapping = {
       date: detectedFormat?.dateColumn ?? '',
       amount: detectedFormat?.amountColumn ?? '',
       description: detectedFormat?.descriptionColumn ?? '',
-      credit: detectedFormat?.creditColumn,
-      debit: detectedFormat?.debitColumn,
+    };
+    if (detectedFormat?.creditColumn) {
+      baseMapping.credit = detectedFormat.creditColumn;
     }
-  );
+    if (detectedFormat?.debitColumn) {
+      baseMapping.debit = detectedFormat.debitColumn;
+    }
+    return baseMapping;
+  });
   const [useSplitAmount, setUseSplitAmount] = useState(
     detectedFormat?.amountFormat === 'split'
   );

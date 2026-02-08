@@ -6,13 +6,13 @@ import argon2 from 'argon2';
 
 // OWASP recommended Argon2id parameters
 // https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
-const ARGON2_OPTIONS: argon2.Options = {
+const ARGON2_OPTIONS = {
   type: argon2.argon2id,
   memoryCost: 65536, // 64 MB
   timeCost: 3, // 3 iterations
   parallelism: 4, // 4 parallel threads
   hashLength: 32, // 256 bits
-};
+} as const;
 
 /**
  * Hash a password using Argon2id

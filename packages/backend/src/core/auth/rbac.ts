@@ -4,6 +4,7 @@
 
 import { PERMISSIONS, ROLE_HIERARCHY } from '@finance-hub/shared';
 import type { MembershipRole } from '@prisma/client';
+import { prisma } from '@/core/database/client.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -21,6 +22,48 @@ export type Permission = keyof typeof PERMISSIONS;
 export function hasPermission(role: MembershipRole, permission: Permission): boolean {
   const allowedRoles = PERMISSIONS[permission] as readonly string[];
   return allowedRoles.includes(role);
+}
+
+/**
+ * Check if a user has permission for a specific action in a workspace
+ * @throws Error if user doesn't have permission
+ */
+export async function checkPermission(
+  userId: string,
+  workspaceId: string,
+  resource: string,
+  action: string
+): Promise<void> {
+  // Get user's membership in this workspace
+  const membership = await prisma.membership.findUnique({
+    where: {
+      workspaceId_userId: {
+        userId,
+        workspaceId,
+      },
+    },
+  });
+
+  if (!membership) {
+    throw new Error('Not a member of this workspace');
+  }
+
+  // Build permission key
+  const permissionKey = `${resource}:${action}` as Permission;
+
+  // Check if this permission exists
+  if (!(permissionKey in PERMISSIONS)) {
+    // If permission doesn't exist, default to checking basic resource access
+    const readPermission = `${resource}:read` as Permission;
+    if (readPermission in PERMISSIONS && !hasPermission(membership.role, readPermission)) {
+      throw new Error(`Insufficient permissions for ${resource}:${action}`);
+    }
+    return;
+  }
+
+  if (!hasPermission(membership.role, permissionKey)) {
+    throw new Error(`Insufficient permissions for ${resource}:${action}`);
+  }
 }
 
 /**

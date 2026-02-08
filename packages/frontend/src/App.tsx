@@ -6,7 +6,6 @@ import { AppLayout } from './components/layout/AppLayout';
 import {
   ProDashboard,
   ContactsPage,
-  ContactForm,
   QuotesPage,
   QuoteForm,
   InvoicesPage,
@@ -31,11 +30,32 @@ import { SearchPage } from './features/search';
 // Export imports
 import { ExportPage } from './features/export';
 
+// Transactions imports
+import { TransactionsPage } from './features/transactions';
+
+// Accounts imports
+import { AccountsPage } from './features/accounts';
+
+// Budgets imports
+import { BudgetsPage } from './features/budgets';
+
+// Documents imports
+import { DocumentsPage } from './features/documents';
+
+// Import imports
+import { ImportPage } from './features/import';
+
+// Rules imports
+import { RulesPage } from './features/rules';
+
 // Settings imports
 import { SettingsPage, WorkspaceSettingsPage } from './features/settings';
 
 // Notifications imports
 import { AlertSettings } from './features/notifications';
+
+// Dashboard imports
+import { DashboardPage } from './features/dashboard/DashboardPage';
 
 // Lazy load pages for better code splitting
 // import { lazy, Suspense } from 'react';
@@ -43,25 +63,28 @@ import { AlertSettings } from './features/notifications';
 // const LoginPage = lazy(() => import('./features/auth/LoginPage'));
 // etc.
 
-// Placeholder components until they're implemented
+// Import auth components
+import { LoginForm } from './features/auth/LoginForm';
+import { RegisterForm } from './features/auth/RegisterForm';
+
+// Login page with proper form
 function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="card max-w-md w-full">
-        <h1 className="text-2xl font-bold text-center mb-6">Finance Hub</h1>
-        <p className="text-center text-gray-600 dark:text-gray-400">
-          Login page coming soon...
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="card max-w-md w-full p-8">
+        <LoginForm />
       </div>
     </div>
   );
 }
 
-function DashboardPage() {
+// Register page
+function RegisterPage() {
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      <p className="text-gray-600 dark:text-gray-400">Dashboard content coming soon...</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="card max-w-md w-full p-8">
+        <RegisterForm />
+      </div>
     </div>
   );
 }
@@ -101,6 +124,7 @@ export default function App() {
     <Routes>
       {/* Public routes */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
 
       {/* Protected routes */}
       <Route
@@ -113,6 +137,33 @@ export default function App() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
+
+        {/* Transactions Routes */}
+        <Route path="transactions" element={<TransactionsPage />} />
+        <Route path="workspaces/:workspaceId/transactions" element={<TransactionsPage />} />
+
+        {/* Accounts Routes */}
+        <Route path="accounts" element={<AccountsPage />} />
+        <Route path="workspaces/:workspaceId/accounts" element={<AccountsPage />} />
+
+        {/* Budgets Routes */}
+        <Route path="budgets" element={<BudgetsPage />} />
+        <Route path="workspaces/:workspaceId/budgets" element={<BudgetsPage />} />
+
+        {/* Documents Routes */}
+        <Route path="documents" element={<DocumentsPage />} />
+        <Route path="workspaces/:workspaceId/documents" element={<DocumentsPage />} />
+
+        {/* Import Routes */}
+        <Route path="import" element={<ImportPage />} />
+        <Route path="workspaces/:workspaceId/import" element={<ImportPage />} />
+
+        {/* Rules Routes */}
+        <Route path="rules" element={<RulesPage />} />
+        <Route path="workspaces/:workspaceId/rules" element={<RulesPage />} />
+
+        {/* Reports Routes */}
+        <Route path="reports" element={<ReportsPage />} />
 
         {/* Pro Mode Routes */}
         <Route path="workspaces/:workspaceId/pro">
@@ -130,9 +181,6 @@ export default function App() {
 
         {/* Investment Routes */}
         <Route path="workspaces/:workspaceId/portfolio" element={<PortfolioPage />} />
-
-        {/* Reports Routes */}
-        <Route path="workspaces/:workspaceId/reports" element={<ReportsPage />} />
 
         {/* Recurrences Routes */}
         <Route path="recurrences" element={<RecurrencesPage />} />

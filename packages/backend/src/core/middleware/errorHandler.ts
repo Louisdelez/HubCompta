@@ -48,7 +48,10 @@ export class ForbiddenError extends AppError {
 }
 
 export class ConflictError extends AppError {
-  constructor(message: string) {
+  constructor(entityOrMessage: string, field?: string, value?: string) {
+    const message = field && value
+      ? `${entityOrMessage} with ${field} "${value}" already exists`
+      : entityOrMessage;
     super(message, 'CONFLICT', 409);
     this.name = 'ConflictError';
   }
@@ -161,7 +164,7 @@ export async function errorHandler(
     statusCode = 400;
   }
   // Handle rate limit errors
-  else if (error.statusCode === 429) {
+  else if ('statusCode' in error && error.statusCode === 429) {
     response = {
       success: false,
       error: {

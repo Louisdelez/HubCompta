@@ -74,7 +74,7 @@ export function PreviewStep({
   jobId,
   accountId,
   columnMapping,
-  dateFormat,
+  dateFormat: _dateFormat,
   onBack,
   onComplete,
   onPreviewData,

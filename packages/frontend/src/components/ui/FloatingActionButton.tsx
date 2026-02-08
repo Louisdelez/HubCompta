@@ -39,17 +39,19 @@ export function FloatingActionButton({
   };
 
   if (actions.length === 1) {
+    const action = actions[0];
+    if (!action) return null;
     // Single action - direct click
     return (
       <button
-        onClick={() => actions[0].onClick()}
+        onClick={() => action.onClick()}
         className={clsx(
           'fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg text-white text-2xl flex items-center justify-center z-40 transition-transform hover:scale-110',
           mainColor
         )}
-        title={actions[0].label}
+        title={action.label}
       >
-        {actions[0].icon}
+        {action.icon}
       </button>
     );
   }

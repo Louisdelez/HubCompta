@@ -78,7 +78,7 @@ export const alertService = {
         workspaceId: input.workspaceId,
         type: input.type,
         name: input.name,
-        config: input.config as Prisma.JsonObject,
+        config: input.config as unknown as Prisma.JsonObject,
       },
     });
   },
@@ -93,7 +93,7 @@ export const alertService = {
       data: {
         ...(data.name && { name: data.name }),
         ...(data.isEnabled !== undefined && { isEnabled: data.isEnabled }),
-        ...(data.config && { config: data.config as Prisma.JsonObject }),
+        ...(data.config && { config: data.config as unknown as Prisma.JsonObject }),
       },
     });
   },
@@ -175,8 +175,8 @@ export const alertService = {
         _sum: { amount: true },
       });
 
-      const totalSpent = Math.abs(spending._sum.amount || 0);
-      const percentUsed = (totalSpent / budget.amount) * 100;
+      const totalSpent = Math.abs(Number(spending._sum.amount) || 0);
+      const percentUsed = (totalSpent / Number(budget.amount)) * 100;
 
       // Check if threshold is reached
       const isExceeded = percentUsed >= 100;
@@ -238,7 +238,7 @@ export const alertService = {
 
       if (!asset || !asset.lastPrice) continue;
 
-      const currentPrice = asset.lastPrice;
+      const currentPrice = Number(asset.lastPrice);
       let shouldTrigger = false;
 
       if (rule.type === 'price_above' && currentPrice >= config.targetPrice) {
@@ -290,7 +290,8 @@ export const alertService = {
 
       if (!account) continue;
 
-      if (account.balance < config.threshold) {
+      const accountBalance = Number(account.balance);
+      if (accountBalance < config.threshold) {
         // Only notify once per day
         const lastTriggered = rule.lastTriggeredAt;
         const now = new Date();
@@ -300,7 +301,7 @@ export const alertService = {
             workspaceId: rule.workspaceId || undefined,
             type: 'budget_warning',
             title: `Solde bas: ${account.name}`,
-            message: `Le solde de "${account.name}" (${account.balance.toFixed(2)} €) est inférieur à ${config.threshold.toFixed(2)} €.`,
+            message: `Le solde de "${account.name}" (${accountBalance.toFixed(2)} €) est inférieur à ${config.threshold.toFixed(2)} €.`,
             data: { accountId: account.id },
           });
 
@@ -331,24 +332,28 @@ export const alertService = {
         where: { id: config.recurrenceId },
       });
 
-      if (!recurrence || !recurrence.nextOccurrence) continue;
+      if (!recurrence || !recurrence.nextRunAt) continue;
 
       const now = new Date();
       const daysUntil = Math.ceil(
-        (recurrence.nextOccurrence.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
+        (recurrence.nextRunAt.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
       );
+
+      const template = recurrence.template as Record<string, unknown> | null;
+      const templateAmount = template?.amount as number | undefined;
+      const templateDescription = template?.description as string | undefined;
 
       if (daysUntil <= config.daysBefore && daysUntil >= 0) {
         // Only notify once per occurrence
         const lastTriggered = rule.lastTriggeredAt;
-        if (!lastTriggered || lastTriggered < recurrence.nextOccurrence) {
+        if (!lastTriggered || lastTriggered < recurrence.nextRunAt) {
           await notificationService.notifyBillReminder(
             rule.userId,
             rule.workspaceId || '',
             {
-              description: recurrence.description || 'Transaction récurrente',
-              amount: Math.abs(recurrence.amount),
-              dueDate: recurrence.nextOccurrence,
+              description: templateDescription || recurrence.name || 'Transaction récurrente',
+              amount: Math.abs(templateAmount || 0),
+              dueDate: recurrence.nextRunAt,
               daysUntil,
             }
           );

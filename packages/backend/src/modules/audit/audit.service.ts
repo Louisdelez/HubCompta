@@ -16,8 +16,10 @@ export interface AuditLogEntry {
   entityType?: string;
   entityId?: string;
   changes?: Record<string, unknown>;
-  ipAddress?: string;
-  userAgent?: string;
+  newValue?: Record<string, unknown> | null;
+  oldValue?: Record<string, unknown> | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
   severity?: AuditSeverity;
 }
 
@@ -164,9 +166,9 @@ export const auditService = {
         action: entry.action,
         entityType: entry.entityType,
         entityId: entry.entityId,
-        changes: entry.changes ?? null,
-        ipAddress: entry.ipAddress,
-        userAgent: entry.userAgent,
+        changes: entry.changes as object | undefined,
+        ipAddress: entry.ipAddress ?? undefined,
+        userAgent: entry.userAgent ?? undefined,
         severity: entry.severity ?? 'info',
       },
     });

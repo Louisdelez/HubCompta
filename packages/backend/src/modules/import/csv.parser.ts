@@ -147,7 +147,7 @@ export const csvParser = {
       relax_column_count: true,
     }) as ParsedRow[];
 
-    if (records.length === 0) {
+    if (records.length === 0 || !records[0]) {
       return {
         headers: [],
         rows: [],
@@ -173,7 +173,7 @@ export const csvParser = {
    * Detect CSV delimiter
    */
   detectDelimiter(content: string): string {
-    const firstLine = content.split('\n')[0];
+    const firstLine = content.split('\n')[0] ?? '';
     const delimiters = [';', ',', '\t', '|'];
     let maxCount = 0;
     let detected = ',';
@@ -229,7 +229,7 @@ export const csvParser = {
 
     for (const header of headers) {
       const lowerHeader = header.toLowerCase();
-      const sampleValues = rows.slice(0, 5).map((r) => r[header]);
+      const sampleValues = rows.slice(0, 5).map((r) => r[header]).filter((v): v is string => v !== undefined);
 
       // Detect date column
       if (!dateColumn && this.looksLikeDateColumn(lowerHeader, sampleValues)) {
@@ -252,10 +252,10 @@ export const csvParser = {
     }
 
     // Detect date format
-    const dateFormat = this.detectDateFormat(rows.slice(0, 5).map((r) => r[dateColumn!]));
+    const dateFormat = this.detectDateFormat(rows.slice(0, 5).map((r) => r[dateColumn!]).filter((v): v is string => v !== undefined));
 
     // Detect amount format
-    const amountFormat = this.detectAmountFormat(rows.slice(0, 5).map((r) => r[amountColumn!]));
+    const amountFormat = this.detectAmountFormat(rows.slice(0, 5).map((r) => r[amountColumn!]).filter((v): v is string => v !== undefined));
 
     return {
       bank: 'Generic',
@@ -369,18 +369,31 @@ export const csvParser = {
     let day: number, month: number, year: number;
 
     try {
+      let parts: number[];
       switch (format) {
         case 'DD/MM/YYYY':
-          [day, month, year] = v.split('/').map(Number);
+          parts = v.split('/').map(Number);
+          day = parts[0] ?? 0;
+          month = parts[1] ?? 0;
+          year = parts[2] ?? 0;
           break;
         case 'YYYY-MM-DD':
-          [year, month, day] = v.split('-').map(Number);
+          parts = v.split('-').map(Number);
+          year = parts[0] ?? 0;
+          month = parts[1] ?? 0;
+          day = parts[2] ?? 0;
           break;
         case 'DD-MM-YYYY':
-          [day, month, year] = v.split('-').map(Number);
+          parts = v.split('-').map(Number);
+          day = parts[0] ?? 0;
+          month = parts[1] ?? 0;
+          year = parts[2] ?? 0;
           break;
         case 'DD.MM.YYYY':
-          [day, month, year] = v.split('.').map(Number);
+          parts = v.split('.').map(Number);
+          day = parts[0] ?? 0;
+          month = parts[1] ?? 0;
+          year = parts[2] ?? 0;
           break;
         default:
           return new Date(v);
@@ -411,15 +424,15 @@ export const csvParser = {
       let amount: number;
 
       if (format.amountFormat === 'split' && mapping.credit && mapping.debit) {
-        const credit = this.parseAmount(row[mapping.credit], 'french');
-        const debit = this.parseAmount(row[mapping.debit], 'french');
+        const credit = this.parseAmount(row[mapping.credit] ?? '', 'french');
+        const debit = this.parseAmount(row[mapping.debit] ?? '', 'french');
         amount = credit > 0 ? credit : -debit;
       } else {
-        amount = this.parseAmount(row[mapping.amount], format.amountFormat);
+        amount = this.parseAmount(row[mapping.amount] ?? '', format.amountFormat);
       }
 
       return {
-        date: this.parseDate(row[mapping.date], format.dateFormat),
+        date: this.parseDate(row[mapping.date] ?? '', format.dateFormat),
         amount,
         description: row[mapping.description]?.trim() ?? '',
         notes: mapping.notes ? row[mapping.notes]?.trim() : undefined,

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '@/lib/api/client';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -22,12 +22,12 @@ interface Contact {
 }
 
 interface InvoiceLine {
-  id?: string;
+  id?: string | undefined;
   description: string;
   quantity: number;
   unitPrice: number;
   vatRate: number;
-  total?: number;
+  total?: number | undefined;
 }
 
 interface Invoice {
@@ -90,7 +90,7 @@ function calculateTotals(lines: InvoiceLine[]) {
 
 export function InvoiceForm() {
   const { invoiceId } = useParams();
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const isEditing = !!invoiceId;
@@ -99,7 +99,7 @@ export function InvoiceForm() {
   const [dueDate, setDueDate] = useState(() => {
     const date = new Date();
     date.setDate(date.getDate() + 30);
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split('T')[0] ?? '';
   });
   const [notes, setNotes] = useState('');
   const [lines, setLines] = useState<InvoiceLine[]>([
@@ -129,10 +129,10 @@ export function InvoiceForm() {
   useEffect(() => {
     if (invoice) {
       setContactId(invoice.contactId);
-      setDueDate(invoice.dueDate.split('T')[0]);
+      setDueDate(invoice.dueDate.split('T')[0] ?? '');
       setNotes(invoice.notes || '');
-      setLines(invoice.lines.map((line) => ({
-        id: line.id,
+      setLines(invoice.lines.map((line): InvoiceLine => ({
+        ...(line.id ? { id: line.id } : {}),
         description: line.description,
         quantity: parseFloat(String(line.quantity)),
         unitPrice: parseFloat(String(line.unitPrice)),
@@ -141,8 +141,15 @@ export function InvoiceForm() {
     }
   }, [invoice]);
 
+  type CreateInvoicePayload = {
+    contactId: string;
+    dueDate: Date;
+    lines: InvoiceLine[];
+    notes?: string | undefined;
+  };
+
   const createMutation = useMutation({
-    mutationFn: (data: { contactId: string; dueDate: Date; lines: InvoiceLine[]; notes?: string }) =>
+    mutationFn: (data: CreateInvoicePayload) =>
       api.post<{ data: Invoice }>(`/workspaces/${workspaceId}/invoices`, data),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
@@ -176,9 +183,25 @@ export function InvoiceForm() {
   };
 
   const updateLine = (index: number, field: keyof InvoiceLine, value: string | number) => {
-    const newLines = [...lines];
-    newLines[index] = { ...newLines[index], [field]: value };
-    setLines(newLines);
+    setLines((prevLines) => {
+      const newLines = [...prevLines];
+      const currentLine = newLines[index];
+      if (!currentLine) return prevLines;
+      const updatedLine: InvoiceLine = {
+        description: field === 'description' ? (value as string) : currentLine.description,
+        quantity: field === 'quantity' ? (value as number) : currentLine.quantity,
+        unitPrice: field === 'unitPrice' ? (value as number) : currentLine.unitPrice,
+        vatRate: field === 'vatRate' ? (value as number) : currentLine.vatRate,
+      };
+      if (currentLine.id !== undefined) {
+        updatedLine.id = currentLine.id;
+      }
+      if (currentLine.total !== undefined) {
+        updatedLine.total = currentLine.total;
+      }
+      newLines[index] = updatedLine;
+      return newLines;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -197,16 +220,17 @@ export function InvoiceForm() {
       return;
     }
 
-    const data = {
-      contactId,
-      dueDate: new Date(dueDate),
-      lines: validLines,
-      notes: notes || undefined,
-    };
-
     if (isEditing) {
       updateMutation.mutate({ lines: validLines });
     } else {
+      const data: CreateInvoicePayload = {
+        contactId,
+        dueDate: new Date(dueDate),
+        lines: validLines,
+      };
+      if (notes) {
+        data.notes = notes;
+      }
       createMutation.mutate(data);
     }
   };

@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api/client';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -68,7 +68,7 @@ const STATUS_CONFIG: Record<QuoteStatus, { label: string; color: string }> = {
 // ----------------------------------------------------------------------------
 
 export function QuotesPage() {
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<QuoteStatus | 'all'>('all');

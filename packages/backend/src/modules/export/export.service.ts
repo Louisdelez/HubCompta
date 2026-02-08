@@ -226,7 +226,7 @@ export const exportService = {
     });
 
     return transactions.map((t) => ({
-      date: t.date.toISOString().split('T')[0],
+      date: t.date.toISOString().split('T')[0] ?? '',
       description: t.description,
       amount: Number(t.amount),
       currency: t.currency,
@@ -329,7 +329,7 @@ export const exportService = {
         parentCategory: c.parent?.name ?? '',
       })),
       transactions: transactions.map((t) => ({
-        date: t.date.toISOString().split('T')[0],
+        date: t.date.toISOString().split('T')[0] ?? '',
         description: t.description,
         amount: Number(t.amount),
         currency: t.currency,
@@ -426,7 +426,7 @@ export const exportService = {
       where: { id: { in: categoryIds } },
       select: { id: true, name: true, icon: true },
     });
-    const categoryMap = new Map(categories.map((c) => [c.id, c]));
+    const categoryMap = new Map<string, { id: string; name: string; icon: string | null }>(categories.map((c) => [c.id, c]));
 
     return {
       period: { year, month },
@@ -525,7 +525,7 @@ export const exportService = {
       where: { id: { in: categoryIds } },
       select: { id: true, name: true, icon: true, type: true },
     });
-    const categoryMap = new Map(categories.map((c) => [c.id, c]));
+    const categoryMap = new Map<string, { id: string; name: string; icon: string | null; type: string }>(categories.map((c) => [c.id, c]));
 
     return {
       period: { year, month },
@@ -966,7 +966,7 @@ export const exportService = {
   // --------------------------------------------------------------------------
 
   getDateString(): string {
-    return new Date().toISOString().split('T')[0];
+    return new Date().toISOString().split('T')[0] ?? '';
   },
 
   formatCurrency(amount: number, currency: string = 'EUR'): string {
@@ -974,6 +974,271 @@ export const exportService = {
       style: 'currency',
       currency,
     }).format(amount);
+  },
+
+  /**
+   * Restore workspace data from a backup
+   */
+  async restoreFromBackup(
+    workspaceId: string,
+    backup: FullBackupData,
+    options: { merge?: boolean } = {}
+  ): Promise<{ imported: { accounts: number; categories: number; tags: number; transactions: number; budgets: number; rules: number; recurrences: number }; errors: string[] }> {
+    const errors: string[] = [];
+    const imported = {
+      accounts: 0,
+      categories: 0,
+      tags: 0,
+      transactions: 0,
+      budgets: 0,
+      rules: 0,
+      recurrences: 0,
+    };
+
+    // Create maps for ID lookups (name -> new id)
+    const accountMap = new Map<string, string>();
+    const categoryMap = new Map<string, string>();
+    const tagMap = new Map<string, string>();
+
+    try {
+      await prisma.$transaction(async (tx) => {
+        // 1. Import categories first (they may have parent relationships)
+        for (const cat of backup.categories ?? []) {
+          try {
+            const existing = await tx.category.findFirst({
+              where: { workspaceId, name: cat.name },
+            });
+
+            if (existing) {
+              categoryMap.set(cat.name, existing.id);
+              if (options.merge) continue;
+            }
+
+            if (!existing) {
+              const created = await tx.category.create({
+                data: {
+                  workspaceId,
+                  name: cat.name,
+                  type: cat.type as 'income' | 'expense',
+                },
+              });
+              categoryMap.set(cat.name, created.id);
+              imported.categories++;
+            }
+          } catch (e) {
+            errors.push(`Category ${cat.name}: ${e instanceof Error ? e.message : 'Unknown error'}`);
+          }
+        }
+
+        // 2. Update parent categories
+        for (const cat of backup.categories ?? []) {
+          if (cat.parentCategory) {
+            const parentId = categoryMap.get(cat.parentCategory);
+            const catId = categoryMap.get(cat.name);
+            if (parentId && catId) {
+              await tx.category.update({
+                where: { id: catId },
+                data: { parentId },
+              });
+            }
+          }
+        }
+
+        // 3. Import tags
+        for (const tag of backup.tags ?? []) {
+          try {
+            const existing = await tx.tag.findFirst({
+              where: { workspaceId, name: tag.name },
+            });
+
+            if (existing) {
+              tagMap.set(tag.name, existing.id);
+              continue;
+            }
+
+            const created = await tx.tag.create({
+              data: {
+                workspaceId,
+                name: tag.name,
+                color: tag.color,
+              },
+            });
+            tagMap.set(tag.name, created.id);
+            imported.tags++;
+          } catch (e) {
+            errors.push(`Tag ${tag.name}: ${e instanceof Error ? e.message : 'Unknown error'}`);
+          }
+        }
+
+        // 4. Import accounts
+        for (const acc of backup.accounts ?? []) {
+          try {
+            const existing = await tx.account.findFirst({
+              where: { workspaceId, name: acc.name, deletedAt: null },
+            });
+
+            if (existing) {
+              accountMap.set(acc.name, existing.id);
+              if (options.merge) continue;
+            }
+
+            if (!existing) {
+              const created = await tx.account.create({
+                data: {
+                  workspaceId,
+                  name: acc.name,
+                  type: acc.type as 'checking' | 'savings' | 'credit_card' | 'investment' | 'cash' | 'loan',
+                  currency: acc.currency,
+                  balance: acc.balance,
+                  isArchived: acc.isArchived,
+                },
+              });
+              accountMap.set(acc.name, created.id);
+              imported.accounts++;
+            }
+          } catch (e) {
+            errors.push(`Account ${acc.name}: ${e instanceof Error ? e.message : 'Unknown error'}`);
+          }
+        }
+
+        // 5. Import transactions
+        for (const txn of backup.transactions ?? []) {
+          try {
+            const accountId = accountMap.get(txn.account);
+            if (!accountId) {
+              errors.push(`Transaction ${txn.description}: Account not found`);
+              continue;
+            }
+
+            const categoryId = txn.category ? categoryMap.get(txn.category) : undefined;
+
+            const created = await tx.transaction.create({
+              data: {
+                workspaceId,
+                accountId,
+                categoryId,
+                description: txn.description,
+                amount: txn.amount,
+                currency: txn.currency,
+                type: txn.type as 'income' | 'expense' | 'transfer',
+                status: txn.status as 'pending' | 'cleared' | 'reconciled',
+                date: new Date(txn.date),
+                notes: txn.notes || undefined,
+              },
+            });
+
+            // Add tags
+            if (txn.tags) {
+              const tagNames = txn.tags.split(',').map((t) => t.trim()).filter(Boolean);
+              for (const tagName of tagNames) {
+                const tagId = tagMap.get(tagName);
+                if (tagId) {
+                  await tx.transactionTag.create({
+                    data: { transactionId: created.id, tagId },
+                  });
+                }
+              }
+            }
+
+            imported.transactions++;
+          } catch (e) {
+            errors.push(`Transaction ${txn.description}: ${e instanceof Error ? e.message : 'Unknown error'}`);
+          }
+        }
+
+        // 6. Import budgets
+        for (const budget of backup.budgets ?? []) {
+          try {
+            const categoryId = categoryMap.get(budget.category);
+            if (!categoryId) {
+              errors.push(`Budget ${budget.name}: Category not found`);
+              continue;
+            }
+
+            const existing = await tx.budget.findFirst({
+              where: { workspaceId, name: budget.name },
+            });
+
+            if (existing && options.merge) continue;
+
+            if (!existing) {
+              await tx.budget.create({
+                data: {
+                  workspaceId,
+                  categoryId,
+                  name: budget.name,
+                  amount: budget.amount,
+                  period: budget.period as 'monthly' | 'yearly',
+                  alertThreshold: budget.alertThreshold,
+                  startDate: new Date(),
+                },
+              });
+              imported.budgets++;
+            }
+          } catch (e) {
+            errors.push(`Budget ${budget.name}: ${e instanceof Error ? e.message : 'Unknown error'}`);
+          }
+        }
+
+        // 7. Import rules
+        for (const rule of backup.rules ?? []) {
+          try {
+            const existing = await tx.rule.findFirst({
+              where: { workspaceId, name: rule.name },
+            });
+
+            if (existing && options.merge) continue;
+
+            if (!existing) {
+              await tx.rule.create({
+                data: {
+                  workspaceId,
+                  name: rule.name,
+                  conditions: rule.conditions as any,
+                  actions: rule.actions as any,
+                  isEnabled: rule.isEnabled,
+                  priority: 0,
+                },
+              });
+              imported.rules++;
+            }
+          } catch (e) {
+            errors.push(`Rule ${rule.name}: ${e instanceof Error ? e.message : 'Unknown error'}`);
+          }
+        }
+
+        // 8. Import recurrences
+        for (const rec of backup.recurrences ?? []) {
+          try {
+            const existing = await tx.recurrence.findFirst({
+              where: { workspaceId, name: rec.name },
+            });
+
+            if (existing && options.merge) continue;
+
+            if (!existing) {
+              await tx.recurrence.create({
+                data: {
+                  workspaceId,
+                  name: rec.name,
+                  frequency: rec.frequency as 'daily' | 'weekly' | 'monthly' | 'yearly',
+                  template: rec.template as any,
+                  isActive: rec.isActive,
+                  nextRunAt: new Date(),
+                },
+              });
+              imported.recurrences++;
+            }
+          } catch (e) {
+            errors.push(`Recurrence ${rec.name}: ${e instanceof Error ? e.message : 'Unknown error'}`);
+          }
+        }
+      });
+    } catch (e) {
+      errors.push(`Transaction failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    }
+
+    return { imported, errors };
   },
 };
 

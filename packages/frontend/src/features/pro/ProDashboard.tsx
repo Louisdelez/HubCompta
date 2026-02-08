@@ -6,7 +6,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '@/lib/api/client';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -67,7 +67,7 @@ function getDaysUntil(dateStr: string): number {
 // ----------------------------------------------------------------------------
 
 export function ProDashboard() {
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
 
   const { data: contactStats, isLoading: loadingContacts } = useQuery({
     queryKey: ['contacts', 'stats', workspaceId],

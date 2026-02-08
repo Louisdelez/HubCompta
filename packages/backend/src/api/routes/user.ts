@@ -180,7 +180,7 @@ export async function userRoutes(app: FastifyInstance): Promise<void> {
     const sessions = await sessionService.getUserSessions(request.user!.sub);
 
     // Mark current session
-    const currentSessionId = request.session?.id;
+    const currentSessionId = (request as unknown as { sessionId?: string }).sessionId;
     const sessionsWithCurrent = sessions.map((session) => ({
       ...session,
       isCurrent: session.id === currentSessionId,
@@ -195,9 +195,9 @@ export async function userRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // DELETE /user/sessions/:id - Revoke a specific session
   // --------------------------------------------------------------------------
-  app.delete(
+  app.delete<{ Params: { id: string } }>(
     '/sessions/:id',
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    async (request, reply) => {
       const { id } = request.params;
       const userId = request.user!.sub;
 
@@ -217,7 +217,7 @@ export async function userRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   app.post('/sessions/revoke-all', async (request: FastifyRequest, reply: FastifyReply) => {
     const userId = request.user!.sub;
-    const currentSessionId = request.session?.id;
+    const currentSessionId = (request as unknown as { sessionId?: string }).sessionId;
 
     await sessionService.revokeAllExcept(userId, currentSessionId);
 
@@ -249,10 +249,10 @@ export async function userRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // DELETE /user/mfa/:id - Remove MFA method (requires step-up)
   // --------------------------------------------------------------------------
-  app.delete(
+  app.delete<{ Params: { id: string } }>(
     '/mfa/:id',
     { preHandler: [stepUpGuard('remove_mfa')] },
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    async (request, reply) => {
       const { id } = request.params;
       const userId = request.user!.sub;
 
@@ -282,10 +282,10 @@ export async function userRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /user/mfa/:id/backup-codes - Regenerate backup codes
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { id: string } }>(
     '/mfa/:id/backup-codes',
     { preHandler: [stepUpGuard('security_settings')] },
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    async (request, reply) => {
       const { id } = request.params;
       const backupCodes = await mfaService.regenerateBackupCodes(id, request.user!.sub);
 

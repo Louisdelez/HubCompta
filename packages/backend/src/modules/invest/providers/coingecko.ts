@@ -358,11 +358,11 @@ export class CoinGeckoProvider implements MarketDataProvider {
 
       for (const [timestamp, price] of prices) {
         const date = new Date(timestamp);
-        const dateKey = date.toISOString().split('T')[0];
+        const dateKey = date.toISOString().split('T')[0] ?? '';
 
         if (!dailyPrices.has(dateKey)) {
           dailyPrices.set(dateKey, {
-            date: new Date(dateKey),
+            date: new Date(dateKey || date),
             open: price,
             high: price,
             low: price,

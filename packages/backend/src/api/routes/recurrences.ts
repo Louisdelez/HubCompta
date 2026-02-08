@@ -122,7 +122,7 @@ const recurrenceRoutes: FastifyPluginAsync = async (fastify) => {
     Params: { workspaceId: string };
     Body: CreateRecurrenceBody;
   }>('/', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });
     }
@@ -176,7 +176,7 @@ const recurrenceRoutes: FastifyPluginAsync = async (fastify) => {
     Params: RecurrenceParams;
     Body: UpdateRecurrenceBody;
   }>('/:recurrenceId', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });
     }
@@ -195,7 +195,7 @@ const recurrenceRoutes: FastifyPluginAsync = async (fastify) => {
         action: 'recurrence.updated',
         entityType: 'recurrence',
         entityId: recurrenceId,
-        changes: request.body,
+        changes: request.body as unknown as Record<string, unknown>,
         ipAddress: request.ip,
       });
 
@@ -217,7 +217,7 @@ const recurrenceRoutes: FastifyPluginAsync = async (fastify) => {
    * Delete a recurrence
    */
   fastify.delete<{ Params: RecurrenceParams }>('/:recurrenceId', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });
     }
@@ -254,7 +254,7 @@ const recurrenceRoutes: FastifyPluginAsync = async (fastify) => {
    * Pause a recurrence
    */
   fastify.post<{ Params: RecurrenceParams }>('/:recurrenceId/pause', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });
     }
@@ -291,7 +291,7 @@ const recurrenceRoutes: FastifyPluginAsync = async (fastify) => {
    * Resume a paused recurrence
    */
   fastify.post<{ Params: RecurrenceParams }>('/:recurrenceId/resume', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });
     }
@@ -328,7 +328,7 @@ const recurrenceRoutes: FastifyPluginAsync = async (fastify) => {
    * Skip the next occurrence
    */
   fastify.post<{ Params: RecurrenceParams }>('/:recurrenceId/skip', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });
     }
@@ -365,7 +365,7 @@ const recurrenceRoutes: FastifyPluginAsync = async (fastify) => {
    * Execute a recurrence immediately
    */
   fastify.post<{ Params: RecurrenceParams }>('/:recurrenceId/execute', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });
     }

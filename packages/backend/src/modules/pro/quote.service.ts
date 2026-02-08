@@ -477,7 +477,7 @@ class QuoteService {
     let nextNumber = 1;
     if (lastDoc) {
       const parts = lastDoc.number.split('-');
-      const lastNumber = parseInt(parts[2], 10);
+      const lastNumber = parseInt(parts[2] ?? '0', 10);
       nextNumber = lastNumber + 1;
     }
 

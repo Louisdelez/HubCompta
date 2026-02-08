@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -34,7 +34,7 @@ interface ContactFormProps {
 // ----------------------------------------------------------------------------
 
 export function ContactForm({ contact, onClose }: ContactFormProps) {
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
   const isEditing = !!contact;
 
@@ -50,8 +50,18 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  type ContactPayload = {
+    type: 'client' | 'supplier';
+    name: string;
+    email: string | null;
+    phone: string | null;
+    address: string | null;
+    siret: string | null;
+    vatNumber: string | null;
+  };
+
   const createMutation = useMutation({
-    mutationFn: (data: typeof formData) =>
+    mutationFn: (data: ContactPayload) =>
       api.post(`/workspaces/${workspaceId}/contacts`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contacts', workspaceId] });
@@ -63,7 +73,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: typeof formData) =>
+    mutationFn: (data: ContactPayload) =>
       api.patch(`/workspaces/${workspaceId}/contacts/${contact!.id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contacts', workspaceId] });

@@ -6,7 +6,7 @@
 /// <reference lib="webworker" />
 
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
-import { registerRoute, NavigationRoute, Route } from 'workbox-routing';
+import { registerRoute, NavigationRoute } from 'workbox-routing';
 import {
   NetworkFirst,
   CacheFirst,
@@ -16,6 +16,12 @@ import { ExpirationPlugin } from 'workbox-expiration';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 
 declare const self: ServiceWorkerGlobalScope;
+
+// Helper to cast plugins for exactOptionalPropertyTypes compatibility
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asPlugin<T>(plugin: T): any {
+  return plugin;
+}
 
 // ----------------------------------------------------------------------------
 // Configuration
@@ -48,9 +54,9 @@ const navigationRoute = new NavigationRoute(
   new NetworkFirst({
     cacheName: `${CACHE_PREFIX}-pages-${CACHE_VERSION}`,
     plugins: [
-      new CacheableResponsePlugin({
+      asPlugin(new CacheableResponsePlugin({
         statuses: [200],
-      }),
+      })),
     ],
   }),
   {
@@ -74,14 +80,14 @@ registerRoute(
     cacheName: API_CACHE,
     networkTimeoutSeconds: 10,
     plugins: [
-      new CacheableResponsePlugin({
+      asPlugin(new CacheableResponsePlugin({
         statuses: [200],
-      }),
-      new ExpirationPlugin({
+      })),
+      asPlugin(new ExpirationPlugin({
         maxEntries: 100,
         maxAgeSeconds: 60 * 60, // 1 hour
         purgeOnQuotaError: true,
-      }),
+      })),
     ],
   })
 );
@@ -96,13 +102,13 @@ registerRoute(
     cacheName: API_CACHE,
     networkTimeoutSeconds: 5,
     plugins: [
-      new CacheableResponsePlugin({
+      asPlugin(new CacheableResponsePlugin({
         statuses: [200],
-      }),
-      new ExpirationPlugin({
+      })),
+      asPlugin(new ExpirationPlugin({
         maxEntries: 10,
         maxAgeSeconds: 60, // 1 minute only
-      }),
+      })),
     ],
   })
 );
@@ -118,13 +124,13 @@ registerRoute(
   new CacheFirst({
     cacheName: STATIC_CACHE,
     plugins: [
-      new CacheableResponsePlugin({
+      asPlugin(new CacheableResponsePlugin({
         statuses: [200],
-      }),
-      new ExpirationPlugin({
+      })),
+      asPlugin(new ExpirationPlugin({
         maxEntries: 60,
         maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-      }),
+      })),
     ],
   })
 );
@@ -135,13 +141,13 @@ registerRoute(
   new CacheFirst({
     cacheName: `${CACHE_PREFIX}-fonts-${CACHE_VERSION}`,
     plugins: [
-      new CacheableResponsePlugin({
+      asPlugin(new CacheableResponsePlugin({
         statuses: [200],
-      }),
-      new ExpirationPlugin({
+      })),
+      asPlugin(new ExpirationPlugin({
         maxEntries: 20,
         maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
-      }),
+      })),
     ],
   })
 );
@@ -152,14 +158,14 @@ registerRoute(
   new StaleWhileRevalidate({
     cacheName: IMAGE_CACHE,
     plugins: [
-      new CacheableResponsePlugin({
+      asPlugin(new CacheableResponsePlugin({
         statuses: [200],
-      }),
-      new ExpirationPlugin({
+      })),
+      asPlugin(new ExpirationPlugin({
         maxEntries: 100,
         maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
         purgeOnQuotaError: true,
-      }),
+      })),
     ],
   })
 );
@@ -198,7 +204,7 @@ registerRoute(
 // ----------------------------------------------------------------------------
 
 // Install event
-self.addEventListener('install', (event) => {
+self.addEventListener('install', (_event) => {
   console.log('[ServiceWorker] Install');
   // Skip waiting to activate immediately
   self.skipWaiting();
@@ -218,7 +224,7 @@ self.addEventListener('message', (event) => {
   }
 
   if (event.data && event.data.type === 'GET_VERSION') {
-    event.ports[0].postMessage({
+    event.ports[0]?.postMessage({
       version: CACHE_VERSION,
     });
   }
@@ -249,7 +255,6 @@ self.addEventListener('push', (event) => {
       badge: '/icons/badge-72x72.png',
       tag: data.tag || 'hubcompta-notification',
       data: data.data || {},
-      actions: data.actions || [],
       requireInteraction: data.requireInteraction || false,
     };
 
@@ -280,6 +285,7 @@ self.addEventListener('notificationclick', (event) => {
       if (self.clients.openWindow) {
         return self.clients.openWindow(url);
       }
+      return undefined;
     })
   );
 });

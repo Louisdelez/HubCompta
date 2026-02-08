@@ -2,7 +2,7 @@
 // REDIS CLIENT SINGLETON - Finance Hub
 // ============================================================================
 
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 
 const REDIS_URL = process.env.REDIS_URL;
 
@@ -11,7 +11,7 @@ if (!REDIS_URL) {
 }
 
 // Parse connection options from URL
-const redisOptions: Redis.RedisOptions = {
+const redisOptions = {
   maxRetriesPerRequest: 3,
   retryStrategy: (times: number) => {
     if (times > 10) {
@@ -29,23 +29,23 @@ let redis: Redis | null = null;
 export function getRedisClient(): Redis {
   if (!redis) {
     redis = new Redis(REDIS_URL!, redisOptions);
-
-    redis.on('error', (error) => {
-      console.error('Redis connection error:', error);
-    });
-
-    redis.on('connect', () => {
-      console.info('Redis connected');
-    });
-
-    redis.on('ready', () => {
-      console.info('Redis ready');
-    });
-
-    redis.on('close', () => {
-      console.warn('Redis connection closed');
-    });
   }
+
+  redis.on('error', (error: Error) => {
+    console.error('Redis connection error:', error);
+  });
+
+  redis.on('connect', () => {
+    console.info('Redis connected');
+  });
+
+  redis.on('ready', () => {
+    console.info('Redis ready');
+  });
+
+  redis.on('close', () => {
+    console.warn('Redis connection closed');
+  });
 
   return redis;
 }

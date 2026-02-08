@@ -4,6 +4,7 @@
 
 import { FastifyPluginAsync } from 'fastify';
 import { exportService, ExportFormat } from '../../modules/export/index.js';
+import { authGuard } from '../../core/auth/authGuard.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -35,7 +36,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
     Params: { workspaceId: string };
     Querystring: ExportQuery;
   }>('/transactions', {
-    preHandler: [fastify.authenticate, fastify.requireWorkspaceMember],
+    preHandler: [authGuard],
   }, async (request, reply) => {
     const { workspaceId } = request.params;
     const { format = 'csv', dateFrom, dateTo, accountIds, categoryIds, includeArchived } = request.query;
@@ -61,7 +62,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
     Params: { workspaceId: string };
     Querystring: ExportQuery;
   }>('/accounts', {
-    preHandler: [fastify.authenticate, fastify.requireWorkspaceMember],
+    preHandler: [authGuard],
   }, async (request, reply) => {
     const { workspaceId } = request.params;
     const { format = 'csv', includeArchived } = request.query;
@@ -82,7 +83,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
     Params: { workspaceId: string };
   }>('/backup', {
-    preHandler: [fastify.authenticate, fastify.requireWorkspaceMember],
+    preHandler: [authGuard],
   }, async (request, reply) => {
     const { workspaceId } = request.params;
 
@@ -99,7 +100,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
     Params: { workspaceId: string };
     Querystring: ReportQuery;
   }>('/report', {
-    preHandler: [fastify.authenticate, fastify.requireWorkspaceMember],
+    preHandler: [authGuard],
     schema: {
       querystring: {
         type: 'object',
@@ -132,7 +133,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
 
   // Get available export formats
   fastify.get('/formats', {
-    preHandler: [fastify.authenticate],
+    preHandler: [authGuard],
   }, async () => {
     return {
       formats: [
@@ -154,7 +155,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
     Params: { workspaceId: string };
     Body: { backup: unknown };
   }>('/validate-backup', {
-    preHandler: [fastify.authenticate, fastify.requireWorkspaceMember],
+    preHandler: [authGuard],
   }, async (request, reply) => {
     const { backup } = request.body as { backup: any };
 
@@ -191,6 +192,54 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     };
+  });
+
+  // Restore from backup
+  fastify.post<{
+    Params: { workspaceId: string };
+    Body: { backup: unknown; merge?: boolean };
+  }>('/restore', {
+    preHandler: [authGuard],
+  }, async (request, reply) => {
+    const { workspaceId } = request.params;
+    const { backup, merge = true } = request.body as { backup: any; merge?: boolean };
+
+    // Validate backup structure
+    if (!backup || typeof backup !== 'object') {
+      return reply.status(400).send({
+        success: false,
+        error: 'Invalid backup format'
+      });
+    }
+
+    const requiredFields = ['version', 'workspace', 'accounts', 'transactions', 'categories'];
+    const missingFields = requiredFields.filter((f) => !(f in backup));
+
+    if (missingFields.length > 0) {
+      return reply.status(400).send({
+        success: false,
+        error: 'Missing required fields',
+        missingFields,
+      });
+    }
+
+    try {
+      const result = await exportService.restoreFromBackup(workspaceId, backup, { merge });
+
+      return reply.send({
+        success: true,
+        data: {
+          imported: result.imported,
+          errors: result.errors,
+          hasErrors: result.errors.length > 0,
+        },
+      });
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        error: error instanceof Error ? error.message : 'Restore failed',
+      });
+    }
   });
 };
 

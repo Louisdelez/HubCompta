@@ -86,18 +86,18 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // PATCH /workspaces/:id - Update workspace
   // --------------------------------------------------------------------------
-  app.patch(
+  app.patch<{ Params: { id: string; workspaceId?: string } }>(
     '/:id',
     {
       preHandler: [
         async (req, reply) => {
-          req.params = { ...req.params, workspaceId: (req.params as { id: string }).id };
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
           await workspaceContextMiddleware(req, reply);
         },
         requirePermission('workspace:update'),
       ],
     },
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    async (request, reply) => {
       const { id } = request.params;
       const input = workspaceUpdateSchema.parse(request.body);
 
@@ -123,18 +123,18 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // DELETE /workspaces/:id - Delete workspace
   // --------------------------------------------------------------------------
-  app.delete(
+  app.delete<{ Params: { id: string; workspaceId?: string } }>(
     '/:id',
     {
       preHandler: [
         async (req, reply) => {
-          req.params = { ...req.params, workspaceId: (req.params as { id: string }).id };
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
           await workspaceContextMiddleware(req, reply);
         },
         requireRole('owner'),
       ],
     },
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    async (request, reply) => {
       const { id } = request.params;
       const stats = await workspaceService.getStats(id);
 
@@ -161,18 +161,18 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /workspaces/:id/members - List members
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{ Params: { id: string; workspaceId?: string } }>(
     '/:id/members',
     {
       preHandler: [
         async (req, reply) => {
-          req.params = { ...req.params, workspaceId: (req.params as { id: string }).id };
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
           await workspaceContextMiddleware(req, reply);
         },
         requirePermission('member:read'),
       ],
     },
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    async (request, reply) => {
       const { id } = request.params;
       const members = await membershipService.listMembers(id);
 
@@ -186,18 +186,18 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /workspaces/:id/invite - Invite member
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { id: string; workspaceId?: string } }>(
     '/:id/invite',
     {
       preHandler: [
         async (req, reply) => {
-          req.params = { ...req.params, workspaceId: (req.params as { id: string }).id };
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
           await workspaceContextMiddleware(req, reply);
         },
         requirePermission('member:invite'),
       ],
     },
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    async (request, reply) => {
       const { id } = request.params;
       const input = memberInviteSchema.parse(request.body);
 
@@ -229,18 +229,18 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /workspaces/:id/invitations - List pending invitations
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{ Params: { id: string; workspaceId?: string } }>(
     '/:id/invitations',
     {
       preHandler: [
         async (req, reply) => {
-          req.params = { ...req.params, workspaceId: (req.params as { id: string }).id };
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
           await workspaceContextMiddleware(req, reply);
         },
         requirePermission('member:invite'),
       ],
     },
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    async (request, reply) => {
       const { id } = request.params;
       const invitations = await invitationService.listForWorkspace(id);
 
@@ -254,21 +254,18 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // DELETE /workspaces/:id/invitations/:code - Revoke invitation
   // --------------------------------------------------------------------------
-  app.delete(
+  app.delete<{ Params: { id: string; code: string; workspaceId?: string } }>(
     '/:id/invitations/:code',
     {
       preHandler: [
         async (req, reply) => {
-          req.params = { ...req.params, workspaceId: (req.params as { id: string }).id };
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
           await workspaceContextMiddleware(req, reply);
         },
         requirePermission('member:invite'),
       ],
     },
-    async (
-      request: FastifyRequest<{ Params: { id: string; code: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { code } = request.params;
       await invitationService.revoke(code);
 
@@ -282,21 +279,18 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // PATCH /workspaces/:id/members/:memberId - Update member role
   // --------------------------------------------------------------------------
-  app.patch(
+  app.patch<{ Params: { id: string; memberId: string; workspaceId?: string } }>(
     '/:id/members/:memberId',
     {
       preHandler: [
         async (req, reply) => {
-          req.params = { ...req.params, workspaceId: (req.params as { id: string }).id };
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
           await workspaceContextMiddleware(req, reply);
         },
         requirePermission('member:update'),
       ],
     },
-    async (
-      request: FastifyRequest<{ Params: { id: string; memberId: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { id, memberId } = request.params;
       const input = memberUpdateSchema.parse(request.body);
 
@@ -327,21 +321,18 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // DELETE /workspaces/:id/members/:memberId - Remove member
   // --------------------------------------------------------------------------
-  app.delete(
+  app.delete<{ Params: { id: string; memberId: string; workspaceId?: string } }>(
     '/:id/members/:memberId',
     {
       preHandler: [
         async (req, reply) => {
-          req.params = { ...req.params, workspaceId: (req.params as { id: string }).id };
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
           await workspaceContextMiddleware(req, reply);
         },
         requirePermission('member:remove'),
       ],
     },
-    async (
-      request: FastifyRequest<{ Params: { id: string; memberId: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { id, memberId } = request.params;
 
       await membershipService.removeMember(id, memberId, request.user!.sub);
@@ -365,28 +356,21 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /workspaces/:id/settlement - Get settlement calculation
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{
+    Params: { id: string; workspaceId?: string };
+    Querystring: { startDate?: string; endDate?: string; categoryIds?: string };
+  }>(
     '/:id/settlement',
     {
       preHandler: [
         async (req, reply) => {
-          req.params = { ...req.params, workspaceId: (req.params as { id: string }).id };
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
           await workspaceContextMiddleware(req, reply);
         },
         requirePermission('transaction:read'),
       ],
     },
-    async (
-      request: FastifyRequest<{
-        Params: { id: string };
-        Querystring: {
-          startDate?: string;
-          endDate?: string;
-          categoryIds?: string;
-        };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { id } = request.params;
       const { startDate, endDate, categoryIds } = request.query;
 
@@ -406,24 +390,21 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /workspaces/:id/settlement/history - Get settlement history
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{
+    Params: { id: string; workspaceId?: string };
+    Querystring: { months?: string };
+  }>(
     '/:id/settlement/history',
     {
       preHandler: [
         async (req, reply) => {
-          req.params = { ...req.params, workspaceId: (req.params as { id: string }).id };
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
           await workspaceContextMiddleware(req, reply);
         },
         requirePermission('transaction:read'),
       ],
     },
-    async (
-      request: FastifyRequest<{
-        Params: { id: string };
-        Querystring: { months?: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { id } = request.params;
       const months = parseInt(request.query.months ?? '6', 10);
 
@@ -439,24 +420,21 @@ export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /workspaces/:id/settlement/breakdown - Get expense breakdown
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{
+    Params: { id: string; workspaceId?: string };
+    Querystring: { startDate?: string; endDate?: string };
+  }>(
     '/:id/settlement/breakdown',
     {
       preHandler: [
         async (req, reply) => {
-          req.params = { ...req.params, workspaceId: (req.params as { id: string }).id };
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
           await workspaceContextMiddleware(req, reply);
         },
         requirePermission('transaction:read'),
       ],
     },
-    async (
-      request: FastifyRequest<{
-        Params: { id: string };
-        Querystring: { startDate?: string; endDate?: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { id } = request.params;
       const now = new Date();
       const startDate = request.query.startDate

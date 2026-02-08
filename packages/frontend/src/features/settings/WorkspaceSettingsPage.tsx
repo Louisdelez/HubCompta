@@ -13,8 +13,6 @@ import {
   Save,
   Loader2,
   RotateCcw,
-  Users,
-  CreditCard,
   FolderOpen,
   Briefcase,
 } from 'lucide-react';
@@ -139,7 +137,7 @@ export function WorkspaceSettingsPage() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['workspace-details', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['workspace-details', workspaceId] });
     },
   });
 
@@ -153,7 +151,7 @@ export function WorkspaceSettingsPage() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['workspace-settings', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['workspace-settings', workspaceId] });
       setIsEditing(false);
     },
   });
@@ -167,7 +165,7 @@ export function WorkspaceSettingsPage() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['workspace-settings', workspaceId]);
+      queryClient.invalidateQueries({ queryKey: ['workspace-settings', workspaceId] });
       setIsEditing(false);
     },
   });
@@ -303,10 +301,10 @@ export function WorkspaceSettingsPage() {
                     currency: workspaceInfo.currency,
                   })
                 }
-                disabled={updateWorkspaceMutation.isLoading}
+                disabled={updateWorkspaceMutation.isPending}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
               >
-                {updateWorkspaceMutation.isLoading ? (
+                {updateWorkspaceMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="h-4 w-4" />
@@ -623,7 +621,7 @@ export function WorkspaceSettingsPage() {
             <button
               type="button"
               onClick={() => resetSettingsMutation.mutate()}
-              disabled={resetSettingsMutation.isLoading}
+              disabled={resetSettingsMutation.isPending}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
               <RotateCcw className="h-4 w-4" />
@@ -644,10 +642,10 @@ export function WorkspaceSettingsPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={updateSettingsMutation.isLoading}
+                  disabled={updateSettingsMutation.isPending}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
                 >
-                  {updateSettingsMutation.isLoading ? (
+                  {updateSettingsMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <Save className="h-4 w-4" />

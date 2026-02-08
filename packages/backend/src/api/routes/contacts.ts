@@ -22,19 +22,13 @@ export async function contactRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /contacts - List contacts
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{
+    Params: { workspaceId: string };
+    Querystring: { type?: ContactType; search?: string };
+  }>(
     '/',
     { preHandler: [requirePermission('pro:read')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string };
-        Querystring: {
-          type?: ContactType;
-          search?: string;
-        };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const { type, search } = request.query;
 
@@ -50,13 +44,10 @@ export async function contactRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /contacts/stats - Get contact statistics
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{ Params: { workspaceId: string } }>(
     '/stats',
     { preHandler: [requirePermission('pro:read')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const stats = await contactService.getStats(workspaceId);
 
@@ -70,13 +61,10 @@ export async function contactRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /contacts/:id - Get contact details
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{ Params: { workspaceId: string; id: string } }>(
     '/:id',
     { preHandler: [requirePermission('pro:read')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
       const contact = await contactService.getById(workspaceId, id);
 
@@ -97,13 +85,10 @@ export async function contactRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /contacts - Create contact
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string } }>(
     '/',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const input = contactCreateSchema.parse(request.body);
 
@@ -129,13 +114,10 @@ export async function contactRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // PATCH /contacts/:id - Update contact
   // --------------------------------------------------------------------------
-  app.patch(
+  app.patch<{ Params: { workspaceId: string; id: string } }>(
     '/:id',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
       const input = contactUpdateSchema.parse(request.body);
 
@@ -161,13 +143,10 @@ export async function contactRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // DELETE /contacts/:id - Delete contact
   // --------------------------------------------------------------------------
-  app.delete(
+  app.delete<{ Params: { workspaceId: string; id: string } }>(
     '/:id',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       await contactService.delete(workspaceId, id);

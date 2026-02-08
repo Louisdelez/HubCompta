@@ -146,22 +146,29 @@ export const duplicateService = {
       matrix[i] = [i];
     }
 
+    const row0 = matrix[0];
+    if (!row0) return 0;
     for (let j = 0; j <= str2.length; j++) {
-      matrix[0][j] = j;
+      row0[j] = j;
     }
 
     for (let i = 1; i <= str1.length; i++) {
       for (let j = 1; j <= str2.length; j++) {
         const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1,      // deletion
-          matrix[i][j - 1] + 1,      // insertion
-          matrix[i - 1][j - 1] + cost // substitution
-        );
+        const prevRow = matrix[i - 1];
+        const currRow = matrix[i];
+        if (!prevRow || !currRow) continue;
+        const del = prevRow[j];
+        const ins = currRow[j - 1];
+        const sub = prevRow[j - 1];
+        if (del !== undefined && ins !== undefined && sub !== undefined) {
+          currRow[j] = Math.min(del + 1, ins + 1, sub + cost);
+        }
       }
     }
 
-    const distance = matrix[str1.length][str2.length];
+    const lastRow = matrix[str1.length];
+    const distance = lastRow?.[str2.length] ?? 0;
     const maxLength = Math.max(str1.length, str2.length);
     return 1 - distance / maxLength;
   },
@@ -186,7 +193,8 @@ export const duplicateService = {
 
     // Extract potential amount from filename (e.g., "receipt_45.99_amazon.pdf")
     const amountMatch = filename.match(/(\d+[.,]\d{2})/);
-    const filenameAmount = amountMatch ? parseFloat(amountMatch[1].replace(',', '.')) : null;
+    const matchedAmount = amountMatch?.[1];
+    const filenameAmount = matchedAmount ? parseFloat(matchedAmount.replace(',', '.')) : null;
 
     // Find documents with similar patterns
     const documents = await prisma.document.findMany({
@@ -217,8 +225,9 @@ export const duplicateService = {
       // Check amount in filename
       if (filenameAmount) {
         const docAmountMatch = doc.filename.match(/(\d+[.,]\d{2})/);
-        if (docAmountMatch) {
-          const docAmount = parseFloat(docAmountMatch[1].replace(',', '.'));
+        const docMatchedAmount = docAmountMatch?.[1];
+        if (docMatchedAmount) {
+          const docAmount = parseFloat(docMatchedAmount.replace(',', '.'));
           if (Math.abs(docAmount - filenameAmount) < 0.01) {
             score += 0.3;
           }

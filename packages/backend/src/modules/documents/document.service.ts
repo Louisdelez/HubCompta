@@ -27,14 +27,19 @@ export interface DocumentCreateInput {
   encryptedKey?: string;
 }
 
-export interface DocumentWithLinks extends Document {
+export interface DocumentWithLinks extends Omit<Document, 'size'> {
+  size: number | bigint;
   uploader: { id: string; email: string; displayName: string | null };
   links: {
     id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    transactionId: string;
+    documentId: string;
     transaction: {
       id: string;
       description: string;
-      amount: number;
+      amount: { toNumber: () => number } | number;
       date: Date;
     };
   }[];

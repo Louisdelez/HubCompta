@@ -60,7 +60,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   app.get<{ Querystring: NotificationQuery }>(
     '/',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { page, pageSize, isRead, type, workspaceId } = request.query;
 
       const result = await notificationService.listForUser(
@@ -90,7 +90,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   app.get<{ Querystring: { workspaceId?: string } }>(
     '/unread-count',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { workspaceId } = request.query;
 
       const count = await notificationService.getUnreadCount(userId, workspaceId);
@@ -108,7 +108,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   app.post<{ Params: NotificationParams }>(
     '/:notificationId/read',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { notificationId } = request.params;
 
       await notificationService.markAsRead(notificationId, userId);
@@ -126,7 +126,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   app.post<{ Body: { workspaceId?: string } }>(
     '/read-all',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { workspaceId } = request.body || {};
 
       const result = await notificationService.markAllAsRead(userId, workspaceId);
@@ -145,7 +145,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   app.delete<{ Params: NotificationParams }>(
     '/:notificationId',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { notificationId } = request.params;
 
       await notificationService.delete(notificationId, userId);
@@ -167,7 +167,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   app.get<{ Querystring: { workspaceId?: string } }>(
     '/alerts',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { workspaceId } = request.query;
 
       const rules = await alertService.listForUser(userId, workspaceId);
@@ -185,7 +185,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   app.post<{ Body: CreateAlertBody }>(
     '/alerts',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { workspaceId, type, name, config } = request.body;
 
       const rule = await alertService.create({
@@ -209,7 +209,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   app.get<{ Params: AlertRuleParams }>(
     '/alerts/:ruleId',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { ruleId } = request.params;
 
       const rule = await alertService.getById(ruleId, userId);
@@ -234,7 +234,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   app.patch<{ Params: AlertRuleParams; Body: UpdateAlertBody }>(
     '/alerts/:ruleId',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { ruleId } = request.params;
       const { name, isEnabled, config } = request.body;
 
@@ -259,7 +259,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   app.delete<{ Params: AlertRuleParams }>(
     '/alerts/:ruleId',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { ruleId } = request.params;
 
       await alertService.delete(ruleId, userId);
@@ -287,7 +287,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   }>(
     '/alerts/budget',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { workspaceId, budgetId, thresholdPercent } = request.body;
 
       const rule = await alertService.createBudgetAlert(
@@ -317,7 +317,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   }>(
     '/alerts/price',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { workspaceId, assetId, targetPrice, direction } = request.body;
 
       const rule = await alertService.createPriceAlert(
@@ -347,7 +347,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
   }>(
     '/alerts/balance',
     async (request, reply) => {
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
       const { workspaceId, accountId, threshold } = request.body;
 
       const rule = await alertService.createLowBalanceAlert(

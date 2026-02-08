@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '@/lib/api/client';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -22,12 +22,12 @@ interface Contact {
 }
 
 interface QuoteLine {
-  id?: string;
+  id?: string | undefined;
   description: string;
   quantity: number;
   unitPrice: number;
   vatRate: number;
-  total?: number;
+  total?: number | undefined;
 }
 
 interface Quote {
@@ -90,7 +90,7 @@ function calculateTotals(lines: QuoteLine[]) {
 
 export function QuoteForm() {
   const { quoteId } = useParams();
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const isEditing = !!quoteId;
@@ -99,7 +99,7 @@ export function QuoteForm() {
   const [validUntil, setValidUntil] = useState(() => {
     const date = new Date();
     date.setDate(date.getDate() + 30);
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split('T')[0] ?? '';
   });
   const [notes, setNotes] = useState('');
   const [lines, setLines] = useState<QuoteLine[]>([
@@ -129,10 +129,10 @@ export function QuoteForm() {
   useEffect(() => {
     if (quote) {
       setContactId(quote.contactId);
-      setValidUntil(quote.validUntil.split('T')[0]);
+      setValidUntil(quote.validUntil.split('T')[0] ?? '');
       setNotes(quote.notes || '');
-      setLines(quote.lines.map((line) => ({
-        id: line.id,
+      setLines(quote.lines.map((line): QuoteLine => ({
+        ...(line.id ? { id: line.id } : {}),
         description: line.description,
         quantity: parseFloat(String(line.quantity)),
         unitPrice: parseFloat(String(line.unitPrice)),
@@ -141,8 +141,15 @@ export function QuoteForm() {
     }
   }, [quote]);
 
+  type CreateQuotePayload = {
+    contactId: string;
+    validUntil: Date;
+    lines: QuoteLine[];
+    notes?: string | undefined;
+  };
+
   const createMutation = useMutation({
-    mutationFn: (data: { contactId: string; validUntil: Date; lines: QuoteLine[]; notes?: string }) =>
+    mutationFn: (data: CreateQuotePayload) =>
       api.post<{ data: Quote }>(`/workspaces/${workspaceId}/quotes`, data),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
@@ -176,9 +183,25 @@ export function QuoteForm() {
   };
 
   const updateLine = (index: number, field: keyof QuoteLine, value: string | number) => {
-    const newLines = [...lines];
-    newLines[index] = { ...newLines[index], [field]: value };
-    setLines(newLines);
+    setLines((prevLines) => {
+      const newLines = [...prevLines];
+      const currentLine = newLines[index];
+      if (!currentLine) return prevLines;
+      const updatedLine: QuoteLine = {
+        description: field === 'description' ? (value as string) : currentLine.description,
+        quantity: field === 'quantity' ? (value as number) : currentLine.quantity,
+        unitPrice: field === 'unitPrice' ? (value as number) : currentLine.unitPrice,
+        vatRate: field === 'vatRate' ? (value as number) : currentLine.vatRate,
+      };
+      if (currentLine.id !== undefined) {
+        updatedLine.id = currentLine.id;
+      }
+      if (currentLine.total !== undefined) {
+        updatedLine.total = currentLine.total;
+      }
+      newLines[index] = updatedLine;
+      return newLines;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -197,16 +220,17 @@ export function QuoteForm() {
       return;
     }
 
-    const data = {
-      contactId,
-      validUntil: new Date(validUntil),
-      lines: validLines,
-      notes: notes || undefined,
-    };
-
     if (isEditing) {
       updateMutation.mutate({ lines: validLines });
     } else {
+      const data: CreateQuotePayload = {
+        contactId,
+        validUntil: new Date(validUntil),
+        lines: validLines,
+      };
+      if (notes) {
+        data.notes = notes;
+      }
       createMutation.mutate(data);
     }
   };

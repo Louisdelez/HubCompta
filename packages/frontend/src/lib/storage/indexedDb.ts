@@ -40,8 +40,13 @@ interface HubComptaDB extends DBSchema {
   // User preferences (synced from server)
   preferences: {
     key: string;
-    value: unknown;
+    value: PreferenceItem;
   };
+}
+
+interface PreferenceItem {
+  key: string;
+  value: unknown;
 }
 
 interface DraftTransaction {
@@ -92,7 +97,7 @@ async function getDB(): Promise<IDBPDatabase<HubComptaDB>> {
   }
 
   dbInstance = await openDB<HubComptaDB>(DB_NAME, DB_VERSION, {
-    upgrade(db, oldVersion, newVersion, transaction) {
+    upgrade(db, _oldVersion, _newVersion, _transaction) {
       // Draft transactions store
       if (!db.objectStoreNames.contains('draftTransactions')) {
         const draftStore = db.createObjectStore('draftTransactions', {
@@ -228,11 +233,14 @@ export const pendingOperations = {
     const existing = await db.get('pendingOperations', id);
 
     if (existing) {
-      await db.put('pendingOperations', {
+      const updated: PendingOperation = {
         ...existing,
         retries: existing.retries + 1,
-        lastError: error,
-      });
+      };
+      if (error !== undefined) {
+        updated.lastError = error;
+      }
+      await db.put('pendingOperations', updated);
     }
   },
 

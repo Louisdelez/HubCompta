@@ -105,10 +105,10 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
   const queryClient = useQueryClient();
 
   // Fetch notifications
-  const { data, isLoading } = useQuery({
+  const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['notifications'],
     queryFn: async () => {
-      const response = await api.get<{ data: Notification[]; meta: any }>('/notifications');
+      const response = await api.get<Notification[]>('/notifications');
       return response;
     },
   });
@@ -147,8 +147,6 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
       </div>
     );
   }
-
-  const notifications = data?.data || [];
 
   if (notifications.length === 0) {
     return (

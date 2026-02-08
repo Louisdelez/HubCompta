@@ -17,7 +17,7 @@ export interface TagCreateInput {
 
 export interface TagUpdateInput {
   name?: string;
-  color?: string;
+  color?: string | null;
 }
 
 export interface TagWithUsage extends Tag {
@@ -98,7 +98,7 @@ export const tagService = {
     });
 
     // Get usage counts
-    const usageCounts = await prisma.tagsOnTransactions.groupBy({
+    const usageCounts = await prisma.transactionTag.groupBy({
       by: ['tagId'],
       where: {
         tag: { workspaceId },
@@ -136,7 +136,7 @@ export const tagService = {
    */
   async getPopular(workspaceId: string, limit = 10): Promise<TagWithUsage[]> {
     // Get tags with usage counts
-    const tagUsage = await prisma.tagsOnTransactions.groupBy({
+    const tagUsage = await prisma.transactionTag.groupBy({
       by: ['tagId'],
       where: {
         tag: { workspaceId },
@@ -229,7 +229,7 @@ export const tagService = {
 
     // Delete tag and all associations
     await prisma.$transaction([
-      prisma.tagsOnTransactions.deleteMany({
+      prisma.transactionTag.deleteMany({
         where: { tagId },
       }),
       prisma.tag.delete({
@@ -260,14 +260,14 @@ export const tagService = {
 
     await prisma.$transaction(async (tx) => {
       // Get all transactions with source tag
-      const sourceAssociations = await tx.tagsOnTransactions.findMany({
+      const sourceAssociations = await tx.transactionTag.findMany({
         where: { tagId: sourceTagId },
       });
 
       // Move associations to target (avoiding duplicates)
       for (const assoc of sourceAssociations) {
         // Check if target already has this transaction
-        const exists = await tx.tagsOnTransactions.findUnique({
+        const exists = await tx.transactionTag.findUnique({
           where: {
             transactionId_tagId: {
               transactionId: assoc.transactionId,
@@ -277,7 +277,7 @@ export const tagService = {
         });
 
         if (!exists) {
-          await tx.tagsOnTransactions.create({
+          await tx.transactionTag.create({
             data: {
               transactionId: assoc.transactionId,
               tagId: targetTagId,
@@ -287,7 +287,7 @@ export const tagService = {
       }
 
       // Delete source associations and tag
-      await tx.tagsOnTransactions.deleteMany({
+      await tx.transactionTag.deleteMany({
         where: { tagId: sourceTagId },
       });
 

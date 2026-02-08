@@ -46,7 +46,7 @@ export async function budgetRoutes(app: FastifyInstance): Promise<void> {
     '/',
     async (request: FastifyRequest<{ Params: { workspaceId: string } }>, reply: FastifyReply) => {
       const { workspaceId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       // Check permission
       await checkPermission(userId, workspaceId, 'budget', 'read');
@@ -64,7 +64,7 @@ export async function budgetRoutes(app: FastifyInstance): Promise<void> {
     '/summary',
     async (request: FastifyRequest<{ Params: { workspaceId: string } }>, reply: FastifyReply) => {
       const { workspaceId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       // Check permission
       await checkPermission(userId, workspaceId, 'budget', 'read');
@@ -82,7 +82,7 @@ export async function budgetRoutes(app: FastifyInstance): Promise<void> {
     '/alerts',
     async (request: FastifyRequest<{ Params: { workspaceId: string } }>, reply: FastifyReply) => {
       const { workspaceId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       // Check permission
       await checkPermission(userId, workspaceId, 'budget', 'read');
@@ -100,7 +100,7 @@ export async function budgetRoutes(app: FastifyInstance): Promise<void> {
     '/dashboard',
     async (request: FastifyRequest<{ Params: { workspaceId: string } }>, reply: FastifyReply) => {
       const { workspaceId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       // Check permission
       await checkPermission(userId, workspaceId, 'budget', 'read');
@@ -124,7 +124,7 @@ export async function budgetRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       // Check permission
       await checkPermission(userId, workspaceId, 'budget', 'create');
@@ -160,7 +160,7 @@ export async function budgetRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId, budgetId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       // Check permission
       await checkPermission(userId, workspaceId, 'budget', 'read');
@@ -189,7 +189,7 @@ export async function budgetRoutes(app: FastifyInstance): Promise<void> {
     ) => {
       const { workspaceId, budgetId } = request.params;
       const months = parseInt(request.query.months ?? '6', 10);
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       // Check permission
       await checkPermission(userId, workspaceId, 'budget', 'read');
@@ -213,7 +213,7 @@ export async function budgetRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId, budgetId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       // Check permission
       await checkPermission(userId, workspaceId, 'budget', 'update');
@@ -253,7 +253,7 @@ export async function budgetRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId, budgetId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       // Check permission
       await checkPermission(userId, workspaceId, 'budget', 'delete');

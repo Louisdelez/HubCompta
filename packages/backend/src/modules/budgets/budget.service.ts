@@ -117,7 +117,7 @@ async function calculateCategorySpending(
         lte: endDate,
       },
       amount: { lt: 0 }, // Only expenses
-      isTransfer: false,
+      transferPairId: null,
     },
     _sum: { amount: true },
   });

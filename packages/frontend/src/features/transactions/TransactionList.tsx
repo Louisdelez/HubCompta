@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { TransactionForm } from './TransactionForm';
 
 // ----------------------------------------------------------------------------
@@ -64,12 +64,12 @@ function formatDate(date: string): string {
 }
 
 function groupByDate(transactions: Transaction[]): Record<string, Transaction[]> {
-  return transactions.reduce((groups, txn) => {
-    const date = txn.date.split('T')[0];
+  return transactions.reduce<Record<string, Transaction[]>>((groups, txn) => {
+    const date = txn.date.split('T')[0] ?? txn.date;
     if (!groups[date]) groups[date] = [];
     groups[date].push(txn);
     return groups;
-  }, {} as Record<string, Transaction[]>);
+  }, {});
 }
 
 // ----------------------------------------------------------------------------
@@ -77,7 +77,7 @@ function groupByDate(transactions: Transaction[]): Record<string, Transaction[]>
 // ----------------------------------------------------------------------------
 
 export function TransactionList() {
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<TransactionFilters>({});
   const [showForm, setShowForm] = useState(false);
@@ -283,7 +283,18 @@ export function TransactionList() {
       {showForm && (
         <TransactionForm
           workspaceId={workspaceId}
-          transaction={editingTransaction ?? undefined}
+          transaction={editingTransaction !== null ? {
+            id: editingTransaction.id,
+            accountId: editingTransaction.account.id,
+            amount: editingTransaction.amount,
+            currency: editingTransaction.account.currency,
+            description: editingTransaction.description,
+            date: editingTransaction.date,
+            type: editingTransaction.type,
+            categoryId: editingTransaction.category?.id,
+            notes: undefined,
+            tags: editingTransaction.tags,
+          } : undefined}
           onClose={() => {
             setShowForm(false);
             setEditingTransaction(null);

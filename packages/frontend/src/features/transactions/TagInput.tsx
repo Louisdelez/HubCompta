@@ -5,7 +5,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -80,8 +79,9 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (filteredTags.length > 0) {
-        toggleTag(filteredTags[0].id);
+      const firstTag = filteredTags[0];
+      if (firstTag) {
+        toggleTag(firstTag.id);
         setSearchQuery('');
       } else if (searchQuery.trim()) {
         handleCreateTag();

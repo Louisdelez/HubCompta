@@ -30,7 +30,7 @@ interface NavItem {
   id: SettingsSection;
   label: string;
   description: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: typeof User;
 }
 
 // ----------------------------------------------------------------------------

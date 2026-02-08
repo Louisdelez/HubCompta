@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
-import type { NotificationType, Prisma } from '@prisma/client';
+import { Prisma, type NotificationType } from '@prisma/client';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -46,7 +46,7 @@ export const notificationService = {
         type: input.type,
         title: input.title,
         message: input.message,
-        data: input.data ?? Prisma.JsonNull,
+        data: (input.data ?? Prisma.JsonNull) as Prisma.InputJsonValue,
       },
     });
   },
@@ -62,7 +62,7 @@ export const notificationService = {
         type: n.type,
         title: n.title,
         message: n.message,
-        data: n.data ?? Prisma.JsonNull,
+        data: (n.data ?? Prisma.JsonNull) as Prisma.InputJsonValue,
       })),
     });
   },

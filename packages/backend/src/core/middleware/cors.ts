@@ -45,6 +45,7 @@ const DEFAULT_CONFIG: CorsConfig = {
     'X-Workspace-Id',
     'X-Device-Fingerprint',
     'X-Request-Id',
+    'X-Retry-After-Refresh',
     'Accept',
     'Origin',
     'Cache-Control',

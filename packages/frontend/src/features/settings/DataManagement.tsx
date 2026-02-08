@@ -60,9 +60,7 @@ export function DataManagement() {
   // Export data mutation
   const exportMutation = useMutation({
     mutationFn: async () => {
-      const response = await api.get('/settings/data/export', {
-        responseType: 'blob',
-      });
+      const response = await api.get('/settings/data/export');
       return response;
     },
     onSuccess: (response) => {
@@ -219,10 +217,10 @@ export function DataManagement() {
 
           <button
             onClick={() => exportMutation.mutate()}
-            disabled={exportMutation.isLoading}
+            disabled={exportMutation.isPending}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
-            {exportMutation.isLoading ? (
+            {exportMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <Download className="h-4 w-4" />
@@ -295,10 +293,10 @@ export function DataManagement() {
                 </button>
                 <button
                   onClick={handleDelete}
-                  disabled={deleteConfirmText !== 'SUPPRIMER' || deleteMutation.isLoading}
+                  disabled={deleteConfirmText !== 'SUPPRIMER' || deleteMutation.isPending}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {deleteMutation.isLoading ? (
+                  {deleteMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <XCircle className="h-4 w-4" />

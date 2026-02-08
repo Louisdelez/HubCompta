@@ -21,6 +21,7 @@ import { useWorkspace } from '@/hooks/useWorkspace';
 import { cn, formatCurrency, formatPercent } from '@/lib/utils';
 import { PositionList } from './PositionList';
 import { AddPosition } from './AddPosition';
+import { AddPositionTransaction } from './AddPositionTransaction';
 import { PositionDetail } from './PositionDetail';
 import { AllocationChart, AllocationLegend } from './AllocationChart';
 import { PerformanceChart } from './PerformanceChart';
@@ -79,8 +80,10 @@ type ViewMode = 'list' | 'detail';
 export function PortfolioPage() {
   const { currentWorkspace } = useWorkspace();
   const [showAddPosition, setShowAddPosition] = useState(false);
+  const [showAddTransaction, setShowAddTransaction] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedPositionId, setSelectedPositionId] = useState<string | null>(null);
+  const [selectedPositionAsset, setSelectedPositionAsset] = useState<{ symbol: string; currency: string } | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch portfolio summary
@@ -118,9 +121,18 @@ export function PortfolioPage() {
     }
   };
 
-  const handlePositionClick = (position: { id: string }) => {
+  const handlePositionClick = (position: { id: string; asset?: { symbol: string; currency: string } }) => {
     setSelectedPositionId(position.id);
+    if (position.asset) {
+      setSelectedPositionAsset({ symbol: position.asset.symbol, currency: position.asset.currency });
+    }
     setViewMode('detail');
+  };
+
+  const handleAddTransaction = (positionId: string, asset: { symbol: string; currency: string }) => {
+    setSelectedPositionId(positionId);
+    setSelectedPositionAsset(asset);
+    setShowAddTransaction(true);
   };
 
   const handleBackToList = () => {
@@ -148,9 +160,22 @@ export function PortfolioPage() {
           positionId={selectedPositionId}
           onBack={handleBackToList}
           onAddTransaction={() => {
-            // TODO: Open add transaction modal for this position
+            if (selectedPositionAsset) {
+              handleAddTransaction(selectedPositionId, selectedPositionAsset);
+            }
           }}
         />
+        {/* Add position transaction modal */}
+        {selectedPositionAsset && (
+          <AddPositionTransaction
+            isOpen={showAddTransaction}
+            positionId={selectedPositionId}
+            assetSymbol={selectedPositionAsset.symbol}
+            assetCurrency={selectedPositionAsset.currency}
+            onClose={() => setShowAddTransaction(false)}
+            onSuccess={() => refetchSummary()}
+          />
+        )}
       </div>
     );
   }
@@ -300,7 +325,13 @@ export function PortfolioPage() {
                   {summary.positionCount} position{summary.positionCount > 1 ? 's' : ''}
                 </span>
               </div>
-              <PositionList onPositionClick={handlePositionClick} />
+              <PositionList
+                onPositionClick={handlePositionClick}
+                onAddTransaction={(position) => handleAddTransaction(position.id, {
+                  symbol: position.asset.symbol,
+                  currency: position.asset.currency,
+                })}
+              />
             </div>
           </div>
 
@@ -365,6 +396,18 @@ export function PortfolioPage() {
         onClose={() => setShowAddPosition(false)}
         onSuccess={() => refetchSummary()}
       />
+
+      {/* Add position transaction modal */}
+      {selectedPositionId && selectedPositionAsset && (
+        <AddPositionTransaction
+          isOpen={showAddTransaction}
+          positionId={selectedPositionId}
+          assetSymbol={selectedPositionAsset.symbol}
+          assetCurrency={selectedPositionAsset.currency}
+          onClose={() => setShowAddTransaction(false)}
+          onSuccess={() => refetchSummary()}
+        />
+      )}
     </div>
   );
 }
