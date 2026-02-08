@@ -20,7 +20,7 @@ interface Workspace {
 }
 
 interface WorkspaceSelectorProps {
-  currentWorkspaceId?: string;
+  currentWorkspaceId?: string | undefined;
   onSelect: (workspace: Workspace) => void;
   onCreateNew: () => void;
 }

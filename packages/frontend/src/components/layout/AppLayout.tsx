@@ -9,6 +9,8 @@ import { clsx } from 'clsx';
 import { GlobalSearchBar } from '@/features/search';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { NotificationBell } from '@/features/notifications/NotificationBell';
+import { WorkspaceSelector } from '@/features/workspaces/WorkspaceSelector';
+import { CreateWorkspaceModal } from '@/features/workspaces/CreateWorkspaceModal';
 
 // ----------------------------------------------------------------------------
 // Navigation Items
@@ -174,10 +176,11 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
 
 interface HeaderProps {
   onMenuClick: () => void;
+  onCreateWorkspace: () => void;
 }
 
-function Header({ onMenuClick }: HeaderProps) {
-  const { currentWorkspace } = useWorkspace();
+function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
+  const { currentWorkspace, switchWorkspace } = useWorkspace();
 
   return (
     <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 safe-area-inset-top">
@@ -203,25 +206,13 @@ function Header({ onMenuClick }: HeaderProps) {
           </svg>
         </button>
 
-        {/* Workspace selector placeholder */}
-        <div className="hidden sm:block">
-          <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
-            <span>🏠</span>
-            <span>{currentWorkspace?.name ?? 'Mon espace'}</span>
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
+        {/* Workspace selector */}
+        <div className="hidden sm:block min-w-[200px]">
+          <WorkspaceSelector
+            currentWorkspaceId={currentWorkspace?.id}
+            onSelect={(workspace) => switchWorkspace(workspace.id)}
+            onCreateNew={onCreateWorkspace}
+          />
         </div>
 
         {/* Global Search */}
@@ -245,6 +236,12 @@ function Header({ onMenuClick }: HeaderProps) {
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showCreateWorkspace, setShowCreateWorkspace] = useState(false);
+  const { switchWorkspace } = useWorkspace();
+
+  const handleWorkspaceCreated = (workspaceId: string) => {
+    switchWorkspace(workspaceId);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -252,13 +249,23 @@ export function AppLayout() {
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <div className="flex-1 flex flex-col min-w-0">
-          <Header onMenuClick={() => setSidebarOpen(true)} />
+          <Header
+            onMenuClick={() => setSidebarOpen(true)}
+            onCreateWorkspace={() => setShowCreateWorkspace(true)}
+          />
 
           <main className="flex-1 safe-area-inset-bottom">
             <Outlet />
           </main>
         </div>
       </div>
+
+      {/* Create Workspace Modal */}
+      <CreateWorkspaceModal
+        isOpen={showCreateWorkspace}
+        onClose={() => setShowCreateWorkspace(false)}
+        onCreated={handleWorkspaceCreated}
+      />
     </div>
   );
 }
