@@ -2,7 +2,7 @@
 // QUOTE ROUTES - Finance Hub
 // ============================================================================
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { quoteService } from '@/modules/pro/quote.service.js';
 import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
@@ -23,21 +23,13 @@ export async function quoteRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /quotes - List quotes
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{
+    Params: { workspaceId: string };
+    Querystring: { status?: QuoteStatus; contactId?: string; from?: string; to?: string };
+  }>(
     '/',
     { preHandler: [requirePermission('pro:read')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string };
-        Querystring: {
-          status?: QuoteStatus;
-          contactId?: string;
-          from?: string;
-          to?: string;
-        };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const { status, contactId, from, to } = request.query;
 
@@ -58,13 +50,10 @@ export async function quoteRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /quotes/:id - Get quote details
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{ Params: { workspaceId: string; id: string } }>(
     '/:id',
     { preHandler: [requirePermission('pro:read')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
       const quote = await quoteService.getById(workspaceId, id);
 
@@ -85,13 +74,10 @@ export async function quoteRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /quotes - Create quote
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string } }>(
     '/',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const input = quoteCreateSchema.parse(request.body);
 
@@ -117,13 +103,10 @@ export async function quoteRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // PATCH /quotes/:id/lines - Update quote lines
   // --------------------------------------------------------------------------
-  app.patch(
+  app.patch<{ Params: { workspaceId: string; id: string } }>(
     '/:id/lines',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
       const { lines } = z.object({
         lines: z.array(invoiceLineSchema).min(1),
@@ -151,13 +134,10 @@ export async function quoteRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /quotes/:id/send - Send quote (change status)
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string; id: string } }>(
     '/:id/send',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       const quote = await quoteService.updateStatus(workspaceId, id, 'sent');
@@ -182,13 +162,10 @@ export async function quoteRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /quotes/:id/accept - Accept quote
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string; id: string } }>(
     '/:id/accept',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       const quote = await quoteService.updateStatus(workspaceId, id, 'accepted');
@@ -213,13 +190,10 @@ export async function quoteRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /quotes/:id/reject - Reject quote
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string; id: string } }>(
     '/:id/reject',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       const quote = await quoteService.updateStatus(workspaceId, id, 'rejected');
@@ -244,13 +218,10 @@ export async function quoteRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /quotes/:id/duplicate - Duplicate quote
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string; id: string } }>(
     '/:id/duplicate',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       const quote = await quoteService.duplicate(workspaceId, id);
@@ -275,13 +246,10 @@ export async function quoteRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // DELETE /quotes/:id - Delete quote
   // --------------------------------------------------------------------------
-  app.delete(
+  app.delete<{ Params: { workspaceId: string; id: string } }>(
     '/:id',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       await quoteService.delete(workspaceId, id);

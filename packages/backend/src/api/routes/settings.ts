@@ -4,8 +4,9 @@
 // ============================================================================
 
 import type { FastifyPluginAsync } from 'fastify';
-import { settingsService } from '@/modules/settings/index.js';
+import { settingsService, type UserPreferences, type WorkspaceSettings } from '@/modules/settings/index.js';
 import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
+import { authGuard } from '@/core/auth/authGuard.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -102,6 +103,9 @@ interface WorkspaceUpdate {
 // ----------------------------------------------------------------------------
 
 const settingsRoutes: FastifyPluginAsync = async (fastify) => {
+  // Apply auth guard to all routes
+  fastify.addHook('preHandler', authGuard);
+
   // ==========================================================================
   // User Profile
   // ==========================================================================
@@ -110,7 +114,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
    * Get current user profile
    */
   fastify.get('/profile', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifié' });
     }
@@ -127,7 +131,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
    * Update current user profile
    */
   fastify.patch<{ Body: UserProfileUpdate }>('/profile', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifié' });
     }
@@ -161,7 +165,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
    * Get user preferences
    */
   fastify.get('/preferences', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifié' });
     }
@@ -174,19 +178,19 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
    * Update user preferences
    */
   fastify.patch<{ Body: PreferencesUpdate }>('/preferences', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifié' });
     }
 
-    const preferences = await settingsService.updateUserPreferences(userId, request.body);
+    const preferences = await settingsService.updateUserPreferences(userId, request.body as unknown as Partial<UserPreferences>);
 
     await auditService.log({
       userId,
       action: AUDIT_ACTIONS.USER_UPDATED,
       entityType: 'user_preferences',
       entityId: userId,
-      changes: request.body,
+      changes: request.body as unknown as Record<string, unknown>,
       ipAddress: request.ip,
     });
 
@@ -197,7 +201,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
    * Reset user preferences to defaults
    */
   fastify.post('/preferences/reset', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifié' });
     }
@@ -226,7 +230,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get<{ Params: { workspaceId: string } }>(
     '/workspaces/:workspaceId',
     async (request, reply) => {
-      const userId = request.user?.id;
+      const userId = request.user?.sub;
       if (!userId) {
         return reply.status(401).send({ error: 'Non authentifié' });
       }
@@ -248,7 +252,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.patch<{ Params: { workspaceId: string }; Body: WorkspaceUpdate }>(
     '/workspaces/:workspaceId',
     async (request, reply) => {
-      const userId = request.user?.id;
+      const userId = request.user?.sub;
       if (!userId) {
         return reply.status(401).send({ error: 'Non authentifié' });
       }
@@ -281,7 +285,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get<{ Params: { workspaceId: string } }>(
     '/workspaces/:workspaceId/settings',
     async (request, reply) => {
-      const userId = request.user?.id;
+      const userId = request.user?.sub;
       if (!userId) {
         return reply.status(401).send({ error: 'Non authentifié' });
       }
@@ -299,13 +303,13 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.patch<{ Params: { workspaceId: string }; Body: WorkspaceSettingsUpdate }>(
     '/workspaces/:workspaceId/settings',
     async (request, reply) => {
-      const userId = request.user?.id;
+      const userId = request.user?.sub;
       if (!userId) {
         return reply.status(401).send({ error: 'Non authentifié' });
       }
 
       const { workspaceId } = request.params;
-      const settings = await settingsService.updateWorkspaceSettings(workspaceId, request.body);
+      const settings = await settingsService.updateWorkspaceSettings(workspaceId, request.body as unknown as Partial<WorkspaceSettings>);
 
       await auditService.log({
         userId,
@@ -313,7 +317,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
         action: AUDIT_ACTIONS.WORKSPACE_UPDATED,
         entityType: 'workspace_settings',
         entityId: workspaceId,
-        changes: request.body,
+        changes: request.body as unknown as Record<string, unknown>,
         ipAddress: request.ip,
       });
 
@@ -327,7 +331,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.post<{ Params: { workspaceId: string } }>(
     '/workspaces/:workspaceId/settings/reset',
     async (request, reply) => {
-      const userId = request.user?.id;
+      const userId = request.user?.sub;
       if (!userId) {
         return reply.status(401).send({ error: 'Non authentifié' });
       }
@@ -357,7 +361,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
    * Get user data summary
    */
   fastify.get('/data/summary', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifié' });
     }
@@ -370,7 +374,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
    * Export all user data (GDPR)
    */
   fastify.get('/data/export', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifié' });
     }
@@ -400,7 +404,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
    * Delete user account (GDPR)
    */
   fastify.delete('/data/account', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifié' });
     }

@@ -154,7 +154,9 @@ export function validateSiret(siret: string): boolean {
   // Luhn algorithm check
   let sum = 0;
   for (let i = 0; i < 14; i++) {
-    let digit = parseInt(siret[i], 10);
+    const char = siret[i];
+    if (!char) return false;
+    let digit = parseInt(char, 10);
     if (i % 2 === 0) {
       digit *= 2;
       if (digit > 9) digit -= 9;

@@ -160,8 +160,13 @@ export function PerformanceChart({
       return { startValue: 0, endValue: 0, change: 0, changePercent: 0 };
     }
 
-    const startValue = filteredData[0].value;
-    const endValue = filteredData[filteredData.length - 1].value;
+    const firstPoint = filteredData[0];
+    const lastPoint = filteredData[filteredData.length - 1];
+    if (!firstPoint || !lastPoint) {
+      return { startValue: 0, endValue: 0, change: 0, changePercent: 0 };
+    }
+    const startValue = firstPoint.value;
+    const endValue = lastPoint.value;
     const change = endValue - startValue;
     const changePercent = startValue > 0 ? (change / startValue) * 100 : 0;
 
@@ -267,9 +272,9 @@ export function PerformanceChart({
             <Tooltip content={<CustomTooltip currency={currency} showInvested={showInvested} />} />
 
             {/* Reference line at invested amount (if available) */}
-            {showInvested && filteredData.length > 0 && filteredData[0].invested && (
+            {showInvested && filteredData.length > 0 && filteredData[0]?.invested !== undefined && (
               <ReferenceLine
-                y={filteredData[filteredData.length - 1].invested}
+                y={filteredData[filteredData.length - 1]?.invested ?? 0}
                 stroke="#9CA3AF"
                 strokeDasharray="5 5"
               />

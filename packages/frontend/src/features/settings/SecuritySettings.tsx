@@ -111,8 +111,8 @@ export function SecuritySettings() {
       await api.delete(`/user/devices/${deviceId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['user-devices']);
-      queryClient.invalidateQueries(['user-sessions']);
+      queryClient.invalidateQueries({ queryKey: ['user-devices'] });
+      queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
       setShowRevokeConfirm(null);
     },
   });
@@ -123,7 +123,7 @@ export function SecuritySettings() {
       await api.delete(`/user/sessions/${sessionId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['user-sessions']);
+      queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
     },
   });
 
@@ -133,7 +133,7 @@ export function SecuritySettings() {
       await api.post('/user/sessions/revoke-all');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['user-sessions']);
+      queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
     },
   });
 
@@ -325,10 +325,10 @@ export function SecuritySettings() {
                       </button>
                       <button
                         onClick={() => revokeDeviceMutation.mutate(device.id)}
-                        disabled={revokeDeviceMutation.isLoading}
+                        disabled={revokeDeviceMutation.isPending}
                         className="px-3 py-1 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
                       >
-                        {revokeDeviceMutation.isLoading ? 'Suppression...' : 'Confirmer'}
+                        {revokeDeviceMutation.isPending ? 'Suppression...' : 'Confirmer'}
                       </button>
                     </div>
                   ) : (
@@ -364,7 +364,7 @@ export function SecuritySettings() {
             {sessions.filter((s) => !s.isCurrent).length > 0 && (
               <button
                 onClick={() => revokeAllSessionsMutation.mutate()}
-                disabled={revokeAllSessionsMutation.isLoading}
+                disabled={revokeAllSessionsMutation.isPending}
                 className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
                 Deconnecter tout
@@ -413,7 +413,7 @@ export function SecuritySettings() {
                 {!session.isCurrent && (
                   <button
                     onClick={() => revokeSessionMutation.mutate(session.id)}
-                    disabled={revokeSessionMutation.isLoading}
+                    disabled={revokeSessionMutation.isPending}
                     className="text-sm text-red-600 hover:text-red-700"
                   >
                     Deconnecter

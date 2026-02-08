@@ -360,7 +360,7 @@ export const currencyService = {
       const dateMatch = xml.match(/time='(\d{4}-\d{2}-\d{2})'/);
       const rateMatches = xml.matchAll(/currency='([A-Z]{3})'\s+rate='([\d.]+)'/g);
 
-      if (!dateMatch) {
+      if (!dateMatch || !dateMatch[1]) {
         throw new Error('Could not parse date from ECB response');
       }
 
@@ -368,13 +368,17 @@ export const currencyService = {
       const rates: ExchangeRateData[] = [];
 
       for (const match of rateMatches) {
-        rates.push({
-          baseCurrency: 'EUR',
-          targetCurrency: match[1],
-          rate: parseFloat(match[2]),
-          date,
-          source: 'ecb',
-        });
+        const currency = match[1];
+        const rateStr = match[2];
+        if (currency && rateStr) {
+          rates.push({
+            baseCurrency: 'EUR',
+            targetCurrency: currency,
+            rate: parseFloat(rateStr),
+            date,
+            source: 'ecb',
+          });
+        }
       }
 
       const result = await this.importRates(rates);

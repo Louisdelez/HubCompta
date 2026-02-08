@@ -3,7 +3,7 @@
 // Portfolio summary and analytics
 // ============================================================================
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { positionService } from '@/modules/invest/position.service.js';
 import { assetService } from '@/modules/invest/asset.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
@@ -21,16 +21,13 @@ export async function portfolioRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /portfolio/summary - Get portfolio summary
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{
+    Params: { workspaceId: string };
+    Querystring: { accountId?: string };
+  }>(
     '/summary',
     { preHandler: [requirePermission('transaction:read')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string };
-        Querystring: { accountId?: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const { accountId } = request.query;
 
@@ -46,15 +43,10 @@ export async function portfolioRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /portfolio/refresh-prices - Refresh all position prices
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string } }>(
     '/refresh-prices',
     { preHandler: [requirePermission('transaction:read')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const result = await assetService.updateAllPrices();
 
       return reply.send({
@@ -67,20 +59,13 @@ export async function portfolioRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /portfolio/performance - Get portfolio performance over time
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{
+    Params: { workspaceId: string };
+    Querystring: { from?: string; to?: string; accountId?: string };
+  }>(
     '/performance',
     { preHandler: [requirePermission('transaction:read')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string };
-        Querystring: {
-          from?: string;
-          to?: string;
-          accountId?: string;
-        };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const { accountId } = request.query;
 
@@ -102,16 +87,13 @@ export async function portfolioRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /portfolio/allocation - Get allocation breakdown
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{
+    Params: { workspaceId: string };
+    Querystring: { accountId?: string };
+  }>(
     '/allocation',
     { preHandler: [requirePermission('transaction:read')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string };
-        Querystring: { accountId?: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const { accountId } = request.query;
 

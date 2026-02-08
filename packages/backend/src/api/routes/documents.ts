@@ -65,7 +65,7 @@ export async function documentRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       // Check permission
       await checkPermission(userId, workspaceId, 'document', 'create');
@@ -92,7 +92,7 @@ export async function documentRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       // Check permission
       await checkPermission(userId, workspaceId, 'document', 'create');
@@ -152,7 +152,7 @@ export async function documentRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       // Check permission
       await checkPermission(userId, workspaceId, 'document', 'read');
@@ -190,7 +190,7 @@ export async function documentRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       await checkPermission(userId, workspaceId, 'document', 'read');
 
@@ -210,7 +210,7 @@ export async function documentRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId, documentId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       await checkPermission(userId, workspaceId, 'document', 'read');
 
@@ -234,7 +234,7 @@ export async function documentRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId, documentId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       await checkPermission(userId, workspaceId, 'document', 'read');
 
@@ -257,7 +257,7 @@ export async function documentRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId, documentId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       await checkPermission(userId, workspaceId, 'document', 'update');
 
@@ -293,7 +293,7 @@ export async function documentRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId, documentId, transactionId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       await checkPermission(userId, workspaceId, 'document', 'update');
 
@@ -325,7 +325,7 @@ export async function documentRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId, documentId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       await checkPermission(userId, workspaceId, 'document', 'update');
 
@@ -345,7 +345,7 @@ export async function documentRoutes(app: FastifyInstance): Promise<void> {
       reply: FastifyReply
     ) => {
       const { workspaceId, documentId } = request.params;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       await checkPermission(userId, workspaceId, 'document', 'delete');
 
@@ -384,7 +384,7 @@ export async function documentRoutes(app: FastifyInstance): Promise<void> {
     ) => {
       const { workspaceId } = request.params;
       const { hash, filename } = request.query;
-      const userId = request.user!.id;
+      const userId = request.user!.sub;
 
       await checkPermission(userId, workspaceId, 'document', 'read');
 

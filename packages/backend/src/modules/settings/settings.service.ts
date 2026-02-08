@@ -176,8 +176,8 @@ export const settingsService = {
       select: { preferences: true },
     });
 
-    const stored = (user?.preferences as Partial<UserPreferences>) || {};
-    return this.mergeWithDefaults(stored, DEFAULT_USER_PREFERENCES);
+    const stored = (user?.preferences ?? {}) as Partial<UserPreferences>;
+    return this.mergePreferences(stored, DEFAULT_USER_PREFERENCES);
   },
 
   /**
@@ -188,11 +188,11 @@ export const settingsService = {
     updates: Partial<UserPreferences>
   ): Promise<UserPreferences> {
     const current = await this.getUserPreferences(userId);
-    const merged = this.deepMerge(current, updates);
+    const merged = this.mergePreferences(updates, current);
 
     await prisma.user.update({
       where: { id: userId },
-      data: { preferences: merged as Prisma.JsonObject },
+      data: { preferences: merged as unknown as Prisma.JsonObject },
     });
 
     return merged;
@@ -250,7 +250,7 @@ export const settingsService = {
   async resetUserPreferences(userId: string): Promise<UserPreferences> {
     await prisma.user.update({
       where: { id: userId },
-      data: { preferences: DEFAULT_USER_PREFERENCES as Prisma.JsonObject },
+      data: { preferences: DEFAULT_USER_PREFERENCES as unknown as Prisma.JsonObject },
     });
 
     return DEFAULT_USER_PREFERENCES;
@@ -269,8 +269,8 @@ export const settingsService = {
       select: { settings: true },
     });
 
-    const stored = (workspace?.settings as Partial<WorkspaceSettings>) || {};
-    return this.mergeWithDefaults(stored, DEFAULT_WORKSPACE_SETTINGS);
+    const stored = (workspace?.settings ?? {}) as Partial<WorkspaceSettings>;
+    return this.mergeWorkspaceSettings(stored, DEFAULT_WORKSPACE_SETTINGS);
   },
 
   /**
@@ -281,11 +281,11 @@ export const settingsService = {
     updates: Partial<WorkspaceSettings>
   ): Promise<WorkspaceSettings> {
     const current = await this.getWorkspaceSettings(workspaceId);
-    const merged = this.deepMerge(current, updates);
+    const merged = this.mergeWorkspaceSettings(updates, current);
 
     await prisma.workspace.update({
       where: { id: workspaceId },
-      data: { settings: merged as Prisma.JsonObject },
+      data: { settings: merged as unknown as Prisma.JsonObject },
     });
 
     return merged;
@@ -345,7 +345,7 @@ export const settingsService = {
   async resetWorkspaceSettings(workspaceId: string): Promise<WorkspaceSettings> {
     await prisma.workspace.update({
       where: { id: workspaceId },
-      data: { settings: DEFAULT_WORKSPACE_SETTINGS as Prisma.JsonObject },
+      data: { settings: DEFAULT_WORKSPACE_SETTINGS as unknown as Prisma.JsonObject },
     });
 
     return DEFAULT_WORKSPACE_SETTINGS;
@@ -490,36 +490,31 @@ export const settingsService = {
   // Helper Methods
   // ==========================================================================
 
-  mergeWithDefaults<T extends Record<string, unknown>>(stored: Partial<T>, defaults: T): T {
-    return this.deepMerge(defaults, stored) as T;
+  /**
+   * Merge user preferences with defaults
+   */
+  mergePreferences(stored: Partial<UserPreferences>, defaults: UserPreferences): UserPreferences {
+    return {
+      notifications: {
+        email: { ...defaults.notifications.email, ...stored.notifications?.email },
+        push: { ...defaults.notifications.push, ...stored.notifications?.push },
+      },
+      display: { ...defaults.display, ...stored.display },
+      dashboard: { ...defaults.dashboard, ...stored.dashboard },
+      privacy: { ...defaults.privacy, ...stored.privacy },
+    };
   },
 
-  deepMerge<T extends Record<string, unknown>>(target: T, source: Partial<T>): T {
-    const result = { ...target };
-
-    for (const key in source) {
-      const sourceValue = source[key];
-      const targetValue = result[key];
-
-      if (
-        sourceValue !== undefined &&
-        typeof sourceValue === 'object' &&
-        sourceValue !== null &&
-        !Array.isArray(sourceValue) &&
-        typeof targetValue === 'object' &&
-        targetValue !== null &&
-        !Array.isArray(targetValue)
-      ) {
-        result[key] = this.deepMerge(
-          targetValue as Record<string, unknown>,
-          sourceValue as Record<string, unknown>
-        ) as T[Extract<keyof T, string>];
-      } else if (sourceValue !== undefined) {
-        result[key] = sourceValue as T[Extract<keyof T, string>];
-      }
-    }
-
-    return result;
+  /**
+   * Merge workspace settings with defaults
+   */
+  mergeWorkspaceSettings(stored: Partial<WorkspaceSettings>, defaults: WorkspaceSettings): WorkspaceSettings {
+    return {
+      general: { ...defaults.general, ...stored.general },
+      features: { ...defaults.features, ...stored.features },
+      import: { ...defaults.import, ...stored.import },
+      pro: { ...defaults.pro, ...stored.pro },
+    };
   },
 };
 

@@ -51,7 +51,7 @@ export const balanceService = {
       _sum: { amount: true },
     });
 
-    return account.initialBalance.toNumber() + (transactionSum._sum.amount?.toNumber() ?? 0);
+    return account.balance.toNumber() + (transactionSum._sum.amount?.toNumber() ?? 0);
   },
 
   /**
@@ -59,8 +59,7 @@ export const balanceService = {
    */
   async getWorkspaceBalanceAtDate(
     workspaceId: string,
-    date: Date,
-    excludeStatsAccounts = true
+    date: Date
   ): Promise<number> {
     // Get all accounts
     const accounts = await prisma.account.findMany({
@@ -68,7 +67,6 @@ export const balanceService = {
         workspaceId,
         deletedAt: null,
         isArchived: false,
-        ...(excludeStatsAccounts ? { excludeFromStats: false } : {}),
       },
     });
 
@@ -96,7 +94,7 @@ export const balanceService = {
       where: {
         workspaceId,
         deletedAt: null,
-        excludeFromStats: false,
+        isArchived: false,
       },
     });
 
@@ -159,7 +157,7 @@ export const balanceService = {
       where: {
         workspaceId,
         deletedAt: null,
-        excludeFromStats: false,
+        isArchived: false,
       },
       select: { id: true },
     });
@@ -173,7 +171,7 @@ export const balanceService = {
         date: { gte: startDate, lte: endDate },
         amount: { gt: 0 },
         deletedAt: null,
-        isTransfer: false,
+        transferPairId: null,
       },
       _sum: { amount: true },
     });
@@ -185,7 +183,7 @@ export const balanceService = {
         date: { gte: startDate, lte: endDate },
         amount: { lt: 0 },
         deletedAt: null,
-        isTransfer: false,
+        transferPairId: null,
       },
       _sum: { amount: true },
     });
@@ -234,7 +232,6 @@ export const balanceService = {
         workspaceId,
         deletedAt: null,
         isArchived: false,
-        excludeFromStats: false,
       },
     });
 
@@ -250,7 +247,7 @@ export const balanceService = {
         _sum: { amount: true },
       });
 
-      const balance = account.initialBalance.toNumber() + (transactionSum._sum.amount?.toNumber() ?? 0);
+      const balance = account.balance.toNumber() + (transactionSum._sum.amount?.toNumber() ?? 0);
 
       if (assetTypes.includes(account.type)) {
         assets += balance;

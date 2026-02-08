@@ -149,6 +149,7 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
+    return undefined;
   }, [isOpen]);
 
   // Reset selected index when results change
@@ -211,17 +212,18 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
             <div className="py-2">
               {/* Group results by type */}
               {Object.entries(
-                results.reduce((acc, result) => {
-                  if (!acc[result.type]) acc[result.type] = [];
-                  acc[result.type].push(result);
+                results.reduce<Record<string, SearchResult[]>>((acc, result) => {
+                  const typeResults = acc[result.type] ?? [];
+                  typeResults.push(result);
+                  acc[result.type] = typeResults;
                   return acc;
-                }, {} as Record<string, SearchResult[]>)
+                }, {})
               ).map(([type, typeResults]) => (
                 <div key={type}>
                   <div className="px-3 py-1.5 text-xs font-medium text-gray-400 uppercase">
                     {TYPE_CONFIG[type as keyof typeof TYPE_CONFIG]?.label ?? type}
                   </div>
-                  {typeResults.map((result, idx) => {
+                  {typeResults.map((result) => {
                     const globalIdx = results.indexOf(result);
                     const config = TYPE_CONFIG[result.type];
                     return (

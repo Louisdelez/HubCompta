@@ -182,8 +182,9 @@ export const importService = {
       let suggestedCategory: { id: string; name: string } | undefined;
       for (const rule of rules) {
         if (ruleService.matchesRule(row.description, row.amount, rule)) {
-          const categoryAction = rule.actions.find(
-            (a: { type: string }) => a.type === 'set_category'
+          const actions = (rule.actions ?? []) as Array<{ type: string; value: string }>;
+          const categoryAction = actions.find(
+            (a) => a.type === 'set_category'
           );
           if (categoryAction) {
             const category = await prisma.category.findUnique({
@@ -314,7 +315,8 @@ export const importService = {
 
             for (const rule of rules) {
               if (ruleService.matchesRule(row.description, row.amount, rule)) {
-                for (const action of rule.actions) {
+                const actions = (rule.actions ?? []) as Array<{ type: string; value: string }>;
+                for (const action of actions) {
                   if (action.type === 'set_category') {
                     categoryId = action.value;
                   } else if (action.type === 'add_tag') {
@@ -338,7 +340,6 @@ export const importService = {
                 categoryId,
                 notes,
                 importHash: hash,
-                importJobId: jobId,
                 tags: tags.length > 0 ? {
                   create: tags.map((tagId) => ({ tagId })),
                 } : undefined,

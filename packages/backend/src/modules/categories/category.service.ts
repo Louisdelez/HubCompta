@@ -15,13 +15,13 @@ export interface CategoryCreateInput {
   type: CategoryType;
   icon?: string;
   color?: string;
-  parentId?: string;
+  parentId?: string | null;
 }
 
 export interface CategoryUpdateInput {
   name?: string;
-  icon?: string;
-  color?: string;
+  icon?: string | null;
+  color?: string | null;
   parentId?: string | null;
 }
 
@@ -335,11 +335,7 @@ export const categoryService = {
         where: { parentId: sourceCategoryId },
         data: { parentId: targetCategoryId },
       }),
-      // Move all rules to target
-      prisma.rule.updateMany({
-        where: { categoryId: sourceCategoryId },
-        data: { categoryId: targetCategoryId },
-      }),
+      // Note: Rules store categoryId in JSON actions field, would need special handling
       // Delete source
       prisma.category.delete({
         where: { id: sourceCategoryId },

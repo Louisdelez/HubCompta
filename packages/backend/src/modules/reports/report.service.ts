@@ -137,7 +137,7 @@ export const reportService = {
       where: {
         account: { workspaceId },
         date: { gte: from, lte: to },
-        isTransfer: false,
+        transferPairId: null,
       },
       include: {
         category: true,
@@ -146,15 +146,15 @@ export const reportService = {
     });
 
     // Separate by type
-    const income = transactions.filter((t) => t.amount > 0);
-    const expenses = transactions.filter((t) => t.amount < 0);
+    const income = transactions.filter((t) => Number(t.amount) > 0);
+    const expenses = transactions.filter((t) => Number(t.amount) < 0);
 
     // Group by category
-    const incomeByCategory = this.groupByCategory(income);
-    const expensesByCategory = this.groupByCategory(expenses);
+    const incomeByCategory = this.groupByCategory(income.map(t => ({ ...t, amount: Number(t.amount) })));
+    const expensesByCategory = this.groupByCategory(expenses.map(t => ({ ...t, amount: Number(t.amount) })));
 
-    const totalIncome = income.reduce((sum, t) => sum + t.amount, 0);
-    const totalExpenses = Math.abs(expenses.reduce((sum, t) => sum + t.amount, 0));
+    const totalIncome = income.reduce((sum, t) => sum + Number(t.amount), 0);
+    const totalExpenses = Math.abs(expenses.reduce((sum, t) => sum + Number(t.amount), 0));
 
     // Get investment transactions (positions)
     const investTransactions = await prisma.investTransaction.findMany({
@@ -168,11 +168,11 @@ export const reportService = {
 
     const investInflows = investTransactions
       .filter((t) => t.type === 'sell' || t.type === 'dividend')
-      .reduce((sum, t) => sum + t.quantity * t.price, 0);
+      .reduce((sum, t) => sum + Number(t.quantity) * Number(t.price), 0);
 
     const investOutflows = investTransactions
       .filter((t) => t.type === 'buy')
-      .reduce((sum, t) => sum + t.quantity * t.price + t.fees, 0);
+      .reduce((sum, t) => sum + Number(t.quantity) * Number(t.price) + Number(t.fees), 0);
 
     // Get opening and closing balances
     const accounts = await prisma.account.findMany({
@@ -180,7 +180,7 @@ export const reportService = {
     });
 
     const openingBalance = await this.getBalanceAtDate(workspaceId, from);
-    const closingBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
+    const closingBalance = accounts.reduce((sum, a) => sum + Number(a.balance), 0);
 
     return {
       period: range,
@@ -221,7 +221,7 @@ export const reportService = {
       },
     });
 
-    const totalRevenue = invoices.reduce((sum, inv) => sum + inv.totalTTC, 0);
+    const totalRevenue = invoices.reduce((sum, inv) => sum + Number(inv.total), 0);
 
     // Get expenses from transactions
     const expenseTransactions = await prisma.transaction.findMany({
@@ -229,13 +229,13 @@ export const reportService = {
         account: { workspaceId },
         date: { gte: from, lte: to },
         amount: { lt: 0 },
-        isTransfer: false,
+        transferPairId: null,
       },
       include: { category: true },
     });
 
-    const expensesByCategory = this.groupByCategory(expenseTransactions);
-    const totalExpenses = Math.abs(expenseTransactions.reduce((sum, t) => sum + t.amount, 0));
+    const expensesByCategory = this.groupByCategory(expenseTransactions.map(t => ({ ...t, amount: Number(t.amount) })));
+    const totalExpenses = Math.abs(expenseTransactions.reduce((sum, t) => sum + Number(t.amount), 0));
 
     const grossProfit = totalRevenue;
     const netProfit = totalRevenue - totalExpenses;
@@ -277,9 +277,9 @@ export const reportService = {
             startDate: { lte: to },
             OR: [{ endDate: null }, { endDate: { gte: from } }],
           },
-          // Annual budgets
+          // Yearly budgets
           {
-            period: 'annual',
+            period: 'yearly',
             startDate: { lte: to },
             OR: [{ endDate: null }, { endDate: { gte: from } }],
           },
@@ -299,20 +299,21 @@ export const reportService = {
         account: { workspaceId },
         date: { gte: from, lte: to },
         amount: { lt: 0 },
-        isTransfer: false,
+        transferPairId: null,
       },
       _sum: { amount: true },
       _count: true,
     });
 
     const spendingMap = new Map(
-      actualSpending.map((s) => [s.categoryId, Math.abs(s._sum.amount || 0)])
+      actualSpending.map((s) => [s.categoryId, Math.abs(Number(s._sum.amount) || 0)])
     );
 
     // Build comparison
     const categories: BudgetComparison[] = budgets.map((budget) => {
+      const budgetAmount = Number(budget.amount);
       const budgeted =
-        budget.period === 'annual' ? (budget.amount / 12) * monthsInPeriod : budget.amount;
+        budget.period === 'yearly' ? (budgetAmount / 12) * monthsInPeriod : budgetAmount;
 
       const actual = spendingMap.get(budget.categoryId) || 0;
       const variance = budgeted - actual;
@@ -403,13 +404,13 @@ export const reportService = {
         where: {
           account: { workspaceId },
           date: { gte: periodStart, lte: periodEnd },
-          isTransfer: false,
+          transferPairId: null,
         },
       });
 
-      const income = transactions.filter((t) => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+      const income = transactions.filter((t) => Number(t.amount) > 0).reduce((sum, t) => sum + Number(t.amount), 0);
       const expenses = Math.abs(
-        transactions.filter((t) => t.amount < 0).reduce((sum, t) => sum + t.amount, 0)
+        transactions.filter((t) => Number(t.amount) < 0).reduce((sum, t) => sum + Number(t.amount), 0)
       );
 
       trends.push({
@@ -461,7 +462,7 @@ export const reportService = {
           _sum: { amount: true },
         });
 
-        const amount = Math.abs(result._sum.amount || 0);
+        const amount = Math.abs(Number(result._sum.amount) || 0);
         total += amount;
 
         data.push({
@@ -507,9 +508,9 @@ export const reportService = {
         },
       });
 
-      const totalIncome = transactions.filter((t) => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+      const totalIncome = transactions.filter((t) => Number(t.amount) > 0).reduce((sum, t) => sum + Number(t.amount), 0);
       const totalExpenses = Math.abs(
-        transactions.filter((t) => t.amount < 0).reduce((sum, t) => sum + t.amount, 0)
+        transactions.filter((t) => Number(t.amount) < 0).reduce((sum, t) => sum + Number(t.amount), 0)
       );
 
       summaries.push({
@@ -517,7 +518,7 @@ export const reportService = {
         accountName: account.name,
         accountType: account.type,
         openingBalance,
-        closingBalance: account.balance,
+        closingBalance: Number(account.balance),
         totalIncome,
         totalExpenses,
         transactionCount: transactions.length,
@@ -528,7 +529,7 @@ export const reportService = {
   },
 
   // --------------------------------------------------------------------------
-  // Top Merchants/Payees
+  // Top Descriptions (by spending)
   // --------------------------------------------------------------------------
   async getTopMerchants(
     workspaceId: string,
@@ -538,13 +539,12 @@ export const reportService = {
     const { from, to } = range;
 
     const result = await prisma.transaction.groupBy({
-      by: ['payee'],
+      by: ['description'],
       where: {
         account: { workspaceId },
         date: { gte: from, lte: to },
         amount: { lt: 0 },
-        payee: { not: null },
-        isTransfer: false,
+        transferPairId: null,
       },
       _sum: { amount: true },
       _count: true,
@@ -553,10 +553,10 @@ export const reportService = {
     });
 
     return result
-      .filter((r) => r.payee)
+      .filter((r) => r.description)
       .map((r) => ({
-        payee: r.payee!,
-        amount: Math.abs(r._sum.amount || 0),
+        payee: r.description,
+        amount: Math.abs(Number(r._sum.amount) || 0),
         count: r._count,
       }));
   },
@@ -582,7 +582,7 @@ export const reportService = {
       where: {
         account: { workspaceId },
         date: { gte: prevFrom, lte: prevTo },
-        isTransfer: false,
+        transferPairId: null,
       },
       _sum: { amount: true },
     });
@@ -592,7 +592,7 @@ export const reportService = {
         account: { workspaceId },
         date: { gte: prevFrom, lte: prevTo },
         amount: { lt: 0 },
-        isTransfer: false,
+        transferPairId: null,
       },
       _sum: { amount: true },
     });
@@ -611,8 +611,8 @@ export const reportService = {
         incomeChange: 0, // Would need previous year income
         expenseChange:
           prevYearExpenses._sum.amount && totalExpenses > 0
-            ? ((totalExpenses - Math.abs(prevYearExpenses._sum.amount)) /
-                Math.abs(prevYearExpenses._sum.amount)) *
+            ? ((totalExpenses - Math.abs(Number(prevYearExpenses._sum.amount))) /
+                Math.abs(Number(prevYearExpenses._sum.amount))) *
               100
             : 0,
       },
@@ -690,7 +690,7 @@ export const reportService = {
     });
 
     // Current balance minus transactions after date = balance at date
-    return account.balance - (transactionsAfter._sum.amount || 0);
+    return Number(account.balance) - (Number(transactionsAfter._sum.amount) || 0);
   },
 };
 

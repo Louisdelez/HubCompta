@@ -35,8 +35,8 @@ interface Transaction {
   description: string;
   date: string;
   type: 'expense' | 'income' | 'transfer';
-  categoryId?: string;
-  notes?: string;
+  categoryId?: string | undefined;
+  notes?: string | undefined;
   tags: { id: string; name: string }[];
 }
 
@@ -49,7 +49,7 @@ interface Account {
 
 interface TransactionFormProps {
   workspaceId: string;
-  transaction?: Transaction;
+  transaction?: Transaction | undefined;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -79,6 +79,14 @@ export function TransactionForm({
     queryFn: () => api.get<Account[]>(`/workspaces/${workspaceId}/accounts`),
   });
 
+  const getDefaultDate = (): string => {
+    if (transaction?.date) {
+      const parts = transaction.date.split('T');
+      return parts[0] ?? new Date().toISOString().split('T')[0] ?? '';
+    }
+    return new Date().toISOString().split('T')[0] ?? '';
+  };
+
   const {
     register,
     handleSubmit,
@@ -92,8 +100,8 @@ export function TransactionForm({
       amount: transaction ? Math.abs(transaction.amount) : 0,
       currency: transaction?.currency ?? 'EUR',
       description: transaction?.description ?? '',
-      date: transaction?.date.split('T')[0] ?? new Date().toISOString().split('T')[0],
-      categoryId: transaction?.categoryId,
+      date: getDefaultDate(),
+      categoryId: transaction?.categoryId ?? '',
       notes: transaction?.notes ?? '',
     },
   });
@@ -103,15 +111,8 @@ export function TransactionForm({
   const selectedAccountId = watch('accountId');
   const selectedCurrency = watch('currency');
 
-  // Update currency when account changes
+  // Get selected account for currency validation
   const selectedAccount = accounts?.find((a) => a.id === selectedAccountId);
-  const handleAccountChange = (accountId: string) => {
-    setValue('accountId', accountId);
-    const account = accounts?.find((a) => a.id === accountId);
-    if (account) {
-      setValue('currency', account.currency);
-    }
-  };
 
   const createMutation = useMutation({
     mutationFn: async (data: TransactionFormData) => {
@@ -346,8 +347,8 @@ export function TransactionForm({
               <CategorySelector
                 workspaceId={workspaceId}
                 type={selectedType}
-                value={selectedCategoryId}
-                onChange={(id) => setValue('categoryId', id)}
+                value={selectedCategoryId ?? ''}
+                onChange={(id) => setValue('categoryId', id ?? '')}
               />
 
               {/* Tags */}

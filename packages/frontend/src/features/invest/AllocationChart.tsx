@@ -71,9 +71,11 @@ function CustomTooltip({
   payload?: TooltipPayload[];
   currency?: string;
 }) {
-  if (!active || !payload || !payload.length) return null;
+  if (!active || !payload || payload.length === 0) return null;
 
-  const data = payload[0].payload;
+  const firstPayload = payload[0];
+  if (!firstPayload) return null;
+  const data = firstPayload.payload;
 
   return (
     <div className="bg-white border rounded-lg shadow-lg p-3">
@@ -172,7 +174,7 @@ export function AllocationChart({
               ))}
             </Pie>
             <Tooltip content={<CustomTooltip currency={currency} />} />
-            {showLegend && <Legend content={renderLegend} />}
+            {showLegend && <Legend content={(props) => renderLegend(props as unknown as { payload?: LegendPayload[] })} />}
           </PieChart>
         </ResponsiveContainer>
 

@@ -23,22 +23,19 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /invoices - List invoices
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{
+    Params: { workspaceId: string };
+    Querystring: {
+      status?: InvoiceStatus;
+      contactId?: string;
+      from?: string;
+      to?: string;
+      overdue?: boolean;
+    };
+  }>(
     '/',
     { preHandler: [requirePermission('pro:read')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string };
-        Querystring: {
-          status?: InvoiceStatus;
-          contactId?: string;
-          from?: string;
-          to?: string;
-          overdue?: boolean;
-        };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const { status, contactId, from, to, overdue } = request.query;
 
@@ -60,13 +57,10 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /invoices/stats - Get invoice statistics
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{ Params: { workspaceId: string } }>(
     '/stats',
     { preHandler: [requirePermission('pro:read')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const stats = await invoiceService.getStats(workspaceId);
 
@@ -80,16 +74,13 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /invoices/recent - Get recent invoices
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{
+    Params: { workspaceId: string };
+    Querystring: { limit?: string };
+  }>(
     '/recent',
     { preHandler: [requirePermission('pro:read')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string };
-        Querystring: { limit?: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const limit = request.query.limit ? parseInt(request.query.limit, 10) : 5;
 
@@ -105,13 +96,10 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // GET /invoices/:id - Get invoice details
   // --------------------------------------------------------------------------
-  app.get(
+  app.get<{ Params: { workspaceId: string; id: string } }>(
     '/:id',
     { preHandler: [requirePermission('pro:read')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
       const invoice = await invoiceService.getById(workspaceId, id);
 
@@ -132,13 +120,10 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /invoices - Create invoice
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string } }>(
     '/',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId } = request.params;
       const input = invoiceCreateSchema.parse(request.body);
 
@@ -164,16 +149,13 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /invoices/from-quote/:quoteId - Create invoice from quote
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{
+    Params: { workspaceId: string; quoteId: string };
+    Body: { dueDate: string };
+  }>(
     '/from-quote/:quoteId',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{
-        Params: { workspaceId: string; quoteId: string };
-        Body: { dueDate: string };
-      }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, quoteId } = request.params;
       const { dueDate } = z.object({ dueDate: z.coerce.date() }).parse(request.body);
 
@@ -199,13 +181,10 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // PATCH /invoices/:id/lines - Update invoice lines (draft only)
   // --------------------------------------------------------------------------
-  app.patch(
+  app.patch<{ Params: { workspaceId: string; id: string } }>(
     '/:id/lines',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
       const { lines } = z.object({
         lines: z.array(invoiceLineSchema).min(1),
@@ -233,13 +212,10 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /invoices/:id/send - Send invoice
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string; id: string } }>(
     '/:id/send',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       const invoice = await invoiceService.send(workspaceId, id);
@@ -264,13 +240,10 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /invoices/:id/pay - Record payment
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string; id: string } }>(
     '/:id/pay',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
       const input = invoicePaySchema.parse(request.body);
 
@@ -300,13 +273,10 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /invoices/:id/cancel - Cancel invoice
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string; id: string } }>(
     '/:id/cancel',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       const invoice = await invoiceService.cancel(workspaceId, id);
@@ -331,13 +301,10 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // POST /invoices/:id/duplicate - Duplicate invoice
   // --------------------------------------------------------------------------
-  app.post(
+  app.post<{ Params: { workspaceId: string; id: string } }>(
     '/:id/duplicate',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       const invoice = await invoiceService.duplicate(workspaceId, id);
@@ -362,13 +329,10 @@ export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   // DELETE /invoices/:id - Delete invoice (draft only)
   // --------------------------------------------------------------------------
-  app.delete(
+  app.delete<{ Params: { workspaceId: string; id: string } }>(
     '/:id',
     { preHandler: [requirePermission('pro:manage')] },
-    async (
-      request: FastifyRequest<{ Params: { workspaceId: string; id: string } }>,
-      reply: FastifyReply
-    ) => {
+    async (request, reply) => {
       const { workspaceId, id } = request.params;
 
       await invoiceService.delete(workspaceId, id);

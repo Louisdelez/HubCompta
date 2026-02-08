@@ -234,7 +234,8 @@ model Transaction {
   isRecurring    Boolean           @default(false) @map("is_recurring")
   recurrenceId   String?           @map("recurrence_id") @db.Uuid
   importHash     String?           @map("import_hash") @db.VarChar(64)
-  transferPairId String?           @map("transfer_pair_id") @db.Uuid
+  transferPairId String?           @unique @map("transfer_pair_id") @db.Uuid
+  appliedRuleId  String?           @map("applied_rule_id") @db.Uuid
   deletedAt      DateTime?         @map("deleted_at")
   createdAt      DateTime          @default(now()) @map("created_at")
   updatedAt      DateTime          @updatedAt @map("updated_at")
@@ -246,6 +247,7 @@ model Transaction {
   recurrence    Recurrence?     @relation(fields: [recurrenceId], references: [id], onDelete: SetNull)
   transferPair  Transaction?    @relation("TransferPair", fields: [transferPairId], references: [id])
   pairedTransfer Transaction?   @relation("TransferPair")
+  appliedRule   Rule?           @relation(fields: [appliedRuleId], references: [id], onDelete: SetNull)
   tags          TransactionTag[]
   documentLinks DocumentLink[]
   linkedInvoices Invoice[]
@@ -255,6 +257,7 @@ model Transaction {
   @@index([workspaceId, accountId])
   @@index([workspaceId, categoryId])
   @@index([accountId, date])
+  @@index([appliedRuleId])
   @@index([deletedAt])
   @@map("transactions")
 }
@@ -432,7 +435,8 @@ model Rule {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   // Relations
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace           Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  appliedTransactions Transaction[]
 
   @@index([workspaceId, isEnabled])
   @@map("rules")
@@ -478,17 +482,20 @@ model ImportJob {
   workspaceId   String       @map("workspace_id") @db.Uuid
   accountId     String       @map("account_id") @db.Uuid
   userId        String       @map("user_id") @db.Uuid
-  filename      String       @db.VarChar(255)
+  fileName      String       @map("file_name") @db.VarChar(255)
+  fileContent   String       @map("file_content") @db.Text
   status        ImportStatus @default(pending)
   totalRows     Int          @default(0) @map("total_rows")
   processedRows Int          @default(0) @map("processed_rows")
-  importedCount Int          @default(0) @map("imported_count")
-  skippedCount  Int          @default(0) @map("skipped_count")
-  errorCount    Int          @default(0) @map("error_count")
+  importedRows  Int          @default(0) @map("imported_rows")
+  skippedRows   Int          @default(0) @map("skipped_rows")
+  errorRows     Int          @default(0) @map("error_rows")
+  error         String?      @db.Text
   columnMapping Json         @default("{}") @map("column_mapping")
   errors        Json         @default("[]")
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
+  completedAt   DateTime?    @map("completed_at")
 
   // Relations
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)

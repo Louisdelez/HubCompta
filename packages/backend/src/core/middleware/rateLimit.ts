@@ -162,14 +162,14 @@ async function blockIdentifier(
 
 function getIdentifier(request: FastifyRequest): string {
   // Use user ID if authenticated
-  if (request.user?.id) {
-    return `user:${request.user.id}`;
+  if (request.user?.sub) {
+    return `user:${request.user.sub}`;
   }
 
   // Otherwise use IP address
   const forwarded = request.headers['x-forwarded-for'];
   const ip = typeof forwarded === 'string'
-    ? forwarded.split(',')[0].trim()
+    ? (forwarded.split(',')[0]?.trim() ?? request.ip)
     : request.ip;
 
   return `ip:${ip}`;

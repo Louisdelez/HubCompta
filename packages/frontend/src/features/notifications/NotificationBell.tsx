@@ -23,13 +23,13 @@ export function NotificationBell() {
   const { data: unreadData } = useQuery({
     queryKey: ['notifications', 'unread-count'],
     queryFn: async () => {
-      const response = await api.get<{ data: { count: number } }>('/notifications/unread-count');
-      return response.data;
+      const response = await api.get<{ count: number }>('/notifications/unread-count');
+      return response;
     },
     refetchInterval: 60000, // Refetch every minute
   });
 
-  const unreadCount = unreadData?.count || 0;
+  const unreadCount = unreadData?.count ?? 0;
 
   // Mark all as read mutation
   const markAllReadMutation = useMutation({

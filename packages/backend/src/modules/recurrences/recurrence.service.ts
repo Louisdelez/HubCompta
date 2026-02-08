@@ -109,7 +109,7 @@ export const recurrenceService = {
         interval: input.interval ?? 1,
         dayOfMonth: input.dayOfMonth,
         dayOfWeek: input.dayOfWeek,
-        template: input.template as Prisma.JsonObject,
+        template: input.template as unknown as Prisma.JsonObject,
         nextRunAt,
         endAt: input.endAt,
         isActive: true,
@@ -130,11 +130,6 @@ export const recurrenceService = {
         transactions: {
           orderBy: { date: 'desc' },
           take: 1,
-          select: {
-            id: true,
-            date: true,
-            amount: true,
-          },
         },
       },
     });
@@ -185,8 +180,12 @@ export const recurrenceService = {
     return {
       data: recurrences.map((r) => ({
         ...r,
-        template: r.template as TransactionTemplate,
-        lastTransaction: r.transactions[0] ?? null,
+        template: r.template as unknown as TransactionTemplate,
+        lastTransaction: r.transactions[0] ? {
+          id: r.transactions[0].id,
+          date: r.transactions[0].date,
+          amount: Number(r.transactions[0].amount),
+        } : null,
       })),
       meta: {
         total,
@@ -210,7 +209,7 @@ export const recurrenceService = {
     }
 
     // Merge template if partial update
-    let template = existing.template as TransactionTemplate;
+    let template = existing.template as unknown as TransactionTemplate;
     if (input.template) {
       template = { ...template, ...input.template };
     }
@@ -235,7 +234,7 @@ export const recurrenceService = {
         ...(input.interval && { interval: input.interval }),
         ...(input.dayOfMonth !== undefined && { dayOfMonth: input.dayOfMonth }),
         ...(input.dayOfWeek !== undefined && { dayOfWeek: input.dayOfWeek }),
-        template: template as Prisma.JsonObject,
+        template: template as unknown as Prisma.JsonObject,
         nextRunAt,
         ...(input.endAt !== undefined && { endAt: input.endAt }),
         ...(input.isActive !== undefined && { isActive: input.isActive }),
@@ -330,7 +329,7 @@ export const recurrenceService = {
       return null;
     }
 
-    const template = recurrence.template as TransactionTemplate;
+    const template = recurrence.template as unknown as TransactionTemplate;
     const now = new Date();
 
     // Check if recurrence has ended
@@ -551,7 +550,7 @@ export const recurrenceService = {
     }> = [];
 
     for (const recurrence of recurrences) {
-      const template = recurrence.template as TransactionTemplate;
+      const template = recurrence.template as unknown as TransactionTemplate;
       const occurrences = this.countOccurrencesInMonth(recurrence, month);
 
       if (occurrences > 0) {

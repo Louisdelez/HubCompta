@@ -2,7 +2,7 @@
 // DOCUMENT CARD - Finance Hub
 // ============================================================================
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -88,8 +88,6 @@ export function DocumentCard({
   onLink,
   onAction,
 }: DocumentCardProps) {
-  const queryClient = useQueryClient();
-
   // Archive mutation
   const archiveMutation = useMutation({
     mutationFn: () => api.post(`/workspaces/${workspaceId}/documents/${document.id}/archive`),

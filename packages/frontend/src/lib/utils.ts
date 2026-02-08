@@ -159,7 +159,9 @@ export function isValidSiret(siret: string): boolean {
   // Luhn algorithm check
   let sum = 0;
   for (let i = 0; i < 14; i++) {
-    let digit = parseInt(cleaned[i], 10);
+    const char = cleaned[i];
+    if (char === undefined) return false;
+    let digit = parseInt(char, 10);
     if (i % 2 === 0) {
       digit *= 2;
       if (digit > 9) digit -= 9;
@@ -230,6 +232,6 @@ export function getChartColor(index: number): string {
     '#6366F1', // indigo
     '#84CC16', // lime
     '#F97316', // orange
-  ];
-  return colors[index % colors.length];
+  ] as const;
+  return colors[index % colors.length] ?? colors[0];
 }

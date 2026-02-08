@@ -16,7 +16,7 @@ export interface TransferInput {
   amount: number;
   date: Date;
   description?: string;
-  notes?: string;
+  notes?: string | null;
 }
 
 export interface TransferResult {
@@ -79,11 +79,10 @@ export const transferService = {
           description: input.description ?? `Virement vers ${toAccount.name}`,
           date: input.date,
           notes: input.notes,
-          isTransfer: true,
         },
       });
 
-      // Create incoming transaction (positive amount)
+      // Create incoming transaction (positive amount) and link it to the outgoing one
       const toTransaction = await tx.transaction.create({
         data: {
           workspaceId,
@@ -93,15 +92,14 @@ export const transferService = {
           description: input.description ?? `Virement depuis ${fromAccount.name}`,
           date: input.date,
           notes: input.notes,
-          isTransfer: true,
-          linkedTransferId: fromTransaction.id,
+          transferPairId: fromTransaction.id,
         },
       });
 
       // Link the from transaction to the to transaction
       await tx.transaction.update({
         where: { id: fromTransaction.id },
-        data: { linkedTransferId: toTransaction.id },
+        data: { transferPairId: toTransaction.id },
       });
 
       return { fromTransaction, toTransaction };
@@ -119,7 +117,7 @@ export const transferService = {
         id: transactionId,
         workspaceId,
         deletedAt: null,
-        isTransfer: true,
+        transferPairId: { not: null },
       },
     });
 
@@ -133,10 +131,10 @@ export const transferService = {
         where: { id: transactionId },
         data: { deletedAt: new Date() },
       }),
-      ...(transaction.linkedTransferId
+      ...(transaction.transferPairId
         ? [
             prisma.transaction.update({
-              where: { id: transaction.linkedTransferId },
+              where: { id: transaction.transferPairId },
               data: { deletedAt: new Date() },
             }),
           ]
@@ -157,7 +155,7 @@ export const transferService = {
         id: transactionId,
         workspaceId,
         deletedAt: null,
-        isTransfer: true,
+        transferPairId: { not: null },
       },
     });
 
@@ -165,14 +163,14 @@ export const transferService = {
       throw new NotFoundError('Transfer', transactionId);
     }
 
-    const linkedTransaction = transaction.linkedTransferId
+    const linkedTransaction = transaction.transferPairId
       ? await prisma.transaction.findUnique({
-          where: { id: transaction.linkedTransferId },
+          where: { id: transaction.transferPairId },
         })
       : null;
 
     if (!linkedTransaction) {
-      throw new NotFoundError('Linked transfer', transaction.linkedTransferId ?? '');
+      throw new NotFoundError('Linked transfer', transaction.transferPairId ?? '');
     }
 
     // Determine which is the outgoing (negative) and incoming (positive)
@@ -181,25 +179,18 @@ export const transferService = {
     const toTxn = isOutgoing ? linkedTransaction : transaction;
 
     // Get account names for description if amount/accounts changed
-    let fromAccountName: string | undefined;
-    let toAccountName: string | undefined;
+    if (input.fromAccountId) {
+      const fromAccount = await prisma.account.findFirst({
+        where: { id: input.fromAccountId, workspaceId, deletedAt: null },
+      });
+      if (!fromAccount) throw new NotFoundError('Account', input.fromAccountId);
+    }
 
-    if (input.fromAccountId || input.toAccountId) {
-      if (input.fromAccountId) {
-        const fromAccount = await prisma.account.findFirst({
-          where: { id: input.fromAccountId, workspaceId, deletedAt: null },
-        });
-        if (!fromAccount) throw new NotFoundError('Account', input.fromAccountId);
-        fromAccountName = fromAccount.name;
-      }
-
-      if (input.toAccountId) {
-        const toAccount = await prisma.account.findFirst({
-          where: { id: input.toAccountId, workspaceId, deletedAt: null },
-        });
-        if (!toAccount) throw new NotFoundError('Account', input.toAccountId);
-        toAccountName = toAccount.name;
-      }
+    if (input.toAccountId) {
+      const toAccount = await prisma.account.findFirst({
+        where: { id: input.toAccountId, workspaceId, deletedAt: null },
+      });
+      if (!toAccount) throw new NotFoundError('Account', input.toAccountId);
     }
 
     // Update both transactions
@@ -247,16 +238,16 @@ export const transferService = {
         id: transactionId,
         workspaceId,
         deletedAt: null,
-        isTransfer: true,
+        transferPairId: { not: null },
       },
     });
 
-    if (!transaction || !transaction.linkedTransferId) {
+    if (!transaction || !transaction.transferPairId) {
       return null;
     }
 
     const linkedTransaction = await prisma.transaction.findUnique({
-      where: { id: transaction.linkedTransferId },
+      where: { id: transaction.transferPairId },
     });
 
     if (!linkedTransaction) {

@@ -15,24 +15,18 @@ export interface AccountCreateInput {
   type: AccountType;
   currency?: string;
   initialBalance?: number;
-  institution?: string;
-  accountNumber?: string;
   color?: string;
   icon?: string;
-  excludeFromStats?: boolean;
 }
 
 export interface AccountUpdateInput {
   name?: string;
-  institution?: string;
-  accountNumber?: string;
-  color?: string;
-  icon?: string;
-  excludeFromStats?: boolean;
+  color?: string | null;
+  icon?: string | null;
   isArchived?: boolean;
 }
 
-export interface AccountWithBalance extends Account {
+export interface AccountWithBalance extends Omit<Account, 'balance'> {
   balance: number;
   transactionCount: number;
 }
@@ -70,12 +64,9 @@ export const accountService = {
         name: input.name,
         type: input.type,
         currency: input.currency ?? 'EUR',
-        initialBalance: input.initialBalance ?? 0,
-        institution: input.institution,
-        accountNumber: input.accountNumber,
+        balance: input.initialBalance ?? 0,
         color: input.color,
         icon: input.icon,
-        excludeFromStats: input.excludeFromStats ?? false,
       },
     });
 
@@ -119,7 +110,7 @@ export const accountService = {
       _count: true,
     });
 
-    const balance = account.initialBalance.toNumber() + (transactionSum._sum.amount?.toNumber() ?? 0);
+    const balance = account.balance.toNumber() + (transactionSum._sum.amount?.toNumber() ?? 0);
 
     return {
       ...account,
@@ -168,7 +159,7 @@ export const accountService = {
 
       accountsWithBalances.push({
         ...account,
-        balance: account.initialBalance.toNumber() + (transactionSum._sum.amount?.toNumber() ?? 0),
+        balance: account.balance.toNumber() + (transactionSum._sum.amount?.toNumber() ?? 0),
         transactionCount: transactionSum._count,
       });
     }
@@ -273,9 +264,7 @@ export const accountService = {
   async getTotalBalance(workspaceId: string, excludeArchived = true): Promise<number> {
     const accounts = await this.list(workspaceId, { includeArchived: !excludeArchived });
 
-    return accounts
-      .filter((a) => !a.excludeFromStats)
-      .reduce((sum, account) => sum + account.balance, 0);
+    return accounts.reduce((sum, account) => sum + account.balance, 0);
   },
 
   /**
@@ -287,7 +276,6 @@ export const accountService = {
     const balanceByType: Record<string, number> = {};
 
     for (const account of accounts) {
-      if (account.excludeFromStats) continue;
       balanceByType[account.type] = (balanceByType[account.type] ?? 0) + account.balance;
     }
 

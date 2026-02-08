@@ -8,6 +8,7 @@ import { prisma } from '../../core/database/client.js';
 import { redisClient } from '../../core/database/redis.js';
 import { storageClient } from '../../core/storage/s3.js';
 import { getBackupQueue } from '../../core/queue/index.js';
+import { authGuard } from '../../core/auth/authGuard.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -29,17 +30,17 @@ interface RestorePreviewRequest {
 
 async function requireAdmin(request: any, reply: any): Promise<void> {
   // Check if user is authenticated
-  if (!request.user?.id) {
+  if (!request.user?.sub) {
     return reply.status(401).send({ error: 'Authentication required' });
   }
 
   // Check if user is instance admin
   const user = await prisma.user.findUnique({
-    where: { id: request.user.id },
-    select: { isAdmin: true },
+    where: { id: request.user?.sub },
+    select: { isInstanceAdmin: true },
   });
 
-  if (!user?.isAdmin) {
+  if (!user?.isInstanceAdmin) {
     return reply.status(403).send({ error: 'Admin access required' });
   }
 }
@@ -50,7 +51,7 @@ async function requireAdmin(request: any, reply: any): Promise<void> {
 
 export const adminRoutes: FastifyPluginAsync = async (fastify) => {
   // Apply authentication and admin check to all routes
-  fastify.addHook('preHandler', fastify.authenticate);
+  fastify.addHook('preHandler', authGuard);
   fastify.addHook('preHandler', requireAdmin);
 
   // --------------------------------------------------------------------------
@@ -80,7 +81,7 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
       type,
       workspaceId,
       retention,
-      triggeredBy: request.user.id,
+      triggeredBy: request.user?.sub,
     }, {
       attempts: 3,
       backoff: {
@@ -290,10 +291,8 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
           id: true,
           email: true,
           displayName: true,
-          isAdmin: true,
-          mfaEnabled: true,
+          isInstanceAdmin: true,
           createdAt: true,
-          lastLoginAt: true,
           _count: {
             select: {
               memberships: true,
@@ -323,35 +322,35 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
    */
   fastify.patch<{
     Params: { userId: string };
-    Body: { isAdmin?: boolean };
+    Body: { isInstanceAdmin?: boolean };
   }>('/users/:userId', async (request, reply) => {
     const { userId } = request.params;
-    const { isAdmin } = request.body;
+    const { isInstanceAdmin } = request.body;
 
     // Prevent self-demotion
-    if (userId === request.user.id && isAdmin === false) {
+    if (userId === request.user?.sub && isInstanceAdmin === false) {
       return reply.status(400).send({ error: 'Cannot remove admin from yourself' });
     }
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { isAdmin },
+      data: { isInstanceAdmin },
       select: {
         id: true,
         email: true,
         displayName: true,
-        isAdmin: true,
+        isInstanceAdmin: true,
       },
     });
 
     // Log action
     await prisma.auditLog.create({
       data: {
-        userId: request.user.id,
-        action: isAdmin ? 'admin.grant' : 'admin.revoke',
-        entity: 'user',
+        userId: request.user?.sub,
+        action: isInstanceAdmin ? 'admin.grant' : 'admin.revoke',
+        entityType: 'user',
         entityId: userId,
-        metadata: { targetEmail: user.email },
+        changes: { targetEmail: user.email },
         ipAddress: request.ip,
         userAgent: request.headers['user-agent'] ?? '',
       },

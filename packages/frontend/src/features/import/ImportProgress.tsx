@@ -83,7 +83,8 @@ export function ImportProgress({
     queryKey: ['import-job', jobId],
     queryFn: () => api.get<JobStatus>(`/workspaces/${workspaceId}/import/${jobId}`),
     enabled: started && !executeMutation.isPending,
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
+      const data = query.state.data;
       if (data?.status === 'completed' || data?.status === 'failed') {
         return false;
       }

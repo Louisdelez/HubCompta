@@ -106,7 +106,7 @@ export const settlementService = {
 
     for (const membership of memberships) {
       const memberName = membership.user.displayName?.toLowerCase() || '';
-      const memberEmail = membership.user.email.split('@')[0].toLowerCase();
+      const memberEmail = (membership.user.email.split('@')[0] ?? '').toLowerCase();
 
       const matchingAccounts = accounts.filter((account) => {
         const accountName = account.name.toLowerCase();
@@ -143,7 +143,7 @@ export const settlementService = {
     };
 
     if (options.excludeTransfers !== false) {
-      transactionWhere.isTransfer = false;
+      transactionWhere.transferPairId = null;
     }
 
     if (options.categoryIds && options.categoryIds.length > 0) {
@@ -193,7 +193,7 @@ export const settlementService = {
 
       balances.push({
         memberId: membership.userId,
-        memberName: membership.user.displayName || membership.user.email.split('@')[0],
+        memberName: membership.user.displayName || membership.user.email.split('@')[0] || 'Unknown',
         memberEmail: membership.user.email,
         totalPaid,
         fairShare: fairSharePerMember,
@@ -262,6 +262,8 @@ export const settlementService = {
       const debtor = debtors[i];
       const creditor = creditors[j];
 
+      if (!debtor || !creditor) break;
+
       const transferAmount = Math.min(debtor.amount, creditor.amount);
 
       if (transferAmount > 0.01) {
@@ -302,7 +304,7 @@ export const settlementService = {
           deletedAt: null,
           date: { gte: startDate, lte: endDate },
           amount: { lt: 0 },
-          isTransfer: false,
+          transferPairId: null,
         },
         _sum: { amount: true },
       });
@@ -333,7 +335,7 @@ export const settlementService = {
         deletedAt: null,
         date: { gte: startDate, lte: endDate },
         amount: { lt: 0 },
-        isTransfer: false,
+        transferPairId: null,
       },
       include: {
         category: {

@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
 import { ContactForm } from './ContactForm';
 
@@ -62,12 +62,12 @@ function getAvatarColor(name: string): string {
     'bg-teal-500',
     'bg-indigo-500',
     'bg-red-500',
-  ];
+  ] as const;
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return colors[Math.abs(hash) % colors.length];
+  return colors[Math.abs(hash) % colors.length] as string;
 }
 
 // ----------------------------------------------------------------------------
@@ -75,7 +75,7 @@ function getAvatarColor(name: string): string {
 // ----------------------------------------------------------------------------
 
 export function ContactsPage() {
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
   const [typeFilter, setTypeFilter] = useState<'all' | 'client' | 'supplier'>('all');
   const [search, setSearch] = useState('');

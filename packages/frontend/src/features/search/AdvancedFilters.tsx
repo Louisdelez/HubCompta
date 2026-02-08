@@ -2,7 +2,7 @@
 // ADVANCED FILTERS - Finance Hub
 // ============================================================================
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
@@ -104,7 +104,7 @@ export function AdvancedFilters({
   });
 
   // Count active filters
-  const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
+  const activeFilterCount = Object.entries(filters).filter(([_key, value]) => {
     if (Array.isArray(value)) return value.length > 0;
     if (typeof value === 'boolean') return true;
     return value !== undefined && value !== '';

@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { DocumentCard } from './DocumentCard';
 import { DocumentUpload } from './DocumentUpload';
 import { DocumentViewer } from './DocumentViewer';
@@ -47,7 +47,7 @@ type FilterStatus = 'all' | 'inbox' | 'linked' | 'archived';
 // ----------------------------------------------------------------------------
 
 export function DocumentsPage() {
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
 
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');

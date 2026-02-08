@@ -56,10 +56,16 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   // CORS
   await app.register(fastifyCors, {
-    origin: process.env.APP_URL ?? 'http://localhost:3000',
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:3000',
+      process.env.APP_URL,
+    ].filter(Boolean) as string[],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Workspace-Id'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Workspace-Id', 'X-Device-Fingerprint'],
   });
 
   // Security Headers
@@ -137,13 +143,6 @@ export async function buildApp(): Promise<FastifyInstance> {
   // Register Routes
   // ----------------------------------------------------------------------------
   await registerRoutes(app);
-
-  // ----------------------------------------------------------------------------
-  // Health Check (basic)
-  // ----------------------------------------------------------------------------
-  app.get('/health', async () => {
-    return { status: 'ok', version: '1.0.0' };
-  });
 
   return app;
 }

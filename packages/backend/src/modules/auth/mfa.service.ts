@@ -61,7 +61,7 @@ function createTotp(secret: string, email: string): OTPAuth.TOTP {
     algorithm: 'SHA1',
     digits: TOTP_DIGITS,
     period: TOTP_PERIOD,
-    secret: OTPAuth.Secret.fromBase64(secret),
+    secret: OTPAuth.Secret.fromBase32(Buffer.from(secret, 'base64').toString('hex').toUpperCase()),
   });
 }
 

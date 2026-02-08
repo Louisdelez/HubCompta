@@ -95,23 +95,31 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
     }
   };
 
-  // Restore mutation (placeholder - would need backend implementation)
+  // Restore mutation
   const restoreMutation = useMutation({
     mutationFn: async (data: BackupData) => {
-      // Note: Full restore functionality would require a backend endpoint
-      // For now, we'll show the preview functionality
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      return { success: true };
+      const response = await api.post<{ data: { imported: Record<string, number>; errors: string[]; hasErrors: boolean } }>(
+        `/workspaces/${workspaceId}/export/restore`,
+        { backup: data, merge: true }
+      );
+      return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['transactions', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['categories', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['budgets', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['tags', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['rules', workspaceId] });
       setRestoreStep('idle');
       setBackupPreview(null);
+
+      if (result.hasErrors) {
+        setError(`Restauration partielle: ${result.errors.length} erreur(s)`);
+      }
     },
-    onError: () => {
-      setError('Erreur lors de la restauration');
+    onError: (err) => {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la restauration');
     },
   });
 

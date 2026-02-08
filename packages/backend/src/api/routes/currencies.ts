@@ -57,32 +57,13 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // ==========================================================================
-  // Get Currency
-  // ==========================================================================
-
-  /**
-   * GET /currencies/:code
-   * Get currency by code
-   */
-  fastify.get<{
-    Params: { code: string };
-  }>('/:code', async (request, reply) => {
-    const currency = await currencyService.getCurrency(request.params.code);
-
-    if (!currency) {
-      return reply.status(404).send({ error: 'Devise non trouvee' });
-    }
-
-    return { data: currency };
-  });
-
-  // ==========================================================================
   // Convert Amount
   // ==========================================================================
 
   /**
    * GET /currencies/convert
    * Convert amount between currencies
+   * NOTE: Must be defined before /:code to avoid being captured as a param
    */
   fastify.get<{
     Querystring: ConvertQuery;
@@ -112,6 +93,26 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
     }
 
     return { data: result };
+  });
+
+  // ==========================================================================
+  // Get Currency
+  // ==========================================================================
+
+  /**
+   * GET /currencies/:code
+   * Get currency by code
+   */
+  fastify.get<{
+    Params: { code: string };
+  }>('/:code', async (request, reply) => {
+    const currency = await currencyService.getCurrency(request.params.code);
+
+    if (!currency) {
+      return reply.status(404).send({ error: 'Devise non trouvee' });
+    }
+
+    return { data: currency };
   });
 
   // ==========================================================================
@@ -216,7 +217,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.post<{
     Body: SetRateBody;
   }>('/rates', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });
     }
@@ -265,7 +266,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
    * Fetch latest rates from ECB
    */
   fastify.post('/rates/fetch-ecb', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });
     }
@@ -301,7 +302,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
    * Initialize default currencies (admin only)
    */
   fastify.post('/initialize', async (request, reply) => {
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });
     }

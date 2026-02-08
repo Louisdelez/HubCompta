@@ -33,7 +33,7 @@ interface Account {
 
 interface AccountFormProps {
   workspaceId: string;
-  account?: Account;
+  account?: Account | undefined;
   onClose: () => void;
 }
 
@@ -67,6 +67,22 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
 
   const isEditing = !!account;
 
+  const defaultValues: AccountFormData = {
+    name: account?.name ?? '',
+    type: account?.type ?? 'checking',
+    currency: account?.currency ?? 'EUR',
+    initialBalance: 0,
+  };
+  // Handle optional properties explicitly to satisfy exactOptionalPropertyTypes
+  if (account?.icon !== undefined) {
+    defaultValues.icon = account.icon;
+  }
+  if (account?.color !== undefined) {
+    defaultValues.color = account.color;
+  } else {
+    defaultValues.color = COLORS[0] as string;
+  }
+
   const {
     register,
     handleSubmit,
@@ -74,14 +90,7 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
     setValue,
     formState: { errors },
   } = useForm<AccountFormData>({
-    defaultValues: {
-      name: account?.name ?? '',
-      type: account?.type ?? 'checking',
-      currency: account?.currency ?? 'EUR',
-      initialBalance: 0,
-      icon: account?.icon,
-      color: account?.color ?? COLORS[0],
-    },
+    defaultValues,
   });
 
   const selectedType = watch('type');
@@ -114,7 +123,14 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
   const onSubmit = (data: AccountFormData) => {
     setError(null);
     if (isEditing) {
-      updateMutation.mutate({ name: data.name, icon: data.icon, color: data.color });
+      const updateData: Partial<AccountFormData> = { name: data.name };
+      if (data.icon !== undefined) {
+        updateData.icon = data.icon;
+      }
+      if (data.color !== undefined) {
+        updateData.color = data.color;
+      }
+      updateMutation.mutate(updateData);
     } else {
       createMutation.mutate(data);
     }

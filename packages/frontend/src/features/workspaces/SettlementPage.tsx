@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { BalanceChart } from './BalanceChart';
 import { TransferSuggestions } from './TransferSuggestions';
 
@@ -73,14 +73,16 @@ function formatDate(dateStr: string): string {
 // ----------------------------------------------------------------------------
 
 export function SettlementPage() {
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
 
   // Parse selected month to dates
-  const [year, month] = selectedMonth.split('-').map(Number);
+  const [yearStr, monthStr] = selectedMonth.split('-');
+  const year = Number(yearStr);
+  const month = Number(monthStr);
   const startDate = new Date(year, month - 1, 1).toISOString();
   const endDate = new Date(year, month, 0, 23, 59, 59).toISOString();
 

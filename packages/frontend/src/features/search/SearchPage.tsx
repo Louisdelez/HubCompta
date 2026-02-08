@@ -154,11 +154,12 @@ export function SearchPage() {
   });
 
   // Group global results by type
-  const groupedResults = globalResults?.results.reduce((acc, result) => {
-    if (!acc[result.type]) acc[result.type] = [];
-    acc[result.type].push(result);
+  const groupedResults = globalResults?.results.reduce<Record<string, SearchResult[]>>((acc, result) => {
+    const typeResults = acc[result.type] ?? [];
+    typeResults.push(result);
+    acc[result.type] = typeResults;
     return acc;
-  }, {} as Record<string, SearchResult[]>) ?? {};
+  }, {}) ?? {};
 
   const handleResultClick = (result: SearchResult) => {
     const basePath = workspaceId ? `/workspaces/${workspaceId}` : '';

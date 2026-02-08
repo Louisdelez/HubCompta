@@ -61,8 +61,8 @@ export function useWorkspace() {
   } = useQuery({
     queryKey: ['workspaces'],
     queryFn: async () => {
-      const response = await api.get<{ data: Workspace[] }>('/workspaces');
-      return response.data;
+      // api.get already returns unwrapped data
+      return api.get<Workspace[]>('/workspaces');
     },
   });
 
@@ -74,8 +74,8 @@ export function useWorkspace() {
   } = useQuery({
     queryKey: ['workspace', currentWorkspaceId],
     queryFn: async () => {
-      const response = await api.get<{ data: Workspace }>(`/workspaces/${currentWorkspaceId}`);
-      return response.data;
+      // api.get already returns unwrapped data
+      return api.get<Workspace>(`/workspaces/${currentWorkspaceId}`);
     },
     enabled: !!currentWorkspaceId,
   });

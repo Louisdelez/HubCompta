@@ -44,12 +44,19 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
   const queryClient = useQueryClient();
 
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    accountId: string;
+    quantity: string;
+    price: string;
+    fees: string;
+    date: string;
+    notes: string;
+  }>({
     accountId: '',
     quantity: '',
     price: '',
     fees: '0',
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split('T')[0] ?? '',
     notes: '',
   });
   const [error, setError] = useState<string | null>(null);
@@ -99,7 +106,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
       quantity: '',
       price: '',
       fees: '0',
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString().split('T')[0] ?? '',
       notes: '',
     });
     setError(null);
@@ -133,7 +140,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
       return;
     }
 
-    createMutation.mutate({
+    const baseData = {
       assetSymbol: selectedAsset.symbol,
       assetType: selectedAsset.type,
       accountId: formData.accountId,
@@ -141,8 +148,12 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
       price,
       fees,
       date: formData.date,
-      notes: formData.notes || undefined,
-    });
+    };
+    if (formData.notes) {
+      createMutation.mutate({ ...baseData, notes: formData.notes });
+    } else {
+      createMutation.mutate(baseData);
+    }
   };
 
   const getAssetIcon = (type: string) => {

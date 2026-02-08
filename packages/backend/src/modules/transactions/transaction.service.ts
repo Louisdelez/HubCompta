@@ -16,10 +16,10 @@ export interface TransactionCreateInput {
   type: TransactionType;
   description: string;
   date: Date;
-  categoryId?: string;
-  payee?: string;
-  reference?: string;
-  notes?: string;
+  categoryId?: string | null;
+  payee?: string | null;
+  reference?: string | null;
+  notes?: string | null;
   tags?: string[];
   isReconciled?: boolean;
 }
@@ -40,7 +40,7 @@ export interface TransactionWithRelations extends Transaction {
   category?: { id: string; name: string; icon: string | null; color: string | null } | null;
   tags: { id: string; name: string; color: string | null }[];
   account: { id: string; name: string; type: string; currency: string };
-  linkedDocuments: { id: string; fileName: string }[];
+  linkedDocuments: { id: string; filename: string }[];
 }
 
 export interface TransactionFilters {
@@ -53,7 +53,6 @@ export interface TransactionFilters {
   maxAmount?: number;
   search?: string;
   tagIds?: string[];
-  isReconciled?: boolean;
   isTransfer?: boolean;
 }
 
@@ -114,17 +113,14 @@ export const transactionService = {
           description: input.description,
           date: input.date,
           categoryId: input.categoryId,
-          payee: input.payee,
-          reference: input.reference,
           notes: input.notes,
-          isReconciled: input.isReconciled ?? false,
         },
       });
 
       // Add tags if provided
       if (input.tags && input.tags.length > 0) {
         for (const tagId of input.tags) {
-          await tx.tagsOnTransactions.create({
+          await tx.transactionTag.create({
             data: {
               transactionId: txn.id,
               tagId,
@@ -169,7 +165,7 @@ export const transactionService = {
         documentLinks: {
           include: {
             document: {
-              select: { id: true, fileName: true },
+              select: { id: true, filename: true },
             },
           },
         },
@@ -228,7 +224,6 @@ export const transactionService = {
     if (filters.search) {
       where.OR = [
         { description: { contains: filters.search, mode: 'insensitive' } },
-        { payee: { contains: filters.search, mode: 'insensitive' } },
         { notes: { contains: filters.search, mode: 'insensitive' } },
       ];
     }
@@ -241,12 +236,12 @@ export const transactionService = {
       };
     }
 
-    if (filters.isReconciled !== undefined) {
-      where.isReconciled = filters.isReconciled;
-    }
-
     if (filters.isTransfer !== undefined) {
-      where.isTransfer = filters.isTransfer;
+      if (filters.isTransfer) {
+        where.transferPairId = { not: null };
+      } else {
+        where.transferPairId = null;
+      }
     }
 
     // Get total count
@@ -272,7 +267,7 @@ export const transactionService = {
         documentLinks: {
           include: {
             document: {
-              select: { id: true, fileName: true },
+              select: { id: true, filename: true },
             },
           },
         },
@@ -353,7 +348,7 @@ export const transactionService = {
     }
 
     for (const tagId of tagIds) {
-      await prisma.tagsOnTransactions.upsert({
+      await prisma.transactionTag.upsert({
         where: {
           transactionId_tagId: { transactionId, tagId },
         },
@@ -383,7 +378,7 @@ export const transactionService = {
       throw new NotFoundError('Transaction', transactionId);
     }
 
-    await prisma.tagsOnTransactions.deleteMany({
+    await prisma.transactionTag.deleteMany({
       where: {
         transactionId,
         tagId: { in: tagIds },
@@ -422,9 +417,9 @@ export const transactionService = {
     }
 
     // If it's a transfer, delete the linked transaction too
-    if (transaction.isTransfer && transaction.linkedTransferId) {
+    if (transaction.transferPairId) {
       await prisma.transaction.update({
-        where: { id: transaction.linkedTransferId },
+        where: { id: transaction.transferPairId },
         data: { deletedAt: new Date() },
       });
     }
@@ -465,7 +460,7 @@ export const transactionService = {
         deletedAt: null,
         date: { gte: startDate, lte: endDate },
         amount: { lt: 0 },
-        isTransfer: false,
+        transferPairId: null,
       },
       include: {
         category: {

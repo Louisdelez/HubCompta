@@ -125,14 +125,12 @@ export const exportService = {
         transactions.map((t) => ({
           date: formatDate(t.date),
           description: t.description,
-          amount: t.amount,
+          amount: Number(t.amount),
           account: t.account.name,
           category: t.category?.name || '',
           tags: t.tags.map((tt) => tt.tag.name).join(', '),
-          payee: t.payee || '',
-          reference: t.reference || '',
           notes: t.notes || '',
-          isReconciled: t.isReconciled,
+          status: t.status,
         })),
         null,
         2
@@ -154,24 +152,20 @@ export const exportService = {
       'Compte',
       'Catégorie',
       'Tags',
-      'Bénéficiaire',
-      'Référence',
       'Notes',
-      'Rapproché',
+      'Statut',
     ];
 
     const rows = transactions.map((t) =>
       formatCSVRow([
         formatDate(t.date),
         t.description,
-        formatAmount(t.amount),
+        formatAmount(Number(t.amount)),
         t.account.name,
         t.category?.name || '',
         t.tags.map((tt) => tt.tag.name).join('; '),
-        t.payee || '',
-        t.reference || '',
         t.notes || '',
-        t.isReconciled ? 'Oui' : 'Non',
+        t.status,
       ])
     );
 
@@ -265,9 +259,8 @@ export const exportService = {
           name: a.name,
           type: a.type,
           currency: a.currency,
-          balance: a.balance,
+          balance: Number(a.balance),
           isArchived: a.isArchived,
-          institution: a.institution || '',
           transactionCount: a._count.transactions,
         })),
         null,
@@ -282,7 +275,7 @@ export const exportService = {
       };
     }
 
-    const headers = ['Nom', 'Type', 'Devise', 'Solde', 'Institution', 'Archivé', 'Nb transactions'];
+    const headers = ['Nom', 'Type', 'Devise', 'Solde', 'Archivé', 'Nb transactions'];
 
     const typeLabels: Record<string, string> = {
       checking: 'Compte courant',
@@ -299,8 +292,7 @@ export const exportService = {
         a.name,
         typeLabels[a.type] || a.type,
         a.currency,
-        formatAmount(a.balance),
-        a.institution || '',
+        formatAmount(Number(a.balance)),
         a.isArchived ? 'Oui' : 'Non',
         a._count.transactions,
       ])
@@ -544,9 +536,9 @@ export const exportService = {
         formatDate(inv.issueDate),
         formatDate(inv.dueDate),
         inv.contact.name,
-        formatAmount(inv.totalHT),
-        formatAmount(inv.totalVAT),
-        formatAmount(inv.totalTTC),
+        formatAmount(Number(inv.subtotal)),
+        formatAmount(Number(inv.vatAmount)),
+        formatAmount(Number(inv.total)),
         statusLabels[inv.status] || inv.status,
         inv.paidAt ? formatDate(inv.paidAt) : '',
       ])
@@ -614,9 +606,9 @@ export const exportService = {
         formatDate(q.issueDate),
         formatDate(q.validUntil),
         q.contact.name,
-        formatAmount(q.totalHT),
-        formatAmount(q.totalVAT),
-        formatAmount(q.totalTTC),
+        formatAmount(Number(q.subtotal)),
+        formatAmount(Number(q.vatAmount)),
+        formatAmount(Number(q.total)),
         statusLabels[q.status] || q.status,
       ])
     );

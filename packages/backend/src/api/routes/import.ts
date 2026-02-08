@@ -2,7 +2,13 @@
 // IMPORT ROUTES - Finance Hub
 // ============================================================================
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
+
+interface MultipartFile {
+  file: AsyncIterableIterator<Buffer>;
+  filename: string;
+  fields: Record<string, unknown>;
+}
 import { importService } from '@/modules/import/import.service.js';
 import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
@@ -41,7 +47,7 @@ export async function importRoutes(app: FastifyInstance): Promise<void> {
       const { workspaceId } = request.params;
 
       // Handle multipart file upload
-      const data = await request.file();
+      const data = await (request as unknown as { file: () => Promise<MultipartFile | undefined> }).file();
       if (!data) {
         return reply.status(400).send({
           success: false,

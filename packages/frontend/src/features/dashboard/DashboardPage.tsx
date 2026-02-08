@@ -4,7 +4,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import { useCurrentWorkspaceId } from '@/stores/workspaceStore';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { MonthlySummary } from './MonthlySummary';
 import { CategoryChart } from './CategoryChart';
 import { AccountList } from '@/features/accounts/AccountList';
@@ -44,7 +44,7 @@ interface DashboardData {
 // ----------------------------------------------------------------------------
 
 export function DashboardPage() {
-  const workspaceId = useCurrentWorkspaceId();
+  const { currentWorkspaceId: workspaceId } = useWorkspace();
 
   const { data: summary, isLoading } = useQuery({
     queryKey: ['dashboard-summary', workspaceId],

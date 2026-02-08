@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -110,9 +109,8 @@ export function WorkspaceSettings({
     register,
     handleSubmit,
     formState: { errors, isDirty },
-    reset,
   } = useForm<WorkspaceFormData>({
-    values: workspace
+    defaultValues: workspace
       ? {
           name: workspace.name,
           currency: workspace.currency,
@@ -122,7 +120,15 @@ export function WorkspaceSettings({
           enableProMode: workspace.settings.enableProMode,
           enableInvestMode: workspace.settings.enableInvestMode,
         }
-      : undefined,
+      : {
+          name: '',
+          currency: 'EUR',
+          fiscalYearStart: '01-01',
+          dateFormat: 'DD/MM/YYYY',
+          decimalSeparator: ',',
+          enableProMode: false,
+          enableInvestMode: false,
+        },
   });
 
   // Update mutation

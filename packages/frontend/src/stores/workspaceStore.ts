@@ -46,7 +46,7 @@ const initialState = {
 
 export const useWorkspaceStore = create<WorkspaceState>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       ...initialState,
 
       setCurrentWorkspace: (workspace) =>

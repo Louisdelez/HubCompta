@@ -2,6 +2,8 @@
 // API CLIENT - Finance Hub
 // ============================================================================
 
+/// <reference types="vite/client" />
+
 import type { ApiError } from '@finance-hub/shared';
 
 // ----------------------------------------------------------------------------
@@ -82,12 +84,20 @@ async function refreshAccessToken(): Promise<void> {
     throw new Error('Token refresh failed');
   }
 
-  const data = (await response.json()) as {
-    accessToken: string;
-    refreshToken: string;
+  const result = (await response.json()) as {
+    success: boolean;
+    data: {
+      accessToken: string;
+      refreshToken: string;
+    };
   };
 
-  setTokens(data.accessToken, data.refreshToken);
+  if (!result.success || !result.data.accessToken || !result.data.refreshToken) {
+    clearTokens();
+    throw new Error('Token refresh failed');
+  }
+
+  setTokens(result.data.accessToken, result.data.refreshToken);
 }
 
 async function ensureValidToken(): Promise<void> {
@@ -131,9 +141,9 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
   await ensureValidToken();
 
   // Build headers
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...customHeaders,
+    ...(customHeaders as Record<string, string>),
   };
 
   if (accessToken) {
@@ -148,19 +158,25 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...fetchOptions,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body: body ? JSON.stringify(body) : null,
   });
 
   // Handle 401 - try token refresh once
-  if (response.status === 401 && refreshToken && !options.headers?.['X-Retry-After-Refresh']) {
+  if (response.status === 401 && refreshToken && !(options.headers as Record<string, string> | undefined)?.['X-Retry-After-Refresh']) {
     try {
-      await refreshAccessToken();
+      // Use shared promise to prevent concurrent refreshes
+      if (!tokenRefreshPromise) {
+        tokenRefreshPromise = refreshAccessToken();
+      }
+      await tokenRefreshPromise;
+      tokenRefreshPromise = null;
       // Retry the request with new token
       return request(endpoint, {
         ...options,
         headers: { ...customHeaders, 'X-Retry-After-Refresh': 'true' },
       });
     } catch {
+      tokenRefreshPromise = null;
       clearTokens();
       window.location.href = '/login';
       throw new ApiClientError('Session expired', 'SESSION_EXPIRED', 401);
