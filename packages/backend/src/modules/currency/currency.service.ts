@@ -312,31 +312,42 @@ export const currencyService = {
    * Get latest rates for a base currency
    */
   async getLatestRates(baseCurrency: string) {
-    // Get most recent date with rates for this base currency
-    const latestRate = await prisma.exchangeRate.findFirst({
-      where: { baseCurrency: baseCurrency.toUpperCase() },
-      orderBy: { date: 'desc' },
-      select: { date: true },
+    const base = baseCurrency.toUpperCase();
+
+    // Get distinct target currencies that have rates from this base
+    const distinctTargets = await prisma.exchangeRate.findMany({
+      where: { baseCurrency: base },
+      distinct: ['targetCurrency'],
+      select: { targetCurrency: true },
     });
 
-    if (!latestRate) {
+    if (distinctTargets.length === 0) {
       return [];
     }
 
-    // Get all rates for that date
-    const rates = await prisma.exchangeRate.findMany({
-      where: {
-        baseCurrency: baseCurrency.toUpperCase(),
-        date: latestRate.date,
-      },
-    });
+    // For each target currency, get the most recent rate
+    const rates = await Promise.all(
+      distinctTargets.map(async ({ targetCurrency }) => {
+        const latestRate = await prisma.exchangeRate.findFirst({
+          where: {
+            baseCurrency: base,
+            targetCurrency,
+          },
+          orderBy: { date: 'desc' },
+        });
+        return latestRate;
+      })
+    );
 
-    return rates.map((r) => ({
-      targetCurrency: r.targetCurrency,
-      rate: Number(r.rate),
-      date: r.date,
-      source: r.source,
-    }));
+    // Filter out nulls and map to response format
+    return rates
+      .filter((r): r is NonNullable<typeof r> => r !== null)
+      .map((r) => ({
+        targetCurrency: r.targetCurrency,
+        rate: Number(r.rate),
+        date: r.date,
+        source: r.source,
+      }));
   },
 
   /**
