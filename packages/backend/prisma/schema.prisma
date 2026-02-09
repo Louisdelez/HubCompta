@@ -233,6 +233,7 @@ model Transaction {
   categoryId     String?           @map("category_id") @db.Uuid
   status         TransactionStatus @default(pending)
   isRecurring    Boolean           @default(false) @map("is_recurring")
+  isReconciled   Boolean           @default(false) @map("is_reconciled")
   recurrenceId   String?           @map("recurrence_id") @db.Uuid
   importHash     String?           @map("import_hash") @db.VarChar(64)
   transferPairId String?           @unique @map("transfer_pair_id") @db.Uuid

@@ -6,7 +6,7 @@ import { prisma } from '@/core/database/client.js';
 import { NotFoundError, ValidationError } from '@/core/middleware/errorHandler.js';
 import * as OTPAuth from 'otpauth';
 import { randomBytes } from 'crypto';
-import type { MFA, MFAType } from '@prisma/client';
+import type { MFAType } from '@prisma/client';
 
 // ----------------------------------------------------------------------------
 // Configuration

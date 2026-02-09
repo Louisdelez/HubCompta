@@ -113,28 +113,28 @@ export function ExchangeRatesPage() {
   const fetchECBMutation = useMutation({
     mutationFn: () => api.post('/currencies/rates/fetch-ecb', {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
+      void queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
     },
   });
 
   const fetchFedMutation = useMutation({
     mutationFn: () => api.post('/currencies/rates/fetch-fed', {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
+      void queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
     },
   });
 
   const fetchSNBMutation = useMutation({
     mutationFn: () => api.post('/currencies/rates/fetch-snb', {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
+      void queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
     },
   });
 
   const fetchFREDMutation = useMutation({
     mutationFn: () => api.post('/currencies/rates/fetch-fred', {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
+      void queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
     },
   });
 
@@ -142,7 +142,7 @@ export function ExchangeRatesPage() {
   const fetchAllMutation = useMutation({
     mutationFn: () => api.post('/currencies/rates/fetch-all', {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
+      void queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
     },
   });
 
@@ -150,7 +150,7 @@ export function ExchangeRatesPage() {
   const initializeMutation = useMutation({
     mutationFn: () => api.post('/currencies/initialize', {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currencies'] });
+      void queryClient.invalidateQueries({ queryKey: ['currencies'] });
     },
   });
 

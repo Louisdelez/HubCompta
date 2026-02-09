@@ -206,7 +206,7 @@ export const searchService = {
     workspaceId: string,
     limit: number
   ): Promise<{ results: SearchResult[]; total: number }> {
-    const searchPattern = `%${query}%`;
+    const _searchPattern = `%${query}%`;
 
     const [transactions, count] = await Promise.all([
       prisma.transaction.findMany({

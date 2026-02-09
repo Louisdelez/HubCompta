@@ -91,7 +91,7 @@ export function QuotesPage() {
     mutationFn: (id: string) =>
       api.post(`/workspaces/${workspaceId}/quotes/${id}/send`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
     },
   });
 
@@ -99,7 +99,7 @@ export function QuotesPage() {
     mutationFn: (id: string) =>
       api.post(`/workspaces/${workspaceId}/quotes/${id}/accept`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
     },
   });
 
@@ -107,7 +107,7 @@ export function QuotesPage() {
     mutationFn: (id: string) =>
       api.post(`/workspaces/${workspaceId}/quotes/${id}/reject`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
     },
   });
 
@@ -115,7 +115,7 @@ export function QuotesPage() {
     mutationFn: (id: string) =>
       api.delete(`/workspaces/${workspaceId}/quotes/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
     },
   });
 
@@ -123,7 +123,7 @@ export function QuotesPage() {
     mutationFn: (id: string) =>
       api.post<{ data: Quote }>(`/workspaces/${workspaceId}/quotes/${id}/duplicate`),
     onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
       navigate(`/workspaces/${workspaceId}/pro/quotes/${response.data.id}`);
     },
   });
@@ -138,8 +138,8 @@ export function QuotesPage() {
       );
     },
     onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
       navigate(`/workspaces/${workspaceId}/pro/invoices/${response.data.id}`);
     },
   });

@@ -4,7 +4,6 @@
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
-import type { Prisma } from '@prisma/client';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -135,7 +134,7 @@ export const currencyService = {
   /**
    * Get currency by code
    */
-  async getCurrency(code: string) {
+  getCurrency(code: string) {
     return prisma.currency.findUnique({
       where: { code: code.toUpperCase() },
     });
@@ -350,7 +349,7 @@ export const currencyService = {
   /**
    * Set exchange rate manually
    */
-  async setRate(data: ExchangeRateData) {
+  setRate(data: ExchangeRateData) {
     const normalizedDate = new Date(data.date);
     normalizedDate.setHours(0, 0, 0, 0);
 
@@ -407,16 +406,16 @@ export const currencyService = {
   async getHistoricalRates(
     baseCurrency: string,
     targetCurrency: string,
-    startDate: Date,
-    endDate: Date = new Date()
+    _startDate: Date,
+    _endDate: Date = new Date()
   ) {
     const rates = await prisma.exchangeRate.findMany({
       where: {
         baseCurrency: baseCurrency.toUpperCase(),
         targetCurrency: targetCurrency.toUpperCase(),
         date: {
-          gte: startDate,
-          lte: endDate,
+          gte: _startDate,
+          lte: _endDate,
         },
       },
       orderBy: { date: 'asc' },

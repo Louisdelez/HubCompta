@@ -46,7 +46,7 @@ export function ManualRateModal({
       date: string;
     }) => api.post('/currencies/rates', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
+      void queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
       onClose();
       // Reset form
       setRate('');

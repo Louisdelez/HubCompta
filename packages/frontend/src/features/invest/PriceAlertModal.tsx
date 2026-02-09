@@ -43,7 +43,7 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
     mutationFn: (data: { assetId: string; targetPrice: number; direction: 'above' | 'below' }) =>
       api.post(`/workspaces/${currentWorkspace?.id}/alerts/price`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['price-alerts'] });
+      void queryClient.invalidateQueries({ queryKey: ['price-alerts'] });
       onClose();
     },
   });

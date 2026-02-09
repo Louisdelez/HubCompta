@@ -459,7 +459,7 @@ export const documentService = {
   /**
    * Get inbox count (unlinked documents)
    */
-  async getInboxCount(workspaceId: string): Promise<number> {
+  getInboxCount(workspaceId: string): Promise<number> {
     return prisma.document.count({
       where: {
         workspaceId,

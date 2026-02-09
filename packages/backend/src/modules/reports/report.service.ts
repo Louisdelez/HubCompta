@@ -4,13 +4,11 @@
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
-import { Prisma } from '@prisma/client';
 import {
-  startOfMonth,
-  endOfMonth,
+  startOfMonth as _startOfMonth,
+  endOfMonth as _endOfMonth,
   startOfYear,
   endOfYear,
-  subMonths,
   format,
   eachMonthOfInterval,
   eachDayOfInterval,
@@ -392,8 +390,8 @@ export const reportService = {
           break;
         case 'month':
         default:
-          periodStart = startOfMonth(date);
-          periodEnd = endOfMonth(date);
+          periodStart = _startOfMonth(date);
+          periodEnd = _endOfMonth(date);
       }
 
       // Don't go beyond the requested range
@@ -450,8 +448,8 @@ export const reportService = {
       let total = 0;
 
       for (const month of months) {
-        const periodStart = startOfMonth(month);
-        const periodEnd = endOfMonth(month);
+        const periodStart = _startOfMonth(month);
+        const periodEnd = _endOfMonth(month);
 
         const result = await prisma.transaction.aggregate({
           where: {
@@ -578,7 +576,7 @@ export const reportService = {
     const prevFrom = startOfYear(new Date(prevYear, 0, 1));
     const prevTo = endOfYear(new Date(prevYear, 0, 1));
 
-    const prevYearData = await prisma.transaction.aggregate({
+    const _prevYearData = await prisma.transaction.aggregate({
       where: {
         account: { workspaceId },
         date: { gte: prevFrom, lte: prevTo },

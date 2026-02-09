@@ -5,7 +5,7 @@
 
 import type { FastifyPluginAsync } from 'fastify';
 import { recurrenceService } from '@/modules/recurrences/index.js';
-import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
+import { auditService } from '@/modules/audit/audit.service.js';
 import type { RecurrenceFreq } from '@prisma/client';
 
 // ----------------------------------------------------------------------------
@@ -77,7 +77,7 @@ const recurrenceRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
     Params: { workspaceId: string };
     Querystring: ListQuery;
-  }>('/', async (request, reply) => {
+  }>('/', async (request, _reply) => {
     const { workspaceId } = request.params;
     const { isActive, page, pageSize } = request.query;
 
@@ -411,7 +411,7 @@ const recurrenceRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
     Params: RecurrenceParams;
     Querystring: { count?: string };
-  }>('/:recurrenceId/upcoming', async (request, reply) => {
+  }>('/:recurrenceId/upcoming', async (request, _reply) => {
     const { workspaceId, recurrenceId } = request.params;
     const count = request.query.count ? parseInt(request.query.count) : 5;
 
@@ -435,7 +435,7 @@ const recurrenceRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get<{
     Params: { workspaceId: string };
     Querystring: { month?: string };
-  }>('/forecast', async (request, reply) => {
+  }>('/forecast', async (request, _reply) => {
     const { workspaceId } = request.params;
     const month = request.query.month ? new Date(request.query.month) : new Date();
 

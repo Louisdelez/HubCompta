@@ -8,10 +8,10 @@ import type { FastifyRequest, FastifyReply } from 'fastify';
  * Request logging hook
  * Logs incoming requests with relevant metadata
  */
-export async function requestLogger(
+export function requestLogger(
   request: FastifyRequest,
   _reply: FastifyReply
-): Promise<void> {
+): void {
   // Skip logging for health checks and static assets
   if (
     request.url === '/health' ||
@@ -43,10 +43,10 @@ export async function requestLogger(
  * Returns a hook that logs response details
  */
 export function createResponseLogger() {
-  return async function responseLogger(
+  return function responseLogger(
     request: FastifyRequest,
     reply: FastifyReply
-  ): Promise<void> {
+  ): void {
     // Skip logging for health checks
     if (request.url === '/health') {
       return;

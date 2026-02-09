@@ -4,11 +4,11 @@
 
 import { startWorker, gracefulShutdown } from './jobs/registry.js';
 
-async function main(): Promise<void> {
+function main(): void {
   console.info('Starting Finance Hub Worker...');
 
   try {
-    await startWorker();
+    startWorker();
     console.info('Worker started successfully');
   } catch (error) {
     console.error('Failed to start worker:', error);
@@ -17,16 +17,14 @@ async function main(): Promise<void> {
 }
 
 // Handle graceful shutdown
-process.on('SIGTERM', async () => {
+process.on('SIGTERM', () => {
   console.info('Received SIGTERM, shutting down gracefully...');
-  await gracefulShutdown();
-  process.exit(0);
+  void gracefulShutdown().then(() => process.exit(0));
 });
 
-process.on('SIGINT', async () => {
+process.on('SIGINT', () => {
   console.info('Received SIGINT, shutting down gracefully...');
-  await gracefulShutdown();
-  process.exit(0);
+  void gracefulShutdown().then(() => process.exit(0));
 });
 
 // Handle uncaught errors
@@ -41,4 +39,4 @@ process.on('unhandledRejection', (reason) => {
 });
 
 // Start the worker
-void main();
+main();

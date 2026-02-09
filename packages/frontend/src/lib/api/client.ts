@@ -196,7 +196,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     );
   }
 
-  return (data as ApiResponse<T>).data;
+  return data.data;
 }
 
 // ----------------------------------------------------------------------------

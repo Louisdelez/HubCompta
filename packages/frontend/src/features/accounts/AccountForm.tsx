@@ -115,7 +115,7 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
     mutationFn: (data: AccountFormData) =>
       api.post(`/workspaces/${workspaceId}/accounts`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
       onClose();
     },
     onError: (err) => {
@@ -127,7 +127,7 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
     mutationFn: (data: Partial<AccountFormData>) =>
       api.patch(`/workspaces/${workspaceId}/accounts/${account!.id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
       onClose();
     },
     onError: (err) => {

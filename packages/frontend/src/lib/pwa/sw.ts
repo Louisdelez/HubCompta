@@ -38,7 +38,7 @@ const IMAGE_CACHE = `${CACHE_PREFIX}-images-${CACHE_VERSION}`;
 // ----------------------------------------------------------------------------
 
 // Precache all assets built by Vite
-// @ts-ignore - Injected by workbox-build
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- __WB_MANIFEST is injected by workbox-build at build time
 precacheAndRoute(self.__WB_MANIFEST || []);
 
 // Cleanup old caches
@@ -207,7 +207,7 @@ registerRoute(
 self.addEventListener('install', (_event) => {
   console.log('[ServiceWorker] Install');
   // Skip waiting to activate immediately
-  self.skipWaiting();
+  void self.skipWaiting();
 });
 
 // Activate event
@@ -220,7 +220,7 @@ self.addEventListener('activate', (event) => {
 // Message event (for communication with main app)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+    void self.skipWaiting();
   }
 
   if (event.data && event.data.type === 'GET_VERSION') {
@@ -277,7 +277,7 @@ self.addEventListener('notificationclick', (event) => {
       // Focus existing window if available
       for (const client of clientList) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
-          client.navigate(url);
+          void client.navigate(url);
           return client.focus();
         }
       }

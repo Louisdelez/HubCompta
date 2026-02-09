@@ -2,7 +2,7 @@
 // SEARCH API ROUTES - Finance Hub
 // ============================================================================
 
-import { FastifyPluginAsync, FastifyRequest } from 'fastify';
+import { FastifyPluginAsync } from 'fastify';
 import { searchService, TransactionFilters } from '../../modules/search/index.js';
 import { authGuard } from '../../core/auth/authGuard.js';
 import { prisma } from '../../core/database/client.js';

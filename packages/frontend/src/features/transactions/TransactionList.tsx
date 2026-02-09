@@ -317,7 +317,7 @@ export function TransactionList() {
             setEditingTransaction(null);
           }}
           onSuccess={() => {
-            refetch();
+            void refetch();
             setShowForm(false);
             setEditingTransaction(null);
           }}

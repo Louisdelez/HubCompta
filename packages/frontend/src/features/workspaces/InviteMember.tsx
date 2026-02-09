@@ -56,7 +56,7 @@ export function InviteMember({ workspaceId, onClose }: InviteMemberProps) {
       api.post<InviteResponse>(`/workspaces/${workspaceId}/invite`, data),
     onSuccess: (data) => {
       setInviteLink(window.location.origin + data.inviteLink);
-      queryClient.invalidateQueries({ queryKey: ['workspace-invitations', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['workspace-invitations', workspaceId] });
     },
     onError: (err) => {
       setError(err instanceof Error ? err.message : 'Erreur lors de l\'invitation');
@@ -70,7 +70,7 @@ export function InviteMember({ workspaceId, onClose }: InviteMemberProps) {
 
   const copyLink = () => {
     if (inviteLink) {
-      navigator.clipboard.writeText(inviteLink);
+      void navigator.clipboard.writeText(inviteLink);
     }
   };
 
@@ -118,7 +118,7 @@ export function InviteMember({ workspaceId, onClose }: InviteMemberProps) {
             </div>
           ) : (
             // Form state
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={(e) => { e.preventDefault(); void handleSubmit(onSubmit)(e); }} className="space-y-4">
               {error && (
                 <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm">
                   {error}

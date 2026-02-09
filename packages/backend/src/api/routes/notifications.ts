@@ -3,9 +3,9 @@
 // In-app notifications API
 // ============================================================================
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { notificationService } from '@/modules/notifications/notification.service.js';
-import { alertService } from '@/modules/notifications/alert.service.js';
+import { alertService, type AlertConfig } from '@/modules/notifications/alert.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
 import type { NotificationType, AlertRuleType } from '@prisma/client';
 
@@ -33,20 +33,20 @@ interface CreateAlertBody {
   workspaceId?: string;
   type: AlertRuleType;
   name: string;
-  config: Record<string, unknown>;
+  config: AlertConfig;
 }
 
 interface UpdateAlertBody {
   name?: string;
   isEnabled?: boolean;
-  config?: Record<string, unknown>;
+  config?: AlertConfig;
 }
 
 // ----------------------------------------------------------------------------
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function notificationRoutes(app: FastifyInstance): Promise<void> {
+export function notificationRoutes(app: FastifyInstance): void {
   // Apply auth guard to all routes
   app.addHook('preHandler', authGuard);
 
@@ -193,7 +193,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
         workspaceId,
         type,
         name,
-        config: config as any,
+        config,
       });
 
       return reply.status(201).send({
@@ -241,7 +241,7 @@ export async function notificationRoutes(app: FastifyInstance): Promise<void> {
       await alertService.update(ruleId, userId, {
         name,
         isEnabled,
-        config: config as any,
+        config,
       });
 
       const rule = await alertService.getById(ruleId, userId);

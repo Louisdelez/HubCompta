@@ -153,7 +153,7 @@ export function QuoteForm() {
     mutationFn: (data: CreateQuotePayload) =>
       api.post<{ data: Quote }>(`/workspaces/${workspaceId}/quotes`, data),
     onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
       navigate(`/workspaces/${workspaceId}/pro/quotes/${response.data.id}`);
     },
     onError: (error: Error) => {
@@ -165,7 +165,7 @@ export function QuoteForm() {
     mutationFn: (data: { lines: QuoteLine[] }) =>
       api.patch<{ data: Quote }>(`/workspaces/${workspaceId}/quotes/${quoteId}/lines`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
       navigate(`/workspaces/${workspaceId}/pro/quotes/${quoteId}`);
     },
     onError: (error: Error) => {

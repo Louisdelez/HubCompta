@@ -2,9 +2,9 @@
 // RULES ROUTES - Finance Hub
 // ============================================================================
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { ruleService } from '@/modules/rules/rule.service.js';
-import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
+import { auditService } from '@/modules/audit/audit.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
 import { workspaceContextMiddleware, requirePermission } from '@/core/middleware/workspaceContext.js';
 import { ruleCreateSchema, ruleUpdateSchema } from '@finance-hub/shared';
@@ -25,7 +25,7 @@ interface RuleParams extends WorkspaceParams {
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function ruleRoutes(app: FastifyInstance): Promise<void> {
+export function ruleRoutes(app: FastifyInstance): void {
   // Apply auth guard and workspace context to all routes
   app.addHook('preHandler', authGuard);
   app.addHook('preHandler', workspaceContextMiddleware);

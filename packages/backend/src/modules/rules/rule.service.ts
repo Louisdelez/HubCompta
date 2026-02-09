@@ -79,7 +79,7 @@ export const ruleService = {
   /**
    * Get rule by ID
    */
-  async getById(workspaceId: string, ruleId: string): Promise<Rule | null> {
+  getById(workspaceId: string, ruleId: string): Promise<Rule | null> {
     return prisma.rule.findFirst({
       where: { id: ruleId, workspaceId },
     });

@@ -4,6 +4,7 @@
 
 import type { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
+import { Sentry } from '../monitoring/sentry.js';
 
 // ----------------------------------------------------------------------------
 // Custom Error Classes
@@ -187,6 +188,15 @@ export async function errorHandler(
   }
   // Handle unknown errors
   else {
+    // Report unexpected errors to Sentry
+    Sentry.captureException(error, {
+      extra: {
+        url: request.url,
+        method: request.method,
+        userId: (request.user as { sub?: string })?.sub,
+      },
+    });
+
     // Don't leak internal error details in production
     const message =
       process.env.NODE_ENV === 'production'

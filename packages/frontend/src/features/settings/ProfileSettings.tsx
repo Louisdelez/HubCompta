@@ -65,7 +65,7 @@ export function ProfileSettings() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      void queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       setIsEditing(false);
     },
   });

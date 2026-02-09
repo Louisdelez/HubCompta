@@ -74,7 +74,7 @@ export function RulesPage() {
     mutationFn: (ruleId: string) =>
       api.post(`/workspaces/${workspaceId}/rules/${ruleId}/toggle`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['rules', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['rules', workspaceId] });
     },
   });
 
@@ -83,7 +83,7 @@ export function RulesPage() {
     mutationFn: (ruleId: string) =>
       api.delete(`/workspaces/${workspaceId}/rules/${ruleId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['rules', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['rules', workspaceId] });
     },
   });
 
@@ -270,7 +270,7 @@ export function RulesPage() {
           {...(editingRule ? { rule: editingRule } : {})}
           onClose={handleClose}
           onSave={() => {
-            queryClient.invalidateQueries({ queryKey: ['rules', workspaceId] });
+            void queryClient.invalidateQueries({ queryKey: ['rules', workspaceId] });
             handleClose();
           }}
         />

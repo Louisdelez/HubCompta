@@ -103,6 +103,20 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Handle result selection
+  const handleSelect = useCallback(
+    (result: SearchResult) => {
+      const config = TYPE_CONFIG[result.type];
+      const path = workspaceId
+        ? `/workspaces/${workspaceId}${config.path}/${result.id}`
+        : `${config.path}?id=${result.id}`;
+      navigate(path);
+      setIsOpen(false);
+      setQuery('');
+    },
+    [navigate, workspaceId]
+  );
+
   // Handle result navigation
   const handleKeyNavigation = useCallback(
     (e: React.KeyboardEvent) => {
@@ -125,19 +139,8 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
           break;
       }
     },
-    [results, selectedIndex]
+    [results, selectedIndex, handleSelect]
   );
-
-  // Handle result selection
-  const handleSelect = (result: SearchResult) => {
-    const config = TYPE_CONFIG[result.type];
-    const path = workspaceId
-      ? `/workspaces/${workspaceId}${config.path}/${result.id}`
-      : `${config.path}?id=${result.id}`;
-    navigate(path);
-    setIsOpen(false);
-    setQuery('');
-  };
 
   // Click outside to close
   useEffect(() => {

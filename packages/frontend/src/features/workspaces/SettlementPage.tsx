@@ -283,7 +283,7 @@ export function SettlementPage() {
           <Home className="w-12 h-12 mx-auto mb-4 text-ctp-overlay1" />
           <h2 className="text-xl font-bold mb-2">Aucune donnee</h2>
           <p className="text-ctp-subtext0">
-            Ajoutez des depenses partagees pour voir l'equilibre
+            Ajoutez des depenses partagees pour voir l&apos;equilibre
           </p>
         </div>
       ) : null}

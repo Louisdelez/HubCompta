@@ -48,7 +48,7 @@ const linkSchema = z.object({
 // Route Handlers
 // ----------------------------------------------------------------------------
 
-export async function documentRoutes(app: FastifyInstance): Promise<void> {
+export function documentRoutes(app: FastifyInstance): void {
   // Apply auth guard to all routes
   app.addHook('onRequest', authGuard);
 

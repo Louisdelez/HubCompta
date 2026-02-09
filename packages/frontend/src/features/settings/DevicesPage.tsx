@@ -41,7 +41,7 @@ export function DevicesPage() {
   const revokeMutation = useMutation({
     mutationFn: (deviceId: string) => api.delete(`/user/devices/${deviceId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['devices'] });
+      void queryClient.invalidateQueries({ queryKey: ['devices'] });
     },
   });
 
@@ -50,7 +50,7 @@ export function DevicesPage() {
     mutationFn: ({ deviceId, trust }: { deviceId: string; trust: boolean }) =>
       api.patch(`/user/devices/${deviceId}/${trust ? 'trust' : 'untrust'}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['devices'] });
+      void queryClient.invalidateQueries({ queryKey: ['devices'] });
     },
   });
 
@@ -59,7 +59,7 @@ export function DevicesPage() {
     mutationFn: ({ deviceId, name }: { deviceId: string; name: string }) =>
       api.patch(`/user/devices/${deviceId}/rename`, { name }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['devices'] });
+      void queryClient.invalidateQueries({ queryKey: ['devices'] });
       setSelectedDevice(null);
       setRenameValue('');
     },

@@ -13,7 +13,6 @@ import { importService } from '@/modules/import/import.service.js';
 import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
 import { workspaceContextMiddleware, requirePermission } from '@/core/middleware/workspaceContext.js';
-import { importPreviewSchema, importExecuteSchema } from '@finance-hub/shared';
 import { importQueue } from '@/core/queue/index.js';
 
 // ----------------------------------------------------------------------------
@@ -32,7 +31,7 @@ interface JobParams extends WorkspaceParams {
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function importRoutes(app: FastifyInstance): Promise<void> {
+export function importRoutes(app: FastifyInstance): void {
   // Apply auth guard and workspace context to all routes
   app.addHook('preHandler', authGuard);
   app.addHook('preHandler', workspaceContextMiddleware);

@@ -4,7 +4,7 @@
 
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { ForbiddenError, UnauthorizedError } from '@/core/middleware/errorHandler.js';
-import { redisClient, REDIS_KEYS } from '@/core/database/redis.js';
+import { redisClient } from '@/core/database/redis.js';
 import { verifyPassword } from '@/core/crypto/password.js';
 import { prisma } from '@/core/database/client.js';
 

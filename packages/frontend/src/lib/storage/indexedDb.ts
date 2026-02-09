@@ -410,11 +410,11 @@ export async function isStoragePersisted(): Promise<boolean> {
   return false;
 }
 
-export async function requestPersistentStorage(): Promise<boolean> {
+export function requestPersistentStorage(): Promise<boolean> {
   if ('storage' in navigator && 'persist' in navigator.storage) {
     return navigator.storage.persist();
   }
-  return false;
+  return Promise.resolve(false);
 }
 
 // Export database types

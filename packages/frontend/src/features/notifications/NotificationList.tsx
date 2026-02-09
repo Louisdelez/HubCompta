@@ -116,21 +116,21 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
 
   // Mark as read mutation
   const markReadMutation = useMutation({
-    mutationFn: async (notificationId: string) => {
+    mutationFn: (notificationId: string) => {
       return api.post(`/notifications/${notificationId}/read`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: async (notificationId: string) => {
+    mutationFn: (notificationId: string) => {
       return api.delete(`/notifications/${notificationId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 

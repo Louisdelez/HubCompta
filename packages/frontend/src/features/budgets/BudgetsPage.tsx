@@ -92,7 +92,7 @@ export function BudgetsPage() {
   };
 
   const handleSave = () => {
-    queryClient.invalidateQueries({ queryKey: ['budgets', workspaceId] });
+    void queryClient.invalidateQueries({ queryKey: ['budgets', workspaceId] });
     handleClose();
   };
 

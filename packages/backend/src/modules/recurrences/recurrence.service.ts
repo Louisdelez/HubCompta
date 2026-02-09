@@ -92,7 +92,7 @@ export const recurrenceService = {
   /**
    * Create a new recurrence
    */
-  async create(input: CreateRecurrenceInput) {
+  create(input: CreateRecurrenceInput) {
     const nextRunAt = this.calculateNextRun(
       input.startAt,
       input.frequency,
@@ -120,7 +120,7 @@ export const recurrenceService = {
   /**
    * Get a recurrence by ID
    */
-  async getById(id: string, workspaceId: string) {
+  getById(id: string, workspaceId: string) {
     return prisma.recurrence.findFirst({
       where: { id, workspaceId },
       include: {
@@ -303,7 +303,7 @@ export const recurrenceService = {
   /**
    * Get recurrences due for execution
    */
-  async getDueRecurrences(limit = 100) {
+  getDueRecurrences(limit = 100) {
     const now = new Date();
 
     return prisma.recurrence.findMany({
@@ -586,8 +586,9 @@ export const recurrenceService = {
     recurrence: { frequency: RecurrenceFreq; interval: number; nextRunAt: Date; endAt: Date | null },
     month: Date
   ): number {
-    const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
-    const endOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+    // Month boundaries for potential future use
+    const _startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
+    const _endOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0);
 
     switch (recurrence.frequency) {
       case 'daily':
@@ -599,13 +600,14 @@ export const recurrenceService = {
       case 'monthly':
         return recurrence.interval === 1 ? 1 : 0;
 
-      case 'yearly':
+      case 'yearly': {
         // Check if the yearly recurrence falls in this month
         const nextRun = recurrence.nextRunAt;
         if (nextRun.getMonth() === month.getMonth()) {
           return 1;
         }
         return 0;
+      }
 
       default:
         return 0;

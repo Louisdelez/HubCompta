@@ -24,6 +24,10 @@ import { handleAlertsJob } from './alerts.js';
 import { processRecurrenceJob } from './recurrences.js';
 import { processExchangeRateJob } from './exchange-rates.js';
 import { processBackupJob } from './backup.js';
+import { processImportJob } from './import.js';
+import { handleExportJob } from './export.js';
+import { handleMarketDataJob } from './marketdata.js';
+import { handleCleanupJob } from './cleanup.js';
 
 // Configuration
 const REDIS_URL = process.env.REDIS_URL;
@@ -52,30 +56,39 @@ const workers: Worker[] = [];
 // Job Processors
 // ----------------------------------------------------------------------------
 
-// Import processor (placeholder - will be implemented in T107)
+// Import processor
 async function processImport(job: Job<ImportJobData>): Promise<void> {
   console.info(`Processing import job: ${job.id}`, job.data);
-  // TODO: Implement import processing
-  await job.updateProgress(100);
+  const result = await processImportJob(job);
+  console.info(`Import job result:`, result);
 }
 
-// Export processor (placeholder - will be implemented in T186)
+// Export processor
 async function processExport(job: Job<ExportJobData>): Promise<void> {
   console.info(`Processing export job: ${job.id}`, job.data);
-  // TODO: Implement export processing
+  const result = await handleExportJob(job.data);
+  console.info(`Export job result:`, result);
   await job.updateProgress(100);
 }
 
-// Market data processor (placeholder - will be implemented in T169)
+// Market data processor
 async function processMarketData(job: Job<MarketDataJobData>): Promise<void> {
   console.info(`Processing market data job: ${job.id}`, job.data);
-  // TODO: Implement market data fetching
+  const result = await handleMarketDataJob(job.data);
+  console.info(`Market data job result:`, result);
 }
 
-// Cleanup processor (placeholder - will be implemented in T135)
+// Cleanup processor
 async function processCleanup(job: Job<CleanupJobData>): Promise<void> {
   console.info(`Processing cleanup job: ${job.id}`, job.data);
-  // TODO: Implement cleanup logic
+  const result = await handleCleanupJob({
+    type: job.data.type === 'orphaned_documents' ? 'documents'
+        : job.data.type === 'expired_sessions' ? 'sessions'
+        : job.data.type === 'old_audit_logs' ? 'audit'
+        : 'full',
+    dryRun: false,
+  });
+  console.info(`Cleanup job result:`, result);
 }
 
 // Backup processor
@@ -124,7 +137,8 @@ function registerWorker<T>(config: ProcessorConfig<T>): Worker<T> {
   });
 
   worker.on('progress', (job, progress) => {
-    console.info(`[${config.name}] Job ${job.id} progress: ${progress}%`);
+    const progressValue = typeof progress === 'number' ? progress : JSON.stringify(progress);
+    console.info(`[${config.name}] Job ${job.id} progress: ${progressValue}%`);
   });
 
   worker.on('error', (error) => {
@@ -139,7 +153,7 @@ function registerWorker<T>(config: ProcessorConfig<T>): Worker<T> {
 // Start Workers
 // ----------------------------------------------------------------------------
 
-export async function startWorker(): Promise<void> {
+export function startWorker(): void {
   // Register all job processors
   registerWorker<ImportJobData>({
     name: 'import',

@@ -138,7 +138,7 @@ export function WorkspaceSettingsPage() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace-details', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['workspace-details', workspaceId] });
     },
   });
 
@@ -152,7 +152,7 @@ export function WorkspaceSettingsPage() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace-settings', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['workspace-settings', workspaceId] });
       setIsEditing(false);
     },
   });
@@ -166,7 +166,7 @@ export function WorkspaceSettingsPage() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace-settings', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['workspace-settings', workspaceId] });
       setIsEditing(false);
     },
   });

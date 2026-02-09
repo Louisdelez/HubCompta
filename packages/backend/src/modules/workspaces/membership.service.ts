@@ -28,7 +28,7 @@ export const membershipService = {
   /**
    * Get membership by workspace and user
    */
-  async get(workspaceId: string, userId: string): Promise<Membership | null> {
+  get(workspaceId: string, userId: string): Promise<Membership | null> {
     return prisma.membership.findUnique({
       where: {
         workspaceId_userId: { workspaceId, userId },

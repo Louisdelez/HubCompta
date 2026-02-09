@@ -93,7 +93,7 @@ export function InvoicesPage() {
     mutationFn: (id: string) =>
       api.post(`/workspaces/${workspaceId}/invoices/${id}/send`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
     },
   });
 
@@ -101,7 +101,7 @@ export function InvoicesPage() {
     mutationFn: (id: string) =>
       api.post(`/workspaces/${workspaceId}/invoices/${id}/cancel`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
     },
   });
 
@@ -109,7 +109,7 @@ export function InvoicesPage() {
     mutationFn: (id: string) =>
       api.delete(`/workspaces/${workspaceId}/invoices/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
     },
   });
 
@@ -117,7 +117,7 @@ export function InvoicesPage() {
     mutationFn: (id: string) =>
       api.post<{ data: Invoice }>(`/workspaces/${workspaceId}/invoices/${id}/duplicate`),
     onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
       navigate(`/workspaces/${workspaceId}/pro/invoices/${response.data.id}`);
     },
   });

@@ -98,9 +98,9 @@ export function ImportProgress({
   useEffect(() => {
     if (!started) {
       setStarted(true);
-      executeMutation.mutate();
+      void executeMutation.mutateAsync();
     }
-  }, [started]);
+  }, [started, executeMutation]);
 
   // Handle job completion
   useEffect(() => {
@@ -115,7 +115,7 @@ export function ImportProgress({
     if (jobStatus?.status === 'failed') {
       setError(jobStatus.error ?? 'Import échoué');
     }
-  }, [jobStatus?.status]);
+  }, [jobStatus, onComplete]);
 
   const progress = jobStatus
     ? jobStatus.totalRows > 0

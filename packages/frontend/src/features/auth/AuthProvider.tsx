@@ -72,27 +72,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLocked: false,
   });
 
-  // Initialize auth state on mount
-  useEffect(() => {
-    async function initAuth() {
-      loadRefreshToken();
-      const token = getAccessToken();
-
-      if (!token) {
-        // Try to get token from stored refresh token
-        try {
-          await refreshUser();
-        } catch {
-          setState((prev) => ({ ...prev, isLoading: false }));
-        }
-      } else {
-        await refreshUser();
-      }
-    }
-
-    void initAuth();
-  }, []);
-
   // Refresh user data
   const refreshUser = useCallback(async () => {
     try {
@@ -112,6 +91,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
     }
   }, []);
+
+  // Initialize auth state on mount
+  useEffect(() => {
+    async function initAuth() {
+      loadRefreshToken();
+      const token = getAccessToken();
+
+      if (!token) {
+        // Try to get token from stored refresh token
+        try {
+          await refreshUser();
+        } catch {
+          setState((prev) => ({ ...prev, isLoading: false }));
+        }
+      } else {
+        await refreshUser();
+      }
+    }
+
+    void initAuth();
+  }, [refreshUser]);
 
   // Login
   const login = useCallback(

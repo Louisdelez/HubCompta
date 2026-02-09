@@ -64,7 +64,7 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (err) {
+    } catch {
       setError('Erreur lors du téléchargement de la sauvegarde');
     }
   };
@@ -107,12 +107,12 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
       return response.data;
     },
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['transactions', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['categories', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['budgets', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['tags', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['rules', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['transactions', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['categories', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['budgets', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['tags', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['rules', workspaceId] });
       setRestoreStep('idle');
       setBackupPreview(null);
 

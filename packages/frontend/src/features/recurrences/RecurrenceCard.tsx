@@ -140,7 +140,7 @@ export function RecurrenceCard({
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/workspaces/${workspaceId}/recurrences/${recurrence.id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
     },
   });
 
@@ -149,7 +149,7 @@ export function RecurrenceCard({
     mutationFn: () =>
       api.post(`/workspaces/${workspaceId}/recurrences/${recurrence.id}/pause`, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
     },
   });
 
@@ -158,7 +158,7 @@ export function RecurrenceCard({
     mutationFn: () =>
       api.post(`/workspaces/${workspaceId}/recurrences/${recurrence.id}/resume`, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
     },
   });
 
@@ -167,7 +167,7 @@ export function RecurrenceCard({
     mutationFn: () =>
       api.post(`/workspaces/${workspaceId}/recurrences/${recurrence.id}/skip`, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
     },
   });
 
@@ -179,8 +179,8 @@ export function RecurrenceCard({
         {}
       ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['transactions', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['transactions', workspaceId] });
     },
   });
 

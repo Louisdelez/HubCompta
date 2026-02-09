@@ -123,13 +123,13 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
 
   // Refresh price mutation
   const refreshMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: () => {
       return api.post(`/workspaces/${currentWorkspace?.id}/portfolio/refresh-prices`, {});
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['position'] });
-      queryClient.invalidateQueries({ queryKey: ['positions'] });
-      queryClient.invalidateQueries({ queryKey: ['portfolio'] });
+      void queryClient.invalidateQueries({ queryKey: ['position'] });
+      void queryClient.invalidateQueries({ queryKey: ['positions'] });
+      void queryClient.invalidateQueries({ queryKey: ['portfolio'] });
     },
   });
 

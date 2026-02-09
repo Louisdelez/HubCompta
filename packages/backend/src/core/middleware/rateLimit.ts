@@ -138,7 +138,7 @@ async function incrementRateLimit(
   };
 }
 
-async function blockIdentifier(
+async function _blockIdentifier(
   identifier: string,
   category: string,
   blockDuration: number
@@ -249,21 +249,6 @@ export const loginRateLimit = createRateLimitMiddleware({
     }
     return getIdentifier(request);
   },
-  onBlocked: async (request, reply) => {
-    // Block the identifier after max attempts
-    const body = request.body as { email?: string } | undefined;
-    const identifier = body?.email
-      ? `email:${body.email.toLowerCase()}`
-      : getIdentifier(request);
-
-    await blockIdentifier(identifier, 'login', DEFAULT_CONFIG.login.blockDuration);
-
-    return reply.status(429).send({
-      error: 'Compte temporairement bloque',
-      message: 'Trop de tentatives de connexion. Veuillez reessayer dans 30 minutes.',
-      retryAfter: Math.ceil(DEFAULT_CONFIG.login.blockDuration / 1000),
-    });
-  },
 });
 
 export const uploadRateLimit = createRateLimitMiddleware({
@@ -278,7 +263,7 @@ export const exportRateLimit = createRateLimitMiddleware({
 // Plugin Registration
 // ----------------------------------------------------------------------------
 
-export async function registerRateLimiting(app: FastifyInstance): Promise<void> {
+export function registerRateLimiting(app: FastifyInstance): void {
   // Apply global API rate limiting
   app.addHook('preHandler', async (request, reply) => {
     // Skip health checks and static files

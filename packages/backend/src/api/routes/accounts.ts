@@ -2,7 +2,7 @@
 // ACCOUNT ROUTES - Finance Hub
 // ============================================================================
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { accountService } from '@/modules/accounts/account.service.js';
 import { balanceService } from '@/modules/accounts/balance.service.js';
 import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
@@ -32,7 +32,7 @@ interface AccountQuery {
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function accountRoutes(app: FastifyInstance): Promise<void> {
+export function accountRoutes(app: FastifyInstance): void {
   // Apply auth guard and workspace context to all routes
   app.addHook('preHandler', authGuard);
   app.addHook('preHandler', workspaceContextMiddleware);

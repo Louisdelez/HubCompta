@@ -80,12 +80,12 @@ export function DocumentsPage() {
   });
 
   const handleUploadComplete = () => {
-    queryClient.invalidateQueries({ queryKey: ['documents', workspaceId] });
+    void queryClient.invalidateQueries({ queryKey: ['documents', workspaceId] });
     setShowUpload(false);
   };
 
   const handleDocumentAction = () => {
-    queryClient.invalidateQueries({ queryKey: ['documents', workspaceId] });
+    void queryClient.invalidateQueries({ queryKey: ['documents', workspaceId] });
   };
 
   if (!workspaceId) {

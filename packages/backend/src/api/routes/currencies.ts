@@ -7,6 +7,7 @@ import type { FastifyPluginAsync } from 'fastify';
 import { currencyService } from '@/modules/currency/index.js';
 import { auditService } from '@/modules/audit/audit.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
+import { prisma } from '@/core/database/client.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -105,7 +106,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
    * Get available exchange rate sources
    * NOTE: Must be defined before /:code to avoid being captured as a param
    */
-  fastify.get('/sources', async () => {
+  fastify.get('/sources', () => {
     const sources = [
       {
         id: 'ecb',
@@ -275,7 +276,15 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
     }
 
     // Check if user is instance admin
-    // TODO: Add proper admin check
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { isInstanceAdmin: true },
+    });
+
+    if (!user?.isInstanceAdmin) {
+      return reply.status(403).send({ error: 'Acces reserve aux administrateurs' });
+    }
+
     const { baseCurrency, targetCurrency, rate, date } = request.body;
 
     if (!baseCurrency || !targetCurrency || !rate || !date) {

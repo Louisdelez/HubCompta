@@ -66,7 +66,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
     mutationFn: (data: ContactPayload) =>
       api.post(`/workspaces/${workspaceId}/contacts`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contacts', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['contacts', workspaceId] });
       onClose();
     },
     onError: (error: Error) => {
@@ -78,7 +78,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
     mutationFn: (data: ContactPayload) =>
       api.patch(`/workspaces/${workspaceId}/contacts/${contact!.id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contacts', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['contacts', workspaceId] });
       onClose();
     },
     onError: (error: Error) => {

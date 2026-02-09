@@ -95,7 +95,7 @@ export function CreateWorkspaceModal({
     mutationFn: (data: CreateWorkspaceData) =>
       api.post<{ id: string }>('/workspaces', data),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      void queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       reset();
       onCreated?.(data.id);
       onClose();
@@ -131,10 +131,10 @@ export function CreateWorkspaceModal({
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={(e) => { e.preventDefault(); void handleSubmit(onSubmit)(e); }} className="space-y-6">
             {/* Workspace Type */}
             <div>
-              <label className="label">Type d'espace</label>
+              <label className="label">Type d&apos;espace</label>
               <div className="grid grid-cols-2 gap-3">
                 {WORKSPACE_TYPES.map((type) => (
                   <label
@@ -174,7 +174,7 @@ export function CreateWorkspaceModal({
             {/* Name */}
             <div>
               <label htmlFor="name" className="label">
-                Nom de l'espace
+                Nom de l&apos;espace
               </label>
               <input
                 id="name"

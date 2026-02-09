@@ -221,7 +221,7 @@ export const settingsService = {
   /**
    * Update user profile
    */
-  async updateUserProfile(
+  updateUserProfile(
     userId: string,
     data: {
       displayName?: string;
@@ -294,7 +294,7 @@ export const settingsService = {
   /**
    * Get workspace details for settings page
    */
-  async getWorkspaceDetails(workspaceId: string) {
+  getWorkspaceDetails(workspaceId: string) {
     return prisma.workspace.findUnique({
       where: { id: workspaceId },
       select: {
@@ -326,7 +326,7 @@ export const settingsService = {
   /**
    * Update workspace general info
    */
-  async updateWorkspace(
+  updateWorkspace(
     workspaceId: string,
     data: {
       name?: string;

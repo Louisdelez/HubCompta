@@ -57,7 +57,7 @@ export const tagService = {
   /**
    * Get tag by ID
    */
-  async getById(workspaceId: string, tagId: string): Promise<Tag | null> {
+  getById(workspaceId: string, tagId: string): Promise<Tag | null> {
     return prisma.tag.findFirst({
       where: {
         id: tagId,
@@ -120,7 +120,7 @@ export const tagService = {
   /**
    * Search tags by name
    */
-  async search(workspaceId: string, query: string, limit = 10): Promise<Tag[]> {
+  search(workspaceId: string, query: string, limit = 10): Promise<Tag[]> {
     return prisma.tag.findMany({
       where: {
         workspaceId,

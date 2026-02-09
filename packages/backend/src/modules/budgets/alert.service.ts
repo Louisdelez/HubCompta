@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
-import { budgetService, type BudgetWithProgress } from './budget.service.js';
+import { budgetService } from './budget.service.js';
 
 // ----------------------------------------------------------------------------
 // Types

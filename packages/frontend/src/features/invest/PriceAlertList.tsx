@@ -58,7 +58,7 @@ export function PriceAlertList() {
     mutationFn: ({ alertId, isEnabled }: { alertId: string; isEnabled: boolean }) =>
       api.patch(`/workspaces/${currentWorkspace?.id}/alerts/${alertId}`, { isEnabled }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['price-alerts'] });
+      void queryClient.invalidateQueries({ queryKey: ['price-alerts'] });
     },
   });
 
@@ -66,7 +66,7 @@ export function PriceAlertList() {
     mutationFn: (alertId: string) =>
       api.delete(`/workspaces/${currentWorkspace?.id}/alerts/${alertId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['price-alerts'] });
+      void queryClient.invalidateQueries({ queryKey: ['price-alerts'] });
     },
   });
 

@@ -4,9 +4,9 @@
 
 import { prisma } from '@/core/database/client.js';
 import { NotFoundError, ValidationError } from '@/core/middleware/errorHandler.js';
-import { csvParser, type ColumnMapping, type DetectedFormat, type ParsedRow } from './csv.parser.js';
+import { csvParser, type ColumnMapping, type DetectedFormat } from './csv.parser.js';
 import { ruleService } from '@/modules/rules/rule.service.js';
-import type { ImportJob, ImportStatus } from '@prisma/client';
+import type { ImportJob } from '@prisma/client';
 import crypto from 'crypto';
 
 // ----------------------------------------------------------------------------
@@ -347,7 +347,7 @@ export const importService = {
             });
 
             imported++;
-          } catch (err) {
+          } catch {
             errors++;
           }
         }
@@ -393,7 +393,7 @@ export const importService = {
   /**
    * Get import job status
    */
-  async getJob(jobId: string, workspaceId: string): Promise<ImportJob | null> {
+  getJob(jobId: string, workspaceId: string): Promise<ImportJob | null> {
     return prisma.importJob.findFirst({
       where: { id: jobId, workspaceId },
     });

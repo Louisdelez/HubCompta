@@ -2,7 +2,7 @@
 // CATEGORY ROUTES - Finance Hub
 // ============================================================================
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { categoryService } from '@/modules/categories/category.service.js';
 import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
@@ -31,7 +31,7 @@ interface CategoryQuery {
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function categoryRoutes(app: FastifyInstance): Promise<void> {
+export function categoryRoutes(app: FastifyInstance): void {
   // Apply auth guard and workspace context to all routes
   app.addHook('preHandler', authGuard);
   app.addHook('preHandler', workspaceContextMiddleware);

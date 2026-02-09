@@ -147,8 +147,8 @@ export function WorkspaceSettings({
         },
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      void queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       setSuccess('Paramètres enregistrés');
       setTimeout(() => setSuccess(null), 3000);
     },
@@ -161,7 +161,7 @@ export function WorkspaceSettings({
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/workspaces/${workspaceId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      void queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       window.location.href = '/';
     },
     onError: (err) => {
@@ -236,14 +236,14 @@ export function WorkspaceSettings({
       </div>
 
       {/* Settings Form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={(e) => { e.preventDefault(); void handleSubmit(onSubmit)(e); }} className="space-y-6">
         {/* General */}
         <div className="card">
           <h2 className="text-lg font-semibold mb-4">Général</h2>
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="label">
-                Nom de l'espace
+                Nom de l&apos;espace
               </label>
               <input
                 id="name"
@@ -319,7 +319,7 @@ export function WorkspaceSettings({
 
             <div>
               <label htmlFor="fiscalYearStart" className="label">
-                Début de l'année fiscale
+                Début de l&apos;année fiscale
               </label>
               <select
                 id="fiscalYearStart"
@@ -395,7 +395,7 @@ export function WorkspaceSettings({
           {!showDeleteConfirm ? (
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium">Supprimer l'espace</p>
+                <p className="font-medium">Supprimer l&apos;espace</p>
                 <p className="text-sm text-ctp-subtext0">
                   Cette action est irréversible
                 </p>
@@ -431,7 +431,7 @@ export function WorkspaceSettings({
                   Annuler
                 </button>
                 <button
-                  onClick={() => deleteMutation.mutate()}
+                  onClick={() => { void deleteMutation.mutateAsync(); }}
                   disabled={deleteMutation.isPending}
                   className="btn-danger flex-1"
                 >

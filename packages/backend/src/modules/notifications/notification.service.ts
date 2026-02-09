@@ -38,7 +38,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Create Notification
   // --------------------------------------------------------------------------
-  async create(input: CreateNotificationInput) {
+  create(input: CreateNotificationInput) {
     return prisma.notification.create({
       data: {
         userId: input.userId,
@@ -54,7 +54,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Create Multiple Notifications (for batch operations)
   // --------------------------------------------------------------------------
-  async createMany(notifications: CreateNotificationInput[]) {
+  createMany(notifications: CreateNotificationInput[]) {
     return prisma.notification.createMany({
       data: notifications.map((n) => ({
         userId: n.userId,
@@ -114,7 +114,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Get Unread Count
   // --------------------------------------------------------------------------
-  async getUnreadCount(userId: string, workspaceId?: string) {
+  getUnreadCount(userId: string, workspaceId?: string) {
     return prisma.notification.count({
       where: {
         userId,
@@ -127,7 +127,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Mark as Read
   // --------------------------------------------------------------------------
-  async markAsRead(notificationId: string, userId: string) {
+  markAsRead(notificationId: string, userId: string) {
     return prisma.notification.updateMany({
       where: {
         id: notificationId,
@@ -143,7 +143,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Mark All as Read
   // --------------------------------------------------------------------------
-  async markAllAsRead(userId: string, workspaceId?: string) {
+  markAllAsRead(userId: string, workspaceId?: string) {
     return prisma.notification.updateMany({
       where: {
         userId,
@@ -160,7 +160,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Delete Notification
   // --------------------------------------------------------------------------
-  async delete(notificationId: string, userId: string) {
+  delete(notificationId: string, userId: string) {
     return prisma.notification.deleteMany({
       where: {
         id: notificationId,
@@ -172,7 +172,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Delete Old Notifications
   // --------------------------------------------------------------------------
-  async deleteOld(olderThanDays: number = 30) {
+  deleteOld(olderThanDays: number = 30) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
 
@@ -191,7 +191,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Budget Alert
   // --------------------------------------------------------------------------
-  async notifyBudgetAlert(
+  notifyBudgetAlert(
     userId: string,
     workspaceId: string,
     budget: { id: string; name: string; categoryName: string },
@@ -223,7 +223,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Import Complete
   // --------------------------------------------------------------------------
-  async notifyImportComplete(
+  notifyImportComplete(
     userId: string,
     workspaceId: string,
     result: { imported: number; skipped: number; errors: number }
@@ -245,7 +245,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Export Ready
   // --------------------------------------------------------------------------
-  async notifyExportReady(
+  notifyExportReady(
     userId: string,
     workspaceId: string,
     exportInfo: { type: string; filename: string; downloadUrl?: string }
@@ -263,7 +263,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Invoice Overdue
   // --------------------------------------------------------------------------
-  async notifyInvoiceOverdue(
+  notifyInvoiceOverdue(
     userId: string,
     workspaceId: string,
     invoice: { id: string; number: string; contactName: string; amount: number }
@@ -281,7 +281,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Invoice Paid
   // --------------------------------------------------------------------------
-  async notifyInvoicePaid(
+  notifyInvoicePaid(
     userId: string,
     workspaceId: string,
     invoice: { id: string; number: string; contactName: string; amount: number }
@@ -299,7 +299,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Quote Accepted
   // --------------------------------------------------------------------------
-  async notifyQuoteAccepted(
+  notifyQuoteAccepted(
     userId: string,
     workspaceId: string,
     quote: { id: string; number: string; contactName: string; amount: number }
@@ -317,7 +317,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Quote Expiring
   // --------------------------------------------------------------------------
-  async notifyQuoteExpiring(
+  notifyQuoteExpiring(
     userId: string,
     workspaceId: string,
     quote: { id: string; number: string; contactName: string; daysLeft: number }
@@ -335,7 +335,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Price Alert
   // --------------------------------------------------------------------------
-  async notifyPriceAlert(
+  notifyPriceAlert(
     userId: string,
     workspaceId: string,
     alert: {
@@ -360,7 +360,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Bill Reminder
   // --------------------------------------------------------------------------
-  async notifyBillReminder(
+  notifyBillReminder(
     userId: string,
     workspaceId: string,
     bill: { description: string; amount: number; dueDate: Date; daysUntil: number }
@@ -378,7 +378,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // System Notification
   // --------------------------------------------------------------------------
-  async notifySystem(userId: string, title: string, message: string, data?: Record<string, unknown>) {
+  notifySystem(userId: string, title: string, message: string, data?: Record<string, unknown>) {
     return this.create({
       userId,
       type: 'system',

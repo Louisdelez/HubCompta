@@ -83,10 +83,23 @@ export function AssetSearch({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Reset selected index when results change
-  useEffect(() => {
+  // Track query to reset selected index when search changes
+  const [lastQuery, setLastQuery] = useState(debouncedQuery);
+
+  // Reset selected index to 0 when query changes
+  if (debouncedQuery !== lastQuery) {
+    setLastQuery(debouncedQuery);
     setSelectedIndex(0);
-  }, [results]);
+  }
+
+  const handleSelect = useCallback(
+    (asset: SearchResult) => {
+      onSelect(asset);
+      setQuery('');
+      setIsOpen(false);
+    },
+    [onSelect]
+  );
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback(
@@ -113,16 +126,7 @@ export function AssetSearch({
           break;
       }
     },
-    [results, selectedIndex]
-  );
-
-  const handleSelect = useCallback(
-    (asset: SearchResult) => {
-      onSelect(asset);
-      setQuery('');
-      setIsOpen(false);
-    },
-    [onSelect]
+    [results, selectedIndex, handleSelect]
   );
 
   const getAssetIcon = (type: string) => {

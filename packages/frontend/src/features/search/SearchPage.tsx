@@ -76,7 +76,7 @@ const TYPE_CONFIG: Record<string, { icon: LucideIcon; label: string; color: stri
   recurrence: { icon: RefreshCw, label: 'Récurrences', color: 'pink' },
 };
 
-const RESULT_TYPES = Object.keys(TYPE_CONFIG) as (keyof typeof TYPE_CONFIG)[];
+const RESULT_TYPES = Object.keys(TYPE_CONFIG);
 
 // ----------------------------------------------------------------------------
 // Component
@@ -108,7 +108,7 @@ export function SearchPage() {
   // Global search query
   const { data: globalResults, isLoading: isGlobalLoading } = useQuery({
     queryKey: ['global-search', workspaceId, globalQuery, selectedTypes],
-    queryFn: async () => {
+    queryFn: () => {
       if (!globalQuery || globalQuery.length < 2 || !workspaceId) return null;
       const typesParam = selectedTypes.length > 0 ? `&types=${selectedTypes.join(',')}` : '';
       return api.get<SearchResponse>(
@@ -121,7 +121,7 @@ export function SearchPage() {
   // Transaction search query
   const { data: transactionResults, isLoading: isTransactionLoading } = useQuery({
     queryKey: ['transaction-search', workspaceId, transactionFilters, page, pageSize],
-    queryFn: async () => {
+    queryFn: () => {
       if (!workspaceId) return null;
       const params = new URLSearchParams();
       if (transactionFilters.query) params.set('query', transactionFilters.query);
@@ -307,8 +307,8 @@ export function SearchPage() {
                 <div key={type} className="bg-ctp-surface0 rounded-lg border border-ctp-surface1 overflow-hidden">
                   <div className="px-4 py-3 bg-ctp-surface1 border-b border-ctp-surface1">
                     <h3 className="font-medium inline-flex items-center gap-1">
-                      {(() => { const Icon = TYPE_CONFIG[type as keyof typeof TYPE_CONFIG]?.icon; return Icon ? <Icon className="w-4 h-4" /> : null; })()}
-                      {TYPE_CONFIG[type as keyof typeof TYPE_CONFIG]?.label}
+                      {(() => { const Icon = TYPE_CONFIG[type]?.icon; return Icon ? <Icon className="w-4 h-4" /> : null; })()}
+                      {TYPE_CONFIG[type]?.label}
                       <span className="ml-2 text-sm text-ctp-subtext0">({results.length})</span>
                     </h3>
                   </div>

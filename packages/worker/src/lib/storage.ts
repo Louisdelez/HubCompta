@@ -50,6 +50,35 @@ export async function fileExists(storageKey: string): Promise<boolean> {
 }
 
 /**
+ * Upload a file to storage
+ */
+export async function uploadFile(
+  storageKey: string,
+  content: Buffer,
+  contentType: string
+): Promise<void> {
+  const client = getStorageClient();
+  await client.putObject(MINIO_BUCKET, storageKey, content, content.length, {
+    'Content-Type': contentType,
+  });
+}
+
+/**
+ * Download a file from storage
+ */
+export async function downloadFile(storageKey: string): Promise<Buffer> {
+  const client = getStorageClient();
+  const stream = await client.getObject(MINIO_BUCKET, storageKey);
+
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    stream.on('data', (chunk: Buffer) => chunks.push(chunk));
+    stream.on('end', () => resolve(Buffer.concat(chunks)));
+    stream.on('error', reject);
+  });
+}
+
+/**
  * List files in a prefix
  */
 export async function listFiles(prefix: string): Promise<string[]> {

@@ -89,7 +89,7 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/workspaces/${workspaceId}/budgets/${budget.id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['budgets', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['budgets', workspaceId] });
     },
   });
 

@@ -6,6 +6,7 @@
 
 import { Component, type ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { Sentry } from '../lib/sentry';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -45,7 +46,12 @@ export class ErrorBoundary extends Component<Props, State> {
       console.error('Component stack:', errorInfo.componentStack);
     }
 
-    // TODO: Send error to monitoring service (e.g., Sentry)
+    // Send error to Sentry
+    Sentry.captureException(error, {
+      extra: {
+        componentStack: errorInfo.componentStack,
+      },
+    });
   }
 
   handleReload = () => {

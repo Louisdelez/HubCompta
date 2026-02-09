@@ -153,7 +153,7 @@ export function InvoiceForm() {
     mutationFn: (data: CreateInvoicePayload) =>
       api.post<{ data: Invoice }>(`/workspaces/${workspaceId}/invoices`, data),
     onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
       navigate(`/workspaces/${workspaceId}/pro/invoices/${response.data.id}`);
     },
     onError: (error: Error) => {
@@ -165,7 +165,7 @@ export function InvoiceForm() {
     mutationFn: (data: { lines: InvoiceLine[] }) =>
       api.patch<{ data: Invoice }>(`/workspaces/${workspaceId}/invoices/${invoiceId}/lines`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
       navigate(`/workspaces/${workspaceId}/pro/invoices/${invoiceId}`);
     },
     onError: (error: Error) => {

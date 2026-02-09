@@ -75,7 +75,7 @@ export function AdminBackups() {
     mutationFn: (type: 'full' | 'incremental') =>
       api.post<BackupJobResponse>('/admin/backup', { type }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'backups'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'backups'] });
     },
   });
 

@@ -4,8 +4,8 @@
 
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { verifyAccessToken } from '@/core/crypto/jwt.js';
-import { UnauthorizedError, SessionLockedError } from '@/core/middleware/errorHandler.js';
-import { sessionService } from '@/modules/auth/session.service.js';
+import { UnauthorizedError } from '@/core/middleware/errorHandler.js';
+import { sessionService as _sessionService } from '@/modules/auth/session.service.js';
 import type { TokenPayload } from '@finance-hub/shared';
 
 // ----------------------------------------------------------------------------
@@ -27,10 +27,10 @@ declare module 'fastify' {
  * Authentication guard middleware
  * Verifies JWT token and attaches user to request
  */
-export async function authGuard(
+export function authGuard(
   request: FastifyRequest,
   _reply: FastifyReply
-): Promise<void> {
+): void {
   // Get token from Authorization header
   const authHeader = request.headers.authorization;
 
@@ -44,7 +44,7 @@ export async function authGuard(
   let payload: TokenPayload;
   try {
     payload = verifyAccessToken(token);
-  } catch (error) {
+  } catch {
     throw new UnauthorizedError('Invalid or expired token');
   }
 
@@ -57,10 +57,10 @@ export async function authGuard(
  * Checks if session is valid and not locked
  * Use after authGuard for endpoints that need session validation
  */
-export async function sessionGuard(
+export function sessionGuard(
   request: FastifyRequest,
   _reply: FastifyReply
-): Promise<void> {
+): void {
   if (!request.user) {
     throw new UnauthorizedError('Authentication required');
   }
@@ -73,12 +73,12 @@ export async function sessionGuard(
 /**
  * Combined auth + session guard
  */
-export async function authenticatedGuard(
+export function authenticatedGuard(
   request: FastifyRequest,
   reply: FastifyReply
-): Promise<void> {
-  await authGuard(request, reply);
-  await sessionGuard(request, reply);
+): void {
+  authGuard(request, reply);
+  sessionGuard(request, reply);
 }
 
 // ----------------------------------------------------------------------------
@@ -89,10 +89,10 @@ export async function authenticatedGuard(
  * Optional authentication - doesn't throw if no token
  * Useful for endpoints that work differently for authenticated vs anonymous users
  */
-export async function optionalAuth(
+export function optionalAuth(
   request: FastifyRequest,
   _reply: FastifyReply
-): Promise<void> {
+): void {
   const authHeader = request.headers.authorization;
 
   if (!authHeader?.startsWith('Bearer ')) {
@@ -120,7 +120,7 @@ export async function instanceAdminGuard(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  await authGuard(request, reply);
+  authGuard(request, reply);
 
   // Check if user is instance admin
   // This requires a database lookup since isInstanceAdmin is not in the JWT

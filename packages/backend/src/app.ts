@@ -18,6 +18,12 @@ import { prisma } from './core/database/client.js';
 import { redisClient } from './core/database/redis.js';
 import { setupScheduledJobs, closeQueues } from './core/queue/index.js';
 import { initializeWorkers, shutdownWorkers } from './core/queue/workers.js';
+import { initSentry } from './core/monitoring/sentry.js';
+
+// ----------------------------------------------------------------------------
+// Initialize Sentry (must be early in startup)
+// ----------------------------------------------------------------------------
+initSentry();
 
 // ----------------------------------------------------------------------------
 // Application Factory
@@ -201,5 +207,5 @@ async function shutdown(): Promise<void> {
   process.exit(0);
 }
 
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
+process.on('SIGTERM', () => void shutdown());
+process.on('SIGINT', () => void shutdown());

@@ -139,13 +139,13 @@ export const csvParser = {
     const delimiter = options.delimiter ?? this.detectDelimiter(content);
 
     // Parse CSV
-    const records = parse(content, {
+    const records: ParsedRow[] = parse(content, {
       delimiter,
       columns: true,
       skip_empty_lines: true,
       trim: true,
       relax_column_count: true,
-    }) as ParsedRow[];
+    });
 
     if (records.length === 0 || !records[0]) {
       return {
@@ -193,8 +193,6 @@ export const csvParser = {
    * Detect bank format from headers
    */
   detectFormat(headers: string[], rows: ParsedRow[]): DetectedFormat | null {
-    const headerSet = new Set(headers.map((h) => h.toLowerCase()));
-
     // Try to match known bank patterns
     for (const { bank, patterns, format } of BANK_PATTERNS) {
       const matches = patterns.every((pattern) =>
@@ -252,10 +250,10 @@ export const csvParser = {
     }
 
     // Detect date format
-    const dateFormat = this.detectDateFormat(rows.slice(0, 5).map((r) => r[dateColumn!]).filter((v): v is string => v !== undefined));
+    const dateFormat = this.detectDateFormat(rows.slice(0, 5).map((r) => r[dateColumn]).filter((v): v is string => v !== undefined));
 
     // Detect amount format
-    const amountFormat = this.detectAmountFormat(rows.slice(0, 5).map((r) => r[amountColumn!]).filter((v): v is string => v !== undefined));
+    const amountFormat = this.detectAmountFormat(rows.slice(0, 5).map((r) => r[amountColumn]).filter((v): v is string => v !== undefined));
 
     return {
       bank: 'Generic',

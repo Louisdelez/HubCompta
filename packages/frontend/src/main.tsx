@@ -8,7 +8,11 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './features/auth/AuthProvider';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { registerServiceWorker } from './lib/pwa/register';
+import { initSentry } from './lib/sentry';
 import './index.css';
+
+// Initialize Sentry before rendering
+initSentry();
 
 // Create a client
 const queryClient = new QueryClient({
@@ -28,7 +32,10 @@ const queryClient = new QueryClient({
 // Register service worker for PWA
 registerServiceWorker();
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Root element not found');
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <ErrorBoundary>
       <ThemeProvider>

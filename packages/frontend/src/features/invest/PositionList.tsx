@@ -90,12 +90,12 @@ export function PositionList({
 
   // Delete position mutation
   const deleteMutation = useMutation({
-    mutationFn: async (positionId: string) => {
+    mutationFn: (positionId: string) => {
       return api.delete(`/workspaces/${currentWorkspace?.id}/positions/${positionId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['positions'] });
-      queryClient.invalidateQueries({ queryKey: ['portfolio'] });
+      void queryClient.invalidateQueries({ queryKey: ['positions'] });
+      void queryClient.invalidateQueries({ queryKey: ['portfolio'] });
     },
   });
 

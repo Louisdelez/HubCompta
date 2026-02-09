@@ -72,7 +72,7 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
     mutationFn: ({ memberId, role }: { memberId: string; role: string }) =>
       api.patch(`/workspaces/${workspaceId}/members/${memberId}`, { role }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace-members', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['workspace-members', workspaceId] });
       setEditingMember(null);
     },
   });
@@ -82,7 +82,7 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
     mutationFn: (memberId: string) =>
       api.delete(`/workspaces/${workspaceId}/members/${memberId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace-members', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['workspace-members', workspaceId] });
     },
   });
 
@@ -186,7 +186,7 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
               <button
                 onClick={() => {
                   if (confirm(`Retirer ${member.displayName} de l'espace ?`)) {
-                    removeMutation.mutate(member.id);
+                    void removeMutation.mutateAsync(member.id);
                   }
                 }}
                 className="btn-ghost text-ctp-red hover:bg-ctp-red/10"

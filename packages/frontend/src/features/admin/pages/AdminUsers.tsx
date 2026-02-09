@@ -63,7 +63,7 @@ export function AdminUsers() {
     mutationFn: ({ userId, isAdmin }: { userId: string; isAdmin: boolean }) =>
       api.patch(`/admin/users/${userId}`, { isInstanceAdmin: isAdmin }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
     },
   });
 

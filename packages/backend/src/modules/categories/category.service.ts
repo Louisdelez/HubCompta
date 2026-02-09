@@ -86,7 +86,7 @@ export const categoryService = {
   /**
    * Get category by ID
    */
-  async getById(workspaceId: string, categoryId: string): Promise<Category | null> {
+  getById(workspaceId: string, categoryId: string): Promise<Category | null> {
     return prisma.category.findFirst({
       where: {
         id: categoryId,

@@ -50,7 +50,7 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
     mutationFn: (name: string) =>
       api.post<Tag>(`/workspaces/${workspaceId}/tags`, { name }),
     onSuccess: (newTag) => {
-      queryClient.invalidateQueries({ queryKey: ['tags', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['tags', workspaceId] });
       onChange([...value, newTag.id]);
       setSearchQuery('');
     },

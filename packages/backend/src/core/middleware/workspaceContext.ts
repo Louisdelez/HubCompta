@@ -121,10 +121,10 @@ export function isRoleAtLeast(role: MembershipRole, minimumRole: MembershipRole)
  * Create a permission check middleware
  */
 export function requirePermission(permission: Permission) {
-  return async function permissionCheck(
+  return function permissionCheck(
     request: FastifyRequest,
     _reply: FastifyReply
-  ): Promise<void> {
+  ): void {
     if (!request.workspace) {
       throw new ForbiddenError('Workspace context required');
     }
@@ -139,10 +139,10 @@ export function requirePermission(permission: Permission) {
  * Create a role check middleware
  */
 export function requireRole(minimumRole: MembershipRole) {
-  return async function roleCheck(
+  return function roleCheck(
     request: FastifyRequest,
     _reply: FastifyReply
-  ): Promise<void> {
+  ): void {
     if (!request.workspace) {
       throw new ForbiddenError('Workspace context required');
     }

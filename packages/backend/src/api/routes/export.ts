@@ -26,6 +26,20 @@ interface ReportQuery {
   accountId?: string;
 }
 
+interface BackupData {
+  version?: string;
+  exportedAt?: string;
+  workspace?: { name?: string };
+  accounts?: unknown[];
+  transactions?: unknown[];
+  categories?: unknown[];
+  budgets?: unknown[];
+  tags?: unknown[];
+  rules?: unknown[];
+  recurrences?: unknown[];
+  [key: string]: unknown;
+}
+
 // ----------------------------------------------------------------------------
 // Routes
 // ----------------------------------------------------------------------------
@@ -134,7 +148,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
   // Get available export formats
   fastify.get('/formats', {
     preHandler: [authGuard],
-  }, async () => {
+  }, () => {
     return {
       formats: [
         { id: 'csv', name: 'CSV', extension: '.csv', mimeType: 'text/csv' },
@@ -157,7 +171,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
   }>('/validate-backup', {
     preHandler: [authGuard],
   }, async (request, reply) => {
-    const { backup } = request.body as { backup: any };
+    const { backup } = request.body as { backup: BackupData };
 
     // Validate backup structure
     if (!backup || typeof backup !== 'object') {
@@ -202,7 +216,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
     preHandler: [authGuard],
   }, async (request, reply) => {
     const { workspaceId } = request.params;
-    const { backup, merge = true } = request.body as { backup: any; merge?: boolean };
+    const { backup, merge = true } = request.body as { backup: BackupData; merge?: boolean };
 
     // Validate backup structure
     if (!backup || typeof backup !== 'object') {
@@ -224,7 +238,14 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
     }
 
     try {
-      const result = await exportService.restoreFromBackup(workspaceId, backup, { merge });
+      // At this point we've validated required fields exist, so we can safely cast
+      // Ensure exportedAt is set (required by FullBackupData)
+      const fullBackup = {
+        ...backup,
+        exportedAt: backup.exportedAt || new Date().toISOString(),
+        version: backup.version || '1.0',
+      };
+      const result = await exportService.restoreFromBackup(workspaceId, fullBackup as Parameters<typeof exportService.restoreFromBackup>[1], { merge });
 
       return reply.send({
         success: true,

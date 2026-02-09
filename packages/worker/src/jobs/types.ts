@@ -10,24 +10,23 @@ export interface ImportJobData {
   jobId: string;
   workspaceId: string;
   accountId: string;
-  userId: string;
-  filename: string;
-  storageKey: string;
-  columnMapping: Record<string, string>;
-  dateFormat?: string;
-  skipFirstRow: boolean;
+  columnMapping: {
+    date: string;
+    amount: string;
+    description: string;
+    credit?: string;
+    debit?: string;
+  };
+  dateFormat: string;
+  skipDuplicates: boolean;
   applyRules: boolean;
 }
 
 export interface ImportJobResult {
   imported: number;
   skipped: number;
-  errors: ImportError[];
-}
-
-export interface ImportError {
-  row: number;
-  message: string;
+  duplicates: number;
+  errors: number;
 }
 
 // ----------------------------------------------------------------------------

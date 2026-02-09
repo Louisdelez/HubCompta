@@ -71,7 +71,7 @@ export const alertService = {
   // CRUD Operations
   // --------------------------------------------------------------------------
 
-  async create(input: CreateAlertRuleInput) {
+  create(input: CreateAlertRuleInput) {
     return prisma.alertRule.create({
       data: {
         userId: input.userId,
@@ -83,7 +83,7 @@ export const alertService = {
     });
   },
 
-  async update(
+  update(
     ruleId: string,
     userId: string,
     data: { name?: string; isEnabled?: boolean; config?: AlertConfig }
@@ -98,19 +98,19 @@ export const alertService = {
     });
   },
 
-  async delete(ruleId: string, userId: string) {
+  delete(ruleId: string, userId: string) {
     return prisma.alertRule.deleteMany({
       where: { id: ruleId, userId },
     });
   },
 
-  async getById(ruleId: string, userId: string) {
+  getById(ruleId: string, userId: string) {
     return prisma.alertRule.findFirst({
       where: { id: ruleId, userId },
     });
   },
 
-  async listForUser(userId: string, workspaceId?: string) {
+  listForUser(userId: string, workspaceId?: string) {
     return prisma.alertRule.findMany({
       where: {
         userId,
@@ -120,7 +120,7 @@ export const alertService = {
     });
   },
 
-  async listByType(type: AlertRuleType, isEnabled: boolean = true) {
+  listByType(type: AlertRuleType, isEnabled: boolean = true) {
     return prisma.alertRule.findMany({
       where: { type, isEnabled },
     });

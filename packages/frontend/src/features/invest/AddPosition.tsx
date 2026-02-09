@@ -117,7 +117,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
 
   // Create position mutation
   const createMutation = useMutation({
-    mutationFn: async (data: {
+    mutationFn: (data: {
       assetSymbol: string;
       assetType: string;
       accountId: string;
@@ -130,8 +130,8 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
       return api.post(`/workspaces/${currentWorkspace?.id}/positions`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['positions'] });
-      queryClient.invalidateQueries({ queryKey: ['portfolio'] });
+      void queryClient.invalidateQueries({ queryKey: ['positions'] });
+      void queryClient.invalidateQueries({ queryKey: ['portfolio'] });
       resetForm();
       onSuccess?.();
       onClose();
@@ -358,7 +358,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
                         if (currentPrice) {
                           setFormData({ ...formData, price: currentPrice.toString() });
                         } else {
-                          refetchQuote();
+                          void refetchQuote();
                         }
                       }}
                       disabled={isLoadingQuote}

@@ -3,7 +3,7 @@
 // Manages light/dark/system theme with localStorage persistence
 // ============================================================================
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -57,34 +57,30 @@ function applyTheme(theme: 'light' | 'dark'): void {
 
 export function useTheme(): UseThemeReturn {
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
-    const stored = getStoredTheme();
-    return stored === 'system' ? getSystemTheme() : stored;
-  });
+  const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>(getSystemTheme);
+
+  // Compute resolved theme using useMemo instead of setState in effect
+  const resolvedTheme = useMemo<'light' | 'dark'>(() => {
+    return theme === 'system' ? systemTheme : theme;
+  }, [theme, systemTheme]);
 
   // Apply theme on mount and when theme changes
   useEffect(() => {
-    const resolved = theme === 'system' ? getSystemTheme() : theme;
-    setResolvedTheme(resolved);
-    applyTheme(resolved);
+    applyTheme(resolvedTheme);
     localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme]);
+  }, [theme, resolvedTheme]);
 
   // Listen for system theme changes
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const handleChange = (e: MediaQueryListEvent) => {
-      if (theme === 'system') {
-        const newTheme = e.matches ? 'dark' : 'light';
-        setResolvedTheme(newTheme);
-        applyTheme(newTheme);
-      }
+      setSystemTheme(e.matches ? 'dark' : 'light');
     };
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
+  }, []);
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);

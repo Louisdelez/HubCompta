@@ -424,7 +424,7 @@ export const auditService = {
   /**
    * Get security events for a user
    */
-  async getSecurityEvents(userId: string, limit = 20) {
+  getSecurityEvents(userId: string, limit = 20) {
     return prisma.auditLog.findMany({
       where: {
         userId,

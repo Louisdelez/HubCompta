@@ -210,7 +210,7 @@ export function DisplaySettings() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-preferences'] });
+      void queryClient.invalidateQueries({ queryKey: ['user-preferences'] });
       setIsEditing(false);
     },
   });
@@ -222,7 +222,7 @@ export function DisplaySettings() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-preferences'] });
+      void queryClient.invalidateQueries({ queryKey: ['user-preferences'] });
       setIsEditing(false);
     },
   });

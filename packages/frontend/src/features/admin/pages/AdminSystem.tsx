@@ -38,7 +38,7 @@ export function AdminSystem() {
     mutationFn: (pattern?: string) =>
       api.post<ClearCacheResponse>('/admin/cache/clear', { pattern }),
     onSuccess: () => {
-      queryClient.invalidateQueries();
+      void queryClient.invalidateQueries();
     },
   });
 

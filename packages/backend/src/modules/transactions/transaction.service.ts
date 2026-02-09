@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
-import { NotFoundError, ConflictError } from '@/core/middleware/errorHandler.js';
+import { NotFoundError } from '@/core/middleware/errorHandler.js';
 import type { Transaction, TransactionType, Prisma } from '@prisma/client';
 
 // ----------------------------------------------------------------------------

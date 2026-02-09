@@ -5,7 +5,6 @@
 
 import type { FastifyInstance } from 'fastify';
 import { positionService } from '@/modules/invest/position.service.js';
-import { assetService } from '@/modules/invest/asset.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
 import { workspaceContextMiddleware, requirePermission } from '@/core/middleware/workspaceContext.js';
 
@@ -13,7 +12,7 @@ import { workspaceContextMiddleware, requirePermission } from '@/core/middleware
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function portfolioRoutes(app: FastifyInstance): Promise<void> {
+export function portfolioRoutes(app: FastifyInstance): void {
   // Apply auth guard and workspace context to all routes
   app.addHook('preHandler', authGuard);
   app.addHook('preHandler', workspaceContextMiddleware);

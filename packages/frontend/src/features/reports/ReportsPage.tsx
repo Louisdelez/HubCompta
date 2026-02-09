@@ -144,7 +144,7 @@ export function ReportsPage() {
   const { data: trends } = useQuery({
     queryKey: ['reports', 'spending-trend', currentWorkspace?.id],
     queryFn: async () => {
-      const response = await api.get<{ data: { trends: SpendingTrend[]; averages: any } }>(
+      const response = await api.get<{ data: { trends: SpendingTrend[]; averages: { income: number; expenses: number; net: number } } }>(
         `/workspaces/${currentWorkspace?.id}/reports/spending-trend?months=6`
       );
       return response.data;

@@ -151,7 +151,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
       }
 
       await api.post(endpoint, body);
-      queryClient.invalidateQueries({ queryKey: ['alert-rules'] });
+      void queryClient.invalidateQueries({ queryKey: ['alert-rules'] });
       onSuccess?.();
       onClose();
     } catch (error) {

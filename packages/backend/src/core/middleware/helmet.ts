@@ -154,10 +154,10 @@ function buildPermissionsPolicyHeader(features: Record<string, string[]>): strin
 // ----------------------------------------------------------------------------
 
 function createSecurityHeadersMiddleware(config: SecurityHeadersConfig) {
-  return async function securityHeaders(
+  return function securityHeaders(
     _request: FastifyRequest,
     reply: FastifyReply
-  ): Promise<void> {
+  ): void {
     // Content-Security-Policy
     if (config.contentSecurityPolicy.enabled) {
       const cspHeader = buildCSPHeader(config.contentSecurityPolicy.directives);
@@ -230,10 +230,10 @@ function createSecurityHeadersMiddleware(config: SecurityHeadersConfig) {
 // Plugin Registration
 // ----------------------------------------------------------------------------
 
-export async function registerSecurityHeaders(
+export function registerSecurityHeaders(
   app: FastifyInstance,
   customConfig?: Partial<SecurityHeadersConfig>
-): Promise<void> {
+): void {
   const config = mergeConfig(DEFAULT_CONFIG, customConfig);
   const middleware = createSecurityHeadersMiddleware(config);
 

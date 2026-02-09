@@ -28,6 +28,6 @@ if (process.env.NODE_ENV !== 'production') {
 export default prisma;
 
 // Graceful shutdown
-process.on('beforeExit', async () => {
-  await prisma.$disconnect();
+process.on('beforeExit', () => {
+  void prisma.$disconnect();
 });

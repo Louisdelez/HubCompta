@@ -60,10 +60,7 @@ export function useWorkspace() {
     error: workspacesError,
   } = useQuery({
     queryKey: ['workspaces'],
-    queryFn: async () => {
-      // api.get already returns unwrapped data
-      return api.get<Workspace[]>('/workspaces');
-    },
+    queryFn: () => api.get<Workspace[]>('/workspaces'),
   });
 
   // Fetch current workspace details
@@ -73,10 +70,7 @@ export function useWorkspace() {
     error: currentWorkspaceError,
   } = useQuery({
     queryKey: ['workspace', currentWorkspaceId],
-    queryFn: async () => {
-      // api.get already returns unwrapped data
-      return api.get<Workspace>(`/workspaces/${currentWorkspaceId}`);
-    },
+    queryFn: () => api.get<Workspace>(`/workspaces/${currentWorkspaceId}`),
     enabled: !!currentWorkspaceId,
   });
 

@@ -155,7 +155,7 @@ class ContactService {
   /**
    * Create a new contact
    */
-  async create(workspaceId: string, input: ContactCreateInput) {
+  create(workspaceId: string, input: ContactCreateInput) {
     // Validate SIRET if provided
     if (input.siret && !validateSiret(input.siret)) {
       throw new Error('Numéro SIRET invalide');

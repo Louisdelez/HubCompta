@@ -34,11 +34,11 @@ export function NotificationBell() {
 
   // Mark all as read mutation
   const markAllReadMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: () => {
       return api.post('/notifications/read-all');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 

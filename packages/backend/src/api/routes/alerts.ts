@@ -5,7 +5,7 @@
 
 import type { FastifyInstance } from 'fastify';
 import { alertService } from '@/modules/notifications/alert.service.js';
-import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
+import { auditService } from '@/modules/audit/audit.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
 import { workspaceContextMiddleware, requirePermission } from '@/core/middleware/workspaceContext.js';
 import { z } from 'zod';
@@ -30,7 +30,7 @@ const updateAlertSchema = z.object({
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function alertRoutes(app: FastifyInstance): Promise<void> {
+export function alertRoutes(app: FastifyInstance): void {
   // Apply auth guard and workspace context to all routes
   app.addHook('preHandler', authGuard);
   app.addHook('preHandler', workspaceContextMiddleware);

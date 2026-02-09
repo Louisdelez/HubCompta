@@ -15,7 +15,7 @@ import { z } from 'zod';
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function quoteRoutes(app: FastifyInstance): Promise<void> {
+export function quoteRoutes(app: FastifyInstance): void {
   // Apply auth guard and workspace context to all routes
   app.addHook('preHandler', authGuard);
   app.addHook('preHandler', workspaceContextMiddleware);

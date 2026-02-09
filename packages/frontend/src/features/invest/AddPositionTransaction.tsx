@@ -104,7 +104,7 @@ export function AddPositionTransaction({
   };
 
   const addTransactionMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: () => {
       return api.post(`/workspaces/${currentWorkspace?.id}/positions/${positionId}/transactions`, {
         type,
         quantity: parseFloat(quantity),
@@ -115,9 +115,9 @@ export function AddPositionTransaction({
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['position', currentWorkspace?.id, positionId] });
-      queryClient.invalidateQueries({ queryKey: ['positions'] });
-      queryClient.invalidateQueries({ queryKey: ['portfolio'] });
+      void queryClient.invalidateQueries({ queryKey: ['position', currentWorkspace?.id, positionId] });
+      void queryClient.invalidateQueries({ queryKey: ['positions'] });
+      void queryClient.invalidateQueries({ queryKey: ['portfolio'] });
       resetForm();
       onSuccess?.();
       onClose();

@@ -12,7 +12,7 @@ import type { AssetType } from '@prisma/client';
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function assetRoutes(app: FastifyInstance): Promise<void> {
+export function assetRoutes(app: FastifyInstance): void {
   // Apply auth guard to all routes
   app.addHook('preHandler', authGuard);
 

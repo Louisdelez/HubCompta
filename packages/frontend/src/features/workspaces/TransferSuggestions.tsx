@@ -81,7 +81,7 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
         <CheckCircle className="w-10 h-10 mx-auto mb-3 text-ctp-green" />
         <h3 className="text-lg font-semibold text-ctp-green">Tout est équilibré !</h3>
         <p className="text-ctp-subtext0 mt-1">
-          Personne ne doit d'argent à personne
+          Personne ne doit d&apos;argent à personne
         </p>
       </div>
     );
@@ -182,7 +182,7 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
       <div className="mt-4 p-3 bg-ctp-blue/10 rounded-lg">
         <p className="text-sm text-ctp-blue flex items-start gap-2">
           <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" />
-          <span>Cliquez sur un transfert pour le marquer comme effectué. Ces transferts minimisent le nombre d'échanges nécessaires.</span>
+          <span>Cliquez sur un transfert pour le marquer comme effectué. Ces transferts minimisent le nombre d&apos;échanges nécessaires.</span>
         </p>
       </div>
 

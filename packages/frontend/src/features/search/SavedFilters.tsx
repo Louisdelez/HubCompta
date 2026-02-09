@@ -53,7 +53,7 @@ export function SavedFilters({
     mutationFn: (data: { name: string; filters: TransactionFilters; isDefault?: boolean }) =>
       api.post(`/workspaces/${workspaceId}/filters`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['saved-filters', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['saved-filters', workspaceId] });
       setIsCreating(false);
       setNewFilterName('');
     },
@@ -64,7 +64,7 @@ export function SavedFilters({
     mutationFn: ({ id, ...data }: { id: string; isDefault?: boolean }) =>
       api.patch(`/workspaces/${workspaceId}/filters/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['saved-filters', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['saved-filters', workspaceId] });
     },
   });
 
@@ -72,7 +72,7 @@ export function SavedFilters({
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/workspaces/${workspaceId}/filters/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['saved-filters', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['saved-filters', workspaceId] });
     },
   });
 

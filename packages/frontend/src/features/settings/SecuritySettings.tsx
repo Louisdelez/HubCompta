@@ -112,8 +112,8 @@ export function SecuritySettings() {
       await api.delete(`/user/devices/${deviceId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-devices'] });
-      queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
+      void queryClient.invalidateQueries({ queryKey: ['user-devices'] });
+      void queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
       setShowRevokeConfirm(null);
     },
   });
@@ -124,7 +124,7 @@ export function SecuritySettings() {
       await api.delete(`/user/sessions/${sessionId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
+      void queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
     },
   });
 
@@ -134,7 +134,7 @@ export function SecuritySettings() {
       await api.post('/user/sessions/revoke-all');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
+      void queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
     },
   });
 

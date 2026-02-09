@@ -132,9 +132,9 @@ export function TransactionForm({
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-summary', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['transactions', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard-summary', workspaceId] });
       onSuccess();
     },
     onError: (err) => {
@@ -143,7 +143,7 @@ export function TransactionForm({
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: TransactionFormData) => {
+    mutationFn: (data: TransactionFormData) => {
       const amount = data.type === 'expense' ? -Math.abs(data.amount) : Math.abs(data.amount);
       return api.patch(`/workspaces/${workspaceId}/transactions/${transaction!.id}`, {
         ...data,
@@ -151,9 +151,9 @@ export function TransactionForm({
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-summary', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['transactions', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard-summary', workspaceId] });
       onSuccess();
     },
     onError: (err) => {
@@ -165,8 +165,8 @@ export function TransactionForm({
     mutationFn: () =>
       api.delete(`/workspaces/${workspaceId}/transactions/${transaction!.id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['transactions', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['accounts', workspaceId] });
       onSuccess();
     },
     onError: (err) => {

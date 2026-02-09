@@ -22,7 +22,7 @@ import { ForbiddenError } from '@/core/middleware/errorHandler.js';
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function workspaceRoutes(app: FastifyInstance): Promise<void> {
+export function workspaceRoutes(app: FastifyInstance): void {
   // Apply auth guard to all routes
   app.addHook('preHandler', authGuard);
 

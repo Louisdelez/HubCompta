@@ -101,7 +101,7 @@ export function ContactsPage() {
     mutationFn: (id: string) =>
       api.delete(`/workspaces/${workspaceId}/contacts/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contacts', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['contacts', workspaceId] });
     },
   });
 

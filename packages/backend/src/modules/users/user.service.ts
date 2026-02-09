@@ -68,7 +68,7 @@ export const userService = {
   /**
    * Find user by email
    */
-  async findByEmail(email: string): Promise<User | null> {
+  findByEmail(email: string): Promise<User | null> {
     return prisma.user.findUnique({
       where: { email: email.toLowerCase() },
     });

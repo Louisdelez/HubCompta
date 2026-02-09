@@ -4,7 +4,7 @@
 // https://catppuccin.com
 // ============================================================================
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -172,34 +172,30 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children, defaultTheme }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(() => defaultTheme ?? getStoredTheme());
-  const [resolvedTheme, setResolvedTheme] = useState<CatppuccinFlavor>(() => {
-    const initial = defaultTheme ?? getStoredTheme();
-    return initial === 'system' ? getSystemTheme() : initial;
-  });
+  const [systemTheme, setSystemTheme] = useState<CatppuccinFlavor>(getSystemTheme);
+
+  // Compute resolved theme using useMemo instead of setState in effect
+  const resolvedTheme = useMemo<CatppuccinFlavor>(() => {
+    return theme === 'system' ? systemTheme : theme;
+  }, [theme, systemTheme]);
 
   // Apply theme on mount and when theme changes
   useEffect(() => {
-    const resolved = theme === 'system' ? getSystemTheme() : theme;
-    setResolvedTheme(resolved);
-    applyTheme(resolved);
+    applyTheme(resolvedTheme);
     localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme]);
+  }, [theme, resolvedTheme]);
 
   // Listen for system theme changes
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const handleChange = (e: MediaQueryListEvent) => {
-      if (theme === 'system') {
-        const newTheme = e.matches ? 'mocha' : 'latte';
-        setResolvedTheme(newTheme);
-        applyTheme(newTheme);
-      }
+      setSystemTheme(e.matches ? 'mocha' : 'latte');
     };
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
+  }, []);
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);

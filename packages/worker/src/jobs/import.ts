@@ -4,35 +4,10 @@
 
 import { Job } from 'bullmq';
 import { PrismaClient } from '@prisma/client';
+import { createHash } from 'crypto';
+import type { ImportJobData, ImportJobResult } from './types.js';
 
 const prisma = new PrismaClient();
-
-// ----------------------------------------------------------------------------
-// Types
-// ----------------------------------------------------------------------------
-
-interface ImportJobData {
-  jobId: string;
-  workspaceId: string;
-  accountId: string;
-  columnMapping: {
-    date: string;
-    amount: string;
-    description: string;
-    credit?: string;
-    debit?: string;
-  };
-  dateFormat: string;
-  skipDuplicates: boolean;
-  applyRules: boolean;
-}
-
-interface ImportJobResult {
-  imported: number;
-  skipped: number;
-  duplicates: number;
-  errors: number;
-}
 
 // ----------------------------------------------------------------------------
 // CSV Parser (minimal version for worker)
@@ -107,9 +82,8 @@ function parseDate(value: string, format: string): Date | null {
 }
 
 function generateHash(date: Date | null, amount: number, description: string): string {
-  const crypto = require('crypto');
   const data = `${date?.toISOString().split('T')[0] ?? ''}|${amount}|${description.toLowerCase().trim()}`;
-  return crypto.createHash('md5').update(data).digest('hex');
+  return createHash('md5').update(data).digest('hex');
 }
 
 // ----------------------------------------------------------------------------

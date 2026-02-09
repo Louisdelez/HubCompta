@@ -104,9 +104,9 @@ export async function cleanupDeletedDocuments(
  * Find and optionally delete orphaned storage files
  * (files that exist in storage but not in database)
  */
-export async function cleanupOrphanedFiles(
+export function cleanupOrphanedFiles(
   _options: CleanupOptions = {}
-): Promise<{ orphanedFiles: string[]; deleted: number }> {
+): { orphanedFiles: string[]; deleted: number } {
   // dryRun option will be used when implementation is complete
 
   // This would require listing all files in storage and comparing

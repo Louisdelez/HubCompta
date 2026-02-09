@@ -16,7 +16,7 @@ import { userUpdateSchema, passwordChangeSchema } from '@finance-hub/shared';
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function userRoutes(app: FastifyInstance): Promise<void> {
+export function userRoutes(app: FastifyInstance): void {
   // Apply auth guard to all routes
   app.addHook('preHandler', authGuard);
 

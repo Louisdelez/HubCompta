@@ -2,7 +2,7 @@
 // CONTACT ROUTES - Finance Hub
 // ============================================================================
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { contactService } from '@/modules/pro/contact.service.js';
 import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
@@ -14,7 +14,7 @@ import type { ContactType } from '@prisma/client';
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function contactRoutes(app: FastifyInstance): Promise<void> {
+export function contactRoutes(app: FastifyInstance): void {
   // Apply auth guard and workspace context to all routes
   app.addHook('preHandler', authGuard);
   app.addHook('preHandler', workspaceContextMiddleware);

@@ -82,7 +82,7 @@ const BACKUP_TABLES = [
 // ----------------------------------------------------------------------------
 
 async function getTableData(tableName: string, workspaceId?: string): Promise<unknown[]> {
-  // @ts-ignore - Dynamic table access
+  // @ts-expect-error - Dynamic table access
   const model = prisma[tableName];
 
   if (!model) {

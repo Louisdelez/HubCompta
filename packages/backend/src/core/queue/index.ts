@@ -377,8 +377,8 @@ export async function closeQueues(): Promise<void> {
   queues.clear();
 }
 
-process.on('beforeExit', async () => {
-  await closeQueues();
+process.on('beforeExit', () => {
+  void closeQueues();
 });
 
 // ----------------------------------------------------------------------------

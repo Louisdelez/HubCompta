@@ -2,7 +2,7 @@
 // DATABASE SEED - Finance Hub
 // ============================================================================
 
-import { PrismaClient, CategoryType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 

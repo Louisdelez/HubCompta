@@ -35,7 +35,7 @@ const updateBudgetSchema = z.object({
 // Route Handlers
 // ----------------------------------------------------------------------------
 
-export async function budgetRoutes(app: FastifyInstance): Promise<void> {
+export function budgetRoutes(app: FastifyInstance): void {
   // Apply auth guard to all routes
   app.addHook('onRequest', authGuard);
 

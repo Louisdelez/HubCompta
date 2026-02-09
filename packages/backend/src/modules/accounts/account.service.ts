@@ -76,7 +76,7 @@ export const accountService = {
   /**
    * Get account by ID
    */
-  async getById(workspaceId: string, accountId: string): Promise<Account | null> {
+  getById(workspaceId: string, accountId: string): Promise<Account | null> {
     return prisma.account.findFirst({
       where: {
         id: accountId,

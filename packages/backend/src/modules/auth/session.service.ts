@@ -11,16 +11,13 @@ import {
   verifyRefreshToken,
   type RefreshTokenPayload,
 } from '@/core/crypto/jwt.js';
-import { NotFoundError, UnauthorizedError, SessionLockedError } from '@/core/middleware/errorHandler.js';
-import { AUTH } from '@finance-hub/shared';
+import { UnauthorizedError, SessionLockedError } from '@/core/middleware/errorHandler.js';
 import { randomUUID } from 'crypto';
-import type { Session } from '@prisma/client';
 
 // ----------------------------------------------------------------------------
 // Configuration
 // ----------------------------------------------------------------------------
 
-const SESSION_LOCK_MINUTES = parseInt(process.env.SESSION_LOCK_MINUTES ?? '10', 10);
 const SESSION_EXPIRY_HOURS = parseInt(process.env.SESSION_EXPIRY_HOURS ?? '24', 10);
 
 // ----------------------------------------------------------------------------
@@ -376,7 +373,7 @@ export const sessionService = {
     );
   },
 
-  async getCachedSession(sessionId: string): Promise<CachedSession | null> {
+  getCachedSession(sessionId: string): Promise<CachedSession | null> {
     return getJson<CachedSession>(REDIS_KEYS.session(sessionId));
   },
 };

@@ -3,7 +3,7 @@
 // Instance administration endpoints
 // ============================================================================
 
-import { FastifyPluginAsync } from 'fastify';
+import type { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
 import { prisma } from '../../core/database/client.js';
 import { redisClient } from '../../core/database/redis.js';
 import { storageClient } from '../../core/storage/s3.js';
@@ -28,7 +28,7 @@ interface RestorePreviewRequest {
 // Admin Guard Middleware
 // ----------------------------------------------------------------------------
 
-async function requireAdmin(request: any, reply: any): Promise<void> {
+async function requireAdmin(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   // Check if user is authenticated
   if (!request.user?.sub) {
     return reply.status(401).send({ error: 'Authentication required' });
@@ -397,7 +397,11 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
     const limit = Math.min(parseInt(request.query.limit ?? '100', 10), 500);
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: {
+      action?: { contains: string };
+      userId?: string;
+      entity?: string;
+    } = {};
 
     if (request.query.action) {
       where.action = { contains: request.query.action };

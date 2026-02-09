@@ -449,8 +449,9 @@ export const exportService = {
   },
 
   async getYearlyReportData(workspaceId: string, year: number) {
-    const startDate = new Date(year, 0, 1);
-    const endDate = new Date(year, 11, 31);
+    // Year boundaries for reference (used implicitly in monthly queries)
+    const _startDate = new Date(year, 0, 1);
+    const _endDate = new Date(year, 11, 31);
 
     const monthlyData = await Promise.all(
       Array.from({ length: 12 }, (_, i) => i + 1).map(async (month) => {

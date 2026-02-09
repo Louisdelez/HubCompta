@@ -152,7 +152,7 @@ export function RecurrencesPage() {
   };
 
   const handleSave = () => {
-    queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
+    void queryClient.invalidateQueries({ queryKey: ['recurrences', workspaceId] });
     handleClose();
   };
 

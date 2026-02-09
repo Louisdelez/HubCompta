@@ -8,7 +8,7 @@ import type { QuoteCreateInput } from '@finance-hub/shared';
 import type { QuoteStatus, Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { NotFoundError } from '@/core/middleware/errorHandler.js';
-import { calculateDocumentTotals, DEFAULT_VAT_RATE } from './vat.utils.js';
+import { calculateDocumentTotals } from './vat.utils.js';
 
 // ----------------------------------------------------------------------------
 // Types

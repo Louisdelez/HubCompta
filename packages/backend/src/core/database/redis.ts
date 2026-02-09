@@ -57,7 +57,14 @@ export const redisClient = getRedisClient();
 // Redis Key Prefixes
 // ----------------------------------------------------------------------------
 
-export const REDIS_KEYS = {
+export const REDIS_KEYS: {
+  session: (sessionId: string) => string;
+  rateLimit: (type: string, identifier: string) => string;
+  loginAttempts: (email: string) => string;
+  accountLockout: (email: string) => string;
+  cache: (key: string) => string;
+  workspace: (workspaceId: string, key: string) => string;
+} = {
   /** Session data: session:{sessionId} */
   session: (sessionId: string) => `session:${sessionId}`,
 
@@ -124,9 +131,10 @@ export async function incrementWithExpiry(
 // Graceful Shutdown
 // ----------------------------------------------------------------------------
 
-process.on('beforeExit', async () => {
+process.on('beforeExit', () => {
   if (redis) {
-    await redis.quit();
-    redis = null;
+    void redis.quit().then(() => {
+      redis = null;
+    });
   }
 });

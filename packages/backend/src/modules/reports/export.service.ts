@@ -38,7 +38,14 @@ export interface ExportResult {
 
 function escapeCSV(value: unknown): string {
   if (value === null || value === undefined) return '';
-  const str = String(value);
+  let str: string;
+  if (typeof value === 'object') {
+    str = JSON.stringify(value);
+  } else if (typeof value === 'string') {
+    str = value;
+  } else {
+    str = String(value as string | number | boolean | bigint | symbol);
+  }
   if (str.includes(',') || str.includes('"') || str.includes('\n')) {
     return `"${str.replace(/"/g, '""')}"`;
   }
@@ -54,7 +61,7 @@ function formatDate(date: Date | string): string {
   return format(d, 'dd/MM/yyyy', { locale: fr });
 }
 
-function formatDateTime(date: Date | string): string {
+function _formatDateTime(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   return format(d, 'dd/MM/yyyy HH:mm', { locale: fr });
 }

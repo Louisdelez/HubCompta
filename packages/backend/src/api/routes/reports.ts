@@ -3,7 +3,7 @@
 // Advanced reporting and export endpoints
 // ============================================================================
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { reportService } from '@/modules/reports/report.service.js';
 import { exportService } from '@/modules/reports/export.service.js';
 import { transactionService } from '@/modules/transactions/transaction.service.js';
@@ -56,7 +56,7 @@ function parseDateRange(query: DateRangeQuery): { from: Date; to: Date } {
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function reportRoutes(app: FastifyInstance): Promise<void> {
+export function reportRoutes(app: FastifyInstance): void {
   // Apply auth guard and workspace context to all routes
   app.addHook('preHandler', authGuard);
   app.addHook('preHandler', workspaceContextMiddleware);

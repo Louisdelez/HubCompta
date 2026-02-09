@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
-import { ConflictError, NotFoundError, ForbiddenError } from '@/core/middleware/errorHandler.js';
+import { NotFoundError } from '@/core/middleware/errorHandler.js';
 import { WORKSPACE } from '@finance-hub/shared';
 import type { Workspace, WorkspaceType, MembershipRole } from '@prisma/client';
 import type { WorkspaceCreateInput, WorkspaceUpdateInput } from '@finance-hub/shared';
@@ -63,7 +63,7 @@ export const workspaceService = {
   /**
    * Get workspace by ID
    */
-  async getById(workspaceId: string): Promise<Workspace | null> {
+  getById(workspaceId: string): Promise<Workspace | null> {
     return prisma.workspace.findUnique({
       where: { id: workspaceId, deletedAt: null },
     });

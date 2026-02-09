@@ -253,7 +253,7 @@ export const uploadService = {
   /**
    * Get a presigned download URL for a document
    */
-  async getDownloadUrl(
+  getDownloadUrl(
     storageKey: string,
     filename: string,
     expirySeconds = 3600

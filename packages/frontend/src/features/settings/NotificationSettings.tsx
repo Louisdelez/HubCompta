@@ -66,7 +66,7 @@ export function NotificationSettings() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-preferences'] });
+      void queryClient.invalidateQueries({ queryKey: ['user-preferences'] });
       setIsEditing(false);
     },
   });

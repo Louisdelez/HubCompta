@@ -172,7 +172,7 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   await app.register(adminRoutes, { prefix: `${apiPrefix}/admin` });
 
   // Placeholder route for now
-  app.get(`${apiPrefix}/ping`, async () => {
+  app.get(`${apiPrefix}/ping`, () => {
     return { pong: true, timestamp: new Date().toISOString() };
   });
 }

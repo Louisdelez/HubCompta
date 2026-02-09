@@ -89,7 +89,7 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
       ),
   });
 
-  const uploadFile = async (file: File, index: number) => {
+  const uploadFile = useCallback(async (file: File, index: number) => {
     try {
       // Update status to uploading
       setUploads((prev) =>
@@ -150,7 +150,7 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
         )
       );
     }
-  };
+  }, [requestUploadMutation, confirmUploadMutation]);
 
   const handleFiles = useCallback((files: FileList | null) => {
     if (!files) return;
@@ -161,14 +161,15 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
       status: 'pending' as const,
     }));
 
-    setUploads((prev) => [...prev, ...newUploads]);
-
-    // Start uploading
-    const startIndex = uploads.length;
-    newUploads.forEach((upload, i) => {
-      uploadFile(upload.file, startIndex + i);
+    setUploads((prev) => {
+      // Start uploading after calculating correct indices
+      const startIndex = prev.length;
+      newUploads.forEach((upload, i) => {
+        void uploadFile(upload.file, startIndex + i);
+      });
+      return [...prev, ...newUploads];
     });
-  }, [uploads.length]);
+  }, [uploadFile]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();

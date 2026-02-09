@@ -85,8 +85,8 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
         transactionId,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transaction-documents', transactionId] });
-      queryClient.invalidateQueries({ queryKey: ['documents', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['transaction-documents', transactionId] });
+      void queryClient.invalidateQueries({ queryKey: ['documents', workspaceId] });
       setShowPicker(false);
     },
   });
@@ -96,8 +96,8 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
     mutationFn: (documentId: string) =>
       api.delete(`/workspaces/${workspaceId}/documents/${documentId}/link/${transactionId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transaction-documents', transactionId] });
-      queryClient.invalidateQueries({ queryKey: ['documents', workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['transaction-documents', transactionId] });
+      void queryClient.invalidateQueries({ queryKey: ['documents', workspaceId] });
     },
   });
 

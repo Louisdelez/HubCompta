@@ -2,7 +2,7 @@
 // TRANSACTION ROUTES - Finance Hub
 // ============================================================================
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { transactionService } from '@/modules/transactions/transaction.service.js';
 import { transferService } from '@/modules/transactions/transfer.service.js';
 import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
@@ -44,7 +44,7 @@ interface TransactionQuery {
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function transactionRoutes(app: FastifyInstance): Promise<void> {
+export function transactionRoutes(app: FastifyInstance): void {
   // Apply auth guard and workspace context to all routes
   app.addHook('preHandler', authGuard);
   app.addHook('preHandler', workspaceContextMiddleware);

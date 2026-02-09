@@ -15,7 +15,7 @@ import { positionCreateSchema, investTransactionCreateSchema } from '@finance-hu
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function positionRoutes(app: FastifyInstance): Promise<void> {
+export function positionRoutes(app: FastifyInstance): void {
   // Apply auth guard and workspace context to all routes
   app.addHook('preHandler', authGuard);
   app.addHook('preHandler', workspaceContextMiddleware);

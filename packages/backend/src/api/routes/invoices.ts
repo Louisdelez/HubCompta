@@ -2,7 +2,7 @@
 // INVOICE ROUTES - Finance Hub
 // ============================================================================
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { invoiceService } from '@/modules/pro/invoice.service.js';
 import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
@@ -15,7 +15,7 @@ import { z } from 'zod';
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function invoiceRoutes(app: FastifyInstance): Promise<void> {
+export function invoiceRoutes(app: FastifyInstance): void {
   // Apply auth guard and workspace context to all routes
   app.addHook('preHandler', authGuard);
   app.addHook('preHandler', workspaceContextMiddleware);

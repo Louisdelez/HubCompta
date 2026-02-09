@@ -16,7 +16,6 @@ import {
   UnauthorizedError,
   ValidationError,
   RateLimitError,
-  SessionLockedError,
 } from '@/core/middleware/errorHandler.js';
 import {
   registerSchema,
@@ -31,7 +30,7 @@ import { AUTH } from '@finance-hub/shared';
 // Rate Limiting Helpers
 // ----------------------------------------------------------------------------
 
-async function checkLoginRateLimit(email: string, ip: string): Promise<void> {
+async function checkLoginRateLimit(email: string, _ip: string): Promise<void> {
   const key = REDIS_KEYS.loginAttempts(email);
   const attempts = await incrementWithExpiry(key, AUTH.RATE_LIMIT.LOCKOUT_MINUTES * 60);
 
@@ -59,7 +58,7 @@ async function clearLoginAttempts(email: string): Promise<void> {
 // Routes
 // ----------------------------------------------------------------------------
 
-export async function authRoutes(app: FastifyInstance): Promise<void> {
+export function authRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   // POST /auth/register - Create new user account
   // --------------------------------------------------------------------------
