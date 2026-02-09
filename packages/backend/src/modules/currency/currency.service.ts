@@ -431,44 +431,134 @@ export const currencyService = {
 
   /**
    * Get latest rates for a base currency
+   * Includes cross-rates from all sources (ECB, Fed, SNB, FRED)
    */
   async getLatestRates(baseCurrency: string) {
     const base = baseCurrency.toUpperCase();
+    const ratesMap = new Map<string, { rate: number; date: Date; source: string }>();
 
-    // Get distinct target currencies that have rates from this base
-    const distinctTargets = await prisma.exchangeRate.findMany({
+    // 1. Get direct rates from base currency
+    const directTargets = await prisma.exchangeRate.findMany({
       where: { baseCurrency: base },
       distinct: ['targetCurrency'],
       select: { targetCurrency: true },
     });
 
-    if (distinctTargets.length === 0) {
-      return [];
+    for (const { targetCurrency } of directTargets) {
+      const latestRate = await prisma.exchangeRate.findFirst({
+        where: { baseCurrency: base, targetCurrency },
+        orderBy: { date: 'desc' },
+      });
+      if (latestRate) {
+        ratesMap.set(targetCurrency, {
+          rate: Number(latestRate.rate),
+          date: latestRate.date,
+          source: latestRate.source,
+        });
+      }
     }
 
-    // For each target currency, get the most recent rate
-    const rates = await Promise.all(
-      distinctTargets.map(async ({ targetCurrency }) => {
-        const latestRate = await prisma.exchangeRate.findFirst({
-          where: {
-            baseCurrency: base,
-            targetCurrency,
-          },
+    // 2. Get inverse rates (rates where target is the base currency)
+    const inverseRates = await prisma.exchangeRate.findMany({
+      where: { targetCurrency: base },
+      distinct: ['baseCurrency'],
+      select: { baseCurrency: true },
+    });
+
+    for (const { baseCurrency: targetFromInverse } of inverseRates) {
+      if (ratesMap.has(targetFromInverse)) continue; // Skip if we already have this rate
+
+      const latestRate = await prisma.exchangeRate.findFirst({
+        where: { baseCurrency: targetFromInverse, targetCurrency: base },
+        orderBy: { date: 'desc' },
+      });
+      if (latestRate) {
+        ratesMap.set(targetFromInverse, {
+          rate: 1 / Number(latestRate.rate),
+          date: latestRate.date,
+          source: `${latestRate.source} (inverse)`,
+        });
+      }
+    }
+
+    // 3. Calculate cross-rates via pivot currencies (EUR, USD, CHF)
+    const pivots = ['EUR', 'USD', 'CHF'];
+
+    for (const pivot of pivots) {
+      if (pivot === base) continue;
+
+      // Get base → pivot rate
+      let baseToPivotRate: number | null = null;
+      let baseToPivotDate: Date | null = null;
+      let baseToPivotSource: string | null = null;
+
+      // Try direct rate base → pivot
+      const directToPivot = await prisma.exchangeRate.findFirst({
+        where: { baseCurrency: base, targetCurrency: pivot },
+        orderBy: { date: 'desc' },
+      });
+
+      if (directToPivot) {
+        baseToPivotRate = Number(directToPivot.rate);
+        baseToPivotDate = directToPivot.date;
+        baseToPivotSource = directToPivot.source;
+      } else {
+        // Try inverse rate pivot → base
+        const inverseToPivot = await prisma.exchangeRate.findFirst({
+          where: { baseCurrency: pivot, targetCurrency: base },
           orderBy: { date: 'desc' },
         });
-        return latestRate;
-      })
-    );
 
-    // Filter out nulls and map to response format
-    return rates
-      .filter((r): r is NonNullable<typeof r> => r !== null)
-      .map((r) => ({
-        targetCurrency: r.targetCurrency,
-        rate: Number(r.rate),
-        date: r.date,
-        source: r.source,
-      }));
+        if (inverseToPivot) {
+          baseToPivotRate = 1 / Number(inverseToPivot.rate);
+          baseToPivotDate = inverseToPivot.date;
+          baseToPivotSource = inverseToPivot.source;
+        }
+      }
+
+      if (baseToPivotRate === null || baseToPivotDate === null || baseToPivotSource === null) {
+        continue; // Can't use this pivot
+      }
+
+      // Get all rates from pivot currency
+      const pivotRates = await prisma.exchangeRate.findMany({
+        where: { baseCurrency: pivot },
+        distinct: ['targetCurrency'],
+        select: { targetCurrency: true },
+      });
+
+      for (const { targetCurrency } of pivotRates) {
+        if (targetCurrency === base) continue;
+        if (ratesMap.has(targetCurrency)) continue; // Skip if we already have this rate
+
+        const pivotToTarget = await prisma.exchangeRate.findFirst({
+          where: { baseCurrency: pivot, targetCurrency },
+          orderBy: { date: 'desc' },
+        });
+
+        if (pivotToTarget) {
+          // Cross-rate: base → pivot → target = baseToPivot × pivotToTarget
+          const crossRate = baseToPivotRate * Number(pivotToTarget.rate);
+          const olderDate = baseToPivotDate < pivotToTarget.date ? baseToPivotDate : pivotToTarget.date;
+
+          ratesMap.set(targetCurrency, {
+            rate: crossRate,
+            date: olderDate,
+            source: `${pivotToTarget.source} (via ${pivot})`,
+          });
+        }
+      }
+    }
+
+    // Convert map to array
+    return Array.from(ratesMap.entries())
+      .map(([targetCurrency, data]) => ({
+        targetCurrency,
+        rate: data.rate,
+        date: data.date,
+        source: data.source,
+      }))
+      .sort((a, b) => a.targetCurrency.localeCompare(b.targetCurrency));
   },
 
   /**
