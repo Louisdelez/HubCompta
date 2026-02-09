@@ -4,8 +4,8 @@
 // ============================================================================
 
 import { Job } from 'bullmq';
-import { prisma } from '../../../backend/src/core/database/client.js';
-import { recurrenceService } from '../../../backend/src/modules/recurrences/recurrence.service.js';
+import { prisma } from '../lib/prisma.js';
+import type { RecurrenceFreq } from '@prisma/client';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -21,6 +21,114 @@ interface RecurrenceJobResult {
   success: number;
   failed: number;
   errors?: Array<{ recurrenceId: string; error: string }>;
+}
+
+interface TransactionTemplate {
+  accountId: string;
+  type: 'income' | 'expense';
+  amount: number;
+  description: string;
+  categoryId?: string;
+  toAccountId?: string;
+}
+
+// ----------------------------------------------------------------------------
+// Helper Functions
+// ----------------------------------------------------------------------------
+
+function calculateNextRun(
+  currentDate: Date,
+  frequency: RecurrenceFreq,
+  interval: number
+): Date {
+  const result = new Date(currentDate);
+
+  switch (frequency) {
+    case 'daily':
+      result.setDate(result.getDate() + interval);
+      break;
+    case 'weekly':
+      result.setDate(result.getDate() + interval * 7);
+      break;
+    case 'monthly':
+      result.setMonth(result.getMonth() + interval);
+      break;
+    case 'yearly':
+      result.setFullYear(result.getFullYear() + interval);
+      break;
+    default:
+      result.setMonth(result.getMonth() + interval);
+  }
+
+  return result;
+}
+
+async function getDueRecurrences(limit: number) {
+  const now = new Date();
+  return prisma.recurrence.findMany({
+    where: {
+      isActive: true,
+      nextRunAt: { lte: now },
+      OR: [
+        { endAt: null },
+        { endAt: { gte: now } },
+      ],
+    },
+    take: limit,
+    orderBy: { nextRunAt: 'asc' },
+  });
+}
+
+async function executeRecurrence(recurrenceId: string) {
+  const recurrence = await prisma.recurrence.findUnique({
+    where: { id: recurrenceId },
+  });
+
+  if (!recurrence || !recurrence.isActive) {
+    return null;
+  }
+
+  // Check if ended
+  if (recurrence.endAt && new Date() > recurrence.endAt) {
+    await prisma.recurrence.update({
+      where: { id: recurrenceId },
+      data: { isActive: false },
+    });
+    return null;
+  }
+
+  const template = recurrence.template as TransactionTemplate | null;
+  if (!template) {
+    throw new Error('Recurrence has no template');
+  }
+
+  // Create the transaction
+  const transaction = await prisma.transaction.create({
+    data: {
+      workspaceId: recurrence.workspaceId,
+      accountId: template.accountId,
+      type: template.type,
+      amount: template.amount,
+      description: template.description,
+      categoryId: template.categoryId ?? null,
+      date: recurrence.nextRunAt,
+      recurrenceId: recurrence.id,
+    },
+  });
+
+  // Update next run
+  const nextRunAt = calculateNextRun(
+    recurrence.nextRunAt,
+    recurrence.frequency,
+    recurrence.interval
+  );
+
+  await prisma.recurrence.update({
+    where: { id: recurrenceId },
+    data: { nextRunAt },
+  });
+
+  return transaction;
 }
 
 // ----------------------------------------------------------------------------
@@ -52,7 +160,7 @@ async function processDueRecurrences(): Promise<RecurrenceJobResult> {
 
   try {
     // Get all due recurrences
-    const dueRecurrences = await recurrenceService.getDueRecurrences(100);
+    const dueRecurrences = await getDueRecurrences(100);
     result.processed = dueRecurrences.length;
 
     if (dueRecurrences.length === 0) {
@@ -65,7 +173,7 @@ async function processDueRecurrences(): Promise<RecurrenceJobResult> {
     // Process each recurrence
     for (const recurrence of dueRecurrences) {
       try {
-        const transaction = await recurrenceService.execute(recurrence.id);
+        const transaction = await executeRecurrence(recurrence.id);
 
         if (transaction) {
           result.success++;
@@ -109,7 +217,7 @@ async function processSingleRecurrence(recurrenceId: string): Promise<Recurrence
   };
 
   try {
-    const transaction = await recurrenceService.execute(recurrenceId);
+    const transaction = await executeRecurrence(recurrenceId);
 
     if (transaction) {
       result.success = 1;

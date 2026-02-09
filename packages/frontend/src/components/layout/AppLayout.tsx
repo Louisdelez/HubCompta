@@ -220,10 +220,10 @@ const THEME_OPTIONS: { value: Theme; label: string; icon: LucideIcon }[] = [
 ];
 
 function ThemeSelector() {
-  const { theme, setTheme, isDark } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
-  const currentOption = THEME_OPTIONS.find((opt) => opt.value === theme) ?? THEME_OPTIONS[0];
+  const currentOption = THEME_OPTIONS.find((opt) => opt.value === theme) ?? THEME_OPTIONS[0]!;
   const CurrentIcon = currentOption.icon;
 
   return (

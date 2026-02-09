@@ -69,7 +69,7 @@ async function fetchYahooQuotes(symbols: string[]): Promise<Map<string, MarketQu
       return quotes;
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { quoteResponse?: { result?: Array<{ symbol: string; regularMarketPrice?: number; currency?: string }> } };
     const results = data?.quoteResponse?.result || [];
 
     for (const result of results) {
@@ -124,7 +124,7 @@ async function fetchCoinGeckoQuotes(symbols: string[]): Promise<Map<string, Mark
       return quotes;
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as Array<{ id: string; current_price?: number }>;
 
     for (const coin of data) {
       const symbol = symbolToId.get(coin.id);

@@ -70,8 +70,9 @@ async function evaluateBudgetAlerts(workspaceId?: string): Promise<number> {
         _sum: { amount: true },
       });
 
-      const totalSpent = Math.abs(spending._sum.amount || 0);
-      const percentUsed = (totalSpent / budget.amount) * 100;
+      const sumAmount = spending._sum.amount;
+      const totalSpent = Math.abs(sumAmount ? Number(sumAmount) : 0);
+      const percentUsed = (totalSpent / Number(budget.amount)) * 100;
 
       const isExceeded = percentUsed >= 100;
       const isWarning = percentUsed >= config.thresholdPercent && percentUsed < 100;
@@ -139,7 +140,7 @@ async function evaluatePriceAlerts(): Promise<number> {
 
       if (!asset || !asset.lastPrice) continue;
 
-      const currentPrice = asset.lastPrice;
+      const currentPrice = Number(asset.lastPrice);
       let shouldTrigger = false;
 
       if (rule.type === 'price_above' && currentPrice >= config.targetPrice) {
@@ -203,7 +204,7 @@ async function evaluateLowBalanceAlerts(): Promise<number> {
 
       if (!account) continue;
 
-      if (account.balance < config.threshold) {
+      if (Number(account.balance) < config.threshold) {
         // Only notify once per day
         const lastTriggered = rule.lastTriggeredAt;
         const now = new Date();
@@ -214,8 +215,8 @@ async function evaluateLowBalanceAlerts(): Promise<number> {
               workspaceId: rule.workspaceId,
               type: 'budget_warning',
               title: `Solde bas: ${account.name}`,
-              message: `Le solde de "${account.name}" (${account.balance.toFixed(2)} €) est inférieur à ${config.threshold.toFixed(2)} €.`,
-              data: { accountId: account.id, currentBalance: account.balance },
+              message: `Le solde de "${account.name}" (${Number(account.balance).toFixed(2)} €) est inférieur à ${config.threshold.toFixed(2)} €.`,
+              data: { accountId: account.id, currentBalance: Number(account.balance) },
             },
           });
 
@@ -253,28 +254,33 @@ async function evaluateRecurringReminders(): Promise<number> {
         where: { id: config.recurrenceId },
       });
 
-      if (!recurrence || !recurrence.nextOccurrence) continue;
+      if (!recurrence || !recurrence.nextRunAt) continue;
+
+      // Extract template data
+      const template = recurrence.template as { description?: string; amount?: number } | null;
+      const description = template?.description || recurrence.name || 'Transaction récurrente';
+      const amount = template?.amount || 0;
 
       const now = new Date();
       const daysUntil = Math.ceil(
-        (recurrence.nextOccurrence.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
+        (recurrence.nextRunAt.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
       );
 
       if (daysUntil <= config.daysBefore && daysUntil >= 0) {
         // Only notify once per occurrence
         const lastTriggered = rule.lastTriggeredAt;
-        if (!lastTriggered || lastTriggered < recurrence.nextOccurrence) {
+        if (!lastTriggered || lastTriggered < recurrence.nextRunAt) {
           await prisma.notification.create({
             data: {
               userId: rule.userId,
               workspaceId: rule.workspaceId,
               type: 'bill_reminder',
               title: 'Rappel de paiement',
-              message: `"${recurrence.description || 'Transaction récurrente'}" (${Math.abs(recurrence.amount).toFixed(2)} €) est dû dans ${daysUntil} jour(s).`,
+              message: `"${description}" (${Math.abs(amount).toFixed(2)} €) est dû dans ${daysUntil} jour(s).`,
               data: {
                 recurrenceId: recurrence.id,
-                amount: Math.abs(recurrence.amount),
-                dueDate: recurrence.nextOccurrence.toISOString(),
+                amount: Math.abs(amount),
+                dueDate: recurrence.nextRunAt.toISOString(),
                 daysUntil,
               },
             },

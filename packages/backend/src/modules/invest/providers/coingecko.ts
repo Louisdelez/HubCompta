@@ -14,6 +14,58 @@ import type {
 } from './types.js';
 
 // ----------------------------------------------------------------------------
+// Types
+// ----------------------------------------------------------------------------
+
+interface CoinListItem {
+  id: string;
+  symbol: string;
+  name: string;
+}
+
+interface CoinMarketData {
+  current_price?: Record<string, number>;
+  price_change_24h_in_currency?: Record<string, number>;
+  price_change_percentage_24h?: number;
+  total_volume?: Record<string, number>;
+  market_cap?: Record<string, number>;
+  high_24h?: Record<string, number>;
+  low_24h?: Record<string, number>;
+}
+
+interface CoinData {
+  id: string;
+  symbol: string;
+  name: string;
+  market_data?: CoinMarketData;
+}
+
+interface CoinMarketItem {
+  id: string;
+  symbol: string;
+  current_price?: number;
+  price_change_24h?: number;
+  price_change_percentage_24h?: number;
+  total_volume?: number;
+  market_cap?: number;
+  high_24h?: number;
+  low_24h?: number;
+  last_updated: string;
+}
+
+interface SearchResponse {
+  coins?: Array<{
+    id: string;
+    symbol: string;
+    name: string;
+  }>;
+}
+
+interface HistoryResponse {
+  prices?: Array<[number, number]>;
+}
+
+// ----------------------------------------------------------------------------
 // Constants
 // ----------------------------------------------------------------------------
 
@@ -82,8 +134,8 @@ export class CoinGeckoProvider implements MarketDataProvider {
   /**
    * Get headers (with API key if configured)
    */
-  private getHeaders(): HeadersInit {
-    const headers: HeadersInit = {
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
       'Accept': 'application/json',
     };
     if (this.apiKey) {
@@ -150,7 +202,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
         return;
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as CoinListItem[];
       this.coinList = new Map();
 
       for (const coin of data) {
@@ -189,7 +241,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
         return null;
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as CoinData;
       const marketData = data.market_data;
 
       if (!marketData) {
@@ -252,7 +304,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
         return quotes;
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as CoinMarketItem[];
 
       for (const coin of data) {
         const symbol = idToSymbol.get(coin.id);
@@ -295,12 +347,12 @@ export class CoinGeckoProvider implements MarketDataProvider {
         return [];
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as SearchResponse;
       const coins = data?.coins || [];
 
-      return coins.slice(0, 10).map((coin: Record<string, unknown>) => ({
-        symbol: (coin.symbol as string).toUpperCase(),
-        name: coin.name as string,
+      return coins.slice(0, 10).map((coin) => ({
+        symbol: coin.symbol.toUpperCase(),
+        name: coin.name,
         type: 'crypto' as AssetType,
         exchange: undefined,
         currency: 'EUR',
@@ -332,7 +384,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
         return null;
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as CoinData;
 
       return {
         symbol: data.symbol.toUpperCase(),
@@ -378,7 +430,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
         return [];
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as HistoryResponse;
       const prices = data?.prices || [];
 
       // CoinGecko returns [timestamp, price] arrays

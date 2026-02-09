@@ -42,7 +42,10 @@ function parseCSV(content: string, delimiter = ';'): Array<Record<string, string
   const lines = content.split('\n').filter((l) => l.trim());
   if (lines.length < 2) return [];
 
-  const headers = lines[0].split(delimiter).map((h) => h.trim().replace(/"/g, ''));
+  const headerLine = lines[0];
+  if (!headerLine) return [];
+
+  const headers = headerLine.split(delimiter).map((h) => h.trim().replace(/"/g, ''));
 
   return lines.slice(1).map((line) => {
     const values = line.split(delimiter).map((v) => v.trim().replace(/"/g, ''));
@@ -66,18 +69,32 @@ function parseDate(value: string, format: string): Date | null {
   const v = value.trim();
 
   try {
-    let day: number, month: number, year: number;
+    let day: number | undefined;
+    let month: number | undefined;
+    let year: number | undefined;
 
     switch (format) {
-      case 'DD/MM/YYYY':
-        [day, month, year] = v.split('/').map(Number);
+      case 'DD/MM/YYYY': {
+        const parts = v.split('/').map(Number);
+        day = parts[0];
+        month = parts[1];
+        year = parts[2];
         break;
-      case 'YYYY-MM-DD':
-        [year, month, day] = v.split('-').map(Number);
+      }
+      case 'YYYY-MM-DD': {
+        const parts = v.split('-').map(Number);
+        year = parts[0];
+        month = parts[1];
+        day = parts[2];
         break;
-      case 'DD-MM-YYYY':
-        [day, month, year] = v.split('-').map(Number);
+      }
+      case 'DD-MM-YYYY': {
+        const parts = v.split('-').map(Number);
+        day = parts[0];
+        month = parts[1];
+        year = parts[2];
         break;
+      }
       default:
         return new Date(v);
     }
@@ -170,15 +187,15 @@ export async function processImportJob(job: Job<ImportJobData>): Promise<ImportJ
           // Parse row data
           let amount: number;
           if (columnMapping.credit && columnMapping.debit) {
-            const credit = parseAmount(row[columnMapping.credit]);
-            const debit = parseAmount(row[columnMapping.debit]);
+            const credit = parseAmount(row[columnMapping.credit] ?? '');
+            const debit = parseAmount(row[columnMapping.debit] ?? '');
             amount = credit > 0 ? credit : -debit;
           } else {
-            amount = parseAmount(row[columnMapping.amount]);
+            amount = parseAmount(row[columnMapping.amount] ?? '');
           }
 
-          const date = parseDate(row[columnMapping.date], dateFormat);
-          const description = row[columnMapping.description]?.trim();
+          const date = parseDate(row[columnMapping.date] ?? '', dateFormat);
+          const description = (row[columnMapping.description] ?? '').trim();
 
           // Validate
           if (!date || !description || amount === 0) {
@@ -195,8 +212,8 @@ export async function processImportJob(job: Job<ImportJobData>): Promise<ImportJ
           }
 
           // Apply rules
-          let categoryId: string | undefined;
-          let appliedRuleId: string | undefined;
+          let categoryId: string | null = null;
+          let appliedRuleId: string | null = null;
 
           for (const rule of rules) {
             const conditions = rule.conditions as Array<{
@@ -248,7 +265,6 @@ export async function processImportJob(job: Job<ImportJobData>): Promise<ImportJ
               date,
               categoryId,
               importHash: hash,
-              importJobId: jobId,
               appliedRuleId,
             },
           });

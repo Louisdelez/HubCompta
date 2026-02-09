@@ -20,7 +20,6 @@ import type {
 
 // Job processors
 import { handleProStatusJob } from './pro-status.js';
-import { handleMarketDataJob } from './marketdata.js';
 import { handleAlertsJob } from './alerts.js';
 import { processRecurrenceJob } from './recurrences.js';
 import { processExchangeRateJob } from './exchange-rates.js';
@@ -35,10 +34,11 @@ if (!REDIS_URL) {
 
 function parseRedisUrl(url: string): ConnectionOptions {
   const parsed = new URL(url);
+  const password = parsed.password || undefined;
   return {
     host: parsed.hostname,
     port: parseInt(parsed.port || '6379', 10),
-    password: parsed.password || undefined,
+    ...(password && { password }),
     maxRetriesPerRequest: null,
   };
 }
@@ -185,13 +185,17 @@ export async function startWorker(): Promise<void> {
 
   registerWorker<RecurrenceJobData>({
     name: 'recurrences',
-    processor: processRecurrenceJob,
+    processor: async (job) => {
+      await processRecurrenceJob(job);
+    },
     concurrency: 1,
   });
 
   registerWorker<ExchangeRateJobData>({
     name: 'exchange-rates',
-    processor: processExchangeRateJob,
+    processor: async (job) => {
+      await processExchangeRateJob(job);
+    },
     concurrency: 1,
   });
 

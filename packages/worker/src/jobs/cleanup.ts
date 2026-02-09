@@ -105,9 +105,9 @@ export async function cleanupDeletedDocuments(
  * (files that exist in storage but not in database)
  */
 export async function cleanupOrphanedFiles(
-  options: CleanupOptions = {}
+  _options: CleanupOptions = {}
 ): Promise<{ orphanedFiles: string[]; deleted: number }> {
-  const { dryRun = false } = options;
+  // dryRun option will be used when implementation is complete
 
   // This would require listing all files in storage and comparing
   // with database records. Implementation depends on storage provider.
@@ -204,7 +204,7 @@ export async function runFullCleanup(
   const [documents, sessions, auditLogs] = await Promise.all([
     cleanupDeletedDocuments(options),
     cleanupExpiredSessions(),
-    cleanupAuditLogs({ dryRun: options.dryRun }),
+    cleanupAuditLogs({ dryRun: options.dryRun ?? false }),
   ]);
 
   const duration = Date.now() - startTime;

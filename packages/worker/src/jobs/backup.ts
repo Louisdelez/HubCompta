@@ -4,10 +4,13 @@
 // ============================================================================
 
 import { Job } from 'bullmq';
-import { prisma } from '../../../backend/src/core/database/client.js';
-import { storageClient } from '../../../backend/src/core/storage/s3.js';
+import { prisma } from '../lib/prisma.js';
+import { getStorageClient } from '../lib/storage.js';
 import { createGzip } from 'zlib';
 import { Readable } from 'stream';
+
+// Get storage client singleton
+const storageClient = getStorageClient();
 
 // ----------------------------------------------------------------------------
 // Types
@@ -35,7 +38,7 @@ interface BackupMetadata {
   type: 'full' | 'incremental' | 'workspace';
   createdAt: string;
   version: string;
-  workspaceId?: string;
+  workspaceId: string | undefined;
   tables: string[];
   counts: Record<string, number>;
 }
@@ -128,7 +131,7 @@ async function getTableData(tableName: string, workspaceId?: string): Promise<un
 }
 
 async function createBackupData(
-  type: 'full' | 'incremental' | 'workspace',
+  _type: 'full' | 'incremental' | 'workspace',
   workspaceId?: string
 ): Promise<{ data: Record<string, unknown[]>; counts: Record<string, number> }> {
   const data: Record<string, unknown[]> = {};
@@ -267,7 +270,7 @@ export async function processBackupJob(job: Job<BackupJobData>): Promise<BackupJ
       createdAt: new Date().toISOString(),
       version: BACKUP_VERSION,
       workspaceId,
-      tables: BACKUP_TABLES.filter(t => counts[t] > 0),
+      tables: BACKUP_TABLES.filter(t => (counts[t] ?? 0) > 0),
       counts,
     };
 
@@ -305,9 +308,9 @@ export async function processBackupJob(job: Job<BackupJobData>): Promise<BackupJ
         data: {
           userId: job.data.triggeredBy ?? 'system',
           action: 'backup.created',
-          entity: 'system',
+          entityType: 'system',
           entityId: backupId,
-          metadata: {
+          changes: {
             type,
             workspaceId,
             size: compressedData.length,

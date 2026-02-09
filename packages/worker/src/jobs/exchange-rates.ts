@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { Job } from 'bullmq';
-import { prisma } from '../../../backend/src/core/database/client.js';
+import { prisma } from '../lib/prisma.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -41,7 +41,7 @@ async function fetchECBRates(): Promise<{ rates: ExchangeRateData[]; date: Date 
   const dateMatch = xml.match(/time='(\d{4}-\d{2}-\d{2})'/);
   const rateMatches = xml.matchAll(/currency='([A-Z]{3})'\s+rate='([\d.]+)'/g);
 
-  if (!dateMatch) {
+  if (!dateMatch?.[1]) {
     throw new Error('Could not parse date from ECB response');
   }
 
@@ -49,12 +49,16 @@ async function fetchECBRates(): Promise<{ rates: ExchangeRateData[]; date: Date 
   const rates: ExchangeRateData[] = [];
 
   for (const match of rateMatches) {
-    rates.push({
-      baseCurrency: 'EUR',
-      targetCurrency: match[1],
-      rate: parseFloat(match[2]),
-      date,
-    });
+    const currency = match[1];
+    const rateStr = match[2];
+    if (currency && rateStr) {
+      rates.push({
+        baseCurrency: 'EUR',
+        targetCurrency: currency,
+        rate: parseFloat(rateStr),
+        date,
+      });
+    }
   }
 
   return { rates, date };

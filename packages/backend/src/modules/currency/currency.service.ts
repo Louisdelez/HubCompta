@@ -739,6 +739,9 @@ export const currencyService = {
       }
 
       const dataLine = lines[dataLineIndex];
+      if (!dataLine) {
+        throw new Error('Could not read data line from Fed H.10 CSV');
+      }
       const values = dataLine.split(',');
       const dateStr = values[0];
 
@@ -830,17 +833,18 @@ export const currencyService = {
 
       while ((itemMatch = itemRegex.exec(xml)) !== null) {
         const itemContent = itemMatch[1];
+        if (!itemContent) continue;
 
         const currencyMatch = itemContent.match(/<cb:targetCurrency>([A-Z]{3})<\/cb:targetCurrency>/);
         const rateMatch = itemContent.match(/<cb:value>([\d.]+)<\/cb:value>/);
         const dateMatch = itemContent.match(/<cb:period>(\d{4}-\d{2}-\d{2})<\/cb:period>/);
         const unitMultMatch = itemContent.match(/<cb:unit_mult>(-?\d+)<\/cb:unit_mult>/);
 
-        if (currencyMatch && rateMatch && dateMatch) {
+        if (currencyMatch?.[1] && rateMatch?.[1] && dateMatch?.[1]) {
           const currency = currencyMatch[1];
           let rateValue = parseFloat(rateMatch[1]);
           const date = new Date(dateMatch[1]);
-          const unitMult = unitMultMatch ? parseInt(unitMultMatch[1]) : 0;
+          const unitMult = unitMultMatch?.[1] ? parseInt(unitMultMatch[1]) : 0;
 
           // Skip if we already have this currency (RSS contains historical data)
           if (currencies.includes(currency)) {

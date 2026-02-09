@@ -86,14 +86,20 @@ export interface CleanupJobResult {
 // ----------------------------------------------------------------------------
 
 export interface BackupJobData {
+  type: 'full' | 'incremental' | 'workspace';
   workspaceId?: string;
-  includeDocuments: boolean;
+  triggeredBy?: string;
+  retention?: number;
 }
 
 export interface BackupJobResult {
-  storageKey: string;
+  success: boolean;
+  backupId: string;
   size: number;
-  timestamp: string;
+  duration: number;
+  includedWorkspaces: number;
+  includedTables: string[];
+  storagePath: string;
 }
 
 // ----------------------------------------------------------------------------
