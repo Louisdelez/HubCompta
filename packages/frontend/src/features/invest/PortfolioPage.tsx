@@ -33,12 +33,13 @@ import { PerformanceChart } from './PerformanceChart';
 interface PortfolioSummary {
   totalValue: number;
   totalCost: number;
-  totalUnrealizedPnL: number;
-  totalUnrealizedPnLPercent: number;
-  totalRealizedPnL: number;
+  totalUnrealizedGain: number;
+  totalReturn: number;
+  totalReturnPercent: number;
+  totalRealizedGain: number;
   positionCount: number;
   allocation: {
-    name: string;
+    type: string;
     value: number;
     percent: number;
   }[];
@@ -52,15 +53,15 @@ interface PortfolioSummary {
       currency: string;
     };
     currentValue: number;
-    unrealizedPnL: number;
-    unrealizedPnLPercent: number;
+    unrealizedGain: number;
+    unrealizedGainPercent: number;
   }[];
 }
 
 interface AllocationData {
   totalValue: number;
   byType: {
-    name: string;
+    type: string;
     value: number;
     percent: number;
   }[];
@@ -71,11 +72,25 @@ interface AllocationData {
   }[];
 }
 
+interface PerformanceDataPoint {
+  date: string;
+  value: number;
+  invested: number;
+}
+
+interface PerformanceData {
+  current: PortfolioSummary;
+  history: PerformanceDataPoint[];
+}
+
 type ViewMode = 'list' | 'detail';
 
 // ----------------------------------------------------------------------------
 // Component
 // ----------------------------------------------------------------------------
+
+// Refresh interval in milliseconds (30 seconds)
+const REFRESH_INTERVAL = 30000;
 
 export function PortfolioPage() {
   const { currentWorkspace } = useWorkspace();
@@ -86,35 +101,56 @@ export function PortfolioPage() {
   const [selectedPositionAsset, setSelectedPositionAsset] = useState<{ symbol: string; currency: string } | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Fetch portfolio summary
-  const { data: summary, isLoading: summaryLoading, refetch: refetchSummary } = useQuery({
-    queryKey: ['portfolio', 'summary', currentWorkspace?.id],
+  // Use workspace currency or default to EUR
+  const baseCurrency = currentWorkspace?.currency || 'EUR';
+
+  // Fetch portfolio summary (normalized to workspace currency) with auto-refresh
+  const { data: summary, isLoading: summaryLoading, refetch: refetchSummary, isFetching: isFetchingSummary } = useQuery({
+    queryKey: ['portfolio', 'summary', currentWorkspace?.id, baseCurrency],
     queryFn: async () => {
-      const response = await api.get<{ data: PortfolioSummary }>(
-        `/workspaces/${currentWorkspace?.id}/portfolio/summary`
+      // Refresh prices from providers first
+      await api.post(`/workspaces/${currentWorkspace?.id}/portfolio/refresh-prices`, {});
+      const response = await api.get<PortfolioSummary>(
+        `/workspaces/${currentWorkspace?.id}/portfolio/summary?currency=${baseCurrency}`
       );
-      return response.data;
+      return response;
     },
     enabled: !!currentWorkspace?.id,
+    refetchInterval: REFRESH_INTERVAL,
+    refetchIntervalInBackground: false,
   });
 
   // Fetch allocation data
   const { data: allocation } = useQuery({
     queryKey: ['portfolio', 'allocation', currentWorkspace?.id],
     queryFn: async () => {
-      const response = await api.get<{ data: AllocationData }>(
+      const response = await api.get<AllocationData>(
         `/workspaces/${currentWorkspace?.id}/portfolio/allocation`
       );
-      return response.data;
+      return response;
     },
     enabled: !!currentWorkspace?.id,
+  });
+
+  // Fetch performance history
+  const { data: performance, isLoading: performanceLoading, error: performanceError } = useQuery({
+    queryKey: ['portfolio', 'performance', currentWorkspace?.id],
+    queryFn: async () => {
+      const response = await api.get<PerformanceData>(
+        `/workspaces/${currentWorkspace?.id}/portfolio/performance`
+      );
+      return response;
+    },
+    enabled: !!currentWorkspace?.id,
+    refetchInterval: REFRESH_INTERVAL * 2, // Refresh every minute (less frequent than summary)
+    retry: 2,
   });
 
   // Refresh prices
   const handleRefreshPrices = async () => {
     setIsRefreshing(true);
     try {
-      await api.post(`/workspaces/${currentWorkspace?.id}/portfolio/refresh-prices`);
+      await api.post(`/workspaces/${currentWorkspace?.id}/portfolio/refresh-prices`, {});
       await refetchSummary();
     } finally {
       setIsRefreshing(false);
@@ -192,11 +228,11 @@ export function PortfolioPage() {
         <div className="flex gap-2">
           <button
             onClick={handleRefreshPrices}
-            disabled={isRefreshing}
-            className="px-3 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center gap-2"
+            disabled={isRefreshing || isFetchingSummary}
+            className="px-3 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center gap-2 disabled:opacity-50"
           >
-            <RefreshCw className={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
-            Actualiser les prix
+            <RefreshCw className={cn('h-4 w-4', (isRefreshing || isFetchingSummary) && 'animate-spin')} />
+            <span className="hidden sm:inline">Actualiser</span>
           </button>
           <button
             onClick={() => setShowAddPosition(true)}
@@ -223,7 +259,7 @@ export function PortfolioPage() {
                 <span className="text-sm">Valeur totale</span>
               </div>
               <p className="text-2xl font-semibold text-gray-900">
-                {formatCurrency(summary.totalValue, 'EUR')}
+                {formatCurrency(summary.totalValue, baseCurrency)}
               </p>
               <p className="text-xs text-gray-400 mt-1">
                 {summary.positionCount} position{summary.positionCount > 1 ? 's' : ''}
@@ -237,39 +273,39 @@ export function PortfolioPage() {
                 <span className="text-sm">Montant investi</span>
               </div>
               <p className="text-2xl font-semibold text-gray-900">
-                {formatCurrency(summary.totalCost, 'EUR')}
+                {formatCurrency(summary.totalCost, baseCurrency)}
               </p>
             </div>
 
             {/* Unrealized P&L */}
-            <div className={cn('border rounded-lg p-4', getPnLBgColor(summary.totalUnrealizedPnL))}>
+            <div className={cn('border rounded-lg p-4', getPnLBgColor(summary.totalUnrealizedGain))}>
               <div className="flex items-center gap-2 text-gray-500 mb-2">
-                {summary.totalUnrealizedPnL >= 0 ? (
+                {summary.totalUnrealizedGain >= 0 ? (
                   <TrendingUp className="h-4 w-4 text-green-500" />
                 ) : (
                   <TrendingDown className="h-4 w-4 text-red-500" />
                 )}
                 <span className="text-sm">P&L latent</span>
               </div>
-              <p className={cn('text-2xl font-semibold', getPnLColor(summary.totalUnrealizedPnL))}>
-                {summary.totalUnrealizedPnL >= 0 ? '+' : ''}
-                {formatCurrency(summary.totalUnrealizedPnL, 'EUR')}
+              <p className={cn('text-2xl font-semibold', getPnLColor(summary.totalUnrealizedGain))}>
+                {summary.totalUnrealizedGain >= 0 ? '+' : ''}
+                {formatCurrency(summary.totalUnrealizedGain, baseCurrency)}
               </p>
-              <p className={cn('text-xs mt-1', getPnLColor(summary.totalUnrealizedPnLPercent))}>
-                {summary.totalUnrealizedPnLPercent >= 0 ? '+' : ''}
-                {formatPercent(summary.totalUnrealizedPnLPercent)}
+              <p className={cn('text-xs mt-1', getPnLColor(summary.totalReturnPercent))}>
+                {summary.totalReturnPercent >= 0 ? '+' : ''}
+                {formatPercent(summary.totalReturnPercent)}
               </p>
             </div>
 
             {/* Realized P&L */}
-            <div className={cn('border rounded-lg p-4', getPnLBgColor(summary.totalRealizedPnL))}>
+            <div className={cn('border rounded-lg p-4', getPnLBgColor(summary.totalRealizedGain))}>
               <div className="flex items-center gap-2 text-gray-500 mb-2">
                 <LineChartIcon className="h-4 w-4" />
                 <span className="text-sm">P&L réalisé</span>
               </div>
-              <p className={cn('text-2xl font-semibold', getPnLColor(summary.totalRealizedPnL))}>
-                {summary.totalRealizedPnL >= 0 ? '+' : ''}
-                {formatCurrency(summary.totalRealizedPnL, 'EUR')}
+              <p className={cn('text-2xl font-semibold', getPnLColor(summary.totalRealizedGain))}>
+                {summary.totalRealizedGain >= 0 ? '+' : ''}
+                {formatCurrency(summary.totalRealizedGain, baseCurrency)}
               </p>
             </div>
           </div>
@@ -286,10 +322,10 @@ export function PortfolioPage() {
                 <>
                   <AllocationChart
                     data={allocation.byType.map((item) => ({
-                      name: item.name === 'stock' ? 'Actions' :
-                            item.name === 'etf' ? 'ETF' :
-                            item.name === 'crypto' ? 'Crypto' :
-                            item.name === 'bond' ? 'Obligations' : item.name,
+                      name: item.type === 'stock' ? 'Actions' :
+                            item.type === 'etf' ? 'ETF' :
+                            item.type === 'crypto' ? 'Crypto' :
+                            item.type === 'bond' ? 'Obligations' : item.type,
                       value: item.value,
                       percent: item.percent,
                     }))}
@@ -297,10 +333,10 @@ export function PortfolioPage() {
                   />
                   <AllocationLegend
                     data={allocation.byType.map((item) => ({
-                      name: item.name === 'stock' ? 'Actions' :
-                            item.name === 'etf' ? 'ETF' :
-                            item.name === 'crypto' ? 'Crypto' :
-                            item.name === 'bond' ? 'Obligations' : item.name,
+                      name: item.type === 'stock' ? 'Actions' :
+                            item.type === 'etf' ? 'ETF' :
+                            item.type === 'crypto' ? 'Crypto' :
+                            item.type === 'bond' ? 'Obligations' : item.type,
                       value: item.value,
                       percent: item.percent,
                     }))}
@@ -346,7 +382,7 @@ export function PortfolioPage() {
                 {allocation.byCurrency.map((item) => (
                   <div key={item.currency} className="text-center p-4 bg-gray-50 rounded-lg">
                     <p className="text-lg font-semibold text-gray-900">{item.currency}</p>
-                    <p className="text-sm text-gray-600">{formatCurrency(item.value, 'EUR')}</p>
+                    <p className="text-sm text-gray-600">{formatCurrency(item.value, baseCurrency)}</p>
                     <p className="text-xs text-gray-400">{formatPercent(item.percent)}</p>
                   </div>
                 ))}
@@ -354,23 +390,39 @@ export function PortfolioPage() {
             </div>
           )}
 
-          {/* Performance chart placeholder */}
+          {/* Performance chart */}
           <div className="bg-white border rounded-lg p-4">
             <div className="flex items-center gap-2 mb-4">
               <LineChartIcon className="h-4 w-4 text-gray-500" />
               <h2 className="text-sm font-medium text-gray-700">Performance</h2>
             </div>
-            <PerformanceChart
-              data={[
-                // Placeholder data - will be replaced with real historical data
-                { date: '2025-01-01', value: summary.totalCost, invested: summary.totalCost },
-                { date: '2025-02-08', value: summary.totalValue, invested: summary.totalCost },
-              ]}
-              height={250}
-            />
-            <p className="text-xs text-gray-400 text-center mt-2">
-              L'historique de performance sera disponible prochainement
-            </p>
+            {performanceLoading ? (
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+              </div>
+            ) : performanceError ? (
+              <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+                <LineChartIcon className="h-8 w-8 mb-2 text-red-300" />
+                <p className="text-sm text-red-500">Erreur de chargement</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Impossible de charger l'historique de performance
+                </p>
+              </div>
+            ) : performance && performance.history.length >= 2 ? (
+              <PerformanceChart
+                data={performance.history}
+                currency={baseCurrency}
+                height={250}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+                <LineChartIcon className="h-8 w-8 mb-2 text-gray-300" />
+                <p className="text-sm">Historique en cours de construction</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Les données seront disponibles après quelques jours de suivi
+                </p>
+              </div>
+            )}
           </div>
         </>
       ) : (

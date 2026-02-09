@@ -23,19 +23,39 @@ export async function portfolioRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   app.get<{
     Params: { workspaceId: string };
-    Querystring: { accountId?: string };
+    Querystring: { accountId?: string; currency?: string };
   }>(
     '/summary',
     { preHandler: [requirePermission('transaction:read')] },
     async (request, reply) => {
       const { workspaceId } = request.params;
-      const { accountId } = request.query;
+      const { accountId, currency } = request.query;
 
+      // If currency is provided, use normalized summary with currency conversion
+      if (currency) {
+        const summary = await positionService.getNormalizedPortfolioSummary(
+          workspaceId,
+          currency,
+          accountId
+        );
+        return reply.send({
+          success: true,
+          data: {
+            ...summary,
+            positionCount: summary.positions.length,
+          },
+        });
+      }
+
+      // Otherwise return the standard summary
       const summary = await positionService.getPortfolioSummary(workspaceId, accountId);
 
       return reply.send({
         success: true,
-        data: summary,
+        data: {
+          ...summary,
+          positionCount: summary.positions.length,
+        },
       });
     }
   );
@@ -47,7 +67,10 @@ export async function portfolioRoutes(app: FastifyInstance): Promise<void> {
     '/refresh-prices',
     { preHandler: [requirePermission('transaction:read')] },
     async (request, reply) => {
-      const result = await assetService.updateAllPrices();
+      const { workspaceId } = request.params;
+
+      // Refresh prices only for positions in this workspace
+      const result = await positionService.refreshPrices(workspaceId);
 
       return reply.send({
         success: true,
@@ -67,19 +90,42 @@ export async function portfolioRoutes(app: FastifyInstance): Promise<void> {
     { preHandler: [requirePermission('transaction:read')] },
     async (request, reply) => {
       const { workspaceId } = request.params;
-      const { accountId } = request.query;
+      const { from, to } = request.query;
 
-      // Get current summary for now
-      // TODO: Implement historical performance tracking
-      const summary = await positionService.getPortfolioSummary(workspaceId, accountId);
+      // Parse dates if provided
+      const startDate = from ? new Date(from) : undefined;
+      const endDate = to ? new Date(to) : undefined;
+
+      // Get historical snapshots
+      const history = await positionService.getPortfolioHistory(workspaceId, startDate, endDate);
+
+      // Get current summary
+      const current = await positionService.getPortfolioSummary(workspaceId);
 
       return reply.send({
         success: true,
         data: {
-          current: summary,
-          // Historical performance would go here
-          history: [],
+          current,
+          history,
         },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /portfolio/snapshot - Manually trigger a portfolio snapshot
+  // --------------------------------------------------------------------------
+  app.post<{ Params: { workspaceId: string } }>(
+    '/snapshot',
+    { preHandler: [requirePermission('transaction:read')] },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+
+      const snapshot = await positionService.takePortfolioSnapshot(workspaceId);
+
+      return reply.send({
+        success: true,
+        data: snapshot,
       });
     }
   );
@@ -89,29 +135,32 @@ export async function portfolioRoutes(app: FastifyInstance): Promise<void> {
   // --------------------------------------------------------------------------
   app.get<{
     Params: { workspaceId: string };
-    Querystring: { accountId?: string };
+    Querystring: { accountId?: string; currency?: string };
   }>(
     '/allocation',
     { preHandler: [requirePermission('transaction:read')] },
     async (request, reply) => {
       const { workspaceId } = request.params;
-      const { accountId } = request.query;
+      const { accountId, currency } = request.query;
 
-      const summary = await positionService.getPortfolioSummary(workspaceId, accountId);
+      // Use normalized summary if currency is specified
+      const summary = currency
+        ? await positionService.getNormalizedPortfolioSummary(workspaceId, currency, accountId)
+        : await positionService.getPortfolioSummary(workspaceId, accountId);
 
       // Group by asset type
       const byType = summary.allocation;
 
-      // Group by currency
+      // Group by currency (using original asset currencies)
       const byCurrency = new Map<string, number>();
       for (const pos of summary.positions) {
-        const currency = pos.asset.currency;
-        const current = byCurrency.get(currency) || 0;
-        byCurrency.set(currency, current + pos.currentValue);
+        const assetCurrency = pos.asset.currency;
+        const current = byCurrency.get(assetCurrency) || 0;
+        byCurrency.set(assetCurrency, current + pos.currentValue);
       }
 
-      const currencyAllocation = Array.from(byCurrency.entries()).map(([currency, value]) => ({
-        currency,
+      const currencyAllocation = Array.from(byCurrency.entries()).map(([curr, value]) => ({
+        currency: curr,
         value,
         percent: summary.totalValue > 0 ? (value / summary.totalValue) * 100 : 0,
       }));
@@ -120,6 +169,7 @@ export async function portfolioRoutes(app: FastifyInstance): Promise<void> {
         success: true,
         data: {
           totalValue: summary.totalValue,
+          baseCurrency: currency,
           byType,
           byCurrency: currencyAllocation,
         },

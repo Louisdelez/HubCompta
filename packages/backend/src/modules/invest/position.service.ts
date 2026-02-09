@@ -5,9 +5,9 @@
 
 import { prisma } from '@/core/database/client.js';
 import type { InvestTransactionType, Prisma } from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library';
 import { NotFoundError } from '@/core/middleware/errorHandler.js';
 import { assetService } from './asset.service.js';
+import { currencyService } from '../currency/currency.service.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -60,6 +60,16 @@ export interface PortfolioSummary {
   }>;
 }
 
+export interface NormalizedPortfolioSummary extends PortfolioSummary {
+  baseCurrency: string;
+  positionsWithConversion: Array<PositionWithDetails & {
+    valueInBaseCurrency: number;
+    costInBaseCurrency: number;
+    conversionRate: number;
+  }>;
+  lastUpdated: Date;
+}
+
 export interface TransactionInput {
   type: InvestTransactionType;
   quantity: number;
@@ -67,6 +77,12 @@ export interface TransactionInput {
   fees?: number;
   date: Date;
   notes?: string;
+}
+
+export interface PortfolioHistoryPoint {
+  date: string;
+  value: number;
+  invested: number;
 }
 
 // ----------------------------------------------------------------------------
@@ -366,6 +382,105 @@ class PositionService {
   }
 
   /**
+   * Get portfolio summary normalized to a target currency
+   * Converts all position values to the specified base currency
+   */
+  async getNormalizedPortfolioSummary(
+    workspaceId: string,
+    baseCurrency: string,
+    accountId?: string
+  ): Promise<NormalizedPortfolioSummary> {
+    const positions = await this.list(workspaceId, accountId);
+
+    let totalValue = 0;
+    let totalCost = 0;
+    let totalRealizedGain = 0;
+    const allocationByType = new Map<string, number>();
+    const positionsWithConversion: NormalizedPortfolioSummary['positionsWithConversion'] = [];
+
+    for (const pos of positions) {
+      const assetCurrency = pos.asset.currency;
+      let conversionRate = 1;
+      let valueInBaseCurrency = pos.currentValue;
+      let costInBaseCurrency = pos.totalCost;
+      let realizedGainInBaseCurrency = pos.realizedGain;
+
+      // Convert if different currencies
+      if (assetCurrency !== baseCurrency) {
+        const rateInfo = await currencyService.getRate(assetCurrency, baseCurrency);
+        if (rateInfo) {
+          conversionRate = rateInfo.rate;
+          valueInBaseCurrency = pos.currentValue * conversionRate;
+          costInBaseCurrency = pos.totalCost * conversionRate;
+          realizedGainInBaseCurrency = pos.realizedGain * conversionRate;
+        }
+      }
+
+      totalValue += valueInBaseCurrency;
+      totalCost += costInBaseCurrency;
+      totalRealizedGain += realizedGainInBaseCurrency;
+
+      const currentAlloc = allocationByType.get(pos.asset.type) || 0;
+      allocationByType.set(pos.asset.type, currentAlloc + valueInBaseCurrency);
+
+      positionsWithConversion.push({
+        ...pos,
+        valueInBaseCurrency,
+        costInBaseCurrency,
+        conversionRate,
+      });
+    }
+
+    const totalUnrealizedGain = totalValue - totalCost;
+    const totalReturn = totalUnrealizedGain + totalRealizedGain;
+    const totalReturnPercent = totalCost > 0 ? (totalReturn / totalCost) * 100 : 0;
+
+    // Build allocation array
+    const allocation = Array.from(allocationByType.entries()).map(([type, value]) => ({
+      type,
+      value,
+      percent: totalValue > 0 ? (value / totalValue) * 100 : 0,
+    }));
+
+    return {
+      baseCurrency,
+      totalValue,
+      totalCost,
+      totalUnrealizedGain,
+      totalRealizedGain,
+      totalReturn,
+      totalReturnPercent,
+      positions,
+      positionsWithConversion,
+      allocation,
+      lastUpdated: new Date(),
+    };
+  }
+
+  /**
+   * Refresh prices for all positions in a workspace
+   */
+  async refreshPrices(workspaceId: string): Promise<{ updated: number; failed: number }> {
+    const positions = await prisma.position.findMany({
+      where: { workspaceId, quantity: { gt: 0 } },
+      select: { assetId: true },
+    });
+
+    const assetIds = [...new Set(positions.map((p) => p.assetId))];
+
+    if (assetIds.length === 0) {
+      return { updated: 0, failed: 0 };
+    }
+
+    const quotes = await assetService.updatePrices(assetIds);
+
+    return {
+      updated: quotes.size,
+      failed: assetIds.length - quotes.size,
+    };
+  }
+
+  /**
    * Delete a position (only if empty)
    */
   async delete(workspaceId: string, id: string): Promise<void> {
@@ -384,6 +499,96 @@ class PositionService {
     await prisma.position.delete({
       where: { id },
     });
+  }
+
+  /**
+   * Take a snapshot of the portfolio for today
+   * Creates or updates the snapshot for the current date
+   */
+  async takePortfolioSnapshot(workspaceId: string): Promise<{ date: Date; totalValue: number; totalCost: number }> {
+    const summary = await this.getPortfolioSummary(workspaceId);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0); // Use UTC to avoid timezone issues
+
+    const snapshot = await prisma.portfolioSnapshot.upsert({
+      where: {
+        workspaceId_date: {
+          workspaceId,
+          date: today,
+        },
+      },
+      create: {
+        workspaceId,
+        date: today,
+        totalValue: summary.totalValue,
+        totalCost: summary.totalCost,
+      },
+      update: {
+        totalValue: summary.totalValue,
+        totalCost: summary.totalCost,
+      },
+    });
+
+    return {
+      date: snapshot.date,
+      totalValue: snapshot.totalValue.toNumber(),
+      totalCost: snapshot.totalCost.toNumber(),
+    };
+  }
+
+  /**
+   * Get portfolio history between two dates
+   */
+  async getPortfolioHistory(
+    workspaceId: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<PortfolioHistoryPoint[]> {
+    const where: { workspaceId: string; date?: { gte?: Date; lte?: Date } } = { workspaceId };
+
+    if (startDate || endDate) {
+      where.date = {};
+      if (startDate) where.date.gte = startDate;
+      if (endDate) where.date.lte = endDate;
+    }
+
+    const snapshots = await prisma.portfolioSnapshot.findMany({
+      where,
+      orderBy: { date: 'asc' },
+    });
+
+    return snapshots.map((snapshot) => ({
+      date: snapshot.date.toISOString().slice(0, 10),
+      value: snapshot.totalValue.toNumber(),
+      invested: snapshot.totalCost.toNumber(),
+    }));
+  }
+
+  /**
+   * Take snapshots for all workspaces with positions
+   * Used by the scheduled job
+   */
+  async takeAllWorkspacesSnapshots(): Promise<{ workspaceId: string; success: boolean }[]> {
+    // Get all workspaces that have at least one position
+    const workspacesWithPositions = await prisma.position.findMany({
+      where: { quantity: { gt: 0 } },
+      select: { workspaceId: true },
+      distinct: ['workspaceId'],
+    });
+
+    const results: { workspaceId: string; success: boolean }[] = [];
+
+    for (const { workspaceId } of workspacesWithPositions) {
+      try {
+        await this.takePortfolioSnapshot(workspaceId);
+        results.push({ workspaceId, success: true });
+      } catch (error) {
+        console.error(`Failed to take snapshot for workspace ${workspaceId}:`, error);
+        results.push({ workspaceId, success: false });
+      }
+    }
+
+    return results;
   }
 
   /**

@@ -40,6 +40,7 @@ export const QUEUES = {
   ALERTS: 'alerts',
   RECURRENCES: 'recurrences',
   EXCHANGE_RATES: 'exchange-rates',
+  PORTFOLIO_SNAPSHOT: 'portfolio-snapshot',
 } as const;
 
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
@@ -106,8 +107,9 @@ export interface ExportJobData {
 }
 
 export interface MarketDataJobData {
-  assetIds: string[];
-  provider: 'yahoo' | 'coingecko';
+  assetIds?: string[];
+  provider: 'yahoo' | 'coingecko' | 'all';
+  updateAll?: boolean;
 }
 
 export interface CleanupJobData {
@@ -137,6 +139,10 @@ export interface ProStatusJobData {
 export interface ExchangeRateJobData {
   source?: 'ecb' | 'manual';
   baseCurrency?: string;
+}
+
+export interface PortfolioSnapshotJobData {
+  workspaceId?: string; // Optional: specific workspace, or all if not set
 }
 
 // ----------------------------------------------------------------------------
@@ -189,6 +195,16 @@ export async function addBackupJob(data: BackupJobData): Promise<Job<BackupJobDa
   const queue = getQueue(QUEUES.BACKUP);
   return queue.add('backup', data, {
     jobId: data.workspaceId ? `backup-${data.workspaceId}` : 'backup-all',
+  });
+}
+
+/**
+ * Add a portfolio snapshot job
+ */
+export async function addPortfolioSnapshotJob(data: PortfolioSnapshotJobData = {}): Promise<Job<PortfolioSnapshotJobData>> {
+  const queue = getQueue(QUEUES.PORTFOLIO_SNAPSHOT);
+  return queue.add('take-snapshot', data, {
+    jobId: data.workspaceId ? `snapshot-${data.workspaceId}` : `snapshot-all-${Date.now()}`,
   });
 }
 
@@ -266,6 +282,44 @@ export async function setupScheduledJobs(): Promise<void> {
     }
   );
 
+  // Market data (investment prices) - every 15 minutes during market hours (weekdays 8-22 UTC)
+  const marketDataQueue = getQueue(QUEUES.MARKET_DATA);
+  await marketDataQueue.add(
+    'update-all-prices',
+    { provider: 'all' as 'yahoo' | 'coingecko' },
+    {
+      repeat: {
+        pattern: '*/15 8-22 * * 1-5', // Every 15 min, Mon-Fri 8am-10pm UTC
+      },
+      jobId: 'scheduled-market-data-weekday',
+    }
+  );
+
+  // Crypto prices update - every hour on weekends (crypto markets never close)
+  await marketDataQueue.add(
+    'update-all-prices',
+    { provider: 'coingecko' },
+    {
+      repeat: {
+        pattern: '0 * * * 0,6', // Every hour on Sat/Sun
+      },
+      jobId: 'scheduled-market-data-weekend',
+    }
+  );
+
+  // Portfolio snapshots - daily at 23:00 UTC (after market close)
+  const portfolioSnapshotQueue = getQueue(QUEUES.PORTFOLIO_SNAPSHOT);
+  await portfolioSnapshotQueue.add(
+    'take-all-snapshots',
+    {},
+    {
+      repeat: {
+        pattern: '0 23 * * *', // Daily at 23:00 UTC
+      },
+      jobId: 'scheduled-portfolio-snapshots',
+    }
+  );
+
   console.info('Scheduled jobs configured');
 }
 
@@ -336,6 +390,7 @@ export const importQueue = getQueue(QUEUES.IMPORT);
 export const exportQueue = getQueue(QUEUES.EXPORT);
 export const recurrencesQueue = getQueue(QUEUES.RECURRENCES);
 export const backupQueue = getQueue(QUEUES.BACKUP);
+export const portfolioSnapshotQueue = getQueue(QUEUES.PORTFOLIO_SNAPSHOT);
 
 /**
  * Get the backup queue instance
