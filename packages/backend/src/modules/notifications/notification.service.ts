@@ -1,10 +1,14 @@
 // ============================================================================
 // NOTIFICATION SERVICE - Finance Hub
-// In-app notifications management
+// In-app notifications management with email integration
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
 import { Prisma, type NotificationType } from '@prisma/client';
+import { broadcastNotification } from '@/core/websocket/index.js';
+import type { NotificationPayload } from '@/core/websocket/types.js';
+import { emailService, notificationPreferencesService } from '@/core/email/index.js';
+import { logger } from '@/core/middleware/logger.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -38,8 +42,8 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Create Notification
   // --------------------------------------------------------------------------
-  create(input: CreateNotificationInput) {
-    return prisma.notification.create({
+  async create(input: CreateNotificationInput) {
+    const notification = await prisma.notification.create({
       data: {
         userId: input.userId,
         workspaceId: input.workspaceId,
@@ -49,6 +53,20 @@ export const notificationService = {
         data: (input.data ?? Prisma.JsonNull) as Prisma.InputJsonValue,
       },
     });
+
+    // Broadcast via WebSocket
+    const payload: NotificationPayload = {
+      id: notification.id,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      workspaceId: notification.workspaceId ?? undefined,
+      data: input.data,
+      createdAt: notification.createdAt.toISOString(),
+    };
+    broadcastNotification(input.userId, payload);
+
+    return notification;
   },
 
   // --------------------------------------------------------------------------
@@ -189,14 +207,15 @@ export const notificationService = {
   // ==========================================================================
 
   // --------------------------------------------------------------------------
-  // Budget Alert
+  // Budget Alert (with optional email)
   // --------------------------------------------------------------------------
-  notifyBudgetAlert(
+  async notifyBudgetAlert(
     userId: string,
     workspaceId: string,
-    budget: { id: string; name: string; categoryName: string },
+    budget: { id: string; name: string; categoryName: string; amount: number; spent: number },
     percentUsed: number,
-    isExceeded: boolean
+    isExceeded: boolean,
+    options?: { currency?: string; budgetUrl?: string }
   ) {
     const type = isExceeded ? 'budget_alert' : 'budget_warning';
     const title = isExceeded
@@ -206,7 +225,8 @@ export const notificationService = {
       ? `Le budget pour "${budget.categoryName}" a été dépassé (${percentUsed.toFixed(0)}% utilisé).`
       : `Le budget pour "${budget.categoryName}" est à ${percentUsed.toFixed(0)}% de sa limite.`;
 
-    return this.create({
+    // Create in-app notification
+    const notification = await this.create({
       userId,
       workspaceId,
       type: type as NotificationType,
@@ -218,6 +238,34 @@ export const notificationService = {
         percentUsed,
       },
     });
+
+    // Send email if user has budget alerts enabled
+    try {
+      const shouldSendEmail = await notificationPreferencesService.shouldSendEmail(userId, 'budgetAlerts');
+      if (shouldSendEmail) {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (user) {
+          const currency = options?.currency ?? 'EUR';
+          const budgetUrl = options?.budgetUrl ?? `${process.env.FRONTEND_URL}/budgets`;
+
+          await emailService.sendBudgetAlertEmail(user.email, {
+            displayName: user.displayName,
+            budgetName: budget.name,
+            categoryName: budget.categoryName,
+            percentUsed,
+            amountSpent: budget.spent.toFixed(2),
+            budgetLimit: budget.amount.toFixed(2),
+            currency,
+            isExceeded,
+            budgetUrl,
+          });
+        }
+      }
+    } catch (error) {
+      logger.error({ error, userId }, 'Failed to send budget alert email');
+    }
+
+    return notification;
   },
 
   // --------------------------------------------------------------------------
@@ -243,14 +291,15 @@ export const notificationService = {
   },
 
   // --------------------------------------------------------------------------
-  // Export Ready
+  // Export Ready (with email)
   // --------------------------------------------------------------------------
-  notifyExportReady(
+  async notifyExportReady(
     userId: string,
     workspaceId: string,
-    exportInfo: { type: string; filename: string; downloadUrl?: string }
+    exportInfo: { type: string; filename: string; downloadUrl?: string; expiresAt?: string }
   ) {
-    return this.create({
+    // Create in-app notification
+    const notification = await this.create({
       userId,
       workspaceId,
       type: 'export_ready',
@@ -258,17 +307,47 @@ export const notificationService = {
       message: `Votre export ${exportInfo.type} est prêt à être téléchargé.`,
       data: exportInfo,
     });
+
+    // Always send email for export ready (if email is enabled globally)
+    try {
+      const preferences = await notificationPreferencesService.getForUser(userId);
+      if (preferences.emailEnabled && exportInfo.downloadUrl) {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (user) {
+          await emailService.sendExportReadyEmail(user.email, {
+            displayName: user.displayName,
+            exportType: exportInfo.type,
+            filename: exportInfo.filename,
+            downloadUrl: exportInfo.downloadUrl,
+            expiresAt: exportInfo.expiresAt ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'),
+          });
+        }
+      }
+    } catch (error) {
+      logger.error({ error, userId }, 'Failed to send export ready email');
+    }
+
+    return notification;
   },
 
   // --------------------------------------------------------------------------
-  // Invoice Overdue
+  // Invoice Overdue (with email)
   // --------------------------------------------------------------------------
-  notifyInvoiceOverdue(
+  async notifyInvoiceOverdue(
     userId: string,
     workspaceId: string,
-    invoice: { id: string; number: string; contactName: string; amount: number }
+    invoice: {
+      id: string;
+      number: string;
+      contactName: string;
+      amount: number;
+      dueDate?: Date;
+      daysOverdue?: number;
+    },
+    options?: { currency?: string; invoiceUrl?: string }
   ) {
-    return this.create({
+    // Create in-app notification
+    const notification = await this.create({
       userId,
       workspaceId,
       type: 'invoice_overdue',
@@ -276,6 +355,35 @@ export const notificationService = {
       message: `La facture ${invoice.number} pour ${invoice.contactName} (${invoice.amount.toFixed(2)} €) est en retard de paiement.`,
       data: { invoiceId: invoice.id },
     });
+
+    // Send email if user has invoice reminders enabled
+    try {
+      const shouldSendEmail = await notificationPreferencesService.shouldSendEmail(userId, 'invoiceReminders');
+      if (shouldSendEmail) {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (user) {
+          const currency = options?.currency ?? 'EUR';
+          const invoiceUrl = options?.invoiceUrl ?? `${process.env.FRONTEND_URL}/invoices/${invoice.id}`;
+          const dueDate = invoice.dueDate ?? new Date();
+          const daysOverdue = invoice.daysOverdue ?? Math.floor((Date.now() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+
+          await emailService.sendInvoiceOverdueEmail(user.email, {
+            displayName: user.displayName,
+            invoiceNumber: invoice.number,
+            clientName: invoice.contactName,
+            amount: invoice.amount.toFixed(2),
+            currency,
+            dueDate: dueDate.toLocaleDateString('fr-FR'),
+            daysOverdue: Math.max(1, daysOverdue),
+            invoiceUrl,
+          });
+        }
+      }
+    } catch (error) {
+      logger.error({ error, userId }, 'Failed to send invoice overdue email');
+    }
+
+    return notification;
   },
 
   // --------------------------------------------------------------------------

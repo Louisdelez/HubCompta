@@ -3,12 +3,14 @@
 // ============================================================================
 
 import type { FastifyInstance } from 'fastify';
-import { transactionService } from '@/modules/transactions/transaction.service.js';
+import { transactionService, BATCH_MAX_SIZE } from '@/modules/transactions/transaction.service.js';
+import type { TransactionCreateInput, TransactionUpdateInput, BatchUpdateItem } from '@/modules/transactions/transaction.service.js';
 import { transferService } from '@/modules/transactions/transfer.service.js';
 import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
 import { workspaceContextMiddleware, requirePermission } from '@/core/middleware/workspaceContext.js';
-import { transactionCreateSchema, transactionUpdateSchema, transferSchema } from '@finance-hub/shared';
+import { transactionCreateSchema, transactionUpdateSchema, transferSchema, uuidSchema } from '@finance-hub/shared';
+import { z } from 'zod';
 import type { TransactionType } from '@prisma/client';
 
 // ----------------------------------------------------------------------------
@@ -39,6 +41,29 @@ interface TransactionQuery {
   sortBy?: 'date' | 'amount' | 'description';
   sortOrder?: 'asc' | 'desc';
 }
+
+// Batch operation schemas
+const batchCreateSchema = z.object({
+  transactions: z.array(transactionCreateSchema).min(1).max(BATCH_MAX_SIZE),
+});
+
+const batchUpdateItemSchema = z.object({
+  id: uuidSchema,
+  data: transactionUpdateSchema,
+});
+
+const batchUpdateSchema = z.object({
+  updates: z.array(batchUpdateItemSchema).min(1).max(BATCH_MAX_SIZE),
+});
+
+const batchDeleteSchema = z.object({
+  transactionIds: z.array(uuidSchema).min(1).max(BATCH_MAX_SIZE),
+});
+
+const batchCategorizeSchema = z.object({
+  categoryId: uuidSchema.nullable(),
+  transactionIds: z.array(uuidSchema).min(1).max(BATCH_MAX_SIZE),
+});
 
 // ----------------------------------------------------------------------------
 // Routes
@@ -329,7 +354,7 @@ export function transactionRoutes(app: FastifyInstance): void {
   );
 
   // --------------------------------------------------------------------------
-  // POST /workspaces/:workspaceId/transactions/bulk-delete - Bulk delete
+  // POST /workspaces/:workspaceId/transactions/bulk-delete - Bulk delete (legacy)
   // --------------------------------------------------------------------------
   app.post<{ Params: WorkspaceParams }>(
     '/bulk-delete',
@@ -352,6 +377,151 @@ export function transactionRoutes(app: FastifyInstance): void {
       return reply.send({
         success: true,
         data: { deleted: count },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:workspaceId/transactions/batch - Batch create
+  // --------------------------------------------------------------------------
+  app.post<{ Params: WorkspaceParams }>(
+    '/batch',
+    { preHandler: requirePermission('transaction:create') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const { transactions } = batchCreateSchema.parse(request.body);
+
+      const transactionsWithDates: TransactionCreateInput[] = transactions.map((t) => ({
+        ...t,
+        date: new Date(t.date),
+      }));
+
+      const result = await transactionService.createMany(workspaceId, transactionsWithDates);
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId,
+        action: AUDIT_ACTIONS.TRANSACTION_CREATED,
+        changes: {
+          batchOperation: true,
+          total: result.total,
+          successCount: result.successCount,
+          failedCount: result.failedCount,
+        },
+        ipAddress: request.ip,
+      });
+
+      return reply.status(201).send({
+        success: true,
+        data: result,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // PATCH /workspaces/:workspaceId/transactions/batch - Batch update
+  // --------------------------------------------------------------------------
+  app.patch<{ Params: WorkspaceParams }>(
+    '/batch',
+    { preHandler: requirePermission('transaction:update') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const { updates } = batchUpdateSchema.parse(request.body);
+
+      const updatesWithDates: BatchUpdateItem[] = updates.map((u) => ({
+        id: u.id,
+        data: {
+          ...u.data,
+          date: u.data.date ? new Date(u.data.date) : undefined,
+        },
+      }));
+
+      const result = await transactionService.updateMany(workspaceId, updatesWithDates);
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId,
+        action: AUDIT_ACTIONS.TRANSACTION_UPDATED,
+        changes: {
+          batchOperation: true,
+          total: result.total,
+          successCount: result.successCount,
+          failedCount: result.failedCount,
+        },
+        ipAddress: request.ip,
+      });
+
+      return reply.send({
+        success: true,
+        data: result,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // DELETE /workspaces/:workspaceId/transactions/batch - Batch delete
+  // --------------------------------------------------------------------------
+  app.delete<{ Params: WorkspaceParams }>(
+    '/batch',
+    { preHandler: requirePermission('transaction:delete') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const { transactionIds } = batchDeleteSchema.parse(request.body);
+
+      const result = await transactionService.deleteMany(workspaceId, transactionIds);
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId,
+        action: AUDIT_ACTIONS.TRANSACTION_BULK_DELETED,
+        changes: {
+          batchOperation: true,
+          total: result.total,
+          successCount: result.successCount,
+          failedCount: result.failedCount,
+          transactionIds: result.success.map((s) => s.id),
+        },
+        ipAddress: request.ip,
+        severity: 'warning',
+      });
+
+      return reply.send({
+        success: true,
+        data: result,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:workspaceId/transactions/batch/categorize - Batch categorize
+  // --------------------------------------------------------------------------
+  app.post<{ Params: WorkspaceParams }>(
+    '/batch/categorize',
+    { preHandler: requirePermission('transaction:update') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const { categoryId, transactionIds } = batchCategorizeSchema.parse(request.body);
+
+      const result = await transactionService.categorizeMany(workspaceId, categoryId, transactionIds);
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId,
+        action: AUDIT_ACTIONS.TRANSACTION_UPDATED,
+        changes: {
+          batchOperation: true,
+          action: 'categorize',
+          categoryId,
+          total: result.total,
+          successCount: result.successCount,
+          failedCount: result.failedCount,
+        },
+        ipAddress: request.ip,
+      });
+
+      return reply.send({
+        success: true,
+        data: result,
       });
     }
   );

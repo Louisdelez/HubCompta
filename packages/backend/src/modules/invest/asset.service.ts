@@ -7,6 +7,7 @@ import { prisma } from '@/core/database/client.js';
 import type { AssetType, Prisma } from '@prisma/client';
 import { getProviderForType, yahooFinance, coinGecko } from './providers/index.js';
 import type { MarketQuote, SearchResult } from './providers/types.js';
+import { logger } from '@/core/middleware/logger.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -72,7 +73,7 @@ class AssetService {
         const yahooResults = await yahooFinance.search(query, type);
         providerResults.push(...yahooResults);
       } catch (error) {
-        console.error('Yahoo search error:', error);
+        logger.error({ error, query }, 'Yahoo search error');
       }
     }
 
@@ -81,7 +82,7 @@ class AssetService {
         const geckoResults = await coinGecko.search(query, 'crypto');
         providerResults.push(...geckoResults);
       } catch (error) {
-        console.error('CoinGecko search error:', error);
+        logger.error({ error, query }, 'CoinGecko search error');
       }
     }
 
@@ -196,7 +197,7 @@ class AssetService {
           quotes.set(symbol, quote);
         }
       } catch (error) {
-        console.error('Error fetching stock prices:', error);
+        logger.error({ error, symbols: stockSymbols }, 'Error fetching stock prices');
       }
     }
 
@@ -208,7 +209,7 @@ class AssetService {
           quotes.set(symbol, quote);
         }
       } catch (error) {
-        console.error('Error fetching crypto prices:', error);
+        logger.error({ error, symbols: cryptoSymbols }, 'Error fetching crypto prices');
       }
     }
 

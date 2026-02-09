@@ -220,6 +220,203 @@ export function ruleRoutes(app: FastifyInstance): void {
       });
     }
   );
+
+  // ==========================================================================
+  // AUTO-CATEGORIZATION ROUTES
+  // ==========================================================================
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/rules/suggestions - Get category suggestions
+  // --------------------------------------------------------------------------
+  app.get<{ Params: WorkspaceParams; Querystring: { limit?: string } }>(
+    '/suggestions',
+    { preHandler: requirePermission('rule:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const limit = parseInt(request.query.limit ?? '50', 10);
+
+      const suggestions = await ruleService.getSuggestionsForUncategorized(workspaceId, limit);
+
+      return reply.send({
+        success: true,
+        data: suggestions,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/rules/suggest - Suggest category for a description
+  // --------------------------------------------------------------------------
+  app.get<{ Params: WorkspaceParams; Querystring: { description: string; amount?: string } }>(
+    '/suggest',
+    { preHandler: requirePermission('rule:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const { description, amount } = request.query;
+
+      if (!description) {
+        return reply.status(400).send({
+          success: false,
+          error: { message: 'Description is required' },
+        });
+      }
+
+      const suggestions = await ruleService.suggestCategory(
+        workspaceId,
+        description,
+        amount ? parseFloat(amount) : undefined
+      );
+
+      return reply.send({
+        success: true,
+        data: suggestions,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/rules/rule-suggestions - Get suggested rules
+  // --------------------------------------------------------------------------
+  app.get<{ Params: WorkspaceParams }>(
+    '/rule-suggestions',
+    { preHandler: requirePermission('rule:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+
+      const suggestions = await ruleService.getRuleSuggestions(workspaceId);
+
+      return reply.send({
+        success: true,
+        data: suggestions,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:workspaceId/rules/learn - Learn from user categorization
+  // --------------------------------------------------------------------------
+  app.post<{ Params: WorkspaceParams }>(
+    '/learn',
+    { preHandler: requirePermission('rule:manage') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const { transactionId, categoryId } = request.body as {
+        transactionId: string;
+        categoryId: string;
+      };
+
+      if (!transactionId || !categoryId) {
+        return reply.status(400).send({
+          success: false,
+          error: { message: 'transactionId and categoryId are required' },
+        });
+      }
+
+      const pattern = await ruleService.learnFromTransaction(workspaceId, transactionId, categoryId);
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId,
+        action: 'pattern.learned',
+        entityType: 'categoryPattern',
+        entityId: pattern.id,
+        changes: { pattern: pattern.pattern, categoryId },
+        ipAddress: request.ip,
+      });
+
+      return reply.send({
+        success: true,
+        data: pattern,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:workspaceId/rules/bulk-apply - Bulk apply suggestions
+  // --------------------------------------------------------------------------
+  app.post<{ Params: WorkspaceParams }>(
+    '/bulk-apply',
+    { preHandler: requirePermission('rule:manage') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const { applications } = request.body as {
+        applications: Array<{
+          transactionId: string;
+          categoryId: string;
+          learn: boolean;
+        }>;
+      };
+
+      if (!applications || !Array.isArray(applications)) {
+        return reply.status(400).send({
+          success: false,
+          error: { message: 'applications array is required' },
+        });
+      }
+
+      const result = await ruleService.bulkApplySuggestions(workspaceId, applications);
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId,
+        action: 'suggestions.bulk_applied',
+        entityType: 'transaction',
+        changes: { applied: result.applied, learned: result.learned },
+        ipAddress: request.ip,
+      });
+
+      return reply.send({
+        success: true,
+        data: result,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/rules/patterns - List learned patterns
+  // --------------------------------------------------------------------------
+  app.get<{ Params: WorkspaceParams }>(
+    '/patterns',
+    { preHandler: requirePermission('rule:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+
+      const patterns = await ruleService.getPatterns(workspaceId);
+
+      return reply.send({
+        success: true,
+        data: patterns,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // DELETE /workspaces/:workspaceId/rules/patterns/:patternId - Delete pattern
+  // --------------------------------------------------------------------------
+  app.delete<{ Params: WorkspaceParams & { patternId: string } }>(
+    '/patterns/:patternId',
+    { preHandler: requirePermission('rule:manage') },
+    async (request, reply) => {
+      const { workspaceId, patternId } = request.params;
+
+      await ruleService.deletePattern(workspaceId, patternId);
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId,
+        action: 'pattern.deleted',
+        entityType: 'categoryPattern',
+        entityId: patternId,
+        ipAddress: request.ip,
+        severity: 'warning',
+      });
+
+      return reply.send({
+        success: true,
+        data: { message: 'Pattern deleted' },
+      });
+    }
+  );
 }
 
 export default ruleRoutes;

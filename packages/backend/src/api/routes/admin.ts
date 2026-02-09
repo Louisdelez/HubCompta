@@ -9,6 +9,7 @@ import { redisClient } from '../../core/database/redis.js';
 import { storageClient } from '../../core/storage/s3.js';
 import { getBackupQueue } from '../../core/queue/index.js';
 import { authGuard } from '../../core/auth/authGuard.js';
+import { logger } from '../../core/middleware/logger.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -185,7 +186,7 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
         },
       };
     } catch (error) {
-      console.error('Error listing backups:', error);
+      logger.error({ error }, 'Error listing backups');
       return reply.status(500).send({ error: 'Failed to list backups' });
     }
   });
@@ -219,7 +220,7 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
         },
       };
     } catch (error) {
-      console.error('Error previewing backup:', error);
+      logger.error({ error }, 'Error previewing backup');
       return reply.status(400).send({
         error: 'Failed to read backup metadata',
         details: error instanceof Error ? error.message : 'Unknown error',
@@ -477,7 +478,7 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
         return { success: true, data: { cleared: allKeys.length } };
       }
     } catch (error) {
-      console.error('Error clearing cache:', error);
+      logger.error({ error }, 'Error clearing cache');
       return reply.status(500).send({ error: 'Failed to clear cache' });
     }
   });

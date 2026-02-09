@@ -59,6 +59,41 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // ==========================================================================
+  // Get Latest Rates for Multiple Pairs
+  // ==========================================================================
+
+  /**
+   * GET /currencies/batch-rates
+   * Get latest rates for multiple currency pairs at once
+   * Useful for frontend caching
+   */
+  fastify.get<{
+    Querystring: { pairs: string };
+  }>('/batch-rates', async (request, reply) => {
+    const { pairs } = request.query;
+
+    if (!pairs) {
+      return reply.status(400).send({
+        error: 'Parametre pairs manquant',
+        message: 'Fournir une liste de paires au format "EUR/USD,GBP/EUR"',
+      });
+    }
+
+    const pairList = pairs.split(',').map(p => p.trim().toUpperCase());
+    const rates: Record<string, { rate: number; source: string; date: Date } | null> = {};
+
+    for (const pair of pairList) {
+      const [from, to] = pair.split('/');
+      if (from && to) {
+        const rateInfo = await currencyService.getRate(from, to);
+        rates[pair] = rateInfo;
+      }
+    }
+
+    return { success: true, data: rates };
+  });
+
+  // ==========================================================================
   // Convert Amount
   // ==========================================================================
 
@@ -545,6 +580,90 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
     }
 
     return { success: true, data: result };
+  });
+
+  // ==========================================================================
+  // Workspace Currency Summary
+  // ==========================================================================
+
+  /**
+   * GET /currencies/workspace/:workspaceId/summary
+   * Get multi-currency summary for a workspace
+   */
+  fastify.get<{
+    Params: { workspaceId: string };
+    Querystring: { targetCurrency?: string };
+  }>('/workspace/:workspaceId/summary', { preHandler: [authGuard] }, async (request, reply) => {
+    const userId = request.user?.sub;
+    if (!userId) {
+      return reply.status(401).send({ error: 'Non authentifie' });
+    }
+
+    const { workspaceId } = request.params;
+    const { targetCurrency } = request.query;
+
+    // Verify user has access to workspace
+    const membership = await prisma.membership.findUnique({
+      where: {
+        workspaceId_userId: { workspaceId, userId },
+      },
+    });
+
+    if (!membership) {
+      return reply.status(403).send({ error: 'Acces refuse' });
+    }
+
+    if (targetCurrency) {
+      // Return portfolio converted to specific currency
+      const portfolio = await currencyService.getPortfolioInCurrency(workspaceId, targetCurrency);
+      return { success: true, data: portfolio };
+    } else {
+      // Return multi-currency summary
+      const summary = await currencyService.getWorkspaceCurrencySummary(workspaceId);
+      return { success: true, data: summary };
+    }
+  });
+
+  // ==========================================================================
+  // Portfolio in Target Currency
+  // ==========================================================================
+
+  /**
+   * GET /currencies/workspace/:workspaceId/portfolio
+   * Get all accounts converted to a target currency
+   */
+  fastify.get<{
+    Params: { workspaceId: string };
+    Querystring: { currency: string };
+  }>('/workspace/:workspaceId/portfolio', { preHandler: [authGuard] }, async (request, reply) => {
+    const userId = request.user?.sub;
+    if (!userId) {
+      return reply.status(401).send({ error: 'Non authentifie' });
+    }
+
+    const { workspaceId } = request.params;
+    const { currency } = request.query;
+
+    if (!currency) {
+      return reply.status(400).send({
+        error: 'Devise cible requise',
+        message: 'Le parametre currency est requis',
+      });
+    }
+
+    // Verify user has access to workspace
+    const membership = await prisma.membership.findUnique({
+      where: {
+        workspaceId_userId: { workspaceId, userId },
+      },
+    });
+
+    if (!membership) {
+      return reply.status(403).send({ error: 'Acces refuse' });
+    }
+
+    const portfolio = await currencyService.getPortfolioInCurrency(workspaceId, currency);
+    return { success: true, data: portfolio };
   });
 };
 

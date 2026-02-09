@@ -299,12 +299,144 @@ export function importRoutes(app: FastifyInstance): void {
           id: job.id,
           fileName: job.fileName,
           status: job.status,
+          totalRows: job.totalRows,
           importedRows: job.importedRows,
+          skippedRows: job.skippedRows,
+          errorRows: job.errorRows,
           createdAt: job.createdAt,
           completedAt: job.completedAt,
         })),
         meta: {
           total: result.total,
+        },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:workspaceId/import/validate - Validate import data
+  // --------------------------------------------------------------------------
+  app.post<{ Params: WorkspaceParams }>(
+    '/validate',
+    { preHandler: requirePermission('import:execute') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const body = request.body as {
+        jobId: string;
+        accountId: string;
+        columnMapping: {
+          date: string;
+          amount: string;
+          description: string;
+          credit?: string;
+          debit?: string;
+        };
+        dateFormat?: string;
+      };
+
+      // Verify job exists
+      const job = await importService.getJob(body.jobId, workspaceId);
+      if (!job) {
+        return reply.status(404).send({
+          success: false,
+          error: { message: 'Import job not found' },
+        });
+      }
+
+      // Get preview with validation
+      const preview = await importService.preview(
+        workspaceId,
+        body.accountId,
+        job.fileContent,
+        body.columnMapping
+      );
+
+      // Additional validation checks
+      const validationErrors: string[] = [];
+      const validationWarnings: string[] = [];
+
+      if (preview.totalRows === 0) {
+        validationErrors.push('Le fichier ne contient aucune donnee valide');
+      }
+
+      if (preview.validRows === 0) {
+        validationErrors.push('Aucune ligne n\'a pu etre analysee correctement');
+      }
+
+      if (preview.duplicates > preview.validRows * 0.5) {
+        validationWarnings.push(`Plus de 50% des transactions sont des doublons (${preview.duplicates}/${preview.validRows})`);
+      }
+
+      // Check for common issues in sample transactions
+      const missingDates = preview.sampleTransactions.filter((t) => !t.date).length;
+      if (missingDates > 0) {
+        validationWarnings.push(`${missingDates} transactions n'ont pas de date valide`);
+      }
+
+      const zeroAmounts = preview.sampleTransactions.filter((t) => t.amount === 0).length;
+      if (zeroAmounts > 0) {
+        validationWarnings.push(`${zeroAmounts} transactions ont un montant de 0`);
+      }
+
+      return reply.send({
+        success: true,
+        data: {
+          isValid: validationErrors.length === 0,
+          errors: validationErrors,
+          warnings: [...validationWarnings, ...(preview.warnings || [])],
+          summary: {
+            totalRows: preview.totalRows,
+            validRows: preview.validRows,
+            duplicates: preview.duplicates,
+            importableRows: preview.validRows - preview.duplicates,
+          },
+        },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/import/:jobId/status - Get import status
+  // --------------------------------------------------------------------------
+  app.get<{ Params: JobParams }>(
+    '/:jobId/status',
+    { preHandler: requirePermission('import:execute') },
+    async (request, reply) => {
+      const { workspaceId, jobId } = request.params;
+
+      const job = await importService.getJob(jobId, workspaceId);
+
+      if (!job) {
+        return reply.status(404).send({
+          success: false,
+          error: { message: 'Import job not found' },
+        });
+      }
+
+      // Calculate progress percentage
+      const progress = job.totalRows > 0
+        ? Math.round((job.processedRows / job.totalRows) * 100)
+        : 0;
+
+      return reply.send({
+        success: true,
+        data: {
+          id: job.id,
+          fileName: job.fileName,
+          status: job.status,
+          progress,
+          totalRows: job.totalRows,
+          processedRows: job.processedRows,
+          importedRows: job.importedRows,
+          skippedRows: job.skippedRows,
+          errorRows: job.errorRows,
+          error: job.error,
+          createdAt: job.createdAt,
+          completedAt: job.completedAt,
+          // Estimated time remaining (rough estimate based on processing speed)
+          estimatedTimeRemaining: job.status === 'processing' && job.processedRows > 0
+            ? Math.ceil((job.totalRows - job.processedRows) / (job.processedRows / 60)) // seconds
+            : null,
         },
       });
     }

@@ -10,11 +10,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'Finance Hub',
-        short_name: 'Finance Hub',
+        name: 'HubCompta',
+        short_name: 'HubCompta',
         description: 'Self-hosted financial management platform',
-        theme_color: '#3B82F6',
-        background_color: '#ffffff',
+        theme_color: '#1e1e2e', // Catppuccin Mocha base
+        background_color: '#1e1e2e',
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: '/',
@@ -87,12 +87,34 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          react: ['react', 'react-dom'],
-          router: ['react-router-dom'],
+          // Core React libraries - loaded on every page
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          // Data fetching - used across the app
           query: ['@tanstack/react-query'],
+          // UI libraries - icons and charts
+          ui: ['lucide-react'],
           charts: ['recharts'],
+          // Form handling (if used)
+          // forms: ['react-hook-form', 'zod'],
         },
+        // Better chunk naming for debugging
+        chunkFileNames: (chunkInfo) => {
+          const facadeModuleId = chunkInfo.facadeModuleId ?? '';
+          // Feature-based chunks from lazy imports
+          if (facadeModuleId.includes('/features/')) {
+            const match = facadeModuleId.match(/\/features\/([^/]+)\//);
+            if (match) {
+              return `features/${match[1]}-[hash].js`;
+            }
+          }
+          return 'chunks/[name]-[hash].js';
+        },
+        // Keep asset names organized
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        entryFileNames: '[name]-[hash].js',
       },
     },
+    // Increase chunk size warning limit slightly for vendor chunks
+    chunkSizeWarningLimit: 600,
   },
 });

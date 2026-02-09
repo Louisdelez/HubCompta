@@ -155,10 +155,14 @@ export function LoginForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" aria-label="Formulaire de connexion">
           {error && (
-            <div className="p-4 rounded-xl bg-ctp-red/10 border border-ctp-red/20 text-ctp-red text-sm flex items-center gap-3">
-              <div className="w-5 h-5 rounded-full bg-ctp-red/20 flex items-center justify-center flex-shrink-0">
+            <div
+              className="p-4 rounded-xl bg-ctp-red/10 border border-ctp-red/20 text-ctp-red text-sm flex items-center gap-3"
+              role="alert"
+              aria-live="assertive"
+            >
+              <div className="w-5 h-5 rounded-full bg-ctp-red/20 flex items-center justify-center flex-shrink-0" aria-hidden="true">
                 <span className="text-xs font-bold">!</span>
               </div>
               {error}
@@ -173,6 +177,8 @@ export function LoginForm() {
               id="email"
               type="email"
               autoComplete="email"
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? 'email-error' : undefined}
               className="w-full px-4 py-3 rounded-xl bg-ctp-mantle border border-ctp-surface1 text-ctp-text placeholder:text-ctp-overlay0 focus:border-ctp-blue focus:ring-2 focus:ring-ctp-blue/20 transition-all duration-200"
               placeholder="vous@exemple.com"
               {...register('email', {
@@ -184,7 +190,9 @@ export function LoginForm() {
               })}
             />
             {errors.email && (
-              <p className="text-sm mt-2 text-ctp-red">{errors.email.message}</p>
+              <p id="email-error" className="text-sm mt-2 text-ctp-red" role="alert">
+                {errors.email.message}
+              </p>
             )}
           </div>
 
@@ -196,6 +204,8 @@ export function LoginForm() {
               id="password"
               type="password"
               autoComplete="current-password"
+              aria-invalid={!!errors.password}
+              aria-describedby={errors.password ? 'password-error' : undefined}
               className="w-full px-4 py-3 rounded-xl bg-ctp-mantle border border-ctp-surface1 text-ctp-text placeholder:text-ctp-overlay0 focus:border-ctp-blue focus:ring-2 focus:ring-ctp-blue/20 transition-all duration-200"
               placeholder="************"
               {...register('password', {
@@ -203,14 +213,18 @@ export function LoginForm() {
               })}
             />
             {errors.password && (
-              <p className="text-sm mt-2 text-ctp-red">{errors.password.message}</p>
+              <p id="password-error" className="text-sm mt-2 text-ctp-red" role="alert">
+                {errors.password.message}
+              </p>
             )}
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 rounded-xl bg-ctp-blue text-ctp-crust font-semibold hover:bg-ctp-sapphire focus:ring-2 focus:ring-ctp-blue/50 focus:ring-offset-2 focus:ring-offset-ctp-surface0 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-ctp-blue/25"
+            aria-disabled={isLoading}
+            aria-busy={isLoading}
+            className="w-full py-3 px-4 rounded-xl bg-ctp-blue text-ctp-crust font-semibold hover:bg-ctp-sapphire focus:ring-2 focus:ring-ctp-blue/50 focus:ring-offset-2 focus:ring-offset-ctp-surface0 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-ctp-blue/25 focus:outline-none"
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">
@@ -218,6 +232,7 @@ export function LoginForm() {
                   className="animate-spin h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <circle
                     className="opacity-25"
@@ -233,7 +248,8 @@ export function LoginForm() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                   />
                 </svg>
-                Connexion...
+                <span>Connexion...</span>
+                <span className="sr-only">en cours</span>
               </span>
             ) : (
               'Se connecter'

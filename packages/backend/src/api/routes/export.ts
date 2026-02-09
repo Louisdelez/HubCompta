@@ -5,6 +5,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { exportService, ExportFormat } from '../../modules/export/index.js';
 import { authGuard } from '../../core/auth/authGuard.js';
+import { randomUUID } from 'crypto';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -40,11 +41,223 @@ interface BackupData {
   [key: string]: unknown;
 }
 
+interface GenerateExportBody {
+  entityTypes: string[];
+  format: string;
+  dateFrom?: string;
+  dateTo?: string;
+  accountIds?: string[];
+  categoryIds?: string[];
+  includeArchived?: boolean;
+  includeAttachments?: boolean;
+}
+
+// In-memory export job storage (for demo purposes - in production use Redis or DB)
+const exportJobs = new Map<string, {
+  id: string;
+  workspaceId: string;
+  type: string;
+  format: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  createdAt: string;
+  completedAt?: string;
+  error?: string;
+  data?: string;
+  filename?: string;
+  mimeType?: string;
+}>();
+
 // ----------------------------------------------------------------------------
 // Routes
 // ----------------------------------------------------------------------------
 
 export const exportRoutes: FastifyPluginAsync = async (fastify) => {
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:workspaceId/export - Generate export job
+  // --------------------------------------------------------------------------
+  fastify.post<{
+    Params: { workspaceId: string };
+    Body: GenerateExportBody;
+  }>('/', {
+    preHandler: [authGuard],
+  }, async (request, reply) => {
+    const { workspaceId } = request.params;
+    const { entityTypes, format, dateFrom, dateTo, accountIds, categoryIds, includeArchived, includeAttachments } = request.body;
+
+    // Create export job
+    const jobId = randomUUID();
+    const job = {
+      id: jobId,
+      workspaceId,
+      type: entityTypes.join(','),
+      format: format || 'csv',
+      status: 'pending' as const,
+      createdAt: new Date().toISOString(),
+    };
+
+    exportJobs.set(jobId, job);
+
+    // Process export asynchronously
+    setImmediate(async () => {
+      try {
+        const currentJob = exportJobs.get(jobId);
+        if (!currentJob) return;
+
+        currentJob.status = 'processing';
+        exportJobs.set(jobId, currentJob);
+
+        let result: { data: string; filename: string; mimeType: string };
+
+        // Handle different export types
+        if (entityTypes.includes('backup') || entityTypes.length > 1) {
+          result = await exportService.exportFullBackup(workspaceId);
+        } else if (entityTypes.includes('transactions')) {
+          result = await exportService.exportTransactions({
+            workspaceId,
+            format: (format || 'csv') as ExportFormat,
+            dateFrom: dateFrom ? new Date(dateFrom) : undefined,
+            dateTo: dateTo ? new Date(dateTo) : undefined,
+            accountIds,
+            categoryIds,
+            includeArchived: includeArchived ?? false,
+          });
+        } else if (entityTypes.includes('accounts')) {
+          result = await exportService.exportAccounts({
+            workspaceId,
+            format: (format || 'csv') as ExportFormat,
+            includeArchived: includeArchived ?? false,
+          });
+        } else {
+          result = await exportService.exportFullBackup(workspaceId);
+        }
+
+        currentJob.status = 'completed';
+        currentJob.completedAt = new Date().toISOString();
+        currentJob.data = result.data;
+        currentJob.filename = result.filename;
+        currentJob.mimeType = result.mimeType;
+        exportJobs.set(jobId, currentJob);
+      } catch (error) {
+        const currentJob = exportJobs.get(jobId);
+        if (currentJob) {
+          currentJob.status = 'failed';
+          currentJob.error = error instanceof Error ? error.message : 'Unknown error';
+          exportJobs.set(jobId, currentJob);
+        }
+      }
+    });
+
+    return reply.status(202).send({
+      success: true,
+      data: {
+        exportId: jobId,
+        status: 'pending',
+        message: 'Export started',
+      },
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/export/:exportId - Download export file
+  // --------------------------------------------------------------------------
+  fastify.get<{
+    Params: { workspaceId: string; exportId: string };
+  }>('/:exportId', {
+    preHandler: [authGuard],
+  }, async (request, reply) => {
+    const { workspaceId, exportId } = request.params;
+
+    const job = exportJobs.get(exportId);
+
+    if (!job) {
+      return reply.status(404).send({
+        success: false,
+        error: { message: 'Export not found' },
+      });
+    }
+
+    if (job.workspaceId !== workspaceId) {
+      return reply.status(403).send({
+        success: false,
+        error: { message: 'Access denied' },
+      });
+    }
+
+    if (job.status === 'pending' || job.status === 'processing') {
+      return reply.send({
+        success: true,
+        data: {
+          id: job.id,
+          status: job.status,
+          createdAt: job.createdAt,
+        },
+      });
+    }
+
+    if (job.status === 'failed') {
+      return reply.status(500).send({
+        success: false,
+        error: { message: job.error ?? 'Export failed' },
+      });
+    }
+
+    // Return the file
+    if (job.data && job.mimeType && job.filename) {
+      reply
+        .header('Content-Type', job.mimeType)
+        .header('Content-Disposition', `attachment; filename="${job.filename}"`)
+        .send(job.data);
+    } else {
+      return reply.status(500).send({
+        success: false,
+        error: { message: 'Export data not available' },
+      });
+    }
+  });
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/export/history - List past exports
+  // --------------------------------------------------------------------------
+  fastify.get<{
+    Params: { workspaceId: string };
+    Querystring: { page?: string; limit?: string };
+  }>('/history', {
+    preHandler: [authGuard],
+  }, async (request, reply) => {
+    const { workspaceId } = request.params;
+    const { page = '1', limit = '20' } = request.query;
+
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+
+    // Filter jobs for this workspace
+    const workspaceJobs = Array.from(exportJobs.values())
+      .filter((job) => job.workspaceId === workspaceId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const total = workspaceJobs.length;
+    const paginatedJobs = workspaceJobs.slice((pageNum - 1) * limitNum, pageNum * limitNum);
+
+    return reply.send({
+      success: true,
+      data: paginatedJobs.map((job) => ({
+        id: job.id,
+        type: job.type,
+        format: job.format,
+        status: job.status,
+        createdAt: job.createdAt,
+        completedAt: job.completedAt,
+        error: job.error,
+        downloadUrl: job.status === 'completed' ? `/api/v1/workspaces/${workspaceId}/export/${job.id}` : undefined,
+      })),
+      meta: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+      },
+    });
+  });
+
   // Export transactions
   fastify.get<{
     Params: { workspaceId: string };

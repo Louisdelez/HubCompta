@@ -6,6 +6,7 @@
 import type { FastifyInstance } from 'fastify';
 import { reportService } from '@/modules/reports/report.service.js';
 import { exportService } from '@/modules/reports/export.service.js';
+import { reportBuilderService, type ReportConfig } from '@/modules/reports/report-builder.service.js';
 import { transactionService } from '@/modules/transactions/transaction.service.js';
 import { balanceService } from '@/modules/accounts/balance.service.js';
 import { accountService } from '@/modules/accounts/account.service.js';
@@ -39,6 +40,33 @@ interface ExportQuery extends DateRangeQuery {
   accountIds?: string;
   categoryIds?: string;
   status?: string;
+}
+
+interface TemplateParams extends WorkspaceParams {
+  templateId: string;
+}
+
+interface CreateTemplateBody {
+  name: string;
+  description?: string;
+  config: ReportConfig;
+  isPublic?: boolean;
+}
+
+interface UpdateTemplateBody {
+  name?: string;
+  description?: string;
+  config?: ReportConfig;
+  isPublic?: boolean;
+}
+
+interface GenerateReportBody {
+  config: ReportConfig;
+  format?: 'json' | 'csv' | 'pdf';
+}
+
+interface GenerateTemplateQuery {
+  format?: 'json' | 'csv' | 'pdf';
 }
 
 // ----------------------------------------------------------------------------
@@ -404,6 +432,237 @@ export function reportRoutes(app: FastifyInstance): void {
       return reply.send({
         success: true,
         data,
+      });
+    }
+  );
+
+  // ==========================================================================
+  // REPORT BUILDER - TEMPLATES
+  // ==========================================================================
+
+  // --------------------------------------------------------------------------
+  // GET /reports/templates - List report templates
+  // --------------------------------------------------------------------------
+  app.get<{ Params: WorkspaceParams }>(
+    '/templates',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const userId = request.user?.sub;
+
+      const templates = await reportBuilderService.listTemplates(workspaceId, userId);
+
+      return reply.send({
+        success: true,
+        data: templates,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /reports/templates - Create report template
+  // --------------------------------------------------------------------------
+  app.post<{ Params: WorkspaceParams; Body: CreateTemplateBody }>(
+    '/templates',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const userId = request.user?.sub;
+      const { name, description, config, isPublic } = request.body;
+
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          error: { message: 'Utilisateur non authentifie' },
+        });
+      }
+
+      if (!name || !config) {
+        return reply.status(400).send({
+          success: false,
+          error: { message: 'Le nom et la configuration sont requis' },
+        });
+      }
+
+      const template = await reportBuilderService.createTemplate({
+        workspaceId,
+        userId,
+        name,
+        description,
+        config,
+        isPublic,
+      });
+
+      return reply.status(201).send({
+        success: true,
+        data: template,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /reports/templates/:templateId - Get report template
+  // --------------------------------------------------------------------------
+  app.get<{ Params: TemplateParams }>(
+    '/templates/:templateId',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId, templateId } = request.params;
+
+      const template = await reportBuilderService.getTemplate(templateId, workspaceId);
+
+      if (!template) {
+        return reply.status(404).send({
+          success: false,
+          error: { message: 'Modele de rapport non trouve' },
+        });
+      }
+
+      return reply.send({
+        success: true,
+        data: template,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // PUT /reports/templates/:templateId - Update report template
+  // --------------------------------------------------------------------------
+  app.put<{ Params: TemplateParams; Body: UpdateTemplateBody }>(
+    '/templates/:templateId',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId, templateId } = request.params;
+      const userId = request.user?.sub;
+      const { name, description, config, isPublic } = request.body;
+
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          error: { message: 'Utilisateur non authentifie' },
+        });
+      }
+
+      const template = await reportBuilderService.updateTemplate(templateId, workspaceId, userId, {
+        name,
+        description,
+        config,
+        isPublic,
+      });
+
+      if (!template) {
+        return reply.status(404).send({
+          success: false,
+          error: { message: 'Modele de rapport non trouve ou acces refuse' },
+        });
+      }
+
+      return reply.send({
+        success: true,
+        data: template,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // DELETE /reports/templates/:templateId - Delete report template
+  // --------------------------------------------------------------------------
+  app.delete<{ Params: TemplateParams }>(
+    '/templates/:templateId',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId, templateId } = request.params;
+      const userId = request.user?.sub;
+
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          error: { message: 'Utilisateur non authentifie' },
+        });
+      }
+
+      const deleted = await reportBuilderService.deleteTemplate(templateId, workspaceId, userId);
+
+      if (!deleted) {
+        return reply.status(404).send({
+          success: false,
+          error: { message: 'Modele de rapport non trouve ou acces refuse' },
+        });
+      }
+
+      return reply.send({
+        success: true,
+        data: { deleted: true },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /reports/templates/:templateId/generate - Generate report from template
+  // --------------------------------------------------------------------------
+  app.post<{ Params: TemplateParams; Querystring: GenerateTemplateQuery }>(
+    '/templates/:templateId/generate',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId, templateId } = request.params;
+      const { format: exportFormat = 'json' } = request.query;
+
+      const report = await reportBuilderService.generateFromTemplate(templateId, workspaceId);
+
+      if (!report) {
+        return reply.status(404).send({
+          success: false,
+          error: { message: 'Modele de rapport non trouve' },
+        });
+      }
+
+      // Handle export formats
+      if (exportFormat === 'csv' || exportFormat === 'pdf') {
+        const exported = await reportBuilderService.exportReport(report, { format: exportFormat });
+
+        reply.header('Content-Type', exported.mimeType);
+        reply.header('Content-Disposition', `attachment; filename="${exported.filename}"`);
+        return reply.send(exported.content);
+      }
+
+      return reply.send({
+        success: true,
+        data: report,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /reports/generate - Generate ad-hoc report (no template)
+  // --------------------------------------------------------------------------
+  app.post<{ Params: WorkspaceParams; Body: GenerateReportBody }>(
+    '/generate',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const { config, format: exportFormat = 'json' } = request.body;
+
+      if (!config || !config.columns || !config.filters) {
+        return reply.status(400).send({
+          success: false,
+          error: { message: 'La configuration du rapport est requise (columns et filters)' },
+        });
+      }
+
+      const report = await reportBuilderService.generateReport(workspaceId, config);
+
+      // Handle export formats
+      if (exportFormat === 'csv' || exportFormat === 'pdf') {
+        const exported = await reportBuilderService.exportReport(report, { format: exportFormat });
+
+        reply.header('Content-Type', exported.mimeType);
+        reply.header('Content-Disposition', `attachment; filename="${exported.filename}"`);
+        return reply.send(exported.content);
+      }
+
+      return reply.send({
+        success: true,
+        data: report,
       });
     }
   );

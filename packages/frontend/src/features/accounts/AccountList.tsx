@@ -3,12 +3,13 @@
 // Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Landmark, PiggyBank, Banknote, CreditCard, FileText, TrendingUp } from 'lucide-react';
+import { Landmark, PiggyBank, Banknote, CreditCard, FileText, TrendingUp, ArrowRightLeft } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 import { AccountForm } from './AccountForm';
+import { CurrencyDisplay } from '@/features/currency';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -29,6 +30,50 @@ interface Account {
 interface AccountListProps {
   workspaceId: string;
   compact?: boolean;
+}
+
+interface PortfolioData {
+  targetCurrency: string;
+  totalBalance: number;
+  accounts: Array<{
+    id: string;
+    name: string;
+    type: string;
+    originalBalance: number;
+    originalCurrency: string;
+    convertedBalance: number;
+    exchangeRate: number;
+    rateSource: string;
+  }>;
+}
+
+// Currency display mode hook
+function useCurrencyDisplayMode() {
+  const [mode, setMode] = useState<'original' | 'converted'>(() => {
+    return (localStorage.getItem('displayCurrencyMode') as 'original' | 'converted') ?? 'original';
+  });
+  const [displayCurrency, setDisplayCurrency] = useState(() => {
+    return localStorage.getItem('displayCurrency') ?? 'EUR';
+  });
+
+  useEffect(() => {
+    const handleModeChange = (e: CustomEvent<{ mode: string }>) => {
+      setMode(e.detail.mode as 'original' | 'converted');
+    };
+    const handleCurrencyChange = (e: CustomEvent<{ currency: string }>) => {
+      setDisplayCurrency(e.detail.currency);
+    };
+
+    window.addEventListener('currencyDisplayModeChanged', handleModeChange as EventListener);
+    window.addEventListener('displayCurrencyChanged', handleCurrencyChange as EventListener);
+
+    return () => {
+      window.removeEventListener('currencyDisplayModeChanged', handleModeChange as EventListener);
+      window.removeEventListener('displayCurrencyChanged', handleCurrencyChange as EventListener);
+    };
+  }, []);
+
+  return { mode, displayCurrency };
 }
 
 // ----------------------------------------------------------------------------
@@ -63,17 +108,6 @@ const ACCOUNT_TYPE_LABELS: Record<Account['type'], string> = {
   investment: 'Investissement',
 };
 
-// ----------------------------------------------------------------------------
-// Helpers
-// ----------------------------------------------------------------------------
-
-function formatCurrency(amount: number, currency = 'EUR'): string {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(amount);
-}
 
 // ----------------------------------------------------------------------------
 // Component
@@ -82,11 +116,24 @@ function formatCurrency(amount: number, currency = 'EUR'): string {
 export function AccountList({ workspaceId, compact = false }: AccountListProps) {
   const [showForm, setShowForm] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+  const { mode, displayCurrency } = useCurrencyDisplayMode();
 
   const { data: accounts, isLoading } = useQuery({
     queryKey: ['accounts', workspaceId],
     queryFn: () => api.get<Account[]>(`/workspaces/${workspaceId}/accounts`),
   });
+
+  // Fetch portfolio data for conversions
+  const { data: portfolio } = useQuery({
+    queryKey: ['portfolio-currency', workspaceId, displayCurrency],
+    queryFn: () => api.get<PortfolioData>(`/currencies/workspace/${workspaceId}/portfolio?currency=${displayCurrency}`),
+    enabled: mode === 'converted',
+  });
+
+  // Map for quick lookup of converted balances
+  const convertedBalances = new Map(
+    portfolio?.accounts.map(a => [a.id, { converted: a.convertedBalance, rate: a.exchangeRate }]) ?? []
+  );
 
   // Group accounts by type
   const groupedAccounts = (accounts ?? []).reduce((groups, account) => {
@@ -97,9 +144,13 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
     return groups;
   }, {} as Record<Account['type'], Account[]>);
 
-  const totalBalance = (accounts ?? [])
-    .filter((a) => !a.isArchived)
-    .reduce((sum, a) => sum + a.balance, 0);
+  const totalBalance = mode === 'converted' && portfolio
+    ? portfolio.totalBalance
+    : (accounts ?? [])
+        .filter((a) => !a.isArchived)
+        .reduce((sum, a) => sum + a.balance, 0);
+
+  const totalCurrency = mode === 'converted' ? displayCurrency : 'EUR';
 
   if (isLoading) {
     return (
@@ -144,21 +195,36 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
                 )}
                 <span className="font-medium">{account.name}</span>
               </div>
-              <span
-                className={clsx(
-                  'font-medium',
-                  account.balance >= 0 ? 'text-ctp-green' : 'text-ctp-red'
+              <div className="text-right">
+                <CurrencyDisplay
+                  amount={account.balance}
+                  currency={account.currency}
+                  colorize
+                  size="sm"
+                />
+                {mode === 'converted' && account.currency !== displayCurrency && convertedBalances.has(account.id) && (
+                  <div className="flex items-center gap-1 text-xs text-ctp-subtext0">
+                    <ArrowRightLeft className="w-3 h-3" />
+                    <CurrencyDisplay
+                      amount={convertedBalances.get(account.id)!.converted}
+                      currency={displayCurrency}
+                      size="sm"
+                    />
+                  </div>
                 )}
-              >
-                {formatCurrency(account.balance, account.currency)}
-              </span>
+              </div>
             </div>
           ))}
         </div>
 
         <div className="mt-4 pt-4 border-t border-ctp-surface1 flex justify-between">
           <span className="font-medium">Total</span>
-          <span className="font-bold">{formatCurrency(totalBalance)}</span>
+          <CurrencyDisplay
+            amount={totalBalance}
+            currency={totalCurrency}
+            size="md"
+            className="font-bold"
+          />
         </div>
 
         {showForm && (
@@ -188,8 +254,20 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
 
       {/* Total Balance Card */}
       <div className="card bg-gradient-to-r from-ctp-blue to-ctp-sapphire">
-        <p className="text-ctp-crust/70">Solde total</p>
-        <p className={clsx('text-3xl font-bold mt-1', totalBalance >= 0 ? 'text-ctp-crust' : 'text-ctp-red')}>{formatCurrency(totalBalance)}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-ctp-crust/70">Solde total</p>
+          {mode === 'converted' && (
+            <span className="text-xs text-ctp-crust/50 bg-ctp-crust/10 px-2 py-0.5 rounded">
+              En {displayCurrency}
+            </span>
+          )}
+        </div>
+        <CurrencyDisplay
+          amount={totalBalance}
+          currency={totalCurrency}
+          size="xl"
+          className={clsx('mt-1', totalBalance >= 0 ? 'text-ctp-crust' : 'text-ctp-red')}
+        />
       </div>
 
       {/* Account Groups */}
@@ -235,16 +313,24 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
                     </p>
                   </div>
                 </div>
-                <span
-                  className={clsx(
-                    'text-lg font-bold',
-                    account.balance >= 0
-                      ? 'text-ctp-green'
-                      : 'text-ctp-red'
+                <div className="text-right">
+                  <CurrencyDisplay
+                    amount={account.balance}
+                    currency={account.currency}
+                    colorize
+                    size="lg"
+                  />
+                  {mode === 'converted' && account.currency !== displayCurrency && convertedBalances.has(account.id) && (
+                    <div className="flex items-center gap-1 text-xs text-ctp-subtext0 justify-end mt-0.5">
+                      <ArrowRightLeft className="w-3 h-3" />
+                      <CurrencyDisplay
+                        amount={convertedBalances.get(account.id)!.converted}
+                        currency={displayCurrency}
+                        size="sm"
+                      />
+                    </div>
                   )}
-                >
-                  {formatCurrency(account.balance, account.currency)}
-                </span>
+                </div>
               </div>
             ))}
           </div>

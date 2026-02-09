@@ -172,12 +172,17 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
             ? 'border-ctp-blue ring-2 ring-ctp-blue/20'
             : 'border-ctp-surface1'
         )}
+        role="combobox"
+        aria-expanded={isOpen && query.length >= 2}
+        aria-haspopup="listbox"
+        aria-owns="search-results-listbox"
       >
         <svg
           className="w-4 h-4 text-ctp-overlay1"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -195,23 +200,32 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
           onKeyDown={handleKeyNavigation}
           placeholder="Rechercher..."
           className="flex-1 bg-transparent border-0 outline-none text-sm placeholder-ctp-overlay0"
+          aria-label="Recherche globale"
+          aria-autocomplete="list"
+          aria-controls="search-results-listbox"
+          aria-activedescendant={results.length > 0 ? `search-result-${results[selectedIndex]?.id}` : undefined}
         />
-        <kbd className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-xs text-ctp-overlay1 bg-ctp-surface1 rounded">
+        <kbd className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-xs text-ctp-overlay1 bg-ctp-surface1 rounded" aria-hidden="true">
           <span>⌘</span>K
         </kbd>
       </div>
 
       {/* Results Dropdown */}
       {isOpen && query.length >= 2 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-ctp-surface0 rounded-lg shadow-xl border border-ctp-surface1 overflow-hidden z-50 max-h-96 overflow-y-auto">
+        <div
+          id="search-results-listbox"
+          className="absolute top-full left-0 right-0 mt-2 bg-ctp-surface0 rounded-lg shadow-xl border border-ctp-surface1 overflow-hidden z-50 max-h-96 overflow-y-auto"
+          role="listbox"
+          aria-label="Resultats de recherche"
+        >
           {isLoading ? (
-            <div className="p-4 text-center text-ctp-subtext0">
-              <div className="animate-spin w-5 h-5 border-2 border-ctp-blue border-t-transparent rounded-full mx-auto" />
+            <div className="p-4 text-center text-ctp-subtext0" role="status" aria-live="polite">
+              <div className="animate-spin w-5 h-5 border-2 border-ctp-blue border-t-transparent rounded-full mx-auto" aria-hidden="true" />
               <p className="mt-2 text-sm">Recherche en cours...</p>
             </div>
           ) : results.length === 0 ? (
-            <div className="p-4 text-center text-ctp-subtext0">
-              <p className="text-sm">Aucun résultat pour "{query}"</p>
+            <div className="p-4 text-center text-ctp-subtext0" role="status" aria-live="polite">
+              <p className="text-sm">Aucun resultat pour "{query}"</p>
             </div>
           ) : (
             <div className="py-2">
@@ -231,17 +245,21 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
                   {typeResults.map((result) => {
                     const globalIdx = results.indexOf(result);
                     const config = TYPE_CONFIG[result.type];
+                    const isSelected = globalIdx === selectedIndex;
                     return (
                       <button
                         key={result.id}
+                        id={`search-result-${result.id}`}
                         onClick={() => handleSelect(result)}
                         onMouseEnter={() => setSelectedIndex(globalIdx)}
                         className={clsx(
                           'w-full px-3 py-2 flex items-center gap-3 text-left transition-colors',
-                          globalIdx === selectedIndex
+                          isSelected
                             ? 'bg-ctp-yellow/20'
                             : 'hover:bg-ctp-surface1'
                         )}
+                        role="option"
+                        aria-selected={isSelected}
                       >
                         {result.icon ? (
                           <span className="text-lg">{result.icon}</span>

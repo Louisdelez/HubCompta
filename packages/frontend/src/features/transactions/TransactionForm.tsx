@@ -3,15 +3,17 @@
 // Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
+import { Sparkles, Zap, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { CategorySelector } from './CategorySelector';
 import { TagInput } from './TagInput';
 import { DocumentAttachment } from './DocumentAttachment';
 import { CurrencySelector } from '@/features/currency';
+import { CategoryConfidence } from '@/features/rules/CategoryConfidence';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -55,6 +57,16 @@ interface TransactionFormProps {
   onSuccess: () => void;
 }
 
+interface CategorySuggestion {
+  categoryId: string;
+  categoryName: string;
+  categoryIcon?: string | null;
+  categoryColor?: string | null;
+  confidence: number;
+  pattern: string;
+  source: 'pattern' | 'rule' | 'similar';
+}
+
 // ----------------------------------------------------------------------------
 // Component
 // ----------------------------------------------------------------------------
@@ -73,6 +85,11 @@ export function TransactionForm({
 
   const isEditing = !!transaction;
   const isTransfer = transaction?.type === 'transfer';
+
+  // State for category suggestions
+  const [suggestions, setSuggestions] = useState<CategorySuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [appliedPattern, setAppliedPattern] = useState<string | null>(null);
 
   // Fetch accounts
   const { data: accounts } = useQuery({
@@ -111,9 +128,62 @@ export function TransactionForm({
   const selectedCategoryId = watch('categoryId');
   const selectedAccountId = watch('accountId');
   const selectedCurrency = watch('currency');
+  const descriptionValue = watch('description');
+  const amountValue = watch('amount');
 
   // Get selected account for currency validation
   const selectedAccount = accounts?.find((a) => a.id === selectedAccountId);
+
+  // Fetch category suggestions when description changes
+  const fetchSuggestions = useCallback(async () => {
+    if (!descriptionValue || descriptionValue.length < 3 || isEditing) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const params = new URLSearchParams({ description: descriptionValue });
+      if (amountValue) {
+        params.append('amount', String(amountValue));
+      }
+      const result = await api.get<CategorySuggestion[]>(
+        `/workspaces/${workspaceId}/rules/suggest?${params.toString()}`
+      );
+      setSuggestions(result);
+    } catch {
+      setSuggestions([]);
+    }
+  }, [descriptionValue, amountValue, workspaceId, isEditing]);
+
+  // Debounce suggestion fetching
+  useEffect(() => {
+    const timer = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(timer);
+  }, [fetchSuggestions]);
+
+  // Learn pattern mutation
+  const learnMutation = useMutation({
+    mutationFn: (categoryId: string) =>
+      api.post(`/workspaces/${workspaceId}/rules/learn`, {
+        transactionId: transaction?.id,
+        categoryId,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['patterns', workspaceId] });
+    },
+  });
+
+  // Apply suggestion handler
+  const handleApplySuggestion = (suggestion: CategorySuggestion, learn: boolean = false) => {
+    setValue('categoryId', suggestion.categoryId);
+    setAppliedPattern(suggestion.pattern);
+    setShowSuggestions(false);
+
+    // If editing and learn is requested, learn the pattern
+    if (isEditing && learn && transaction) {
+      learnMutation.mutate(suggestion.categoryId);
+    }
+  };
 
   const createMutation = useMutation({
     mutationFn: async (data: TransactionFormData) => {
@@ -191,23 +261,37 @@ export function TransactionForm({
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  const modalTitle = isEditing ? 'Modifier la transaction' : 'Nouvelle transaction';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="transaction-modal-title"
+    >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/50"
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
       {/* Modal */}
       <div className="relative bg-ctp-mantle rounded-t-xl sm:rounded-xl shadow-xl w-full sm:max-w-lg max-h-[90vh] overflow-auto animate-slide-up sm:animate-scale-in">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-ctp-text">
-              {isEditing ? 'Modifier' : 'Nouvelle transaction'}
+            <h2 id="transaction-modal-title" className="text-xl font-bold text-ctp-text">
+              {modalTitle}
             </h2>
             {isEditing && !isTransfer && (
               <button
                 onClick={handleDelete}
                 disabled={deleteMutation.isPending}
-                className="text-ctp-red hover:text-ctp-red/80"
+                aria-disabled={deleteMutation.isPending}
+                aria-busy={deleteMutation.isPending}
+                className="text-ctp-red hover:text-ctp-red/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-red rounded"
+                aria-label="Supprimer la transaction"
               >
                 Supprimer
               </button>
@@ -215,7 +299,11 @@ export function TransactionForm({
           </div>
 
           {error && (
-            <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4">
+            <div
+              className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4"
+              role="alert"
+              aria-live="assertive"
+            >
               {error}
             </div>
           )}
@@ -266,6 +354,8 @@ export function TransactionForm({
                       min="0"
                       className="input text-2xl font-bold text-center"
                       placeholder="0.00"
+                      aria-invalid={!!errors.amount}
+                      aria-describedby={errors.amount ? 'amount-error' : undefined}
                       {...register('amount', {
                         required: 'Montant requis',
                         valueAsNumber: true,
@@ -281,7 +371,7 @@ export function TransactionForm({
                   />
                 </div>
                 {errors.amount && (
-                  <p className="error-text">{errors.amount.message}</p>
+                  <p id="amount-error" className="error-text" role="alert">{errors.amount.message}</p>
                 )}
                 {selectedAccount && selectedCurrency !== selectedAccount.currency && (
                   <p className="text-xs text-ctp-yellow mt-1">
@@ -298,10 +388,12 @@ export function TransactionForm({
                   type="text"
                   className="input"
                   placeholder="Ex: Courses supermarché"
+                  aria-invalid={!!errors.description}
+                  aria-describedby={errors.description ? 'description-error' : undefined}
                   {...register('description', { required: 'Description requise' })}
                 />
                 {errors.description && (
-                  <p className="error-text">{errors.description.message}</p>
+                  <p id="description-error" className="error-text" role="alert">{errors.description.message}</p>
                 )}
               </div>
 
@@ -311,6 +403,8 @@ export function TransactionForm({
                 <select
                   id="accountId"
                   className="input"
+                  aria-invalid={!!errors.accountId}
+                  aria-describedby={errors.accountId ? 'account-error' : undefined}
                   {...register('accountId', { required: 'Compte requis' })}
                   onChange={(e) => {
                     const accountId = e.target.value;
@@ -329,7 +423,7 @@ export function TransactionForm({
                   ))}
                 </select>
                 {errors.accountId && (
-                  <p className="error-text">{errors.accountId.message}</p>
+                  <p id="account-error" className="error-text" role="alert">{errors.accountId.message}</p>
                 )}
               </div>
 
@@ -349,8 +443,96 @@ export function TransactionForm({
                 workspaceId={workspaceId}
                 type={selectedType}
                 value={selectedCategoryId ?? ''}
-                onChange={(id) => setValue('categoryId', id ?? '')}
+                onChange={(id) => {
+                  setValue('categoryId', id ?? '');
+                  setAppliedPattern(null);
+                }}
               />
+
+              {/* Category Suggestions */}
+              {!isEditing && suggestions.length > 0 && (
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowSuggestions(!showSuggestions)}
+                    className="flex items-center gap-2 text-sm text-ctp-mauve hover:text-ctp-mauve/80"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>
+                      {suggestions.length} suggestion{suggestions.length > 1 ? 's' : ''} de categorie
+                    </span>
+                    {showSuggestions ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </button>
+
+                  {showSuggestions && (
+                    <div className="space-y-2 p-3 rounded-lg bg-ctp-surface0 border border-ctp-surface1">
+                      {suggestions.map((suggestion, idx) => (
+                        <div
+                          key={idx}
+                          className={clsx(
+                            'flex items-center gap-3 p-2 rounded-lg transition-colors',
+                            selectedCategoryId === suggestion.categoryId
+                              ? 'bg-ctp-mauve/20 border border-ctp-mauve/30'
+                              : 'hover:bg-ctp-surface1'
+                          )}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">
+                                {suggestion.categoryIcon} {suggestion.categoryName}
+                              </span>
+                              <CategoryConfidence confidence={suggestion.confidence} size="sm" />
+                            </div>
+                            <p className="text-xs text-ctp-subtext0 truncate">
+                              {suggestion.source === 'pattern' && 'Pattern: '}
+                              {suggestion.source === 'rule' && 'Regle: '}
+                              {suggestion.source === 'similar' && ''}
+                              {suggestion.pattern}
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleApplySuggestion(suggestion, false)}
+                            className="btn-ghost p-1.5 text-ctp-green hover:bg-ctp-green/10"
+                            title="Appliquer"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Pattern Match Indicator */}
+              {appliedPattern && (
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-ctp-green/10 border border-ctp-green/20 text-sm">
+                  <Sparkles className="w-4 h-4 text-ctp-green" />
+                  <span className="text-ctp-green">
+                    Categorie suggeree appliquee
+                  </span>
+                  <span className="text-ctp-subtext0">({appliedPattern})</span>
+                </div>
+              )}
+
+              {/* Apply and Learn for Editing */}
+              {isEditing && transaction && !transaction.categoryId && selectedCategoryId && (
+                <button
+                  type="button"
+                  onClick={() => learnMutation.mutate(selectedCategoryId)}
+                  disabled={learnMutation.isPending}
+                  className="flex items-center gap-2 p-2 rounded-lg bg-ctp-mauve/10 border border-ctp-mauve/20 text-sm text-ctp-mauve hover:bg-ctp-mauve/20 transition-colors w-full justify-center"
+                >
+                  <Zap className="w-4 h-4" />
+                  {learnMutation.isPending ? 'Apprentissage...' : 'Apprendre ce pattern'}
+                </button>
+              )}
 
               {/* Tags */}
               <TagInput

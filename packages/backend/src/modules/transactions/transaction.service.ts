@@ -3,12 +3,31 @@
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
-import { NotFoundError } from '@/core/middleware/errorHandler.js';
+import { NotFoundError, ValidationError } from '@/core/middleware/errorHandler.js';
 import type { Transaction, TransactionType, Prisma } from '@prisma/client';
+
+// ----------------------------------------------------------------------------
+// Constants
+// ----------------------------------------------------------------------------
+
+export const BATCH_MAX_SIZE = 100;
 
 // ----------------------------------------------------------------------------
 // Types
 // ----------------------------------------------------------------------------
+
+export interface BatchResult<T> {
+  success: T[];
+  failed: { index: number; error: string }[];
+  total: number;
+  successCount: number;
+  failedCount: number;
+}
+
+export interface BatchUpdateItem {
+  id: string;
+  data: TransactionUpdateInput;
+}
 
 export interface TransactionCreateInput {
   accountId: string;
@@ -489,6 +508,332 @@ export const transactionService = {
         total,
       }))
       .sort((a, b) => b.total - a.total);
+  },
+
+  /**
+   * Create multiple transactions in batch
+   */
+  async createMany(
+    workspaceId: string,
+    transactions: TransactionCreateInput[]
+  ): Promise<BatchResult<Transaction>> {
+    if (transactions.length > BATCH_MAX_SIZE) {
+      throw new ValidationError(`Batch size exceeds maximum of ${BATCH_MAX_SIZE} items`);
+    }
+
+    const results: BatchResult<Transaction> = {
+      success: [],
+      failed: [],
+      total: transactions.length,
+      successCount: 0,
+      failedCount: 0,
+    };
+
+    // Validate all accounts and categories upfront
+    const accountIds = [...new Set(transactions.map((t) => t.accountId))];
+    const categoryIds = [...new Set(transactions.map((t) => t.categoryId).filter(Boolean) as string[])];
+
+    const accounts = await prisma.account.findMany({
+      where: {
+        id: { in: accountIds },
+        workspaceId,
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+    const validAccountIds = new Set(accounts.map((a) => a.id));
+
+    let validCategoryIds = new Set<string>();
+    if (categoryIds.length > 0) {
+      const categories = await prisma.category.findMany({
+        where: {
+          id: { in: categoryIds },
+          workspaceId,
+        },
+        select: { id: true },
+      });
+      validCategoryIds = new Set(categories.map((c) => c.id));
+    }
+
+    // Process each transaction
+    for (const [index, input] of transactions.entries()) {
+      // Validate account
+      if (!validAccountIds.has(input.accountId)) {
+        results.failed.push({ index, error: `Invalid account ID: ${input.accountId}` });
+        results.failedCount++;
+        continue;
+      }
+
+      // Validate category if provided
+      if (input.categoryId && !validCategoryIds.has(input.categoryId)) {
+        results.failed.push({ index, error: `Invalid category ID: ${input.categoryId}` });
+        results.failedCount++;
+        continue;
+      }
+
+      try {
+        const transaction = await prisma.$transaction(async (tx) => {
+          const txn = await tx.transaction.create({
+            data: {
+              workspaceId,
+              accountId: input.accountId,
+              amount: input.amount,
+              type: input.type,
+              description: input.description,
+              date: input.date,
+              categoryId: input.categoryId,
+              notes: input.notes,
+            },
+          });
+
+          // Add tags if provided
+          if (input.tags && input.tags.length > 0) {
+            for (const tagId of input.tags) {
+              await tx.transactionTag.create({
+                data: {
+                  transactionId: txn.id,
+                  tagId,
+                },
+              });
+            }
+          }
+
+          return txn;
+        });
+
+        results.success.push(transaction);
+        results.successCount++;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        results.failed.push({ index, error: message });
+        results.failedCount++;
+      }
+    }
+
+    return results;
+  },
+
+  /**
+   * Update multiple transactions in batch
+   */
+  async updateMany(
+    workspaceId: string,
+    updates: BatchUpdateItem[]
+  ): Promise<BatchResult<Transaction>> {
+    if (updates.length > BATCH_MAX_SIZE) {
+      throw new ValidationError(`Batch size exceeds maximum of ${BATCH_MAX_SIZE} items`);
+    }
+
+    const results: BatchResult<Transaction> = {
+      success: [],
+      failed: [],
+      total: updates.length,
+      successCount: 0,
+      failedCount: 0,
+    };
+
+    // Validate all transactions exist upfront
+    const transactionIds = updates.map((u) => u.id);
+    const existingTransactions = await prisma.transaction.findMany({
+      where: {
+        id: { in: transactionIds },
+        workspaceId,
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+    const validTransactionIds = new Set(existingTransactions.map((t) => t.id));
+
+    // Validate categories if provided
+    const categoryIds = [...new Set(
+      updates
+        .map((u) => u.data.categoryId)
+        .filter((id): id is string => id !== undefined && id !== null)
+    )];
+
+    let validCategoryIds = new Set<string>();
+    if (categoryIds.length > 0) {
+      const categories = await prisma.category.findMany({
+        where: {
+          id: { in: categoryIds },
+          workspaceId,
+        },
+        select: { id: true },
+      });
+      validCategoryIds = new Set(categories.map((c) => c.id));
+    }
+
+    // Process each update
+    for (const [index, update] of updates.entries()) {
+      const { id, data } = update;
+
+      // Validate transaction exists
+      if (!validTransactionIds.has(id)) {
+        results.failed.push({ index, error: `Transaction not found: ${id}` });
+        results.failedCount++;
+        continue;
+      }
+
+      // Validate category if provided
+      if (data.categoryId && !validCategoryIds.has(data.categoryId)) {
+        results.failed.push({ index, error: `Invalid category ID: ${data.categoryId}` });
+        results.failedCount++;
+        continue;
+      }
+
+      try {
+        const transaction = await prisma.transaction.update({
+          where: { id },
+          data,
+        });
+
+        results.success.push(transaction);
+        results.successCount++;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        results.failed.push({ index, error: message });
+        results.failedCount++;
+      }
+    }
+
+    return results;
+  },
+
+  /**
+   * Delete multiple transactions in batch with detailed results
+   */
+  async deleteMany(
+    workspaceId: string,
+    transactionIds: string[]
+  ): Promise<BatchResult<{ id: string }>> {
+    if (transactionIds.length > BATCH_MAX_SIZE) {
+      throw new ValidationError(`Batch size exceeds maximum of ${BATCH_MAX_SIZE} items`);
+    }
+
+    const results: BatchResult<{ id: string }> = {
+      success: [],
+      failed: [],
+      total: transactionIds.length,
+      successCount: 0,
+      failedCount: 0,
+    };
+
+    // Get existing transactions
+    const existingTransactions = await prisma.transaction.findMany({
+      where: {
+        id: { in: transactionIds },
+        workspaceId,
+        deletedAt: null,
+      },
+      select: { id: true, transferPairId: true },
+    });
+
+    const existingMap = new Map(existingTransactions.map((t) => [t.id, t]));
+
+    for (const [index, id] of transactionIds.entries()) {
+      const transaction = existingMap.get(id);
+
+      if (!transaction) {
+        results.failed.push({ index, error: `Transaction not found: ${id}` });
+        results.failedCount++;
+        continue;
+      }
+
+      try {
+        // If it's a transfer, delete the linked transaction too
+        if (transaction.transferPairId) {
+          await prisma.transaction.update({
+            where: { id: transaction.transferPairId },
+            data: { deletedAt: new Date() },
+          });
+        }
+
+        await prisma.transaction.update({
+          where: { id },
+          data: { deletedAt: new Date() },
+        });
+
+        results.success.push({ id });
+        results.successCount++;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        results.failed.push({ index, error: message });
+        results.failedCount++;
+      }
+    }
+
+    return results;
+  },
+
+  /**
+   * Categorize multiple transactions at once
+   */
+  async categorizeMany(
+    workspaceId: string,
+    categoryId: string | null,
+    transactionIds: string[]
+  ): Promise<BatchResult<Transaction>> {
+    if (transactionIds.length > BATCH_MAX_SIZE) {
+      throw new ValidationError(`Batch size exceeds maximum of ${BATCH_MAX_SIZE} items`);
+    }
+
+    const results: BatchResult<Transaction> = {
+      success: [],
+      failed: [],
+      total: transactionIds.length,
+      successCount: 0,
+      failedCount: 0,
+    };
+
+    // Validate category if provided
+    if (categoryId) {
+      const category = await prisma.category.findFirst({
+        where: {
+          id: categoryId,
+          workspaceId,
+        },
+      });
+
+      if (!category) {
+        throw new NotFoundError('Category', categoryId);
+      }
+    }
+
+    // Get existing transactions
+    const existingTransactions = await prisma.transaction.findMany({
+      where: {
+        id: { in: transactionIds },
+        workspaceId,
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+
+    const validTransactionIds = new Set(existingTransactions.map((t) => t.id));
+
+    for (const [index, id] of transactionIds.entries()) {
+      if (!validTransactionIds.has(id)) {
+        results.failed.push({ index, error: `Transaction not found: ${id}` });
+        results.failedCount++;
+        continue;
+      }
+
+      try {
+        const transaction = await prisma.transaction.update({
+          where: { id },
+          data: { categoryId },
+        });
+
+        results.success.push(transaction);
+        results.successCount++;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        results.failed.push({ index, error: message });
+        results.failedCount++;
+      }
+    }
+
+    return results;
   },
 };
 

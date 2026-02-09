@@ -1,6 +1,7 @@
 // ============================================================================
 // BUTTON COMPONENT - Finance Hub
 // Uses Catppuccin colors that adapt to the current theme
+// Includes accessibility features: aria-disabled, aria-busy, visible focus states
 // ============================================================================
 
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
@@ -17,7 +18,11 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
+  /** Loading text announced to screen readers (default: "Loading") */
+  loadingText?: string;
   icon?: ReactNode;
+  /** ARIA label for icon-only buttons (required when no children) */
+  'aria-label'?: string;
   children?: ReactNode;
 }
 
@@ -55,20 +60,32 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant = 'primary',
       size = 'md',
       loading = false,
+      loadingText = 'Loading',
       disabled,
       icon,
       children,
       className,
+      'aria-label': ariaLabel,
       ...props
     },
     ref
   ) {
     const isDisabled = disabled || loading;
 
+    // Warn in dev if icon-only button lacks aria-label
+    if (process.env.NODE_ENV === 'development' && icon && !children && !ariaLabel) {
+      console.warn(
+        'Button: Icon-only buttons should have an aria-label for accessibility'
+      );
+    }
+
     return (
       <button
         ref={ref}
         disabled={isDisabled}
+        aria-disabled={isDisabled}
+        aria-busy={loading}
+        aria-label={ariaLabel}
         className={clsx(
           baseStyles,
           variantStyles[variant],
@@ -78,12 +95,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {loading ? (
-          <span
-            className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
-            aria-label="Loading"
-          />
+          <>
+            <span
+              className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
+              aria-hidden="true"
+            />
+            <span className="sr-only">{loadingText}</span>
+          </>
         ) : icon ? (
-          <span className="flex-shrink-0">{icon}</span>
+          <span className="flex-shrink-0" aria-hidden={!!ariaLabel}>
+            {icon}
+          </span>
         ) : null}
         {children && <span>{children}</span>}
       </button>

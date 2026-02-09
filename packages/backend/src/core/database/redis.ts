@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { Redis } from 'ioredis';
+import { logger } from '../middleware/logger.js';
 
 const REDIS_URL = process.env.REDIS_URL;
 
@@ -32,19 +33,19 @@ export function getRedisClient(): Redis {
   }
 
   redis.on('error', (error: Error) => {
-    console.error('Redis connection error:', error);
+    logger.error({ error }, 'Redis connection error');
   });
 
   redis.on('connect', () => {
-    console.info('Redis connected');
+    logger.info('Redis connected');
   });
 
   redis.on('ready', () => {
-    console.info('Redis ready');
+    logger.info('Redis ready');
   });
 
   redis.on('close', () => {
-    console.warn('Redis connection closed');
+    logger.warn('Redis connection closed');
   });
 
   return redis;

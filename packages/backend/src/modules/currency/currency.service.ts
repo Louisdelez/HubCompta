@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
+import { logger } from '@/core/middleware/logger.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -609,7 +610,7 @@ export const currencyService = {
         date: rates.length > 0 ? date : null,
       };
     } catch (error) {
-      console.error('Failed to fetch ECB rates:', error);
+      logger.error({ error }, 'Failed to fetch ECB rates');
       throw error;
     }
   },
@@ -637,7 +638,7 @@ export const currencyService = {
         const response = await fetch(url);
 
         if (!response.ok) {
-          console.error(`FRED API error for ${seriesId}: ${response.status}`);
+          logger.error({ seriesId, status: response.status }, 'FRED API error');
           continue;
         }
 
@@ -686,7 +687,7 @@ export const currencyService = {
 
         currencies.push(currency);
       } catch (error) {
-        console.error(`Failed to fetch FRED rate for ${currency}:`, error);
+        logger.error({ currency, error }, 'Failed to fetch FRED rate');
       }
     }
 
@@ -799,7 +800,7 @@ export const currencyService = {
         currencies,
       };
     } catch (error) {
-      console.error('Failed to fetch Fed H.10 rates:', error);
+      logger.error({ error }, 'Failed to fetch Fed H.10 rates');
       throw error;
     }
   },
@@ -885,7 +886,7 @@ export const currencyService = {
         currencies,
       };
     } catch (error) {
-      console.error('Failed to fetch SNB rates:', error);
+      logger.error({ error }, 'Failed to fetch SNB rates');
       throw error;
     }
   },
@@ -907,7 +908,7 @@ export const currencyService = {
     try {
       fedResult = await this.fetchFedH10Rates();
     } catch (error) {
-      console.error('Failed to fetch Fed H.10 rates:', error);
+      logger.error({ error }, 'Failed to fetch Fed H.10 rates');
     }
 
     // Fetch SNB rates (no API key required)
@@ -915,7 +916,7 @@ export const currencyService = {
     try {
       snbResult = await this.fetchSNBRates();
     } catch (error) {
-      console.error('Failed to fetch SNB rates:', error);
+      logger.error({ error }, 'Failed to fetch SNB rates');
     }
 
     // Try to fetch FRED rates if API key is available (more currencies than H.10)
@@ -924,7 +925,7 @@ export const currencyService = {
       try {
         fredResult = await this.fetchFREDRates();
       } catch (error) {
-        console.error('Failed to fetch FRED rates:', error);
+        logger.error({ error }, 'Failed to fetch FRED rates');
       }
     }
 
@@ -973,6 +974,291 @@ export const currencyService = {
     }
 
     return { total, conversions };
+  },
+
+  /**
+   * Convert amount between currencies (convenience wrapper with historical rate support)
+   * This is an enhanced version that provides more context
+   */
+  async convertAmount(
+    amount: number,
+    from: string,
+    to: string,
+    date?: Date
+  ): Promise<ConversionResult | null> {
+    return this.convert(amount, from, to, date ?? new Date());
+  },
+
+  /**
+   * Get historical exchange rate for a specific date
+   */
+  async getHistoricalRate(
+    from: string,
+    to: string,
+    date: Date
+  ): Promise<{ rate: number; source: string; date: Date } | null> {
+    return this.getRate(from, to, date);
+  },
+
+  /**
+   * Get all accounts in a workspace converted to a target currency
+   * Returns a portfolio summary with each account's balance in both original and target currency
+   */
+  async getPortfolioInCurrency(
+    workspaceId: string,
+    targetCurrency: string
+  ): Promise<{
+    targetCurrency: string;
+    totalBalance: number;
+    accounts: Array<{
+      id: string;
+      name: string;
+      type: string;
+      originalBalance: number;
+      originalCurrency: string;
+      convertedBalance: number;
+      exchangeRate: number;
+      rateSource: string;
+      rateDate: Date;
+    }>;
+    byCurrency: Array<{
+      currency: string;
+      originalTotal: number;
+      convertedTotal: number;
+      accountCount: number;
+    }>;
+  }> {
+    const target = targetCurrency.toUpperCase();
+
+    // Get all accounts for this workspace
+    const accounts = await prisma.account.findMany({
+      where: { workspaceId, isArchived: false },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        currency: true,
+        balance: true,
+      },
+    });
+
+    const convertedAccounts: Array<{
+      id: string;
+      name: string;
+      type: string;
+      originalBalance: number;
+      originalCurrency: string;
+      convertedBalance: number;
+      exchangeRate: number;
+      rateSource: string;
+      rateDate: Date;
+    }> = [];
+
+    // Group by currency for summary
+    const currencyMap = new Map<string, { original: number; converted: number; count: number }>();
+
+    let totalBalance = 0;
+
+    for (const account of accounts) {
+      const originalBalance = Number(account.balance);
+      const originalCurrency = account.currency;
+
+      // Initialize currency group if not exists
+      if (!currencyMap.has(originalCurrency)) {
+        currencyMap.set(originalCurrency, { original: 0, converted: 0, count: 0 });
+      }
+      const currencyGroup = currencyMap.get(originalCurrency)!;
+      currencyGroup.original += originalBalance;
+      currencyGroup.count += 1;
+
+      // Convert to target currency
+      if (originalCurrency === target) {
+        // Same currency, no conversion needed
+        convertedAccounts.push({
+          id: account.id,
+          name: account.name,
+          type: account.type,
+          originalBalance,
+          originalCurrency,
+          convertedBalance: originalBalance,
+          exchangeRate: 1,
+          rateSource: 'identity',
+          rateDate: new Date(),
+        });
+        totalBalance += originalBalance;
+        currencyGroup.converted += originalBalance;
+      } else {
+        const rateInfo = await this.getRate(originalCurrency, target);
+        if (rateInfo) {
+          const convertedBalance = originalBalance * rateInfo.rate;
+          convertedAccounts.push({
+            id: account.id,
+            name: account.name,
+            type: account.type,
+            originalBalance,
+            originalCurrency,
+            convertedBalance,
+            exchangeRate: rateInfo.rate,
+            rateSource: rateInfo.source,
+            rateDate: rateInfo.date,
+          });
+          totalBalance += convertedBalance;
+          currencyGroup.converted += convertedBalance;
+        } else {
+          // Fallback: use original amount with rate 1
+          convertedAccounts.push({
+            id: account.id,
+            name: account.name,
+            type: account.type,
+            originalBalance,
+            originalCurrency,
+            convertedBalance: originalBalance,
+            exchangeRate: 1,
+            rateSource: 'fallback (no rate available)',
+            rateDate: new Date(),
+          });
+          totalBalance += originalBalance;
+          currencyGroup.converted += originalBalance;
+        }
+      }
+    }
+
+    // Build currency summary
+    const byCurrency = Array.from(currencyMap.entries()).map(([currency, data]) => ({
+      currency,
+      originalTotal: data.original,
+      convertedTotal: data.converted,
+      accountCount: data.count,
+    })).sort((a, b) => b.convertedTotal - a.convertedTotal);
+
+    return {
+      targetCurrency: target,
+      totalBalance,
+      accounts: convertedAccounts,
+      byCurrency,
+    };
+  },
+
+  /**
+   * Get multi-currency summary for a workspace
+   * Shows balances grouped by currency with conversion to workspace default
+   */
+  async getWorkspaceCurrencySummary(
+    workspaceId: string
+  ): Promise<{
+    defaultCurrency: string;
+    totalInDefaultCurrency: number;
+    currencies: Array<{
+      currency: string;
+      symbol: string;
+      name: string;
+      totalBalance: number;
+      convertedBalance: number;
+      exchangeRate: number | null;
+      accountCount: number;
+      accounts: Array<{
+        id: string;
+        name: string;
+        balance: number;
+      }>;
+    }>;
+  }> {
+    // Get workspace to find default currency
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { currency: true },
+    });
+
+    const defaultCurrency = workspace?.currency ?? 'EUR';
+
+    // Get all accounts grouped by currency
+    const accounts = await prisma.account.findMany({
+      where: { workspaceId, isArchived: false },
+      select: {
+        id: true,
+        name: true,
+        currency: true,
+        balance: true,
+      },
+    });
+
+    // Get currency details for each unique currency
+    const uniqueCurrencies = Array.from(new Set(accounts.map(a => a.currency)));
+    const currencyDetails = await prisma.currency.findMany({
+      where: { code: { in: uniqueCurrencies } },
+    });
+    const currencyMap = new Map(currencyDetails.map(c => [c.code, c] as [string, typeof c]));
+
+    // Group accounts by currency
+    const currencyGroups = new Map<string, {
+      totalBalance: number;
+      accounts: Array<{ id: string; name: string; balance: number }>;
+    }>();
+
+    for (const account of accounts) {
+      if (!currencyGroups.has(account.currency)) {
+        currencyGroups.set(account.currency, { totalBalance: 0, accounts: [] });
+      }
+      const group = currencyGroups.get(account.currency)!;
+      group.totalBalance += Number(account.balance);
+      group.accounts.push({
+        id: account.id,
+        name: account.name,
+        balance: Number(account.balance),
+      });
+    }
+
+    // Build result with conversions
+    const currencies: Array<{
+      currency: string;
+      symbol: string;
+      name: string;
+      totalBalance: number;
+      convertedBalance: number;
+      exchangeRate: number | null;
+      accountCount: number;
+      accounts: Array<{ id: string; name: string; balance: number }>;
+    }> = [];
+
+    let totalInDefaultCurrency = 0;
+
+    for (const [currency, group] of Array.from(currencyGroups.entries())) {
+      const details = currencyMap.get(currency);
+      let convertedBalance = group.totalBalance;
+      let exchangeRate: number | null = null;
+
+      if (currency !== defaultCurrency) {
+        const rateInfo = await this.getRate(currency, defaultCurrency);
+        if (rateInfo) {
+          exchangeRate = rateInfo.rate;
+          convertedBalance = group.totalBalance * rateInfo.rate;
+        }
+      } else {
+        exchangeRate = 1;
+      }
+
+      totalInDefaultCurrency += convertedBalance;
+
+      currencies.push({
+        currency,
+        symbol: details?.symbol ?? currency,
+        name: details?.name ?? currency,
+        totalBalance: group.totalBalance,
+        convertedBalance,
+        exchangeRate,
+        accountCount: group.accounts.length,
+        accounts: group.accounts,
+      });
+    }
+
+    // Sort by converted balance descending
+    currencies.sort((a, b) => b.convertedBalance - a.convertedBalance);
+
+    return {
+      defaultCurrency,
+      totalInDefaultCurrency,
+      currencies,
+    };
   },
 };
 

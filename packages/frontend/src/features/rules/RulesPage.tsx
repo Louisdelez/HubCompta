@@ -5,10 +5,13 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Lightbulb, Folder, Tag, FileText, ClipboardList } from 'lucide-react';
+import { Lightbulb, Folder, Tag, FileText, ClipboardList, Sparkles, Brain, CheckCheck, List } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { RuleEditor } from './RuleEditor';
+import { RuleSuggestions } from './RuleSuggestions';
+import { PatternList } from './PatternList';
+import { BulkCategorize } from './BulkCategorize';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -56,9 +59,12 @@ const OPERATOR_LABELS: Record<string, string> = {
 // Component
 // ----------------------------------------------------------------------------
 
+type TabType = 'rules' | 'suggestions' | 'patterns' | 'bulk';
+
 export function RulesPage() {
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<TabType>('rules');
   const [showEditor, setShowEditor] = useState(false);
   const [editingRule, setEditingRule] = useState<Rule | null>(null);
 
@@ -123,22 +129,57 @@ export function RulesPage() {
     );
   }
 
+  const tabs = [
+    { id: 'rules' as const, label: 'Regles', icon: List },
+    { id: 'suggestions' as const, label: 'Suggestions', icon: Sparkles },
+    { id: 'patterns' as const, label: 'Patterns', icon: Brain },
+    { id: 'bulk' as const, label: 'Categoriser', icon: CheckCheck },
+  ];
+
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Règles de catégorisation</h1>
+          <h1 className="text-2xl font-bold">Regles et auto-categorisation</h1>
           <p className="text-ctp-subtext0">
-            Catégorisez automatiquement vos transactions
+            Categorisez automatiquement vos transactions
           </p>
         </div>
-        <button onClick={() => setShowEditor(true)} className="btn-primary">
-          + Nouvelle règle
-        </button>
+        {activeTab === 'rules' && (
+          <button onClick={() => setShowEditor(true)} className="btn-primary">
+            + Nouvelle regle
+          </button>
+        )}
       </div>
 
-      {/* Info Box */}
+      {/* Tabs */}
+      <div className="flex gap-1 p-1 mb-6 bg-ctp-surface0 rounded-lg">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={clsx(
+              'flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors flex-1 justify-center',
+              activeTab === tab.id
+                ? 'bg-ctp-base text-ctp-text shadow-sm'
+                : 'text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface1'
+            )}
+          >
+            <tab.icon className="w-4 h-4" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'suggestions' && <RuleSuggestions />}
+      {activeTab === 'patterns' && <PatternList />}
+      {activeTab === 'bulk' && <BulkCategorize />}
+
+      {activeTab === 'rules' && (
+        <>
+          {/* Info Box */}
       <div className="card bg-ctp-blue/10 border-ctp-blue mb-6">
         <div className="flex gap-3">
           <Lightbulb className="w-6 h-6 text-ctp-blue flex-shrink-0" />
@@ -263,17 +304,19 @@ export function RulesPage() {
         </div>
       )}
 
-      {/* Rule Editor Modal */}
-      {showEditor && (
-        <RuleEditor
-          workspaceId={workspaceId}
-          {...(editingRule ? { rule: editingRule } : {})}
-          onClose={handleClose}
-          onSave={() => {
-            void queryClient.invalidateQueries({ queryKey: ['rules', workspaceId] });
-            handleClose();
-          }}
-        />
+          {/* Rule Editor Modal */}
+          {showEditor && (
+            <RuleEditor
+              workspaceId={workspaceId}
+              {...(editingRule ? { rule: editingRule } : {})}
+              onClose={handleClose}
+              onSave={() => {
+                void queryClient.invalidateQueries({ queryKey: ['rules', workspaceId] });
+                handleClose();
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   );

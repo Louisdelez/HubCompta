@@ -130,20 +130,27 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
     }
   };
 
+  const modalTitle = isEditing ? 'Modifier le budget' : 'Nouveau budget';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="budget-modal-title"
+    >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
 
       {/* Modal */}
       <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-md w-full animate-scale-in">
-        <form onSubmit={handleSubmit} className="p-6">
-          <h2 className="text-xl font-bold mb-4">
-            {isEditing ? 'Modifier le budget' : 'Nouveau budget'}
+        <form onSubmit={handleSubmit} className="p-6" aria-label="Formulaire de budget">
+          <h2 id="budget-modal-title" className="text-xl font-bold mb-4">
+            {modalTitle}
           </h2>
 
           {error && (
-            <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4">
+            <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4" role="alert" aria-live="assertive">
               {error}
             </div>
           )}
@@ -304,13 +311,15 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
             <button
               type="submit"
               disabled={saveMutation.isPending}
+              aria-disabled={saveMutation.isPending}
+              aria-busy={saveMutation.isPending}
               className="btn-primary flex-1"
             >
               {saveMutation.isPending
                 ? 'Enregistrement...'
                 : isEditing
                   ? 'Enregistrer'
-                  : 'Créer'}
+                  : 'Creer'}
             </button>
           </div>
         </form>

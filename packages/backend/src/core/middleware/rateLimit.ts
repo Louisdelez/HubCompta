@@ -11,7 +11,7 @@ import { redisClient } from '@/core/database/redis.js';
 // ----------------------------------------------------------------------------
 
 interface RateLimitConfig {
-  // General API rate limit
+  // General API rate limit (read operations)
   api: {
     windowMs: number; // Time window in milliseconds
     max: number; // Max requests per window
@@ -37,21 +37,36 @@ interface RateLimitConfig {
     windowMs: number;
     max: number;
   };
+  // Write operations (create, update, delete)
+  write: {
+    windowMs: number;
+    max: number;
+  };
+  // Registration (very strict to prevent abuse)
+  register: {
+    windowMs: number;
+    max: number;
+  };
+  // Sensitive operations (password change, MFA setup)
+  sensitive: {
+    windowMs: number;
+    max: number;
+  };
 }
 
 const DEFAULT_CONFIG: RateLimitConfig = {
   api: {
     windowMs: 60 * 1000, // 1 minute
-    max: 100, // 100 requests per minute
+    max: 100, // 100 requests per minute (read operations)
   },
   auth: {
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 20, // 20 auth attempts per 15 minutes
+    windowMs: 60 * 1000, // 1 minute
+    max: 10, // 10 auth attempts per minute (stricter for security)
   },
   login: {
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // 5 login attempts
-    blockDuration: 30 * 60 * 1000, // 30 minute block
+    windowMs: 60 * 1000, // 1 minute
+    max: 10, // 10 login attempts per minute
+    blockDuration: 30 * 60 * 1000, // 30 minute block after max attempts
   },
   upload: {
     windowMs: 60 * 60 * 1000, // 1 hour
@@ -60,6 +75,18 @@ const DEFAULT_CONFIG: RateLimitConfig = {
   export: {
     windowMs: 60 * 60 * 1000, // 1 hour
     max: 10, // 10 exports per hour
+  },
+  write: {
+    windowMs: 60 * 1000, // 1 minute
+    max: 30, // 30 write operations per minute
+  },
+  register: {
+    windowMs: 60 * 1000, // 1 minute
+    max: 3, // 3 registrations per minute (very strict)
+  },
+  sensitive: {
+    windowMs: 60 * 1000, // 1 minute
+    max: 5, // 5 sensitive operations per minute
   },
 };
 
@@ -259,6 +286,26 @@ export const exportRateLimit = createRateLimitMiddleware({
   category: 'export',
 });
 
+export const writeRateLimit = createRateLimitMiddleware({
+  category: 'write',
+});
+
+export const registerRateLimit = createRateLimitMiddleware({
+  category: 'register',
+  keyGenerator: (request) => {
+    // For registration, use IP as identifier to prevent mass account creation
+    const forwarded = request.headers['x-forwarded-for'];
+    const ip = typeof forwarded === 'string'
+      ? (forwarded.split(',')[0]?.trim() ?? request.ip)
+      : request.ip;
+    return `ip:${ip}`;
+  },
+});
+
+export const sensitiveRateLimit = createRateLimitMiddleware({
+  category: 'sensitive',
+});
+
 // ----------------------------------------------------------------------------
 // Plugin Registration
 // ----------------------------------------------------------------------------
@@ -316,6 +363,9 @@ export default {
   loginRateLimit,
   uploadRateLimit,
   exportRateLimit,
+  writeRateLimit,
+  registerRateLimit,
+  sensitiveRateLimit,
   registerRateLimiting,
   resetRateLimit,
   isBlocked,

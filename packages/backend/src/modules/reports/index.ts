@@ -17,3 +17,20 @@ export type {
 
 export { exportService } from './export.service.js';
 export type { ExportOptions, ExportResult } from './export.service.js';
+
+export { reportBuilderService } from './report-builder.service.js';
+export type {
+  ReportColumn,
+  AggregationType,
+  GroupByField,
+  SortDirection,
+  ReportFilter,
+  ReportConfig,
+  CreateTemplateInput,
+  UpdateTemplateInput,
+  ReportRow,
+  GroupedReportData,
+  GeneratedReport,
+  ExportFormat,
+  ExportedReport,
+} from './report-builder.service.js';

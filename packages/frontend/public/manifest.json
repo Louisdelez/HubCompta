@@ -1,9 +1,9 @@
 {
-  "name": "Finance Hub",
-  "short_name": "Finance Hub",
+  "name": "HubCompta",
+  "short_name": "HubCompta",
   "description": "Self-hosted financial management platform",
-  "theme_color": "#3B82F6",
-  "background_color": "#ffffff",
+  "theme_color": "#1e1e2e",
+  "background_color": "#1e1e2e",
   "display": "standalone",
   "orientation": "portrait-primary",
   "scope": "/",

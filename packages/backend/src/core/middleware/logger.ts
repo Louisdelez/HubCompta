@@ -3,6 +3,31 @@
 // ============================================================================
 
 import type { FastifyRequest, FastifyReply } from 'fastify';
+import pino from 'pino';
+
+// ----------------------------------------------------------------------------
+// Standalone Logger Instance
+// For use in modules that don't have access to Fastify request context
+// ----------------------------------------------------------------------------
+
+const pinoOptions: pino.LoggerOptions = {
+  level: process.env.LOG_LEVEL ?? 'info',
+  ...(process.env.NODE_ENV === 'development' && {
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        translateTime: 'HH:MM:ss Z',
+        ignore: 'pid,hostname',
+      },
+    },
+  }),
+};
+
+/**
+ * Standalone Pino logger for use outside of Fastify request context
+ * Use this for background jobs, queue workers, startup/shutdown, etc.
+ */
+export const logger = pino(pinoOptions);
 
 /**
  * Request logging hook

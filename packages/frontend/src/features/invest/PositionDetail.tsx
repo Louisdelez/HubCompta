@@ -23,6 +23,8 @@ import {
   Bell,
 } from 'lucide-react';
 import { PriceAlertModal } from './PriceAlertModal';
+import { PriceAlertList } from './PriceAlertList';
+import { PriceAlertBadge } from './PriceAlertBadge';
 import { api } from '@/lib/api';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { cn, formatCurrency, formatNumber, formatPercent } from '@/lib/utils';
@@ -208,7 +210,10 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
         <div className="flex items-center gap-3 flex-1">
           <div className="p-3 bg-ctp-surface0 rounded-lg">{getAssetIcon(position.asset.type)}</div>
           <div>
-            <h1 className="text-xl font-semibold text-ctp-text">{position.asset.symbol}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-semibold text-ctp-text">{position.asset.symbol}</h1>
+              <PriceAlertBadge positionId={position.id} size="md" />
+            </div>
             <p className="text-sm text-ctp-subtext0">{position.asset.name}</p>
           </div>
         </div>
@@ -226,7 +231,7 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
             className="px-3 py-2 text-ctp-subtext0 bg-ctp-surface0 rounded-lg hover:bg-ctp-surface1 flex items-center gap-2"
           >
             <Bell className="h-4 w-4" />
-            Alerte
+            Definir une alerte
           </button>
           <button
             onClick={onAddTransaction}
@@ -393,8 +398,26 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
         </div>
       </div>
 
+      {/* Price Alerts Section */}
+      <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Bell className="h-4 w-4 text-ctp-blue" />
+            <h3 className="text-sm font-medium text-ctp-subtext1">Alertes de prix</h3>
+          </div>
+          <button
+            onClick={() => setShowPriceAlertModal(true)}
+            className="text-xs text-ctp-blue hover:text-ctp-blue/80 flex items-center gap-1"
+          >
+            <Plus className="h-3 w-3" />
+            Ajouter
+          </button>
+        </div>
+        <PriceAlertList positionId={position.id} compact />
+      </div>
+
       {/* Price Alert Modal */}
-      {position && position.asset.lastPrice !== undefined && (
+      {position && (
         <PriceAlertModal
           isOpen={showPriceAlertModal}
           onClose={() => setShowPriceAlertModal(false)}
@@ -402,9 +425,10 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
             id: position.asset.id,
             symbol: position.asset.symbol,
             name: position.asset.name,
-            lastPrice: position.asset.lastPrice,
+            lastPrice: position.asset.lastPrice || undefined,
             currency: position.asset.currency,
           }}
+          positionId={position.id}
         />
       )}
     </div>

@@ -8,6 +8,7 @@ import type { InvestTransactionType, Prisma } from '@prisma/client';
 import { NotFoundError } from '@/core/middleware/errorHandler.js';
 import { assetService } from './asset.service.js';
 import { currencyService } from '../currency/currency.service.js';
+import { logger } from '@/core/middleware/logger.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -583,7 +584,7 @@ class PositionService {
         await this.takePortfolioSnapshot(workspaceId);
         results.push({ workspaceId, success: true });
       } catch (error) {
-        console.error(`Failed to take snapshot for workspace ${workspaceId}:`, error);
+        logger.error({ workspaceId, error }, 'Failed to take snapshot for workspace');
         results.push({ workspaceId, success: false });
       }
     }

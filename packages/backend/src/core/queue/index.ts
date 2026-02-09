@@ -4,6 +4,7 @@
 
 import { Queue, Worker, QueueEvents, Job } from 'bullmq';
 import type { ConnectionOptions } from 'bullmq';
+import { logger } from '../middleware/logger.js';
 
 // Redis connection for BullMQ
 const REDIS_URL = process.env.REDIS_URL;
@@ -320,7 +321,7 @@ export async function setupScheduledJobs(): Promise<void> {
     }
   );
 
-  console.info('Scheduled jobs configured');
+  logger.info('Scheduled jobs configured');
 }
 
 // ----------------------------------------------------------------------------
@@ -354,11 +355,11 @@ export function createWorker<T>(options: WorkerOptions<T>): Worker<T> {
   });
 
   worker.on('completed', (job) => {
-    console.info(`Job ${job.id} completed in queue ${options.name}`);
+    logger.info({ jobId: job.id, queue: options.name }, 'Job completed');
   });
 
   worker.on('failed', (job, error) => {
-    console.error(`Job ${job?.id} failed in queue ${options.name}:`, error);
+    logger.error({ jobId: job?.id, queue: options.name, error }, 'Job failed');
   });
 
   return worker;

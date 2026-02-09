@@ -4,9 +4,9 @@
 // Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, TrendingUp, TrendingDown, Bell } from 'lucide-react';
+import { X, TrendingUp, TrendingDown, Bell, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { cn, formatCurrency } from '@/lib/utils';
@@ -15,6 +15,17 @@ import { cn, formatCurrency } from '@/lib/utils';
 // Types
 // ----------------------------------------------------------------------------
 
+interface PriceAlert {
+  id: string;
+  symbol: string;
+  positionId?: string | null;
+  direction: 'above' | 'below';
+  targetPrice: number;
+  isRecurring: boolean;
+  isTriggered: boolean;
+  triggeredAt?: string | null;
+}
+
 interface PriceAlertModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,26 +33,73 @@ interface PriceAlertModalProps {
     id: string;
     symbol: string;
     name: string;
-    lastPrice?: number;
+    lastPrice?: number | undefined;
     currency: string;
   };
+  positionId?: string | undefined;
+  existingAlert?: PriceAlert | undefined;
 }
 
 // ----------------------------------------------------------------------------
 // Component
 // ----------------------------------------------------------------------------
 
-export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps) {
+export function PriceAlertModal({
+  isOpen,
+  onClose,
+  asset,
+  positionId,
+  existingAlert,
+}: PriceAlertModalProps) {
   const { currentWorkspace } = useWorkspace();
   const queryClient = useQueryClient();
-  const [direction, setDirection] = useState<'above' | 'below'>('above');
-  const [targetPrice, setTargetPrice] = useState(
-    asset.lastPrice ? asset.lastPrice.toString() : ''
+
+  const [direction, setDirection] = useState<'above' | 'below'>(
+    existingAlert?.direction || 'above'
   );
+  const [targetPrice, setTargetPrice] = useState(
+    existingAlert?.targetPrice?.toString() ||
+    (asset.lastPrice ? asset.lastPrice.toString() : '')
+  );
+  const [isRecurring, setIsRecurring] = useState(existingAlert?.isRecurring || false);
+
+  // Reset form when modal opens with new data
+  useEffect(() => {
+    if (isOpen) {
+      setDirection(existingAlert?.direction || 'above');
+      setTargetPrice(
+        existingAlert?.targetPrice?.toString() ||
+        (asset.lastPrice ? asset.lastPrice.toString() : '')
+      );
+      setIsRecurring(existingAlert?.isRecurring || false);
+    }
+  }, [isOpen, existingAlert, asset.lastPrice]);
 
   const createAlertMutation = useMutation({
-    mutationFn: (data: { assetId: string; targetPrice: number; direction: 'above' | 'below' }) =>
-      api.post(`/workspaces/${currentWorkspace?.id}/alerts/price`, data),
+    mutationFn: (data: {
+      symbol: string;
+      positionId?: string | undefined;
+      targetPrice: number;
+      direction: 'above' | 'below';
+      isRecurring: boolean;
+    }) => api.post(`/workspaces/${currentWorkspace?.id}/alerts/price`, data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['price-alerts'] });
+      void queryClient.invalidateQueries({ queryKey: ['positions'] });
+      onClose();
+    },
+  });
+
+  const updateAlertMutation = useMutation({
+    mutationFn: (data: {
+      alertId: string;
+      targetPrice?: number;
+      direction?: 'above' | 'below';
+      isRecurring?: boolean;
+    }) => api.patch(
+      `/workspaces/${currentWorkspace?.id}/alerts/${data.alertId}`,
+      { targetPrice: data.targetPrice, direction: data.direction, isRecurring: data.isRecurring }
+    ),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['price-alerts'] });
       onClose();
@@ -54,14 +112,28 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
     const price = parseFloat(targetPrice);
     if (isNaN(price) || price <= 0) return;
 
-    createAlertMutation.mutate({
-      assetId: asset.id,
-      targetPrice: price,
-      direction,
-    });
+    if (existingAlert) {
+      updateAlertMutation.mutate({
+        alertId: existingAlert.id,
+        targetPrice: price,
+        direction,
+        isRecurring,
+      });
+    } else {
+      createAlertMutation.mutate({
+        symbol: asset.symbol,
+        positionId,
+        targetPrice: price,
+        direction,
+        isRecurring,
+      });
+    }
   };
 
   if (!isOpen) return null;
+
+  const isPending = createAlertMutation.isPending || updateAlertMutation.isPending;
+  const isError = createAlertMutation.isError || updateAlertMutation.isError;
 
   const percentChange = asset.lastPrice && targetPrice
     ? ((parseFloat(targetPrice) - asset.lastPrice) / asset.lastPrice) * 100
@@ -81,7 +153,9 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
               <Bell className="h-5 w-5 text-ctp-blue" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-ctp-text">Alerte de prix</h2>
+              <h2 className="text-lg font-semibold text-ctp-text">
+                {existingAlert ? 'Modifier l\'alerte' : 'Alerte de prix'}
+              </h2>
               <p className="text-sm text-ctp-subtext0">{asset.symbol} - {asset.name}</p>
             </div>
           </div>
@@ -163,35 +237,70 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
             )}
           </div>
 
+          {/* Recurring Toggle */}
+          <div className="flex items-center justify-between p-3 bg-ctp-surface0 rounded-lg">
+            <div className="flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-ctp-subtext0" />
+              <div>
+                <p className="text-sm font-medium text-ctp-text">Alerte recurrente</p>
+                <p className="text-xs text-ctp-subtext0">
+                  Se reactive apres declenchement
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsRecurring(!isRecurring)}
+              className={cn(
+                'relative w-11 h-6 rounded-full transition-colors',
+                isRecurring ? 'bg-ctp-blue' : 'bg-ctp-surface2'
+              )}
+            >
+              <span
+                className={cn(
+                  'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform',
+                  isRecurring && 'translate-x-5'
+                )}
+              />
+            </button>
+          </div>
+
           {/* Info */}
           <div className="bg-ctp-blue/10 border border-ctp-blue/20 rounded-lg p-3 text-sm text-ctp-blue">
             <p>
               Vous recevrez une notification lorsque le prix de {asset.symbol}{' '}
               {direction === 'above' ? 'depassera' : 'passera en-dessous de'}{' '}
               {targetPrice ? formatCurrency(parseFloat(targetPrice), asset.currency) : '...'}.
+              {isRecurring && ' L\'alerte se reactivera automatiquement apres chaque declenchement.'}
             </p>
           </div>
 
           {/* Error */}
-          {createAlertMutation.isError && (
+          {isError && (
             <div className="p-3 bg-ctp-red/10 border border-ctp-red/20 rounded-lg">
               <p className="text-sm text-ctp-red">
-                Erreur lors de la creation de l'alerte
+                Erreur lors de {existingAlert ? 'la mise a jour' : 'la creation'} de l'alerte
               </p>
             </div>
           )}
 
           {/* Actions */}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-2 text-ctp-subtext1 bg-ctp-surface0 rounded-lg hover:bg-ctp-surface1 font-medium">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 text-ctp-subtext1 bg-ctp-surface0 rounded-lg hover:bg-ctp-surface1 font-medium"
+            >
               Annuler
             </button>
             <button
               type="submit"
-              disabled={createAlertMutation.isPending || !targetPrice || parseFloat(targetPrice) <= 0}
+              disabled={isPending || !targetPrice || parseFloat(targetPrice) <= 0}
               className="flex-1 px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg hover:bg-ctp-blue/90 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {createAlertMutation.isPending ? 'Creation...' : 'Creer l\'alerte'}
+              {isPending
+                ? (existingAlert ? 'Mise a jour...' : 'Creation...')
+                : (existingAlert ? 'Mettre a jour' : 'Creer l\'alerte')}
             </button>
           </div>
         </form>

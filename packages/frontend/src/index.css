@@ -611,3 +611,84 @@
   --chart-9: rgb(var(--ctp-red));
   --chart-10: rgb(var(--ctp-lavender));
 }
+
+/* ============================================================================
+   REACT-GRID-LAYOUT OVERRIDES
+   Custom styling for dashboard widgets
+   ============================================================================ */
+
+/* Grid placeholder (shows where widget will drop) */
+.react-grid-placeholder {
+  background-color: rgb(var(--ctp-blue) / 0.2) !important;
+  border: 2px dashed rgb(var(--ctp-blue)) !important;
+  border-radius: 0.75rem !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Resize handle styling */
+.react-resizable-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+  z-index: 10;
+}
+
+.react-resizable-handle::after {
+  content: '';
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid rgb(var(--ctp-overlay1));
+  border-bottom: 2px solid rgb(var(--ctp-overlay1));
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.react-grid-item:hover .react-resizable-handle::after {
+  opacity: 1;
+}
+
+/* Widget grid container */
+.widget-grid {
+  min-height: 400px;
+}
+
+/* Widget item transitions */
+.react-grid-item {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.react-grid-item.cssTransforms {
+  transition-property: transform, box-shadow;
+}
+
+.react-grid-item.resizing {
+  transition: none;
+  z-index: 50;
+}
+
+.react-grid-item.react-draggable-dragging {
+  transition: none;
+  z-index: 50;
+  opacity: 0.9;
+}
+
+/* Custom spin animation for settings icon */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}

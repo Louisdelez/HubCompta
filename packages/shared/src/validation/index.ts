@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { z } from 'zod';
-import { AUTH, WORKSPACE, ACCOUNT, TRANSACTION, BUDGET, DOCUMENT, PRO, INVEST } from '../constants/index.js';
+import { AUTH, WORKSPACE, ACCOUNT, TRANSACTION, BUDGET, DOCUMENT, PRO, INVEST, LOAN } from '../constants/index.js';
 
 // ----------------------------------------------------------------------------
 // Base Schemas
@@ -438,6 +438,83 @@ export const exportRequestSchema = z.object({
 });
 
 // ----------------------------------------------------------------------------
+// Loan Schemas
+// ----------------------------------------------------------------------------
+
+export const loanTypeSchema = z.enum(LOAN.TYPES);
+
+export const loanCreateSchema = z.object({
+  name: z.string().min(1).max(100).trim(),
+  type: loanTypeSchema,
+  principalAmount: z.number().positive('Principal amount must be positive'),
+  interestRate: z.number().min(0).max(100).optional().nullable(),
+  currency: z.string().length(3).toUpperCase().default('EUR'),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date().optional().nullable(),
+  counterparty: z.string().max(200).trim().optional().nullable(),
+  notes: z.string().max(2000).optional().nullable(),
+});
+
+export const loanUpdateSchema = z.object({
+  name: z.string().min(1).max(100).trim().optional(),
+  interestRate: z.number().min(0).max(100).optional().nullable(),
+  endDate: z.coerce.date().optional().nullable(),
+  counterparty: z.string().max(200).trim().optional().nullable(),
+  notes: z.string().max(2000).optional().nullable(),
+});
+
+export const loanPaymentCreateSchema = z.object({
+  amount: z.number().positive('Payment amount must be positive'),
+  principal: z.number().min(0),
+  interest: z.number().min(0),
+  date: z.coerce.date(),
+  notes: z.string().max(500).optional().nullable(),
+}).refine(
+  (data) => Math.abs(data.principal + data.interest - data.amount) < 0.01,
+  { message: 'Principal + Interest must equal Amount' }
+);
+
+export const loanQuerySchema = paginationSchema.extend({
+  type: loanTypeSchema.optional(),
+  includeDeleted: z.coerce.boolean().optional(),
+});
+
+// ----------------------------------------------------------------------------
+// Savings Goals Schemas
+// ----------------------------------------------------------------------------
+
+export const savingsGoalCreateSchema = z.object({
+  name: z.string().min(1).max(100).trim(),
+  targetAmount: z.number().positive('Target amount must be positive'),
+  currency: z.string().length(3).toUpperCase().default('EUR'),
+  targetDate: z.coerce.date().optional().nullable(),
+  icon: z.string().max(10).optional().nullable(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional().nullable(),
+  accountId: z.string().uuid().optional().nullable(),
+});
+
+export const savingsGoalUpdateSchema = z.object({
+  name: z.string().min(1).max(100).trim().optional(),
+  targetAmount: z.number().positive('Target amount must be positive').optional(),
+  targetDate: z.coerce.date().optional().nullable(),
+  icon: z.string().max(10).optional().nullable(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional().nullable(),
+  accountId: z.string().uuid().optional().nullable(),
+});
+
+export const savingsContributionCreateSchema = z.object({
+  amount: z.number().positive('Amount must be positive'),
+  date: z.coerce.date(),
+  notes: z.string().max(500).optional().nullable(),
+  transactionId: z.string().uuid().optional().nullable(),
+});
+
+export const savingsGoalQuerySchema = paginationSchema.extend({
+  includeDeleted: z.coerce.boolean().optional(),
+  includeCompleted: z.coerce.boolean().optional(),
+});
+
+// ----------------------------------------------------------------------------
 // Type Exports (inferred from schemas)
 // ----------------------------------------------------------------------------
 
@@ -491,6 +568,16 @@ export type InvestTransactionCreateInput = z.infer<typeof investTransactionCreat
 
 export type ReportQueryInput = z.infer<typeof reportQuerySchema>;
 export type ExportRequestInput = z.infer<typeof exportRequestSchema>;
+
+export type LoanCreateInput = z.infer<typeof loanCreateSchema>;
+export type LoanUpdateInput = z.infer<typeof loanUpdateSchema>;
+export type LoanPaymentCreateInput = z.infer<typeof loanPaymentCreateSchema>;
+export type LoanQueryInput = z.infer<typeof loanQuerySchema>;
+
+export type SavingsGoalCreateInput = z.infer<typeof savingsGoalCreateSchema>;
+export type SavingsGoalUpdateInput = z.infer<typeof savingsGoalUpdateSchema>;
+export type SavingsContributionCreateInput = z.infer<typeof savingsContributionCreateSchema>;
+export type SavingsGoalQueryInput = z.infer<typeof savingsGoalQuerySchema>;
 
 // Aliases for backwards compatibility
 export { transferCreateSchema as transferSchema };

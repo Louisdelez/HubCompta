@@ -11,7 +11,7 @@ import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 
 import { errorHandler } from './core/middleware/errorHandler.js';
-import { requestLogger } from './core/middleware/logger.js';
+import { requestLogger, logger } from './core/middleware/logger.js';
 import { registerRoutes } from './api/routes/index.js';
 import { initStorage } from './core/storage/s3.js';
 import { prisma } from './core/database/client.js';
@@ -19,6 +19,7 @@ import { redisClient } from './core/database/redis.js';
 import { setupScheduledJobs, closeQueues } from './core/queue/index.js';
 import { initializeWorkers, shutdownWorkers } from './core/queue/workers.js';
 import { initSentry } from './core/monitoring/sentry.js';
+import { registerWebSocket } from './core/websocket/index.js';
 
 // ----------------------------------------------------------------------------
 // Initialize Sentry (must be early in startup)
@@ -26,8 +27,48 @@ import { initSentry } from './core/monitoring/sentry.js';
 initSentry();
 
 // ----------------------------------------------------------------------------
+// CORS Configuration Helper
+// ----------------------------------------------------------------------------
+
+function getCorsOrigins(): string[] {
+  const origins: string[] = [];
+
+  // Add APP_URL if set
+  if (process.env.APP_URL) {
+    origins.push(process.env.APP_URL);
+  }
+
+  // Add CORS_ORIGINS (comma-separated list)
+  if (process.env.CORS_ORIGINS) {
+    const additional = process.env.CORS_ORIGINS.split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+    origins.push(...additional);
+  }
+
+  // In development, add default localhost origins if none configured
+  if (process.env.NODE_ENV !== 'production' && origins.length === 0) {
+    origins.push(
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:3000'
+    );
+  }
+
+  return origins;
+}
+
+// ----------------------------------------------------------------------------
 // Application Factory
 // ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// Body Size Limits Configuration
+// ----------------------------------------------------------------------------
+
+const BODY_LIMIT_DEFAULT = 1024 * 1024; // 1MB default
+const BODY_LIMIT_UPLOAD = 10 * 1024 * 1024; // 10MB for file uploads
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -45,6 +86,13 @@ export async function buildApp(): Promise<FastifyInstance> {
           : undefined,
     },
     trustProxy: true,
+    bodyLimit: BODY_LIMIT_DEFAULT,
+  });
+
+  // Export body limits for use in route handlers that need higher limits
+  app.decorate('bodyLimits', {
+    default: BODY_LIMIT_DEFAULT,
+    upload: BODY_LIMIT_UPLOAD,
   });
 
   // ----------------------------------------------------------------------------
@@ -61,18 +109,13 @@ export async function buildApp(): Promise<FastifyInstance> {
   // Security Plugins
   // ----------------------------------------------------------------------------
 
-  // CORS
+  // CORS - Get origins from environment variables
+  const corsOrigins = getCorsOrigins();
   await app.register(fastifyCors, {
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:3000',
-      process.env.APP_URL,
-    ].filter(Boolean) as string[],
+    origin: corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Workspace-Id', 'X-Device-Fingerprint'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Workspace-Id', 'X-Device-Fingerprint', 'X-Request-Id'],
   });
 
   // Security Headers
@@ -147,6 +190,11 @@ export async function buildApp(): Promise<FastifyInstance> {
   }
 
   // ----------------------------------------------------------------------------
+  // WebSocket Support
+  // ----------------------------------------------------------------------------
+  await registerWebSocket(app);
+
+  // ----------------------------------------------------------------------------
   // Register Routes
   // ----------------------------------------------------------------------------
   await registerRoutes(app);
@@ -179,10 +227,10 @@ export async function startServer(): Promise<void> {
     // Start listening
     await app.listen({ port, host });
 
-    console.info(`Server running at http://${host}:${port}`);
-    console.info(`API docs available at http://${host}:${port}/docs`);
+    logger.info({ host, port }, `Server running at http://${host}:${port}`);
+    logger.info({ host, port }, `API docs available at http://${host}:${port}/docs`);
   } catch (error) {
-    console.error('Failed to start server:', error);
+    logger.error({ error }, 'Failed to start server');
     process.exit(1);
   }
 }
@@ -192,16 +240,16 @@ export async function startServer(): Promise<void> {
 // ----------------------------------------------------------------------------
 
 async function shutdown(): Promise<void> {
-  console.info('Shutting down gracefully...');
+  logger.info('Shutting down gracefully...');
 
   try {
     await shutdownWorkers();
     await closeQueues();
     await prisma.$disconnect();
     await redisClient.quit();
-    console.info('Cleanup complete');
+    logger.info('Cleanup complete');
   } catch (error) {
-    console.error('Error during shutdown:', error);
+    logger.error({ error }, 'Error during shutdown');
   }
 
   process.exit(0);

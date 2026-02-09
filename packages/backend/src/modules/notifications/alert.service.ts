@@ -182,11 +182,19 @@ export const alertService = {
       const isExceeded = percentUsed >= 100;
       const isWarning = percentUsed >= config.thresholdPercent && percentUsed < 100;
 
+      const budgetInfo = {
+        id: budget.id,
+        name: budget.name || budget.category.name,
+        categoryName: budget.category.name,
+        amount: Number(budget.amount),
+        spent: totalSpent,
+      };
+
       if (isExceeded && config.notifyOnExceed) {
         await notificationService.notifyBudgetAlert(
           rule.userId,
           workspaceId,
-          { id: budget.id, name: budget.name || budget.category.name, categoryName: budget.category.name },
+          budgetInfo,
           percentUsed,
           true
         );
@@ -199,12 +207,12 @@ export const alertService = {
       } else if (isWarning) {
         // Only notify once per day for warnings
         const lastTriggered = rule.lastTriggeredAt;
-        const now = new Date();
-        if (!lastTriggered || now.getTime() - lastTriggered.getTime() > 24 * 60 * 60 * 1000) {
+        const alertNow = new Date();
+        if (!lastTriggered || alertNow.getTime() - lastTriggered.getTime() > 24 * 60 * 60 * 1000) {
           await notificationService.notifyBudgetAlert(
             rule.userId,
             workspaceId,
-            { id: budget.id, name: budget.name || budget.category.name, categoryName: budget.category.name },
+            budgetInfo,
             percentUsed,
             false
           );

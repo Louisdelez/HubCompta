@@ -177,6 +177,16 @@ describe('Button', () => {
       render(<Button loading>Loading</Button>);
       expect(screen.getByRole('button')).toBeDisabled();
     });
+
+    it('should have aria-disabled when disabled', () => {
+      render(<Button disabled>Disabled</Button>);
+      expect(screen.getByRole('button')).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('should have aria-disabled when loading', () => {
+      render(<Button loading>Loading</Button>);
+      expect(screen.getByRole('button')).toHaveAttribute('aria-disabled', 'true');
+    });
   });
 
   // --------------------------------------------------------------------------
@@ -184,9 +194,10 @@ describe('Button', () => {
   // --------------------------------------------------------------------------
 
   describe('loading state', () => {
-    it('should show loading spinner when loading', () => {
+    it('should show loading indicator when loading', () => {
       render(<Button loading>Submit</Button>);
-      expect(screen.getByLabelText('Loading')).toBeInTheDocument();
+      // The loading spinner is now aria-hidden, we check for the sr-only text
+      expect(screen.getByText('Loading')).toBeInTheDocument();
     });
 
     it('should still show children text when loading', () => {
@@ -198,13 +209,23 @@ describe('Button', () => {
       const icon = <span data-testid="icon">+</span>;
       render(<Button loading icon={icon}>Add</Button>);
       expect(screen.queryByTestId('icon')).not.toBeInTheDocument();
-      expect(screen.getByLabelText('Loading')).toBeInTheDocument();
     });
 
     it('should apply animation class to spinner', () => {
       render(<Button loading>Submit</Button>);
-      const spinner = screen.getByLabelText('Loading');
-      expect(spinner.className).toContain('animate-spin');
+      const button = screen.getByRole('button');
+      const spinner = button.querySelector('.animate-spin');
+      expect(spinner).toBeInTheDocument();
+    });
+
+    it('should have aria-busy when loading', () => {
+      render(<Button loading>Submit</Button>);
+      expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'true');
+    });
+
+    it('should support custom loading text for screen readers', () => {
+      render(<Button loading loadingText="Saving...">Submit</Button>);
+      expect(screen.getByText('Saving...')).toBeInTheDocument();
     });
   });
 

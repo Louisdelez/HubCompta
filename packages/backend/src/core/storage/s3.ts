@@ -4,6 +4,7 @@
 
 import { Client as MinioClient } from 'minio';
 import { createHash, randomUUID } from 'crypto';
+import { logger } from '../middleware/logger.js';
 
 // Configuration from environment
 const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT ?? 'localhost';
@@ -46,7 +47,7 @@ export async function ensureBucket(): Promise<void> {
   const exists = await storageClient.bucketExists(MINIO_BUCKET);
   if (!exists) {
     await storageClient.makeBucket(MINIO_BUCKET);
-    console.info(`Created bucket: ${MINIO_BUCKET}`);
+    logger.info({ bucket: MINIO_BUCKET }, `Created bucket: ${MINIO_BUCKET}`);
   }
 }
 
@@ -178,5 +179,5 @@ export async function getPresignedDownloadUrl(
  */
 export async function initStorage(): Promise<void> {
   await ensureBucket();
-  console.info('Storage initialized');
+  logger.info('Storage initialized');
 }

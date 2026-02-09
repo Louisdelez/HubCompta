@@ -13,6 +13,7 @@ import type {
   HistoricalPrice,
   ProviderConfig,
 } from './types.js';
+import { logger } from '../../../core/middleware/logger.js';
 
 // ----------------------------------------------------------------------------
 // Types from yahoo-finance2
@@ -116,7 +117,7 @@ export class YahooFinanceProvider implements MarketDataProvider {
         timestamp: result.regularMarketTime ? new Date(result.regularMarketTime) : new Date(),
       };
     } catch (error) {
-      console.error(`Error fetching quote for ${symbol}:`, error);
+      logger.error({ symbol, error }, 'Error fetching quote');
       return null;
     }
   }
@@ -158,7 +159,7 @@ export class YahooFinanceProvider implements MarketDataProvider {
         }
       }
     } catch (error) {
-      console.error('Error fetching quotes:', error);
+      logger.error({ symbols, error }, 'Error fetching quotes');
     }
 
     return quotes;
@@ -190,7 +191,7 @@ export class YahooFinanceProvider implements MarketDataProvider {
           currency: 'USD', // Search doesn't return currency, default to USD
         }));
     } catch (error) {
-      console.error('Error searching:', error);
+      logger.error({ query, error }, 'Error searching');
       return [];
     }
   }
@@ -216,7 +217,7 @@ export class YahooFinanceProvider implements MarketDataProvider {
         exchange: result.exchange,
       };
     } catch (error) {
-      console.error(`Error fetching asset info for ${symbol}:`, error);
+      logger.error({ symbol, error }, 'Error fetching asset info');
       return null;
     }
   }
@@ -257,7 +258,7 @@ export class YahooFinanceProvider implements MarketDataProvider {
           adjustedClose: quote.adjclose,
         }));
     } catch (error) {
-      console.error(`Error fetching history for ${symbol}:`, error);
+      logger.error({ symbol, error }, 'Error fetching history');
       return [];
     }
   }

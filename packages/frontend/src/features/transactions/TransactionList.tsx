@@ -3,13 +3,14 @@
 // Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeftRight, CreditCard, Check } from 'lucide-react';
+import { ArrowLeftRight, CreditCard, Check, ArrowRight } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { TransactionForm } from './TransactionForm';
+import { CurrencyDisplay } from '@/features/currency';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -46,16 +47,38 @@ interface TransactionFilters {
 }
 
 // ----------------------------------------------------------------------------
-// Helpers
+// Hooks
 // ----------------------------------------------------------------------------
 
-function formatCurrency(amount: number, currency = 'EUR'): string {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(amount);
+// Currency display mode hook
+function useCurrencyDisplayMode() {
+  const [mode, setMode] = useState<'original' | 'converted'>(() => {
+    return (localStorage.getItem('displayCurrencyMode') as 'original' | 'converted') ?? 'original';
+  });
+  const [displayCurrency, setDisplayCurrency] = useState(() => {
+    return localStorage.getItem('displayCurrency') ?? 'EUR';
+  });
+
+  useEffect(() => {
+    const handleModeChange = (e: CustomEvent<{ mode: string }>) => {
+      setMode(e.detail.mode as 'original' | 'converted');
+    };
+    const handleCurrencyChange = (e: CustomEvent<{ currency: string }>) => {
+      setDisplayCurrency(e.detail.currency);
+    };
+
+    window.addEventListener('currencyDisplayModeChanged', handleModeChange as EventListener);
+    window.addEventListener('displayCurrencyChanged', handleCurrencyChange as EventListener);
+
+    return () => {
+      window.removeEventListener('currencyDisplayModeChanged', handleModeChange as EventListener);
+      window.removeEventListener('displayCurrencyChanged', handleCurrencyChange as EventListener);
+    };
+  }, []);
+
+  return { mode, displayCurrency };
 }
+
 
 function formatDate(date: string): string {
   return new Date(date).toLocaleDateString('fr-FR', {
@@ -78,6 +101,12 @@ function groupByDate(transactions: Transaction[]): Record<string, Transaction[]>
 // Component
 // ----------------------------------------------------------------------------
 
+interface ConversionRate {
+  rate: number;
+  source: string;
+  date: string;
+}
+
 export function TransactionList() {
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [page, setPage] = useState(1);
@@ -85,6 +114,7 @@ export function TransactionList() {
   const [showForm, setShowForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const { mode, displayCurrency } = useCurrencyDisplayMode();
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['transactions', workspaceId, page, filters],
@@ -108,6 +138,35 @@ export function TransactionList() {
   const transactions = data?.transactions ?? [];
   const groupedTransactions = groupByDate(transactions);
   const meta = data?.meta;
+
+  // Get unique currencies from transactions
+  const uniqueCurrencies = useMemo(() => {
+    const currencies = new Set(transactions.map(t => t.account.currency));
+    return Array.from(currencies);
+  }, [transactions]);
+
+  // Fetch exchange rates for conversion
+  const { data: rates } = useQuery({
+    queryKey: ['batch-rates', uniqueCurrencies, displayCurrency],
+    queryFn: async () => {
+      const pairs = uniqueCurrencies
+        .filter(c => c !== displayCurrency)
+        .map(c => `${c}/${displayCurrency}`)
+        .join(',');
+      if (!pairs) return {};
+      return api.get<Record<string, ConversionRate | null>>(`/currencies/batch-rates?pairs=${pairs}`);
+    },
+    enabled: mode === 'converted' && uniqueCurrencies.length > 0,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Helper to convert amount
+  const convertAmount = (amount: number, currency: string): number | null => {
+    if (currency === displayCurrency) return amount;
+    const rate = rates?.[`${currency}/${displayCurrency}`];
+    if (!rate) return null;
+    return amount * rate.rate;
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -252,19 +311,31 @@ export function TransactionList() {
                     </div>
 
                     {/* Amount */}
-                    <span
-                      className={clsx(
-                        'text-lg font-bold flex-shrink-0',
-                        txn.amount > 0
-                          ? 'text-ctp-green'
-                          : txn.amount < 0
-                          ? 'text-ctp-red'
-                          : 'text-ctp-text'
+                    <div className="flex-shrink-0 text-right">
+                      <CurrencyDisplay
+                        amount={txn.amount}
+                        currency={txn.account.currency}
+                        showSign
+                        colorize
+                        size="lg"
+                      />
+                      {mode === 'converted' && txn.account.currency !== displayCurrency && (
+                        (() => {
+                          const converted = convertAmount(txn.amount, txn.account.currency);
+                          if (converted === null) return null;
+                          return (
+                            <div className="flex items-center gap-1 text-xs text-ctp-subtext0 justify-end mt-0.5">
+                              <ArrowRight className="w-3 h-3" />
+                              <CurrencyDisplay
+                                amount={converted}
+                                currency={displayCurrency}
+                                size="sm"
+                              />
+                            </div>
+                          );
+                        })()
                       )}
-                    >
-                      {txn.amount > 0 ? '+' : ''}
-                      {formatCurrency(txn.amount, txn.account.currency)}
-                    </span>
+                    </div>
                   </div>
                 ))}
               </div>

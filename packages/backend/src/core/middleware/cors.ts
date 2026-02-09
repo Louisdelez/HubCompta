@@ -5,6 +5,7 @@
 
 import type { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
+import { logger } from './logger.js';
 
 // ----------------------------------------------------------------------------
 // Configuration
@@ -91,9 +92,7 @@ function getAllowedOrigins(): string[] {
   if (isProd) {
     const prodOrigins = getProductionOrigins();
     if (prodOrigins.length === 0) {
-      console.warn(
-        'WARNING: No CORS origins configured for production. Set APP_URL or CORS_ORIGINS.'
-      );
+      logger.warn('No CORS origins configured for production. Set APP_URL or CORS_ORIGINS.');
     }
     return prodOrigins;
   }
@@ -155,7 +154,7 @@ export async function registerCors(
       } else {
         // Log blocked origins in development for debugging
         if (process.env.NODE_ENV !== 'production') {
-          console.warn(`CORS blocked origin: ${origin}`);
+          logger.warn({ origin }, 'CORS blocked origin');
         }
         callback(new Error('Not allowed by CORS'), false);
       }
@@ -171,7 +170,7 @@ export async function registerCors(
 
   // Log configured origins
   if (process.env.NODE_ENV !== 'production') {
-    console.log('CORS allowed origins:', allowedOrigins);
+    logger.debug({ allowedOrigins }, 'CORS allowed origins');
   }
 }
 

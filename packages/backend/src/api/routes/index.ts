@@ -53,6 +53,33 @@ import { currencyRoutes } from './currencies.js';
 // Search routes
 import { searchRoutes } from './search.js';
 
+// Loan routes
+import { loanRoutes } from './loans.js';
+
+// Net worth routes
+import { netWorthRoutes } from './networth.js';
+
+// Scheduled transaction routes
+import { scheduledRoutes } from './scheduled.js';
+
+// Tax routes
+import { taxRoutes } from './tax.js';
+
+// Savings routes
+import { savingsRoutes } from './savings.js';
+
+// Bills routes
+import { billRoutes } from './bills.js';
+
+// Forecast routes
+import { forecastRoutes } from './forecast.js';
+
+// Dashboard routes
+import { dashboardRoutes } from './dashboard.js';
+
+// Activity routes
+import { workspaceActivityRoutes, userActivityRoutes } from './activity.js';
+
 // ----------------------------------------------------------------------------
 // Route Registration
 // ----------------------------------------------------------------------------
@@ -142,6 +169,39 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
 
   // Alert routes (workspace scoped)
   await app.register(alertRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/alerts/price` });
+
+  // Loan routes (workspace scoped)
+  await app.register(loanRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/loans` });
+
+  // Net worth routes (workspace scoped)
+  await app.register(netWorthRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/networth` });
+
+  // Scheduled transaction routes (workspace scoped)
+  await app.register(scheduledRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/scheduled` });
+
+  // Tax routes (workspace scoped)
+  await app.register(taxRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/tax` });
+
+  // Savings routes (workspace scoped)
+  await app.register(savingsRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/savings` });
+
+  // Bills routes (workspace scoped)
+  await app.register(billRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/bills` });
+
+  // Forecast routes (workspace scoped)
+  await app.register(forecastRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/forecast` });
+
+  // Activity routes (workspace scoped)
+  await app.register(workspaceActivityRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/activity` });
+
+  // ----------------------------------------------------------------------------
+  // Dashboard Routes (user scoped)
+  // ----------------------------------------------------------------------------
+
+  await app.register(dashboardRoutes, { prefix: `${apiPrefix}/dashboard` });
+
+  // Activity routes (user scoped)
+  await app.register(userActivityRoutes, { prefix: `${apiPrefix}/activity` });
 
   // ----------------------------------------------------------------------------
   // Notification Routes (user scoped)

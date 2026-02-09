@@ -8,9 +8,11 @@ import { deviceService } from '@/modules/auth/device.service.js';
 import { mfaService } from '@/modules/auth/mfa.service.js';
 import { sessionService } from '@/modules/auth/session.service.js';
 import { auditService } from '@/modules/audit/audit.service.js';
+import { notificationPreferencesService } from '@/core/email/index.js';
 import { authGuard } from '@/core/auth/authGuard.js';
 import { stepUpGuard, handleStepUpVerify } from '@/core/auth/stepUpGuard.js';
 import { userUpdateSchema, passwordChangeSchema } from '@finance-hub/shared';
+import type { NotificationPreferencesInput } from '@/core/email/types.js';
 
 // ----------------------------------------------------------------------------
 // Routes
@@ -332,6 +334,47 @@ export function userRoutes(app: FastifyInstance): void {
       data: events,
     });
   });
+
+  // ==========================================================================
+  // NOTIFICATION PREFERENCES
+  // ==========================================================================
+
+  // --------------------------------------------------------------------------
+  // GET /user/me/notification-preferences - Get notification preferences
+  // --------------------------------------------------------------------------
+  app.get('/me/notification-preferences', async (request: FastifyRequest, reply: FastifyReply) => {
+    const preferences = await notificationPreferencesService.getForUser(request.user!.sub);
+
+    return reply.send({
+      success: true,
+      data: preferences,
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // PUT /user/me/notification-preferences - Update notification preferences
+  // --------------------------------------------------------------------------
+  app.put<{ Body: NotificationPreferencesInput }>(
+    '/me/notification-preferences',
+    async (request, reply) => {
+      const userId = request.user!.sub;
+      const input = request.body;
+
+      const preferences = await notificationPreferencesService.update(userId, input);
+
+      await auditService.log({
+        userId,
+        action: 'user.notification_preferences.updated',
+        changes: input as unknown as Record<string, unknown>,
+        ipAddress: request.ip,
+      });
+
+      return reply.send({
+        success: true,
+        data: preferences,
+      });
+    }
+  );
 }
 
 export default userRoutes;

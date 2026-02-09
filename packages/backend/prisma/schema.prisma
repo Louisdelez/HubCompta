@@ -29,31 +29,35 @@ model User {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   // Relations
-  mfaMethods       MFA[]
-  devices          Device[]
-  sessions         Session[]
-  memberships      Membership[]
-  ownedWorkspaces  Workspace[]     @relation("WorkspaceOwner")
-  uploadedDocuments Document[]
-  importJobs       ImportJob[]
-  auditLogs        AuditLog[]
-  notifications    Notification[]
-  alertRules       AlertRule[]
-  savedFilters     SavedFilter[]
+  mfaMethods              MFA[]
+  devices                 Device[]
+  sessions                Session[]
+  memberships             Membership[]
+  ownedWorkspaces         Workspace[]              @relation("WorkspaceOwner")
+  uploadedDocuments       Document[]
+  importJobs              ImportJob[]
+  auditLogs               AuditLog[]
+  notifications           Notification[]
+  alertRules              AlertRule[]
+  savedFilters            SavedFilter[]
+  searchHistory           SearchHistory[]
+  reportTemplates         ReportTemplate[]
+  notificationPreferences NotificationPreferences?
+  dashboardLayouts        DashboardLayout[]
 
   @@map("users")
 }
 
 model MFA {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
   type      MFAType
-  name      String   @db.VarChar(100)
-  secret    String   @db.Text // Encrypted TOTP secret or WebAuthn credential
-  isEnabled Boolean  @default(true) @map("is_enabled")
+  name      String    @db.VarChar(100)
+  secret    String    @db.Text // Encrypted TOTP secret or WebAuthn credential
+  isEnabled Boolean   @default(true) @map("is_enabled")
   usedAt    DateTime? @map("used_at")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -107,43 +111,73 @@ model Session {
   @@map("sessions")
 }
 
+model NotificationPreferences {
+  id               String   @id @default(cuid())
+  userId           String   @unique @map("user_id") @db.Uuid
+  emailEnabled     Boolean  @default(true) @map("email_enabled")
+  budgetAlerts     Boolean  @default(true) @map("budget_alerts")
+  invoiceReminders Boolean  @default(true) @map("invoice_reminders")
+  weeklySummary    Boolean  @default(false) @map("weekly_summary")
+  marketingEmails  Boolean  @default(false) @map("marketing_emails")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
 // ============================================================================
 // WORKSPACE & MEMBERSHIP
 // ============================================================================
 
 model Workspace {
-  id        String         @id @default(uuid()) @db.Uuid
-  name      String         @db.VarChar(100)
+  id        String        @id @default(uuid()) @db.Uuid
+  name      String        @db.VarChar(100)
   type      WorkspaceType
-  currency  String         @default("EUR") @db.VarChar(3)
-  ownerId   String         @map("owner_id") @db.Uuid
-  settings  Json           @default("{}")
-  deletedAt DateTime?      @map("deleted_at")
-  createdAt DateTime       @default(now()) @map("created_at")
-  updatedAt DateTime       @updatedAt @map("updated_at")
+  currency  String        @default("EUR") @db.VarChar(3)
+  ownerId   String        @map("owner_id") @db.Uuid
+  settings  Json          @default("{}")
+  deletedAt DateTime?     @map("deleted_at")
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
 
   // Relations
-  owner        User          @relation("WorkspaceOwner", fields: [ownerId], references: [id])
-  memberships  Membership[]
-  accounts     Account[]
-  transactions Transaction[]
-  categories   Category[]
-  tags         Tag[]
-  budgets      Budget[]
-  documents    Document[]
-  rules        Rule[]
-  recurrences  Recurrence[]
-  importJobs   ImportJob[]
-  contacts     Contact[]
-  quotes       Quote[]
-  invoices     Invoice[]
-  positions    Position[]
-  watchlists   Watchlist[]
-  auditLogs    AuditLog[]
-  notifications Notification[]
-  alertRules   AlertRule[]
-  savedFilters SavedFilter[]
-  portfolioSnapshots PortfolioSnapshot[]
+  owner                 User                   @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  memberships           Membership[]
+  accounts              Account[]
+  transactions          Transaction[]
+  categories            Category[]
+  tags                  Tag[]
+  budgets               Budget[]
+  documents             Document[]
+  rules                 Rule[]
+  recurrences           Recurrence[]
+  importJobs            ImportJob[]
+  contacts              Contact[]
+  quotes                Quote[]
+  invoices              Invoice[]
+  positions             Position[]
+  watchlists            Watchlist[]
+  auditLogs             AuditLog[]
+  notifications         Notification[]
+  alertRules            AlertRule[]
+  savedFilters          SavedFilter[]
+  portfolioSnapshots    PortfolioSnapshot[]
+  searchHistory         SearchHistory[]
+  searchTerms           SearchTerm[]
+  reportTemplates       ReportTemplate[]
+  priceAlerts           PriceAlert[]
+  loans                 Loan[]
+  scheduledTransactions ScheduledTransaction[]
+  netWorthSnapshots     NetWorthSnapshot[]
+  bills                 Bill[]
+  budgetForecasts       BudgetForecast[]
+  savingsGoals          SavingsGoal[]
+  taxYears              TaxYear[]
+  dashboardLayouts      DashboardLayout[]
+  categoryPatterns      CategoryPattern[]
 
   @@index([ownerId])
   @@index([deletedAt])
@@ -201,13 +235,16 @@ model Account {
   updatedAt   DateTime    @updatedAt @map("updated_at")
 
   // Relations
-  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
-  importJobs   ImportJob[]
-  positions    Position[]
+  workspace             Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  transactions          Transaction[]
+  importJobs            ImportJob[]
+  positions             Position[]
+  scheduledTransactions ScheduledTransaction[]
+  savingsGoals          SavingsGoal[]
 
   @@index([workspaceId])
   @@index([workspaceId, isArchived])
+  @@index([workspaceId, deletedAt])
   @@map("accounts")
 }
 
@@ -243,16 +280,18 @@ model Transaction {
   updatedAt      DateTime          @updatedAt @map("updated_at")
 
   // Relations
-  workspace     Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  account       Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  category      Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  recurrence    Recurrence?     @relation(fields: [recurrenceId], references: [id], onDelete: SetNull)
-  transferPair  Transaction?    @relation("TransferPair", fields: [transferPairId], references: [id])
-  pairedTransfer Transaction?   @relation("TransferPair")
-  appliedRule   Rule?           @relation(fields: [appliedRuleId], references: [id], onDelete: SetNull)
-  tags          TransactionTag[]
-  documentLinks DocumentLink[]
-  linkedInvoices Invoice[]
+  workspace             Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  account               Account                @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  category              Category?              @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  recurrence            Recurrence?            @relation(fields: [recurrenceId], references: [id], onDelete: SetNull)
+  transferPair          Transaction?           @relation("TransferPair", fields: [transferPairId], references: [id])
+  pairedTransfer        Transaction?           @relation("TransferPair")
+  appliedRule           Rule?                  @relation(fields: [appliedRuleId], references: [id], onDelete: SetNull)
+  tags                  TransactionTag[]
+  documentLinks         DocumentLink[]
+  linkedInvoices        Invoice[]
+  scheduledTransactions ScheduledTransaction[]
+  linkedBills           Bill[]
 
   @@unique([workspaceId, importHash])
   @@index([workspaceId, date])
@@ -261,6 +300,7 @@ model Transaction {
   @@index([accountId, date])
   @@index([appliedRuleId])
   @@index([deletedAt])
+  @@index([workspaceId, deletedAt])
   @@map("transactions")
 }
 
@@ -304,14 +344,19 @@ model Category {
   updatedAt   DateTime     @updatedAt @map("updated_at")
 
   // Relations
-  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  parent       Category?     @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children     Category[]    @relation("CategoryHierarchy")
-  transactions Transaction[]
-  budgets      Budget[]
+  workspace             Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parent                Category?              @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children              Category[]             @relation("CategoryHierarchy")
+  transactions          Transaction[]
+  budgets               Budget[]
+  scheduledTransactions ScheduledTransaction[]
+  budgetForecasts       BudgetForecast[]
+  bills                 Bill[]
+  patterns              CategoryPattern[]
 
   @@unique([workspaceId, name, type])
   @@index([workspaceId, type])
+  @@index([parentId])
   @@map("categories")
 }
 
@@ -384,18 +429,24 @@ model Document {
   status       DocumentStatus @default(inbox)
   isVault      Boolean        @default(false) @map("is_vault")
   encryptedKey String?        @map("encrypted_key") @db.Text // For E2EE vault docs
+  content      String?        @db.Text // OCR extracted text content for search
   deletedAt    DateTime?      @map("deleted_at")
   createdAt    DateTime       @default(now()) @map("created_at")
   updatedAt    DateTime       @updatedAt @map("updated_at")
 
   // Relations
-  workspace Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  uploader  User           @relation(fields: [uploaderId], references: [id])
-  links     DocumentLink[]
+  workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  uploader      User           @relation(fields: [uploaderId], references: [id])
+  links         DocumentLink[]
+  taxDeductions TaxDeduction[]
+
+  // Note: search_vector column managed by PostgreSQL trigger (not in Prisma)
 
   @@unique([workspaceId, hash])
   @@index([workspaceId, status])
   @@index([deletedAt])
+  @@index([workspaceId, deletedAt])
+  @@index([uploaderId])
   @@map("documents")
 }
 
@@ -418,6 +469,7 @@ model DocumentLink {
 
   @@unique([documentId, transactionId])
   @@index([transactionId])
+  @@index([documentId])
   @@map("document_links")
 }
 
@@ -430,8 +482,8 @@ model Rule {
   workspaceId String   @map("workspace_id") @db.Uuid
   name        String   @db.VarChar(100)
   priority    Int      @default(0)
-  conditions  Json     // Array of RuleCondition
-  actions     Json     // Array of RuleAction
+  conditions  Json // Array of RuleCondition
+  actions     Json // Array of RuleAction
   isEnabled   Boolean  @default(true) @map("is_enabled")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -444,6 +496,27 @@ model Rule {
   @@map("rules")
 }
 
+model CategoryPattern {
+  id          String   @id @default(cuid())
+  workspaceId String   @map("workspace_id") @db.Uuid
+  pattern     String   @db.VarChar(500) // merchant/description pattern
+  categoryId  String   @map("category_id") @db.Uuid
+  confidence  Decimal  @db.Decimal(3, 2) // 0.00 to 1.00
+  matchCount  Int      @default(0) @map("match_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  category  Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, pattern])
+  @@index([workspaceId])
+  @@index([pattern])
+  @@index([categoryId])
+  @@map("category_patterns")
+}
+
 model Recurrence {
   id          String         @id @default(uuid()) @db.Uuid
   workspaceId String         @map("workspace_id") @db.Uuid
@@ -452,7 +525,7 @@ model Recurrence {
   interval    Int            @default(1)
   dayOfMonth  Int?           @map("day_of_month")
   dayOfWeek   Int?           @map("day_of_week")
-  template    Json           // Transaction template
+  template    Json // Transaction template
   nextRunAt   DateTime       @map("next_run_at")
   endAt       DateTime?      @map("end_at")
   isActive    Boolean        @default(true) @map("is_active")
@@ -506,6 +579,8 @@ model ImportJob {
 
   @@index([workspaceId])
   @@index([status])
+  @@index([accountId])
+  @@index([userId])
   @@map("import_jobs")
 }
 
@@ -528,6 +603,7 @@ model Contact {
   email       String?     @db.VarChar(255)
   phone       String?     @db.VarChar(20)
   address     String?     @db.Text
+  company     String?     @db.VarChar(200) // Company name for search
   siret       String?     @db.VarChar(14)
   vatNumber   String?     @map("vat_number") @db.VarChar(20)
   deletedAt   DateTime?   @map("deleted_at")
@@ -538,6 +614,8 @@ model Contact {
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   quotes    Quote[]
   invoices  Invoice[]
+
+  // Note: search_vector column managed by PostgreSQL trigger (not in Prisma)
 
   @@index([workspaceId, type])
   @@index([deletedAt])
@@ -574,6 +652,7 @@ model Quote {
   @@unique([workspaceId, number])
   @@index([workspaceId, status])
   @@index([deletedAt])
+  @@index([contactId])
   @@map("quotes")
 }
 
@@ -615,6 +694,9 @@ model Invoice {
   @@unique([workspaceId, number])
   @@index([workspaceId, status])
   @@index([deletedAt])
+  @@index([contactId])
+  @@index([quoteId])
+  @@index([linkedTransactionId])
   @@map("invoices")
 }
 
@@ -696,23 +778,26 @@ model Position {
   account      Account             @relation(fields: [accountId], references: [id], onDelete: Cascade)
   asset        Asset               @relation(fields: [assetId], references: [id])
   transactions InvestTransaction[]
+  priceAlerts  PriceAlert[]
 
   @@unique([workspaceId, accountId, assetId])
   @@index([workspaceId])
+  @@index([accountId])
+  @@index([assetId])
   @@map("positions")
 }
 
 model InvestTransaction {
-  id         String              @id @default(uuid()) @db.Uuid
-  positionId String              @map("position_id") @db.Uuid
+  id         String                @id @default(uuid()) @db.Uuid
+  positionId String                @map("position_id") @db.Uuid
   type       InvestTransactionType
-  quantity   Decimal             @db.Decimal(19, 8)
-  price      Decimal             @db.Decimal(19, 8)
-  fees       Decimal             @default(0) @db.Decimal(19, 4)
-  date       DateTime            @db.Date
-  notes      String?             @db.Text
-  createdAt  DateTime            @default(now()) @map("created_at")
-  updatedAt  DateTime            @updatedAt @map("updated_at")
+  quantity   Decimal               @db.Decimal(19, 8)
+  price      Decimal               @db.Decimal(19, 8)
+  fees       Decimal               @default(0) @db.Decimal(19, 4)
+  date       DateTime              @db.Date
+  notes      String?               @db.Text
+  createdAt  DateTime              @default(now()) @map("created_at")
+  updatedAt  DateTime              @updatedAt @map("updated_at")
 
   // Relations
   position Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
@@ -757,6 +842,8 @@ model WatchlistItem {
   asset     Asset     @relation(fields: [assetId], references: [id])
 
   @@unique([watchlistId, assetId])
+  @@index([watchlistId])
+  @@index([assetId])
   @@map("watchlist_items")
 }
 
@@ -806,7 +893,7 @@ model Notification {
   type        NotificationType
   title       String           @db.VarChar(200)
   message     String           @db.Text
-  data        Json?            // Additional data (e.g., entity references)
+  data        Json? // Additional data (e.g., entity references)
   isRead      Boolean          @default(false) @map("is_read")
   readAt      DateTime?        @map("read_at")
   createdAt   DateTime         @default(now()) @map("created_at")
@@ -818,34 +905,35 @@ model Notification {
   @@index([userId, isRead])
   @@index([userId, createdAt])
   @@index([workspaceId])
+  @@index([type])
   @@map("notifications")
 }
 
 enum NotificationType {
-  budget_alert        // Budget exceeded or near limit
-  budget_warning      // Budget approaching limit
-  bill_reminder       // Upcoming bill/recurring transaction
-  import_complete     // Import job completed
-  export_ready        // Export file ready
-  invoice_overdue     // Invoice payment overdue
-  invoice_paid        // Invoice marked as paid
-  quote_accepted      // Quote accepted by client
-  quote_expiring      // Quote about to expire
-  price_alert         // Investment price alert
-  system              // System notification
+  budget_alert // Budget exceeded or near limit
+  budget_warning // Budget approaching limit
+  bill_reminder // Upcoming bill/recurring transaction
+  import_complete // Import job completed
+  export_ready // Export file ready
+  invoice_overdue // Invoice payment overdue
+  invoice_paid // Invoice marked as paid
+  quote_accepted // Quote accepted by client
+  quote_expiring // Quote about to expire
+  price_alert // Investment price alert
+  system // System notification
 }
 
 model AlertRule {
-  id          String        @id @default(uuid()) @db.Uuid
-  userId      String        @map("user_id") @db.Uuid
-  workspaceId String?       @map("workspace_id") @db.Uuid
-  type        AlertRuleType
-  name        String        @db.VarChar(100)
-  isEnabled   Boolean       @default(true) @map("is_enabled")
-  config      Json          // Rule-specific configuration
-  lastTriggeredAt DateTime? @map("last_triggered_at")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
+  id              String        @id @default(uuid()) @db.Uuid
+  userId          String        @map("user_id") @db.Uuid
+  workspaceId     String?       @map("workspace_id") @db.Uuid
+  type            AlertRuleType
+  name            String        @db.VarChar(100)
+  isEnabled       Boolean       @default(true) @map("is_enabled")
+  config          Json // Rule-specific configuration
+  lastTriggeredAt DateTime?     @map("last_triggered_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
 
   // Relations
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -858,13 +946,40 @@ model AlertRule {
 }
 
 enum AlertRuleType {
-  budget_threshold    // Alert when budget reaches X%
-  price_above         // Alert when asset price goes above X
-  price_below         // Alert when asset price goes below X
-  price_change        // Alert on X% price change
-  low_balance         // Alert when account balance below X
-  large_transaction   // Alert on transactions above X
-  recurring_reminder  // Reminder before recurring transaction
+  budget_threshold // Alert when budget reaches X%
+  price_above // Alert when asset price goes above X
+  price_below // Alert when asset price goes below X
+  price_change // Alert on X% price change
+  low_balance // Alert when account balance below X
+  large_transaction // Alert on transactions above X
+  recurring_reminder // Reminder before recurring transaction
+}
+
+// ============================================================================
+// PRICE ALERTS
+// ============================================================================
+
+model PriceAlert {
+  id          String    @id @default(cuid())
+  workspaceId String    @map("workspace_id") @db.Uuid
+  positionId  String?   @map("position_id") @db.Uuid
+  symbol      String    @db.VarChar(20)
+  direction   String    @db.VarChar(10) // "above" or "below"
+  targetPrice Decimal   @map("target_price") @db.Decimal(18, 8)
+  isRecurring Boolean   @default(false) @map("is_recurring")
+  isTriggered Boolean   @default(false) @map("is_triggered")
+  triggeredAt DateTime? @map("triggered_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  position  Position? @relation(fields: [positionId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([symbol])
+  @@index([isTriggered])
+  @@map("price_alerts")
 }
 
 // ============================================================================
@@ -872,14 +987,14 @@ enum AlertRuleType {
 // ============================================================================
 
 model ExchangeRate {
-  id           String   @id @default(uuid()) @db.Uuid
-  baseCurrency String   @map("base_currency") @db.VarChar(3)
-  targetCurrency String @map("target_currency") @db.VarChar(3)
-  rate         Decimal  @db.Decimal(19, 10)
-  date         DateTime @db.Date
-  source       String   @default("ecb") @db.VarChar(50) // ecb, openexchange, manual
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(uuid()) @db.Uuid
+  baseCurrency   String   @map("base_currency") @db.VarChar(3)
+  targetCurrency String   @map("target_currency") @db.VarChar(3)
+  rate           Decimal  @db.Decimal(19, 10)
+  date           DateTime @db.Date
+  source         String   @default("ecb") @db.VarChar(50) // ecb, openexchange, manual
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   @@unique([baseCurrency, targetCurrency, date])
   @@index([baseCurrency, targetCurrency])
@@ -919,6 +1034,7 @@ model SavedFilter {
 
   @@unique([workspaceId, userId, name])
   @@index([workspaceId, userId])
+  @@index([userId])
   @@map("saved_filters")
 }
 
@@ -940,4 +1056,360 @@ model PortfolioSnapshot {
   @@unique([workspaceId, date])
   @@index([workspaceId, date])
   @@map("portfolio_snapshots")
+}
+
+// ============================================================================
+// SEARCH HISTORY & SUGGESTIONS
+// ============================================================================
+
+model SearchHistory {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  query       String   @db.VarChar(255)
+  resultCount Int      @default(0) @map("result_count")
+  types       String[] // Array of search types used
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, userId])
+  @@index([query])
+  @@index([createdAt])
+  @@map("search_history")
+}
+
+model SearchTerm {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  term        String   @db.VarChar(100)
+  count       Int      @default(1)
+  lastUsedAt  DateTime @default(now()) @map("last_used_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, term])
+  @@index([workspaceId])
+  @@map("search_terms")
+}
+
+// ============================================================================
+// REPORT TEMPLATES
+// ============================================================================
+
+model ReportTemplate {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  config      Json // Report configuration (columns, filters, grouping, etc.)
+  isPublic    Boolean  @default(false) @map("is_public")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([workspaceId, isPublic])
+  @@map("report_templates")
+}
+
+// ============================================================================
+// LOANS & DEBT TRACKING
+// ============================================================================
+
+model Loan {
+  id              String    @id @default(uuid()) @db.Uuid
+  workspaceId     String    @map("workspace_id") @db.Uuid
+  name            String    @db.VarChar(100)
+  type            LoanType
+  principalAmount Decimal   @map("principal_amount") @db.Decimal(18, 2)
+  currentBalance  Decimal   @map("current_balance") @db.Decimal(18, 2)
+  interestRate    Decimal?  @map("interest_rate") @db.Decimal(5, 4)
+  currency        String    @default("EUR") @db.VarChar(3)
+  startDate       DateTime  @map("start_date") @db.Date
+  endDate         DateTime? @map("end_date") @db.Date
+  counterparty    String?   @db.VarChar(200) // Bank name or person
+  notes           String?   @db.Text
+  deletedAt       DateTime? @map("deleted_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  payments  LoanPayment[]
+
+  @@index([workspaceId, deletedAt])
+  @@index([workspaceId, type])
+  @@map("loans")
+}
+
+enum LoanType {
+  debt // I owe money
+  credit // Money owed to me
+}
+
+model LoanPayment {
+  id        String   @id @default(uuid()) @db.Uuid
+  loanId    String   @map("loan_id") @db.Uuid
+  amount    Decimal  @db.Decimal(18, 2)
+  principal Decimal  @db.Decimal(18, 2)
+  interest  Decimal  @db.Decimal(18, 2)
+  date      DateTime @db.Date
+  notes     String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  loan Loan @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@index([loanId])
+  @@index([loanId, date])
+  @@map("loan_payments")
+}
+
+// ============================================================================
+// NET WORTH SNAPSHOTS
+// ============================================================================
+
+model NetWorthSnapshot {
+  id               String   @id @default(cuid())
+  workspaceId      String   @map("workspace_id") @db.Uuid
+  date             DateTime @db.Date
+  totalAssets      Decimal  @map("total_assets") @db.Decimal(18, 2)
+  totalLiabilities Decimal  @map("total_liabilities") @db.Decimal(18, 2)
+  netWorth         Decimal  @map("net_worth") @db.Decimal(18, 2)
+  breakdown        Json // { accounts: [...], investments: [...], loans: [...] }
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, date])
+  @@index([workspaceId, date])
+  @@map("net_worth_snapshots")
+}
+
+// ============================================================================
+// SCHEDULED TRANSACTIONS (One-time future transactions)
+// ============================================================================
+
+model ScheduledTransaction {
+  id            String          @id @default(cuid())
+  workspaceId   String          @map("workspace_id") @db.Uuid
+  accountId     String          @map("account_id") @db.Uuid
+  categoryId    String?         @map("category_id") @db.Uuid
+  amount        Decimal         @db.Decimal(18, 2)
+  currency      String          @default("EUR") @db.VarChar(3)
+  type          TransactionType
+  description   String          @db.VarChar(500)
+  scheduledDate DateTime        @map("scheduled_date") @db.Date
+  notes         String?         @db.Text
+  isExecuted    Boolean         @default(false) @map("is_executed")
+  executedAt    DateTime?       @map("executed_at")
+  transactionId String?         @map("transaction_id") @db.Uuid
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  account     Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  transaction Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, scheduledDate])
+  @@index([isExecuted])
+  @@index([workspaceId, isExecuted])
+  @@map("scheduled_transactions")
+}
+
+// ============================================================================
+// BUDGET FORECASTING
+// ============================================================================
+
+model BudgetForecast {
+  id              String   @id @default(cuid())
+  workspaceId     String   @map("workspace_id") @db.Uuid
+  categoryId      String?  @map("category_id") @db.Uuid
+  month           DateTime @db.Date // First of month
+  predictedAmount Decimal  @map("predicted_amount") @db.Decimal(18, 2)
+  actualAmount    Decimal? @map("actual_amount") @db.Decimal(18, 2)
+  confidence      Decimal  @db.Decimal(3, 2) // 0.00 to 1.00
+  method          String   @db.VarChar(20) // "average", "trend", "seasonal"
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  category  Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, categoryId, month])
+  @@index([workspaceId, month])
+  @@map("budget_forecasts")
+}
+
+// ============================================================================
+// BILLS & PAYMENT REMINDERS
+// ============================================================================
+
+model Bill {
+  id                String        @id @default(cuid())
+  workspaceId       String        @map("workspace_id") @db.Uuid
+  name              String        @db.VarChar(200)
+  vendor            String?       @db.VarChar(200)
+  amount            Decimal       @db.Decimal(18, 2)
+  currency          String        @default("EUR") @db.VarChar(3)
+  dueDate           DateTime      @map("due_date") @db.Date
+  frequency         BillFrequency @default(once)
+  categoryId        String?       @map("category_id") @db.Uuid
+  isPaid            Boolean       @default(false) @map("is_paid")
+  paidAt            DateTime?     @map("paid_at")
+  paidTransactionId String?       @map("paid_transaction_id") @db.Uuid
+  reminderDays      Int           @default(3) @map("reminder_days")
+  notes             String?       @db.Text
+  deletedAt         DateTime?     @map("deleted_at")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  category        Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  paidTransaction Transaction? @relation(fields: [paidTransactionId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, deletedAt])
+  @@index([dueDate, isPaid])
+  @@index([workspaceId, isPaid])
+  @@map("bills")
+}
+
+enum BillFrequency {
+  once
+  weekly
+  monthly
+  yearly
+}
+
+// ============================================================================
+// TAX PLANNING
+// ============================================================================
+
+model TaxYear {
+  id              String    @id @default(cuid())
+  workspaceId     String    @map("workspace_id") @db.Uuid
+  year            Int
+  status          String    @default("open") @db.VarChar(20) // open, filed, closed
+  totalIncome     Decimal?  @map("total_income") @db.Decimal(18, 2)
+  totalDeductions Decimal?  @map("total_deductions") @db.Decimal(18, 2)
+  taxableIncome   Decimal?  @map("taxable_income") @db.Decimal(18, 2)
+  estimatedTax    Decimal?  @map("estimated_tax") @db.Decimal(18, 2)
+  actualTax       Decimal?  @map("actual_tax") @db.Decimal(18, 2)
+  filedAt         DateTime? @map("filed_at")
+  notes           String?   @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  workspace  Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  deductions TaxDeduction[]
+
+  @@unique([workspaceId, year])
+  @@index([workspaceId])
+  @@map("tax_years")
+}
+
+model TaxDeduction {
+  id          String   @id @default(cuid())
+  taxYearId   String   @map("tax_year_id")
+  category    String   @db.VarChar(50) // professional, medical, charitable, other
+  description String   @db.VarChar(500)
+  amount      Decimal  @db.Decimal(18, 2)
+  documentId  String?  @map("document_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  taxYear  TaxYear   @relation(fields: [taxYearId], references: [id], onDelete: Cascade)
+  document Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@index([taxYearId])
+  @@index([documentId])
+  @@map("tax_deductions")
+}
+
+// ============================================================================
+// SAVINGS GOALS
+// ============================================================================
+
+model SavingsGoal {
+  id            String    @id @default(cuid())
+  workspaceId   String    @map("workspace_id") @db.Uuid
+  accountId     String?   @map("account_id") @db.Uuid
+  name          String    @db.VarChar(100)
+  targetAmount  Decimal   @map("target_amount") @db.Decimal(18, 2)
+  currentAmount Decimal   @default(0) @map("current_amount") @db.Decimal(18, 2)
+  currency      String    @default("EUR") @db.VarChar(3)
+  targetDate    DateTime? @map("target_date") @db.Date
+  icon          String?   @db.VarChar(10)
+  color         String?   @db.VarChar(7)
+  notes         String?   @db.Text
+  isCompleted   Boolean   @default(false) @map("is_completed")
+  completedAt   DateTime? @map("completed_at")
+  deletedAt     DateTime? @map("deleted_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  workspace     Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  account       Account?              @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  contributions SavingsContribution[]
+
+  @@index([workspaceId, deletedAt])
+  @@index([workspaceId, isCompleted])
+  @@map("savings_goals")
+}
+
+model SavingsContribution {
+  id            String   @id @default(cuid())
+  savingsGoalId String   @map("savings_goal_id")
+  amount        Decimal  @db.Decimal(18, 2)
+  date          DateTime @db.Date
+  notes         String?  @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  savingsGoal SavingsGoal @relation(fields: [savingsGoalId], references: [id], onDelete: Cascade)
+
+  @@index([savingsGoalId])
+  @@index([savingsGoalId, date])
+  @@map("savings_contributions")
+}
+
+// ============================================================================
+// DASHBOARD LAYOUTS
+// ============================================================================
+
+model DashboardLayout {
+  id          String     @id @default(cuid())
+  userId      String     @map("user_id") @db.Uuid
+  workspaceId String?    @map("workspace_id") @db.Uuid
+  widgets     Json       // Array of { id, type, position: {x, y, w, h}, config: {} }
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([userId])
+  @@index([workspaceId])
+  @@map("dashboard_layouts")
 }

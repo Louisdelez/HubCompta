@@ -148,6 +148,13 @@ export const AUDIT_ACTIONS = {
   ALERT_UPDATED: 'notification.alert.updated',
   ALERT_DELETED: 'notification.alert.deleted',
   ALERT_TRIGGERED: 'notification.alert.triggered',
+
+  // Loan events
+  LOAN_CREATED: 'loan.created',
+  LOAN_UPDATED: 'loan.updated',
+  LOAN_DELETED: 'loan.deleted',
+  LOAN_PAYMENT_ADDED: 'loan.payment.added',
+  LOAN_PAYMENT_DELETED: 'loan.payment.deleted',
 } as const;
 
 // ----------------------------------------------------------------------------
@@ -433,6 +440,290 @@ export const auditService = {
       orderBy: { createdAt: 'desc' },
       take: limit,
     });
+  },
+
+  /**
+   * Get formatted activity feed for a workspace
+   */
+  async getActivityFeed(
+    workspaceId: string,
+    options: {
+      page?: number;
+      pageSize?: number;
+      types?: string[];
+      userId?: string;
+      from?: Date;
+      to?: Date;
+    } = {}
+  ) {
+    const { page = 1, pageSize = 50, types, userId, from, to } = options;
+
+    // Build where clause
+    const where = {
+      workspaceId,
+      ...(userId && { userId }),
+      ...(types?.length && { action: { in: types } }),
+      ...(from || to
+        ? {
+            createdAt: {
+              ...(from && { gte: from }),
+              ...(to && { lte: to }),
+            },
+          }
+        : {}),
+    };
+
+    const [logs, total] = await Promise.all([
+      prisma.auditLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              displayName: true,
+            },
+          },
+        },
+      }),
+      prisma.auditLog.count({ where }),
+    ]);
+
+    // Format activities for frontend consumption
+    const activities = logs.map((log) => ({
+      id: log.id,
+      action: log.action,
+      actionType: this.getActionType(log.action),
+      actionLabel: this.getActionLabel(log.action),
+      entityType: log.entityType,
+      entityId: log.entityId,
+      changes: log.changes as Record<string, unknown> | null,
+      user: log.user
+        ? {
+            id: log.user.id,
+            name: log.user.displayName ?? log.user.email,
+            email: log.user.email,
+          }
+        : null,
+      createdAt: log.createdAt.toISOString(),
+      severity: log.severity,
+    }));
+
+    return {
+      data: activities,
+      meta: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  },
+
+  /**
+   * Get user's activity across all their workspaces
+   */
+  async getUserActivity(
+    userId: string,
+    options: {
+      page?: number;
+      pageSize?: number;
+      workspaceIds?: string[];
+      from?: Date;
+      to?: Date;
+    } = {}
+  ) {
+    const { page = 1, pageSize = 50, workspaceIds, from, to } = options;
+
+    const where = {
+      userId,
+      ...(workspaceIds?.length && { workspaceId: { in: workspaceIds } }),
+      ...(from || to
+        ? {
+            createdAt: {
+              ...(from && { gte: from }),
+              ...(to && { lte: to }),
+            },
+          }
+        : {}),
+    };
+
+    const [logs, total] = await Promise.all([
+      prisma.auditLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              displayName: true,
+            },
+          },
+          workspace: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      }),
+      prisma.auditLog.count({ where }),
+    ]);
+
+    // Format activities
+    const activities = logs.map((log) => ({
+      id: log.id,
+      action: log.action,
+      actionType: this.getActionType(log.action),
+      actionLabel: this.getActionLabel(log.action),
+      entityType: log.entityType,
+      entityId: log.entityId,
+      changes: log.changes as Record<string, unknown> | null,
+      user: log.user
+        ? {
+            id: log.user.id,
+            name: log.user.displayName ?? log.user.email,
+            email: log.user.email,
+          }
+        : null,
+      workspace: log.workspace
+        ? {
+            id: log.workspace.id,
+            name: log.workspace.name,
+          }
+        : null,
+      createdAt: log.createdAt.toISOString(),
+      severity: log.severity,
+    }));
+
+    return {
+      data: activities,
+      meta: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  },
+
+  /**
+   * Get the action type category from action string
+   */
+  getActionType(action: string): string {
+    const prefix = action.split('.')[0];
+    return prefix ?? 'other';
+  },
+
+  /**
+   * Get human-readable label for an action
+   */
+  getActionLabel(action: string): string {
+    const labels: Record<string, string> = {
+      // Transaction actions
+      'transaction.created': 'Created a transaction',
+      'transaction.updated': 'Updated a transaction',
+      'transaction.deleted': 'Deleted a transaction',
+      'transaction.bulk_deleted': 'Deleted multiple transactions',
+      'transfer.created': 'Created a transfer',
+
+      // Account actions
+      'account.created': 'Created an account',
+      'account.updated': 'Updated an account',
+      'account.archived': 'Archived an account',
+      'account.deleted': 'Deleted an account',
+
+      // Category actions
+      'category.created': 'Created a category',
+      'category.updated': 'Updated a category',
+      'category.deleted': 'Deleted a category',
+      'category.merged': 'Merged categories',
+
+      // Budget actions
+      'budget.created': 'Created a budget',
+      'budget.updated': 'Updated a budget',
+      'budget.deleted': 'Deleted a budget',
+
+      // Document actions
+      'document.uploaded': 'Uploaded a document',
+      'document.linked': 'Linked a document',
+      'document.unlinked': 'Unlinked a document',
+      'document.archived': 'Archived a document',
+      'document.deleted': 'Deleted a document',
+
+      // Workspace actions
+      'workspace.created': 'Created the workspace',
+      'workspace.updated': 'Updated workspace settings',
+      'workspace.deleted': 'Deleted the workspace',
+      'workspace.member.invited': 'Invited a member',
+      'workspace.member.joined': 'Joined the workspace',
+      'workspace.member.role.changed': 'Changed member role',
+      'workspace.member.removed': 'Removed a member',
+
+      // Import/Export actions
+      'import.started': 'Started an import',
+      'import.completed': 'Completed an import',
+      'import.failed': 'Import failed',
+      'export.requested': 'Requested an export',
+      'export.completed': 'Export completed',
+
+      // Tag actions
+      'tag.created': 'Created a tag',
+      'tag.updated': 'Updated a tag',
+      'tag.deleted': 'Deleted a tag',
+      'tag.merged': 'Merged tags',
+
+      // Pro Mode actions
+      'pro.contact.created': 'Created a contact',
+      'pro.contact.updated': 'Updated a contact',
+      'pro.contact.deleted': 'Deleted a contact',
+      'pro.quote.created': 'Created a quote',
+      'pro.quote.updated': 'Updated a quote',
+      'pro.quote.sent': 'Sent a quote',
+      'pro.quote.accepted': 'Quote accepted',
+      'pro.quote.rejected': 'Quote rejected',
+      'pro.invoice.created': 'Created an invoice',
+      'pro.invoice.updated': 'Updated an invoice',
+      'pro.invoice.sent': 'Sent an invoice',
+      'pro.invoice.payment_recorded': 'Recorded invoice payment',
+      'pro.invoice.cancelled': 'Cancelled an invoice',
+
+      // Investment actions
+      'invest.position.opened': 'Opened a position',
+      'invest.position.transaction': 'Made investment transaction',
+      'invest.position.deleted': 'Closed a position',
+      'invest.watchlist.created': 'Created a watchlist',
+      'invest.watchlist.updated': 'Updated a watchlist',
+      'invest.watchlist.deleted': 'Deleted a watchlist',
+
+      // Loan actions
+      'loan.created': 'Created a loan',
+      'loan.updated': 'Updated a loan',
+      'loan.deleted': 'Deleted a loan',
+      'loan.payment.added': 'Added loan payment',
+      'loan.payment.deleted': 'Deleted loan payment',
+
+      // Alert actions
+      'notification.alert.created': 'Created an alert',
+      'notification.alert.updated': 'Updated an alert',
+      'notification.alert.deleted': 'Deleted an alert',
+      'notification.alert.triggered': 'Alert triggered',
+
+      // Auth actions
+      'auth.login.succeeded': 'Logged in',
+      'auth.logout': 'Logged out',
+      'auth.mfa.setup': 'Set up MFA',
+      'auth.mfa.removed': 'Removed MFA',
+      'auth.password.changed': 'Changed password',
+    };
+
+    return labels[action] ?? action.replace(/\./g, ' ').replace(/_/g, ' ');
   },
 };
 

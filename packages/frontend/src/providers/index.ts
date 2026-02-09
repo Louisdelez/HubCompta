@@ -4,3 +4,4 @@
 // ============================================================================
 
 export { ThemeProvider, useTheme, type Theme } from './ThemeProvider';
+export { AnnouncerProvider, useAnnouncer, Announcer } from '@/components/ui/Announcer';

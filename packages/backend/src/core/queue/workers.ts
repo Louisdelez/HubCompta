@@ -14,6 +14,7 @@ import type {
   PortfolioSnapshotJobData,
 } from './index.js';
 import { QUEUES } from './index.js';
+import { logger } from '../middleware/logger.js';
 
 // Parse Redis URL for connection options
 const REDIS_URL = process.env.REDIS_URL;
@@ -43,20 +44,20 @@ let portfolioSnapshotWorker: Worker | null = null;
 async function processMarketDataJob(job: Job<MarketDataJobData>): Promise<void> {
   const { provider, assetIds, updateAll } = job.data;
 
-  console.info(`Processing market data job: provider=${provider}, updateAll=${updateAll}`);
+  logger.info({ provider, updateAll, jobId: job.id }, 'Processing market data job');
 
   try {
     if (updateAll || provider === 'all') {
       // Update all assets with positions
       const result = await assetService.updateAllPrices();
-      console.info(`Market data update complete: ${result.updated} updated, ${result.failed} failed`);
+      logger.info({ updated: result.updated, failed: result.failed }, 'Market data update complete');
     } else if (assetIds && assetIds.length > 0) {
       // Update specific assets
       const quotes = await assetService.updatePrices(assetIds);
-      console.info(`Updated ${quotes.size} asset prices`);
+      logger.info({ count: quotes.size }, 'Updated asset prices');
     }
   } catch (error) {
-    console.error('Market data job failed:', error);
+    logger.error({ error, jobId: job.id }, 'Market data job failed');
     throw error;
   }
 }
@@ -68,15 +69,15 @@ async function processMarketDataJob(job: Job<MarketDataJobData>): Promise<void> 
 async function processExchangeRatesJob(job: Job<ExchangeRateJobData>): Promise<void> {
   const { source } = job.data;
 
-  console.info(`Processing exchange rates job: source=${source || 'ecb'}`);
+  logger.info({ source: source || 'ecb', jobId: job.id }, 'Processing exchange rates job');
 
   try {
     if (source === 'ecb' || !source) {
       const result = await currencyService.fetchECBRates();
-      console.info(`Exchange rates update: ${result.imported} rates imported for ${result.date?.toISOString()}`);
+      logger.info({ imported: result.imported, date: result.date?.toISOString() }, 'Exchange rates update complete');
     }
   } catch (error) {
-    console.error('Exchange rates job failed:', error);
+    logger.error({ error, jobId: job.id }, 'Exchange rates job failed');
     throw error;
   }
 }
@@ -88,22 +89,22 @@ async function processExchangeRatesJob(job: Job<ExchangeRateJobData>): Promise<v
 async function processPortfolioSnapshotJob(job: Job<PortfolioSnapshotJobData>): Promise<void> {
   const { workspaceId } = job.data;
 
-  console.info(`Processing portfolio snapshot job: workspaceId=${workspaceId || 'all'}`);
+  logger.info({ workspaceId: workspaceId || 'all', jobId: job.id }, 'Processing portfolio snapshot job');
 
   try {
     if (workspaceId) {
       // Snapshot for a specific workspace
       const snapshot = await positionService.takePortfolioSnapshot(workspaceId);
-      console.info(`Portfolio snapshot taken for workspace ${workspaceId}: value=${snapshot.totalValue}, cost=${snapshot.totalCost}`);
+      logger.info({ workspaceId, totalValue: snapshot.totalValue, totalCost: snapshot.totalCost }, 'Portfolio snapshot taken');
     } else {
       // Snapshot for all workspaces with positions
       const results = await positionService.takeAllWorkspacesSnapshots();
       const successful = results.filter((r) => r.success).length;
       const failed = results.filter((r) => !r.success).length;
-      console.info(`Portfolio snapshots complete: ${successful} successful, ${failed} failed`);
+      logger.info({ successful, failed }, 'Portfolio snapshots complete');
     }
   } catch (error) {
-    console.error('Portfolio snapshot job failed:', error);
+    logger.error({ error, jobId: job.id }, 'Portfolio snapshot job failed');
     throw error;
   }
 }
@@ -114,7 +115,7 @@ async function processPortfolioSnapshotJob(job: Job<PortfolioSnapshotJobData>): 
 
 export function initializeWorkers(): void {
   if (!REDIS_URL) {
-    console.warn('REDIS_URL not set, workers will not be initialized');
+    logger.warn('REDIS_URL not set, workers will not be initialized');
     return;
   }
 
@@ -131,11 +132,11 @@ export function initializeWorkers(): void {
   );
 
   marketDataWorker.on('completed', (job) => {
-    console.info(`Market data job ${job.id} completed`);
+    logger.info({ jobId: job.id, queue: QUEUES.MARKET_DATA }, 'Market data job completed');
   });
 
   marketDataWorker.on('failed', (job, error) => {
-    console.error(`Market data job ${job?.id} failed:`, error);
+    logger.error({ jobId: job?.id, queue: QUEUES.MARKET_DATA, error }, 'Market data job failed');
   });
 
   // Exchange Rates Worker
@@ -149,11 +150,11 @@ export function initializeWorkers(): void {
   );
 
   exchangeRatesWorker.on('completed', (job) => {
-    console.info(`Exchange rates job ${job.id} completed`);
+    logger.info({ jobId: job.id, queue: QUEUES.EXCHANGE_RATES }, 'Exchange rates job completed');
   });
 
   exchangeRatesWorker.on('failed', (job, error) => {
-    console.error(`Exchange rates job ${job?.id} failed:`, error);
+    logger.error({ jobId: job?.id, queue: QUEUES.EXCHANGE_RATES, error }, 'Exchange rates job failed');
   });
 
   // Portfolio Snapshot Worker
@@ -167,14 +168,14 @@ export function initializeWorkers(): void {
   );
 
   portfolioSnapshotWorker.on('completed', (job) => {
-    console.info(`Portfolio snapshot job ${job.id} completed`);
+    logger.info({ jobId: job.id, queue: QUEUES.PORTFOLIO_SNAPSHOT }, 'Portfolio snapshot job completed');
   });
 
   portfolioSnapshotWorker.on('failed', (job, error) => {
-    console.error(`Portfolio snapshot job ${job?.id} failed:`, error);
+    logger.error({ jobId: job?.id, queue: QUEUES.PORTFOLIO_SNAPSHOT, error }, 'Portfolio snapshot job failed');
   });
 
-  console.info('Queue workers initialized');
+  logger.info('Queue workers initialized');
 }
 
 // ----------------------------------------------------------------------------
@@ -197,5 +198,5 @@ export async function shutdownWorkers(): Promise<void> {
   }
 
   await Promise.all(shutdownPromises);
-  console.info('Queue workers shut down');
+  logger.info('Queue workers shut down');
 }

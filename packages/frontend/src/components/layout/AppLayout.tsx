@@ -3,14 +3,22 @@
 // ============================================================================
 
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { clsx } from 'clsx';
 import { GlobalSearchBar } from '@/features/search';
 import { useWorkspace } from '@/hooks/useWorkspace';
+import { usePrefetch } from '@/hooks/usePrefetch';
 import { NotificationBell } from '@/features/notifications/NotificationBell';
 import { WorkspaceSelector } from '@/features/workspaces/WorkspaceSelector';
 import { CreateWorkspaceModal } from '@/features/workspaces/CreateWorkspaceModal';
+import {
+  ShortcutProvider,
+  ShortcutHelp,
+  useShortcut,
+  useShortcuts,
+} from '@/lib/shortcuts';
+import { ShortcutHelpButton } from '@/components/ui/ShortcutHelpButton';
 import {
   LayoutDashboard,
   CreditCard,
@@ -29,12 +37,11 @@ import {
   Settings,
   LogOut,
   Wallet,
-  Sun,
-  Moon,
-  Monitor,
   type LucideIcon,
 } from 'lucide-react';
-import { useTheme, THEME_META, type CatppuccinFlavor, type Theme } from '@/providers/ThemeProvider';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { OfflineIndicator } from '@/components/ui/OfflineIndicator';
+import { CurrencyToggle } from '@/components/ui/CurrencyToggle';
 
 // ----------------------------------------------------------------------------
 // Navigation Items
@@ -77,6 +84,7 @@ interface SidebarProps {
 function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { prefetchOnHover } = usePrefetch();
 
   const handleLogout = async () => {
     await logout();
@@ -125,6 +133,8 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                     )
                   }
                   onClick={() => onClose()}
+                  onMouseEnter={() => prefetchOnHover(item.href)}
+                  onFocus={() => prefetchOnHover(item.href)}
                 >
                   <item.icon className="w-5 h-5" />
                   <span>{item.name}</span>
@@ -148,6 +158,8 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                     )
                   }
                   onClick={() => onClose()}
+                  onMouseEnter={() => prefetchOnHover(item.href)}
+                  onFocus={() => prefetchOnHover(item.href)}
                 >
                   <item.icon className="w-5 h-5" />
                   <span>{item.name}</span>
@@ -179,6 +191,8 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                   to="/admin"
                   className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-ctp-mauve hover:bg-ctp-mauve/10"
                   onClick={() => onClose()}
+                  onMouseEnter={() => prefetchOnHover('/admin')}
+                  onFocus={() => prefetchOnHover('/admin')}
                 >
                   <Shield className="w-5 h-5" />
                   <span>Administration</span>
@@ -188,16 +202,18 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                 to="/settings"
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-ctp-subtext1 hover:bg-ctp-surface1 hover:text-ctp-text"
                 onClick={() => onClose()}
+                onMouseEnter={() => prefetchOnHover('/settings')}
+                onFocus={() => prefetchOnHover('/settings')}
               >
                 <Settings className="w-5 h-5" />
-                <span>Paramètres</span>
+                <span>Parametres</span>
               </NavLink>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-ctp-red hover:bg-ctp-red/10 w-full"
               >
                 <LogOut className="w-5 h-5" />
-                <span>Déconnexion</span>
+                <span>Deconnexion</span>
               </button>
             </div>
           </div>
@@ -207,117 +223,6 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
   );
 }
 
-// ----------------------------------------------------------------------------
-// Theme Selector Component
-// ----------------------------------------------------------------------------
-
-const THEME_OPTIONS: { value: Theme; label: string; icon: LucideIcon }[] = [
-  { value: 'system', label: 'Système', icon: Monitor },
-  { value: 'latte', label: 'Latte', icon: Sun },
-  { value: 'frappe', label: 'Frappé', icon: Moon },
-  { value: 'macchiato', label: 'Macchiato', icon: Moon },
-  { value: 'mocha', label: 'Mocha', icon: Moon },
-];
-
-function ThemeSelector() {
-  const { theme, setTheme } = useTheme();
-  const [isOpen, setIsOpen] = useState(false);
-
-  const currentOption = THEME_OPTIONS.find((opt) => opt.value === theme) ?? THEME_OPTIONS[0]!;
-  const CurrentIcon = currentOption.icon;
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-lg text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text transition-colors"
-        aria-label={`Thème: ${currentOption.label}`}
-        title={`Thème: ${currentOption.label}`}
-      >
-        <CurrentIcon className="w-5 h-5" />
-      </button>
-
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-          />
-
-          {/* Dropdown */}
-          <div className="absolute right-0 top-full mt-2 w-56 bg-ctp-base border border-ctp-surface1 rounded-xl shadow-lg z-50 overflow-hidden">
-            <div className="p-2">
-              <p className="px-3 py-1.5 text-xs font-medium text-ctp-subtext0 uppercase tracking-wide">
-                Thème Catppuccin
-              </p>
-              {THEME_OPTIONS.map((option) => {
-                const isSelected = theme === option.value;
-                const meta = option.value !== 'system' ? THEME_META[option.value as CatppuccinFlavor] : null;
-                const OptionIcon = option.icon;
-
-                return (
-                  <button
-                    key={option.value}
-                    onClick={() => {
-                      setTheme(option.value);
-                      setIsOpen(false);
-                    }}
-                    className={clsx(
-                      'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-                      isSelected
-                        ? 'bg-ctp-blue/20 text-ctp-blue'
-                        : 'text-ctp-text hover:bg-ctp-surface0'
-                    )}
-                  >
-                    <OptionIcon className="w-4 h-4 flex-shrink-0" />
-                    <span className="flex-1 text-left font-medium">{option.label}</span>
-
-                    {/* Color preview dots */}
-                    {meta && (
-                      <div className="flex gap-1">
-                        <span
-                          className="w-3 h-3 rounded-full border border-ctp-surface1"
-                          style={{ backgroundColor: meta.colors.base }}
-                          title="Base"
-                        />
-                        <span
-                          className="w-3 h-3 rounded-full border border-ctp-surface1"
-                          style={{ backgroundColor: meta.colors.blue }}
-                          title="Blue"
-                        />
-                        <span
-                          className="w-3 h-3 rounded-full border border-ctp-surface1"
-                          style={{ backgroundColor: meta.colors.green }}
-                          title="Green"
-                        />
-                        <span
-                          className="w-3 h-3 rounded-full border border-ctp-surface1"
-                          style={{ backgroundColor: meta.colors.red }}
-                          title="Red"
-                        />
-                      </div>
-                    )}
-
-                    {option.value === 'system' && (
-                      <span className="text-xs text-ctp-subtext0">Auto</span>
-                    )}
-
-                    {isSelected && (
-                      <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
 
 // ----------------------------------------------------------------------------
 // Header Component
@@ -371,8 +276,17 @@ function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* Theme Selector */}
-          <ThemeSelector />
+          {/* Offline Indicator */}
+          <OfflineIndicator compact />
+
+          {/* Currency Toggle */}
+          {currentWorkspace?.id && <CurrencyToggle workspaceId={currentWorkspace.id} />}
+
+          {/* Keyboard Shortcuts Help */}
+          <ShortcutHelpButton />
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
 
           {/* Notifications */}
           <NotificationBell />
@@ -383,10 +297,60 @@ function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
 }
 
 // ----------------------------------------------------------------------------
-// Main Layout
+// Global Shortcuts Handler
 // ----------------------------------------------------------------------------
 
-export function AppLayout() {
+interface GlobalShortcutsProps {
+  onToggleSidebar: () => void;
+  onNewTransaction?: () => void;
+  onNewAccount?: () => void;
+}
+
+function GlobalShortcuts({ onToggleSidebar, onNewTransaction, onNewAccount }: GlobalShortcutsProps) {
+  const navigate = useNavigate();
+  const { setHelpOpen } = useShortcuts();
+
+  // Help shortcut
+  useShortcut('help', useCallback(() => {
+    setHelpOpen(true);
+  }, [setHelpOpen]));
+
+  // Toggle sidebar
+  useShortcut('toggle-sidebar', onToggleSidebar);
+
+  // Navigation shortcuts
+  useShortcut('go-home', useCallback(() => navigate('/dashboard'), [navigate]));
+  useShortcut('go-transactions', useCallback(() => navigate('/transactions'), [navigate]));
+  useShortcut('go-accounts', useCallback(() => navigate('/accounts'), [navigate]));
+  useShortcut('go-budgets', useCallback(() => navigate('/budgets'), [navigate]));
+  useShortcut('go-settings', useCallback(() => navigate('/settings'), [navigate]));
+  useShortcut('go-documents', useCallback(() => navigate('/documents'), [navigate]));
+
+  // Action shortcuts (these should be connected to actual modals in real usage)
+  useShortcut('new-transaction', useCallback(() => {
+    if (onNewTransaction) {
+      onNewTransaction();
+    } else {
+      navigate('/transactions?action=new');
+    }
+  }, [navigate, onNewTransaction]));
+
+  useShortcut('new-account', useCallback(() => {
+    if (onNewAccount) {
+      onNewAccount();
+    } else {
+      navigate('/accounts?action=new');
+    }
+  }, [navigate, onNewAccount]));
+
+  return null;
+}
+
+// ----------------------------------------------------------------------------
+// Main Layout Content
+// ----------------------------------------------------------------------------
+
+function AppLayoutContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showCreateWorkspace, setShowCreateWorkspace] = useState(false);
   const { switchWorkspace } = useWorkspace();
@@ -395,29 +359,61 @@ export function AppLayout() {
     switchWorkspace(workspaceId);
   };
 
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen((prev) => !prev);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-ctp-base">
-      <div className="flex">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <>
+      {/* Global shortcuts handler */}
+      <GlobalShortcuts onToggleSidebar={toggleSidebar} />
 
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header
-            onMenuClick={() => setSidebarOpen(true)}
-            onCreateWorkspace={() => setShowCreateWorkspace(true)}
-          />
+      {/* Shortcuts help modal */}
+      <ShortcutHelp />
 
-          <main className="flex-1 safe-area-inset-bottom">
-            <Outlet />
-          </main>
+      <div className="min-h-screen bg-ctp-base">
+        {/* Skip Navigation Link - visible only on focus for keyboard users */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-ctp-blue focus:text-ctp-crust focus:rounded-lg focus:font-medium focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-ctp-sapphire focus:ring-offset-2 focus:ring-offset-ctp-base"
+        >
+          Aller au contenu principal
+        </a>
+
+        <div className="flex">
+          <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+          <div className="flex-1 flex flex-col min-w-0">
+            <Header
+              onMenuClick={() => setSidebarOpen(true)}
+              onCreateWorkspace={() => setShowCreateWorkspace(true)}
+            />
+
+            <main id="main-content" className="flex-1 safe-area-inset-bottom" tabIndex={-1}>
+              <Outlet />
+            </main>
+          </div>
         </div>
-      </div>
 
-      {/* Create Workspace Modal */}
-      <CreateWorkspaceModal
-        isOpen={showCreateWorkspace}
-        onClose={() => setShowCreateWorkspace(false)}
-        onCreated={handleWorkspaceCreated}
-      />
-    </div>
+        {/* Create Workspace Modal */}
+        <CreateWorkspaceModal
+          isOpen={showCreateWorkspace}
+          onClose={() => setShowCreateWorkspace(false)}
+          onCreated={handleWorkspaceCreated}
+        />
+      </div>
+    </>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// Main Layout (with Provider)
+// ----------------------------------------------------------------------------
+
+export function AppLayout() {
+  return (
+    <ShortcutProvider>
+      <AppLayoutContent />
+    </ShortcutProvider>
   );
 }

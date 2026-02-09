@@ -12,6 +12,7 @@ import type {
   HistoricalPrice,
   ProviderConfig,
 } from './types.js';
+import { logger } from '../../../core/middleware/logger.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -198,7 +199,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
       });
 
       if (!response.ok) {
-        console.error(`CoinGecko API error: ${response.status}`);
+        logger.error({ status: response.status }, 'CoinGecko API error');
         return;
       }
 
@@ -213,7 +214,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
         });
       }
     } catch (error) {
-      console.error('Error loading CoinGecko coin list:', error);
+      logger.error({ error }, 'Error loading CoinGecko coin list');
     }
   }
 
@@ -224,7 +225,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
     try {
       const coinId = await this.symbolToId(symbol);
       if (!coinId) {
-        console.warn(`Could not find CoinGecko ID for symbol: ${symbol}`);
+        logger.warn({ symbol }, 'Could not find CoinGecko ID for symbol');
         return null;
       }
 
@@ -237,7 +238,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
       });
 
       if (!response.ok) {
-        console.error(`CoinGecko API error: ${response.status}`);
+        logger.error({ status: response.status }, 'CoinGecko API error');
         return null;
       }
 
@@ -261,7 +262,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
         timestamp: new Date(),
       };
     } catch (error) {
-      console.error(`Error fetching quote for ${symbol}:`, error);
+      logger.error({ symbol, error }, 'Error fetching quote');
       return null;
     }
   }
@@ -300,7 +301,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
       });
 
       if (!response.ok) {
-        console.error(`CoinGecko API error: ${response.status}`);
+        logger.error({ status: response.status }, 'CoinGecko API error');
         return quotes;
       }
 
@@ -324,7 +325,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
         }
       }
     } catch (error) {
-      console.error('Error fetching quotes:', error);
+      logger.error({ error }, 'Error fetching quotes');
     }
 
     return quotes;
@@ -343,7 +344,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
       });
 
       if (!response.ok) {
-        console.error(`CoinGecko search error: ${response.status}`);
+        logger.error({ status: response.status }, 'CoinGecko search error');
         return [];
       }
 
@@ -358,7 +359,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
         currency: 'EUR',
       }));
     } catch (error) {
-      console.error('Error searching:', error);
+      logger.error({ error }, 'Error searching');
       return [];
     }
   }
@@ -393,7 +394,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
         currency: this.defaultCurrency.toUpperCase(),
       };
     } catch (error) {
-      console.error(`Error fetching asset info for ${symbol}:`, error);
+      logger.error({ symbol, error }, 'Error fetching asset info');
       return null;
     }
   }
@@ -426,7 +427,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
       });
 
       if (!response.ok) {
-        console.error(`CoinGecko history error: ${response.status}`);
+        logger.error({ status: response.status }, 'CoinGecko history error');
         return [];
       }
 
@@ -461,7 +462,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
         (a, b) => a.date.getTime() - b.date.getTime()
       );
     } catch (error) {
-      console.error(`Error fetching history for ${symbol}:`, error);
+      logger.error({ symbol, error }, 'Error fetching history');
       return [];
     }
   }

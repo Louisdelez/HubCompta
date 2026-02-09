@@ -20,9 +20,21 @@ export function cn(...inputs: ClassValue[]): string {
 // Currency Formatting
 // ----------------------------------------------------------------------------
 
+const CURRENCY_LOCALES: Record<string, string> = {
+  EUR: 'fr-FR',
+  USD: 'en-US',
+  GBP: 'en-GB',
+  JPY: 'ja-JP',
+  CHF: 'de-CH',
+  CAD: 'en-CA',
+  AUD: 'en-AU',
+};
+
 interface FormatCurrencyOptions {
   compact?: boolean;
   showSymbol?: boolean;
+  showSign?: boolean;
+  locale?: string;
 }
 
 /**
@@ -33,17 +45,54 @@ export function formatCurrency(
   currency: string = 'EUR',
   options: FormatCurrencyOptions = {}
 ): string {
-  const { compact = false, showSymbol = true } = options;
+  const { compact = false, showSymbol = true, showSign = false, locale } = options;
+  const effectiveLocale = locale ?? CURRENCY_LOCALES[currency] ?? 'fr-FR';
 
-  const formatter = new Intl.NumberFormat('fr-FR', {
+  const formatter = new Intl.NumberFormat(effectiveLocale, {
     style: showSymbol ? 'currency' : 'decimal',
     currency,
     minimumFractionDigits: compact ? 0 : 2,
     maximumFractionDigits: 2,
     notation: compact ? 'compact' : 'standard',
+    signDisplay: showSign ? 'always' : 'auto',
   });
 
   return formatter.format(amount);
+}
+
+/**
+ * Format currency with both original and converted amounts
+ */
+export function formatCurrencyWithConversion(
+  amount: number,
+  currency: string,
+  convertedAmount: number,
+  convertedCurrency: string,
+  options: FormatCurrencyOptions = {}
+): { original: string; converted: string; combined: string } {
+  const original = formatCurrency(amount, currency, options);
+  const converted = formatCurrency(convertedAmount, convertedCurrency, options);
+  return {
+    original,
+    converted,
+    combined: `${original} (${converted})`,
+  };
+}
+
+/**
+ * Get currency symbol
+ */
+export function getCurrencySymbol(currency: string, locale = 'fr-FR'): string {
+  try {
+    const formatted = new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      currencyDisplay: 'narrowSymbol',
+    }).format(0);
+    return formatted.replace(/[\d.,\s]/g, '').trim();
+  } catch {
+    return currency;
+  }
 }
 
 // ----------------------------------------------------------------------------
