@@ -113,13 +113,23 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
         baseCurrency: 'EUR',
         currencies: 29,
         available: true,
+        requiresApiKey: false,
+      },
+      {
+        id: 'fed-h10',
+        name: 'Federal Reserve H.10',
+        baseCurrency: 'USD',
+        currencies: 22,
+        available: true,
+        requiresApiKey: false,
       },
       {
         id: 'fred',
-        name: 'Federal Reserve Economic Data',
+        name: 'Federal Reserve (FRED API)',
         baseCurrency: 'USD',
         currencies: 21,
         available: !!process.env.FRED_API_KEY,
+        requiresApiKey: true,
       },
     ];
 
@@ -374,12 +384,49 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // ==========================================================================
+  // Fetch Fed H.10 Rates (no API key required)
+  // ==========================================================================
+
+  /**
+   * POST /currencies/rates/fetch-fed
+   * Fetch latest rates from Federal Reserve H.10 (no API key required)
+   */
+  fastify.post('/rates/fetch-fed', { preHandler: [authGuard] }, async (request, reply) => {
+    const userId = request.user?.sub;
+    if (!userId) {
+      return reply.status(401).send({ error: 'Non authentifie' });
+    }
+
+    try {
+      const result = await currencyService.fetchFedH10Rates();
+
+      await auditService.log({
+        userId,
+        action: 'exchange_rate.fetch_fed_h10',
+        changes: { imported: result.imported, date: result.date, currencies: result.currencies },
+        ipAddress: request.ip,
+      });
+
+      return {
+        success: true,
+        data: result,
+        message: `${result.imported} taux importes depuis Fed H.10 (${result.currencies.join(', ')})`,
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        error: 'Erreur lors de la recuperation des taux Fed H.10',
+        message: error instanceof Error ? error.message : 'Erreur inconnue',
+      });
+    }
+  });
+
+  // ==========================================================================
   // Fetch All Rates
   // ==========================================================================
 
   /**
    * POST /currencies/rates/fetch-all
-   * Fetch rates from all available sources (ECB + FRED if configured)
+   * Fetch rates from all available sources (ECB + Fed H.10 + FRED if configured)
    */
   fastify.post('/rates/fetch-all', { preHandler: [authGuard] }, async (request, reply) => {
     const userId = request.user?.sub;
@@ -395,17 +442,18 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
         action: 'exchange_rate.fetch_all',
         changes: {
           ecb: { imported: result.ecb.imported },
+          fed: result.fed ? { imported: result.fed.imported } : null,
           fred: result.fred ? { imported: result.fred.imported } : null,
         },
         ipAddress: request.ip,
       });
 
-      const totalImported = result.ecb.imported + (result.fred?.imported ?? 0);
+      const totalImported = result.ecb.imported + (result.fed?.imported ?? 0) + (result.fred?.imported ?? 0);
 
       return {
         success: true,
         data: result,
-        message: `${totalImported} taux importes (BCE: ${result.ecb.imported}, FRED: ${result.fred?.imported ?? 0})`,
+        message: `${totalImported} taux importes (BCE: ${result.ecb.imported}, Fed: ${result.fed?.imported ?? 0}, FRED: ${result.fred?.imported ?? 0})`,
       };
     } catch (error) {
       return reply.status(500).send({

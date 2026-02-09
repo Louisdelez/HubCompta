@@ -28,6 +28,33 @@ export interface ExchangeRateData {
   source?: string;
 }
 
+// Federal Reserve H.10 column mapping (currency code to CSV column index)
+// All rates are foreign currency per USD (except EUR, GBP, AUD, NZD which are USD per foreign)
+const FED_H10_COLUMNS: Record<string, { index: number; direction: 'to_usd' | 'from_usd' }> = {
+  AUD: { index: 1, direction: 'from_usd' },
+  EUR: { index: 2, direction: 'from_usd' },
+  NZD: { index: 3, direction: 'from_usd' },
+  GBP: { index: 4, direction: 'from_usd' },
+  BRL: { index: 5, direction: 'to_usd' },
+  CAD: { index: 6, direction: 'to_usd' },
+  CNY: { index: 7, direction: 'to_usd' },
+  DKK: { index: 8, direction: 'to_usd' },
+  HKD: { index: 9, direction: 'to_usd' },
+  INR: { index: 10, direction: 'to_usd' },
+  JPY: { index: 11, direction: 'to_usd' },
+  MYR: { index: 12, direction: 'to_usd' },
+  MXN: { index: 13, direction: 'to_usd' },
+  NOK: { index: 14, direction: 'to_usd' },
+  SGD: { index: 15, direction: 'to_usd' },
+  ZAR: { index: 16, direction: 'to_usd' },
+  KRW: { index: 17, direction: 'to_usd' },
+  LKR: { index: 18, direction: 'to_usd' },
+  SEK: { index: 19, direction: 'to_usd' },
+  CHF: { index: 20, direction: 'to_usd' },
+  TWD: { index: 21, direction: 'to_usd' },
+  THB: { index: 22, direction: 'to_usd' },
+};
+
 // FRED (Federal Reserve) series IDs for USD-based exchange rates
 // Format: { currency: seriesId, direction: 'to_usd' | 'from_usd' }
 const FRED_SERIES: Record<string, { seriesId: string; direction: 'to_usd' | 'from_usd' }> = {
@@ -588,16 +615,123 @@ export const currencyService = {
   },
 
   /**
+   * Fetch rates from Federal Reserve H.10 (no API key required)
+   * Direct CSV download from Federal Reserve website
+   * Note: Provides rates with USD as base currency
+   */
+  async fetchFedH10Rates(): Promise<{ imported: number; date: Date | null; currencies: string[] }> {
+    try {
+      // Federal Reserve H.10 CSV feed (last observation only)
+      const url = 'https://www.federalreserve.gov/datadownload/Output.aspx?rel=H10&series=60f32914ab61dfab590e0e470153e3ae&lastobs=1&from=&to=&filetype=csv&label=include&layout=seriescolumn';
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`Fed H.10 error: ${response.status}`);
+      }
+
+      const csv = await response.text();
+      const lines = csv.split('\n');
+
+      // Find the data line (after header rows, usually around line 6-7)
+      // Header rows start with "Series Description", "Unit", etc.
+      let dataLineIndex = -1;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        // Data lines start with a date like "2026-01-30"
+        if (line && /^\d{4}-\d{2}-\d{2}/.test(line)) {
+          dataLineIndex = i;
+          break;
+        }
+      }
+
+      if (dataLineIndex === -1) {
+        throw new Error('Could not find data in Fed H.10 CSV');
+      }
+
+      const dataLine = lines[dataLineIndex];
+      const values = dataLine.split(',');
+      const dateStr = values[0];
+
+      if (!dateStr) {
+        throw new Error('Could not parse date from Fed H.10 CSV');
+      }
+
+      const date = new Date(dateStr);
+      const rates: ExchangeRateData[] = [];
+      const currencies: string[] = [];
+
+      for (const [currency, { index, direction }] of Object.entries(FED_H10_COLUMNS)) {
+        const valueStr = values[index]?.trim();
+        if (!valueStr || valueStr === 'ND' || valueStr === '') {
+          continue;
+        }
+
+        const rateValue = parseFloat(valueStr);
+        if (isNaN(rateValue)) {
+          continue;
+        }
+
+        // Convert to USD → currency rate
+        if (direction === 'from_usd') {
+          // Fed gives USD per foreign currency, we want USD → foreign
+          rates.push({
+            baseCurrency: 'USD',
+            targetCurrency: currency,
+            rate: 1 / rateValue,
+            date,
+            source: 'fed-h10',
+          });
+        } else {
+          // Fed gives foreign currency per USD, which is what we want
+          rates.push({
+            baseCurrency: 'USD',
+            targetCurrency: currency,
+            rate: rateValue,
+            date,
+            source: 'fed-h10',
+          });
+        }
+
+        currencies.push(currency);
+      }
+
+      if (rates.length === 0) {
+        return { imported: 0, date: null, currencies: [] };
+      }
+
+      const result = await this.importRates(rates);
+
+      return {
+        imported: result.imported,
+        date,
+        currencies,
+      };
+    } catch (error) {
+      console.error('Failed to fetch Fed H.10 rates:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Fetch rates from all available sources
    */
   async fetchAllRates(): Promise<{
     ecb: { imported: number; date: Date | null };
+    fed: { imported: number; date: Date | null; currencies: string[] } | null;
     fred: { imported: number; date: Date | null; currencies: string[] } | null;
   }> {
     // Always fetch ECB rates
     const ecbResult = await this.fetchECBRates();
 
-    // Try to fetch FRED rates if API key is available
+    // Fetch Fed H.10 rates (no API key required)
+    let fedResult: { imported: number; date: Date | null; currencies: string[] } | null = null;
+    try {
+      fedResult = await this.fetchFedH10Rates();
+    } catch (error) {
+      console.error('Failed to fetch Fed H.10 rates:', error);
+    }
+
+    // Try to fetch FRED rates if API key is available (more currencies than H.10)
     let fredResult: { imported: number; date: Date | null; currencies: string[] } | null = null;
     if (process.env.FRED_API_KEY) {
       try {
@@ -609,6 +743,7 @@ export const currencyService = {
 
     return {
       ecb: ecbResult,
+      fed: fedResult,
       fred: fredResult,
     };
   },
