@@ -97,6 +97,36 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // ==========================================================================
+  // Get Available Sources
+  // ==========================================================================
+
+  /**
+   * GET /currencies/sources
+   * Get available exchange rate sources
+   * NOTE: Must be defined before /:code to avoid being captured as a param
+   */
+  fastify.get('/sources', async () => {
+    const sources = [
+      {
+        id: 'ecb',
+        name: 'European Central Bank',
+        baseCurrency: 'EUR',
+        currencies: 29,
+        available: true,
+      },
+      {
+        id: 'fred',
+        name: 'Federal Reserve Economic Data',
+        baseCurrency: 'USD',
+        currencies: 21,
+        available: !!process.env.FRED_API_KEY,
+      },
+    ];
+
+    return { success: true, data: sources };
+  });
+
+  // ==========================================================================
   // Get Currency
   // ==========================================================================
 
@@ -383,35 +413,6 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
         message: error instanceof Error ? error.message : 'Erreur inconnue',
       });
     }
-  });
-
-  // ==========================================================================
-  // Get Available Sources
-  // ==========================================================================
-
-  /**
-   * GET /currencies/sources
-   * Get available exchange rate sources
-   */
-  fastify.get('/sources', async () => {
-    const sources = [
-      {
-        id: 'ecb',
-        name: 'European Central Bank',
-        baseCurrency: 'EUR',
-        currencies: 29,
-        available: true,
-      },
-      {
-        id: 'fred',
-        name: 'Federal Reserve Economic Data',
-        baseCurrency: 'USD',
-        currencies: 21,
-        available: !!process.env.FRED_API_KEY,
-      },
-    ];
-
-    return { success: true, data: sources };
   });
 
   // ==========================================================================
