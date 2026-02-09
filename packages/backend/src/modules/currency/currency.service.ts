@@ -713,11 +713,97 @@ export const currencyService = {
   },
 
   /**
+   * Fetch rates from SNB (Swiss National Bank)
+   * Note: SNB provides rates with CHF as base currency
+   * Limited to 4 currencies: EUR, USD, GBP, JPY
+   */
+  async fetchSNBRates(): Promise<{ imported: number; date: Date | null; currencies: string[] }> {
+    try {
+      const response = await fetch('https://www.snb.ch/public/en/rss/exchangeRates');
+
+      if (!response.ok) {
+        throw new Error(`SNB RSS error: ${response.status}`);
+      }
+
+      const xml = await response.text();
+      const rates: ExchangeRateData[] = [];
+      const currencies: string[] = [];
+      let latestDate: Date | null = null;
+
+      // Parse each item in the RSS feed
+      // Format: <cb:targetCurrency>EUR</cb:targetCurrency>
+      //         <cb:value>0.9178</cb:value>
+      //         <cb:period>2026-02-06</cb:period>
+      //         <cb:unit_mult>1</cb:unit_mult> (or -2 for JPY = per 100)
+      const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+      let itemMatch;
+
+      while ((itemMatch = itemRegex.exec(xml)) !== null) {
+        const itemContent = itemMatch[1];
+
+        const currencyMatch = itemContent.match(/<cb:targetCurrency>([A-Z]{3})<\/cb:targetCurrency>/);
+        const rateMatch = itemContent.match(/<cb:value>([\d.]+)<\/cb:value>/);
+        const dateMatch = itemContent.match(/<cb:period>(\d{4}-\d{2}-\d{2})<\/cb:period>/);
+        const unitMultMatch = itemContent.match(/<cb:unit_mult>(-?\d+)<\/cb:unit_mult>/);
+
+        if (currencyMatch && rateMatch && dateMatch) {
+          const currency = currencyMatch[1];
+          let rateValue = parseFloat(rateMatch[1]);
+          const date = new Date(dateMatch[1]);
+          const unitMult = unitMultMatch ? parseInt(unitMultMatch[1]) : 0;
+
+          // Skip if we already have this currency (RSS contains historical data)
+          if (currencies.includes(currency)) {
+            continue;
+          }
+
+          // Adjust for unit multiplier (JPY is per 100)
+          if (unitMult === -2) {
+            rateValue = rateValue / 100;
+          }
+
+          if (!latestDate || date > latestDate) {
+            latestDate = date;
+          }
+
+          // SNB gives CHF per foreign currency, we want CHF → foreign
+          // So we need the inverse: 1 CHF = 1/rate foreign currency
+          rates.push({
+            baseCurrency: 'CHF',
+            targetCurrency: currency,
+            rate: 1 / rateValue,
+            date,
+            source: 'snb',
+          });
+
+          currencies.push(currency);
+        }
+      }
+
+      if (rates.length === 0) {
+        return { imported: 0, date: null, currencies: [] };
+      }
+
+      const result = await this.importRates(rates);
+
+      return {
+        imported: result.imported,
+        date: latestDate,
+        currencies,
+      };
+    } catch (error) {
+      console.error('Failed to fetch SNB rates:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Fetch rates from all available sources
    */
   async fetchAllRates(): Promise<{
     ecb: { imported: number; date: Date | null };
     fed: { imported: number; date: Date | null; currencies: string[] } | null;
+    snb: { imported: number; date: Date | null; currencies: string[] } | null;
     fred: { imported: number; date: Date | null; currencies: string[] } | null;
   }> {
     // Always fetch ECB rates
@@ -729,6 +815,14 @@ export const currencyService = {
       fedResult = await this.fetchFedH10Rates();
     } catch (error) {
       console.error('Failed to fetch Fed H.10 rates:', error);
+    }
+
+    // Fetch SNB rates (no API key required)
+    let snbResult: { imported: number; date: Date | null; currencies: string[] } | null = null;
+    try {
+      snbResult = await this.fetchSNBRates();
+    } catch (error) {
+      console.error('Failed to fetch SNB rates:', error);
     }
 
     // Try to fetch FRED rates if API key is available (more currencies than H.10)
@@ -744,6 +838,7 @@ export const currencyService = {
     return {
       ecb: ecbResult,
       fed: fedResult,
+      snb: snbResult,
       fred: fredResult,
     };
   },

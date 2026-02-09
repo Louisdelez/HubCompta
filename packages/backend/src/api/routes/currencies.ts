@@ -124,6 +124,14 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
         requiresApiKey: false,
       },
       {
+        id: 'snb',
+        name: 'Swiss National Bank',
+        baseCurrency: 'CHF',
+        currencies: 4,
+        available: true,
+        requiresApiKey: false,
+      },
+      {
         id: 'fred',
         name: 'Federal Reserve (FRED API)',
         baseCurrency: 'USD',
@@ -421,12 +429,50 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // ==========================================================================
+  // Fetch SNB Rates (no API key required)
+  // ==========================================================================
+
+  /**
+   * POST /currencies/rates/fetch-snb
+   * Fetch latest rates from Swiss National Bank (no API key required)
+   * Limited to 4 currencies: EUR, USD, GBP, JPY
+   */
+  fastify.post('/rates/fetch-snb', { preHandler: [authGuard] }, async (request, reply) => {
+    const userId = request.user?.sub;
+    if (!userId) {
+      return reply.status(401).send({ error: 'Non authentifie' });
+    }
+
+    try {
+      const result = await currencyService.fetchSNBRates();
+
+      await auditService.log({
+        userId,
+        action: 'exchange_rate.fetch_snb',
+        changes: { imported: result.imported, date: result.date, currencies: result.currencies },
+        ipAddress: request.ip,
+      });
+
+      return {
+        success: true,
+        data: result,
+        message: `${result.imported} taux importes depuis SNB (${result.currencies.join(', ')})`,
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        error: 'Erreur lors de la recuperation des taux SNB',
+        message: error instanceof Error ? error.message : 'Erreur inconnue',
+      });
+    }
+  });
+
+  // ==========================================================================
   // Fetch All Rates
   // ==========================================================================
 
   /**
    * POST /currencies/rates/fetch-all
-   * Fetch rates from all available sources (ECB + Fed H.10 + FRED if configured)
+   * Fetch rates from all available sources (ECB + Fed H.10 + SNB + FRED if configured)
    */
   fastify.post('/rates/fetch-all', { preHandler: [authGuard] }, async (request, reply) => {
     const userId = request.user?.sub;
@@ -443,17 +489,18 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
         changes: {
           ecb: { imported: result.ecb.imported },
           fed: result.fed ? { imported: result.fed.imported } : null,
+          snb: result.snb ? { imported: result.snb.imported } : null,
           fred: result.fred ? { imported: result.fred.imported } : null,
         },
         ipAddress: request.ip,
       });
 
-      const totalImported = result.ecb.imported + (result.fed?.imported ?? 0) + (result.fred?.imported ?? 0);
+      const totalImported = result.ecb.imported + (result.fed?.imported ?? 0) + (result.snb?.imported ?? 0) + (result.fred?.imported ?? 0);
 
       return {
         success: true,
         data: result,
-        message: `${totalImported} taux importes (BCE: ${result.ecb.imported}, Fed: ${result.fed?.imported ?? 0}, FRED: ${result.fred?.imported ?? 0})`,
+        message: `${totalImported} taux importes (BCE: ${result.ecb.imported}, Fed: ${result.fed?.imported ?? 0}, SNB: ${result.snb?.imported ?? 0}, FRED: ${result.fred?.imported ?? 0})`,
       };
     } catch (error) {
       return reply.status(500).send({
