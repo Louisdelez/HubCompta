@@ -29,6 +29,49 @@ interface HistoricalRate {
   source: string;
 }
 
+interface ExchangeRateSource {
+  id: string;
+  name: string;
+  baseCurrency: string;
+  currencies: number;
+  available: boolean;
+  requiresApiKey: boolean;
+}
+
+// Source colors and display config
+const SOURCE_CONFIG: Record<string, { color: string; bgColor: string; darkBgColor: string; label: string }> = {
+  ecb: {
+    color: 'text-blue-700 dark:text-blue-300',
+    bgColor: 'bg-blue-100',
+    darkBgColor: 'dark:bg-blue-900/30',
+    label: 'BCE',
+  },
+  'fed-h10': {
+    color: 'text-emerald-700 dark:text-emerald-300',
+    bgColor: 'bg-emerald-100',
+    darkBgColor: 'dark:bg-emerald-900/30',
+    label: 'FED',
+  },
+  snb: {
+    color: 'text-red-700 dark:text-red-300',
+    bgColor: 'bg-red-100',
+    darkBgColor: 'dark:bg-red-900/30',
+    label: 'SNB',
+  },
+  fred: {
+    color: 'text-purple-700 dark:text-purple-300',
+    bgColor: 'bg-purple-100',
+    darkBgColor: 'dark:bg-purple-900/30',
+    label: 'FRED',
+  },
+  manual: {
+    color: 'text-orange-700 dark:text-orange-300',
+    bgColor: 'bg-orange-100',
+    darkBgColor: 'dark:bg-orange-900/30',
+    label: 'MANUEL',
+  },
+};
+
 // ----------------------------------------------------------------------------
 // Component
 // ----------------------------------------------------------------------------
@@ -64,7 +107,13 @@ export function ExchangeRatesPage() {
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 
-  // Fetch ECB rates mutation
+  // Fetch available sources
+  const { data: sourcesData } = useQuery({
+    queryKey: ['exchange-rate-sources'],
+    queryFn: () => api.get<ExchangeRateSource[]>('/currencies/sources'),
+  });
+
+  // Create mutation for each source
   const fetchECBMutation = useMutation({
     mutationFn: () => api.post('/currencies/rates/fetch-ecb', {}),
     onSuccess: () => {
@@ -72,7 +121,20 @@ export function ExchangeRatesPage() {
     },
   });
 
-  // Fetch FRED rates mutation
+  const fetchFedMutation = useMutation({
+    mutationFn: () => api.post('/currencies/rates/fetch-fed', {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
+    },
+  });
+
+  const fetchSNBMutation = useMutation({
+    mutationFn: () => api.post('/currencies/rates/fetch-snb', {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
+    },
+  });
+
   const fetchFREDMutation = useMutation({
     mutationFn: () => api.post('/currencies/rates/fetch-fred', {}),
     onSuccess: () => {
@@ -88,12 +150,6 @@ export function ExchangeRatesPage() {
     },
   });
 
-  // Fetch available sources
-  const { data: sourcesData } = useQuery({
-    queryKey: ['exchange-rate-sources'],
-    queryFn: () => api.get<Array<{ id: string; name: string; baseCurrency: string; currencies: number; available: boolean }>>('/currencies/sources'),
-  });
-
   // Initialize currencies mutation
   const initializeMutation = useMutation({
     mutationFn: () => api.post('/currencies/initialize', {}),
@@ -103,7 +159,26 @@ export function ExchangeRatesPage() {
   });
 
   const sources = sourcesData ?? [];
-  const fredAvailable = sources.find(s => s.id === 'fred')?.available ?? false;
+
+  const isAnyMutationPending = fetchECBMutation.isPending || fetchFedMutation.isPending ||
+    fetchSNBMutation.isPending || fetchFREDMutation.isPending || fetchAllMutation.isPending;
+
+  const isAnyMutationSuccess = fetchECBMutation.isSuccess || fetchFedMutation.isSuccess ||
+    fetchSNBMutation.isSuccess || fetchFREDMutation.isSuccess || fetchAllMutation.isSuccess;
+
+  const isAnyMutationError = fetchECBMutation.isError || fetchFedMutation.isError ||
+    fetchSNBMutation.isError || fetchFREDMutation.isError || fetchAllMutation.isError;
+
+  // Helper to get mutation for a source
+  const getMutationForSource = (sourceId: string) => {
+    switch (sourceId) {
+      case 'ecb': return fetchECBMutation;
+      case 'fed-h10': return fetchFedMutation;
+      case 'snb': return fetchSNBMutation;
+      case 'fred': return fetchFREDMutation;
+      default: return null;
+    }
+  };
 
   const rates = ratesData?.rates ?? [];
   const history = historyData?.rates ?? [];
@@ -213,20 +288,26 @@ export function ExchangeRatesPage() {
                           {new Date(rate.date).toLocaleDateString('fr-FR')}
                         </td>
                         <td className="py-3 px-3 text-center">
-                          <span
-                            className={clsx(
-                              'text-xs px-2 py-1 rounded-full',
-                              rate.source === 'ecb'
-                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                                : rate.source === 'fred'
-                                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                                  : rate.source === 'manual'
-                                    ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
-                                    : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                            )}
-                          >
-                            {rate.source.toUpperCase()}
-                          </span>
+                          {(() => {
+                            const config = SOURCE_CONFIG[rate.source] ?? {
+                              color: 'text-gray-700 dark:text-gray-300',
+                              bgColor: 'bg-gray-100',
+                              darkBgColor: 'dark:bg-gray-700',
+                              label: rate.source.toUpperCase(),
+                            };
+                            return (
+                              <span
+                                className={clsx(
+                                  'text-xs px-2 py-1 rounded-full',
+                                  config.bgColor,
+                                  config.darkBgColor,
+                                  config.color
+                                )}
+                              >
+                                {config.label}
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td className="py-3 px-3">
                           <button
@@ -374,83 +455,106 @@ export function ExchangeRatesPage() {
 
           {/* Sources Info */}
           <div className="card">
-            <h3 className="font-semibold mb-3">Sources de taux</h3>
-            <div className="space-y-3">
-              {/* ECB */}
-              <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-300 text-xs font-bold">
-                  BCE
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">Banque Centrale Europeenne</p>
-                  <p className="text-xs text-gray-500">29 devises - Base EUR</p>
-                  <p className="text-xs text-gray-400 mt-1">Publie a 16h CET</p>
-                </div>
-              </div>
+            <h3 className="font-semibold mb-3">Sources de taux ({sources.length})</h3>
+            <div className="space-y-2">
+              {sources.map((source) => {
+                const config = SOURCE_CONFIG[source.id] ?? {
+                  color: 'text-gray-700 dark:text-gray-300',
+                  bgColor: 'bg-gray-100',
+                  darkBgColor: 'dark:bg-gray-700',
+                  label: source.id.toUpperCase(),
+                };
+                const bgClass = source.available
+                  ? config.bgColor.replace('100', '50') + ' ' + config.darkBgColor.replace('/30', '/20')
+                  : 'bg-gray-50 dark:bg-gray-700/50 opacity-60';
 
-              {/* FRED */}
-              <div className={clsx(
-                'flex items-start gap-3 p-3 rounded-lg',
-                fredAvailable
-                  ? 'bg-green-50 dark:bg-green-900/20'
-                  : 'bg-gray-50 dark:bg-gray-700/50 opacity-60'
-              )}>
-                <div className={clsx(
-                  'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold',
-                  fredAvailable
-                    ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-500'
-                )}>
-                  FED
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">Federal Reserve (FRED)</p>
-                  <p className="text-xs text-gray-500">21 devises - Base USD</p>
-                  {!fredAvailable && (
-                    <p className="text-xs text-orange-500 mt-1">
-                      Cle API requise (FRED_API_KEY)
-                    </p>
-                  )}
-                </div>
-              </div>
+                return (
+                  <div
+                    key={source.id}
+                    className={clsx('flex items-start gap-3 p-3 rounded-lg', bgClass)}
+                  >
+                    <div
+                      className={clsx(
+                        'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold',
+                        source.available
+                          ? `${config.bgColor} ${config.darkBgColor} ${config.color}`
+                          : 'bg-gray-200 dark:bg-gray-600 text-gray-500'
+                      )}
+                    >
+                      {config.label.slice(0, 3)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{source.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {source.currencies} devises - Base {source.baseCurrency}
+                      </p>
+                      {source.requiresApiKey && !source.available && (
+                        <p className="text-xs text-orange-500 mt-1">
+                          Cle API requise
+                        </p>
+                      )}
+                      {source.available && (
+                        <span className="inline-flex items-center text-xs text-green-600 dark:text-green-400 mt-1">
+                          <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1" />
+                          Actif
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           {/* Actions */}
           <div className="card">
-            <h3 className="font-semibold mb-3">Actions</h3>
+            <h3 className="font-semibold mb-3">Importer les taux</h3>
             <div className="space-y-2">
-              <button
-                onClick={() => fetchECBMutation.mutate()}
-                disabled={fetchECBMutation.isPending}
-                className="btn-secondary w-full"
-              >
-                {fetchECBMutation.isPending ? 'Chargement...' : 'Importer BCE'}
-              </button>
-              {fredAvailable && (
-                <button
-                  onClick={() => fetchFREDMutation.mutate()}
-                  disabled={fetchFREDMutation.isPending}
-                  className="btn-secondary w-full"
-                >
-                  {fetchFREDMutation.isPending ? 'Chargement...' : 'Importer FRED'}
-                </button>
-              )}
+              {/* Individual source buttons */}
+              <div className="grid grid-cols-2 gap-2">
+                {sources.filter(s => s.available).map((source) => {
+                  const mutation = getMutationForSource(source.id);
+                  const config = SOURCE_CONFIG[source.id];
+                  if (!mutation || !config) return null;
+
+                  return (
+                    <button
+                      key={source.id}
+                      onClick={() => mutation.mutate()}
+                      disabled={mutation.isPending || isAnyMutationPending}
+                      className={clsx(
+                        'btn-secondary text-xs py-2 flex items-center justify-center gap-1',
+                        mutation.isPending && 'opacity-50'
+                      )}
+                    >
+                      <span
+                        className={clsx(
+                          'w-2 h-2 rounded-full',
+                          config.bgColor
+                        )}
+                      />
+                      {mutation.isPending ? '...' : config.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Fetch all button */}
               <button
                 onClick={() => fetchAllMutation.mutate()}
-                disabled={fetchAllMutation.isPending}
-                className="btn-primary w-full"
+                disabled={isAnyMutationPending}
+                className="btn-primary w-full mt-2"
               >
-                {fetchAllMutation.isPending ? 'Chargement...' : 'Importer toutes les sources'}
+                {fetchAllMutation.isPending ? 'Importation...' : 'Importer toutes les sources'}
               </button>
             </div>
 
-            {(fetchECBMutation.isSuccess || fetchFREDMutation.isSuccess || fetchAllMutation.isSuccess) && (
+            {isAnyMutationSuccess && (
               <p className="text-sm text-success-600 mt-2">
                 Taux mis a jour avec succes
               </p>
             )}
-            {(fetchECBMutation.isError || fetchFREDMutation.isError || fetchAllMutation.isError) && (
+            {isAnyMutationError && (
               <p className="text-sm text-danger-600 mt-2">
                 Erreur lors de la mise a jour
               </p>
