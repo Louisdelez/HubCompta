@@ -193,7 +193,7 @@ export function RegisterForm() {
           {errors.password && (
             <p className="error-text">{errors.password.message}</p>
           )}
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Min. 12 caractères avec majuscule, minuscule, chiffre et caractère spécial
           </p>
         </div>

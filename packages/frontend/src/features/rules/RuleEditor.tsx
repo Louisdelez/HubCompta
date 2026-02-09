@@ -214,7 +214,7 @@ export function RuleEditor({ workspaceId, rule, onClose, onSave }: RuleEditorPro
                   onChange={(e) => setPriority(parseInt(e.target.value) || 0)}
                   className="input"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Les règles avec une priorité plus élevée s'appliquent en premier
                 </p>
               </div>
@@ -289,7 +289,7 @@ export function RuleEditor({ workspaceId, rule, onClose, onSave }: RuleEditorPro
                 ))}
               </div>
 
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                 Toutes les conditions doivent être remplies (ET logique)
               </p>
             </div>
@@ -306,7 +306,7 @@ export function RuleEditor({ workspaceId, rule, onClose, onSave }: RuleEditorPro
 
             {/* Test Results */}
             {testMutation.data && (
-              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg">
                 <p className="text-sm font-medium mb-2">
                   {testMutation.data.filter((t) => t.matches).length} correspondance(s) sur{' '}
                   {testMutation.data.length} transactions récentes

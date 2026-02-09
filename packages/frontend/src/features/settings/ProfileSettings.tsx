@@ -86,7 +86,7 @@ export function ProfileSettings() {
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
       <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-3">
-          <User className="h-5 w-5 text-gray-500" />
+          <User className="h-5 w-5 text-gray-500 dark:text-gray-400" />
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profil</h2>
         </div>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -104,9 +104,9 @@ export function ProfileSettings() {
             type="email"
             value={profile?.email || ''}
             disabled
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
           />
-          <p className="mt-1 text-xs text-gray-500">L'email ne peut pas être modifié</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">L'email ne peut pas être modifié</p>
         </div>
 
         {/* Display Name */}
@@ -122,7 +122,7 @@ export function ProfileSettings() {
               setIsEditing(true);
             }}
             placeholder="Votre nom"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -137,7 +137,7 @@ export function ProfileSettings() {
               setFormData({ ...formData, locale: e.target.value });
               setIsEditing(true);
             }}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="fr-FR">Francais</option>
             <option value="en-US">English (US)</option>
@@ -158,7 +158,7 @@ export function ProfileSettings() {
               setFormData({ ...formData, timezone: e.target.value });
               setIsEditing(true);
             }}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="Europe/Paris">Europe/Paris (CET)</option>
             <option value="Europe/London">Europe/London (GMT)</option>
@@ -180,7 +180,7 @@ export function ProfileSettings() {
               setFormData({ ...formData, theme: e.target.value });
               setIsEditing(true);
             }}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="system">Systeme</option>
             <option value="light">Clair</option>
@@ -216,7 +216,7 @@ export function ProfileSettings() {
                 });
                 setIsEditing(false);
               }}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
               Annuler
             </button>

@@ -92,29 +92,29 @@ function CustomTooltip({
   const investedData = payload.find((p) => p.dataKey === 'invested');
 
   return (
-    <div className="bg-white border rounded-lg shadow-lg p-3">
-      <p className="text-sm text-gray-500 mb-2">
+    <div className="bg-white dark:bg-gray-800 border rounded-lg shadow-lg p-3">
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
         {label ? format(parseISO(label), 'dd MMM yyyy', { locale: fr }) : ''}
       </p>
       {valueData && (
         <p className="text-sm">
-          <span className="text-gray-600">Valeur: </span>
-          <span className="font-medium text-gray-900">
+          <span className="text-gray-600 dark:text-gray-400">Valeur: </span>
+          <span className="font-medium text-gray-900 dark:text-white">
             {formatCurrency(valueData.value, currency)}
           </span>
         </p>
       )}
       {showInvested && investedData && (
         <p className="text-sm">
-          <span className="text-gray-600">Investi: </span>
-          <span className="font-medium text-gray-500">
+          <span className="text-gray-600 dark:text-gray-400">Investi: </span>
+          <span className="font-medium text-gray-500 dark:text-gray-400">
             {formatCurrency(investedData.value, currency)}
           </span>
         </p>
       )}
       {valueData && investedData && (
         <p className="text-sm mt-1 pt-1 border-t">
-          <span className="text-gray-600">P&L: </span>
+          <span className="text-gray-600 dark:text-gray-400">P&L: </span>
           <span
             className={cn(
               'font-medium',
@@ -209,7 +209,7 @@ export function PerformanceChart({
       {/* Header with stats */}
       <div className="flex items-start justify-between mb-4">
         <div>
-          <p className="text-2xl font-semibold text-gray-900">
+          <p className="text-2xl font-semibold text-gray-900 dark:text-white">
             {formatCurrency(stats.endValue, currency)}
           </p>
           <div className="flex items-center gap-2 mt-1">
@@ -220,7 +220,7 @@ export function PerformanceChart({
             <span
               className={cn(
                 'text-xs px-1.5 py-0.5 rounded',
-                stats.change >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                stats.change >= 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400'
               )}
             >
               {stats.changePercent >= 0 ? '+' : ''}
@@ -230,7 +230,7 @@ export function PerformanceChart({
         </div>
 
         {/* Time range selector */}
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+        <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
           {TIME_RANGES.map((range) => (
             <button
               key={range.key}
@@ -238,8 +238,8 @@ export function PerformanceChart({
               className={cn(
                 'px-3 py-1 text-xs font-medium rounded-md transition-colors',
                 timeRange === range.key
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               )}
             >
               {range.label}
@@ -311,11 +311,11 @@ export function PerformanceChart({
         <div className="flex items-center justify-center gap-6 mt-4">
           <div className="flex items-center gap-2">
             <span className="w-4 h-0.5" style={{ backgroundColor: chartColor }} />
-            <span className="text-xs text-gray-600">Valeur du portefeuille</span>
+            <span className="text-xs text-gray-600 dark:text-gray-400">Valeur du portefeuille</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-4 h-0.5 border-t border-dashed border-gray-400" />
-            <span className="text-xs text-gray-600">Montant investi</span>
+            <span className="text-xs text-gray-600 dark:text-gray-400">Montant investi</span>
           </div>
         </div>
       )}

@@ -73,7 +73,7 @@ export function AdminUsers() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Utilisateurs</h2>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-gray-500 dark:text-gray-400">
           {pagination?.total ?? 0} utilisateurs
         </span>
       </div>
@@ -103,16 +103,16 @@ export function AdminUsers() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
                   Utilisateur
                 </th>
-                <th className="text-center py-3 px-4 text-sm font-medium text-gray-500">
+                <th className="text-center py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
                   Espaces
                 </th>
-                <th className="text-center py-3 px-4 text-sm font-medium text-gray-500">
+                <th className="text-center py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
                   Admin
                 </th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">
+                <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
                   Inscription
                 </th>
                 <th className="py-3 px-4"></th>
@@ -122,14 +122,14 @@ export function AdminUsers() {
               {users.map((user) => (
                 <tr
                   key={user.id}
-                  className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50"
                 >
                   <td className="py-3 px-4">
                     <div>
                       <p className="font-medium">
                         {user.displayName || user.email.split('@')[0]}
                       </p>
-                      <p className="text-sm text-gray-500">{user.email}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
                     </div>
                   </td>
                   <td className="py-3 px-4 text-center">
@@ -147,7 +147,7 @@ export function AdminUsers() {
                       <span className="text-gray-400">-</span>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-right text-sm text-gray-500">
+                  <td className="py-3 px-4 text-right text-sm text-gray-500 dark:text-gray-400">
                     {new Date(user.createdAt).toLocaleDateString('fr-FR')}
                   </td>
                   <td className="py-3 px-4">
@@ -179,7 +179,7 @@ export function AdminUsers() {
           </table>
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
           Aucun utilisateur trouve
         </div>
       )}
@@ -187,7 +187,7 @@ export function AdminUsers() {
       {/* Pagination */}
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Page {pagination.page} sur {pagination.totalPages}
           </p>
           <div className="flex gap-2">

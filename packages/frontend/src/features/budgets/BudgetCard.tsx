@@ -120,11 +120,11 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
           {budget.category.icon ? (
             <span className="text-2xl">{budget.category.icon}</span>
           ) : (
-            <Folder className="w-6 h-6 text-gray-500" />
+            <Folder className="w-6 h-6 text-gray-500 dark:text-gray-400" />
           )}
           <div>
             <h3 className="font-medium">{budget.name}</h3>
-            <p className="text-sm text-gray-500">{budget.category.name}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{budget.category.name}</p>
           </div>
         </div>
         {statusBadge && (
@@ -138,7 +138,7 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
       <div className="mb-3">
         <div className="flex justify-between text-sm mb-1">
           <span className="font-medium">{budget.percentUsed}%</span>
-          <span className="text-gray-500">
+          <span className="text-gray-500 dark:text-gray-400">
             {formatCurrency(budget.spent)} / {formatCurrency(Number(budget.amount))}
           </span>
         </div>
@@ -153,7 +153,7 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
       {/* Stats */}
       <div className="flex justify-between text-sm">
         <div>
-          <p className="text-gray-500">Restant</p>
+          <p className="text-gray-500 dark:text-gray-400">Restant</p>
           <p
             className={clsx(
               'font-medium',
@@ -165,7 +165,7 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
           </p>
         </div>
         <div className="text-right">
-          <p className="text-gray-500">Alerte à</p>
+          <p className="text-gray-500 dark:text-gray-400">Alerte à</p>
           <p className="font-medium">{budget.alertThreshold}%</p>
         </div>
       </div>

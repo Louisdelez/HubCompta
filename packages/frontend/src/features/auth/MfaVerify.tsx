@@ -155,7 +155,7 @@ export function MfaVerify({
       <div className="mt-6 text-center space-y-2">
         <button
           onClick={() => setShowBackupInput(!showBackupInput)}
-          className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+          className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white dark:hover:text-gray-200"
         >
           {showBackupInput
             ? 'Utiliser le code authenticator'
@@ -165,7 +165,7 @@ export function MfaVerify({
         <div>
           <button
             onClick={onCancel}
-            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white dark:hover:text-gray-200"
           >
             ← Retour
           </button>

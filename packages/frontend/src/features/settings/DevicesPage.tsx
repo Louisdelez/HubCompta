@@ -109,7 +109,7 @@ export function DevicesPage() {
             key={device.id}
             className="card flex items-start gap-4"
           >
-            {(() => { const Icon = getDeviceIcon(device.name); return <Icon className="w-6 h-6 text-gray-500" />; })()}
+            {(() => { const Icon = getDeviceIcon(device.name); return <Icon className="w-6 h-6 text-gray-500 dark:text-gray-400" />; })()}
 
             <div className="flex-1 min-w-0">
               {selectedDevice === device.id ? (
@@ -204,7 +204,7 @@ export function DevicesPage() {
         )}
       </div>
 
-      <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+      <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-700 dark:bg-gray-800 rounded-lg">
         <h3 className="font-medium mb-2">À propos des appareils</h3>
         <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
           <li>• Les appareils fiables bénéficient de vérifications de sécurité réduites</li>

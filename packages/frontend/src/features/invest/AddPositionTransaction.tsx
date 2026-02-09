@@ -167,16 +167,16 @@ export function AddPositionTransaction({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Nouvelle transaction</h2>
-            <p className="text-sm text-gray-500">{assetSymbol}</p>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Nouvelle transaction</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{assetSymbol}</p>
           </div>
           <button
             onClick={handleClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+            className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 rounded-lg"
           >
             <X className="h-5 w-5" />
           </button>
@@ -186,7 +186,7 @@ export function AddPositionTransaction({
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Transaction type */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Type de transaction
             </label>
             <div className="flex gap-2">
@@ -199,11 +199,11 @@ export function AddPositionTransaction({
                     'flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors',
                     type === t
                       ? t === 'buy'
-                        ? 'bg-green-50 border-green-500 text-green-700'
+                        ? 'bg-green-50 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400'
                         : t === 'sell'
-                        ? 'bg-red-50 border-red-500 text-red-700'
-                        : 'bg-blue-50 border-blue-500 text-blue-700'
-                      : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                        ? 'bg-red-50 dark:bg-red-900/30 border-red-500 text-red-700 dark:text-red-400'
+                        : 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 text-blue-700 dark:text-blue-400'
+                      : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                   )}
                 >
                   {getTypeIcon(t)}
@@ -215,7 +215,7 @@ export function AddPositionTransaction({
 
           {/* Quantity */}
           <div>
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {type === 'dividend' ? 'Montant reçu' : 'Quantité'}
             </label>
             <input
@@ -225,7 +225,7 @@ export function AddPositionTransaction({
               min="0"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
               placeholder={type === 'dividend' ? 'Montant du dividende' : 'Nombre de titres'}
               required
             />
@@ -234,7 +234,7 @@ export function AddPositionTransaction({
           {/* Price */}
           {type !== 'dividend' && (
             <div>
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Prix unitaire ({assetCurrency})
               </label>
               <div className="relative">
@@ -245,7 +245,7 @@ export function AddPositionTransaction({
                   min="0"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  className="w-full px-3 py-2 pr-20 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 pr-20 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Prix par titre"
                   required
                 />
@@ -260,7 +260,7 @@ export function AddPositionTransaction({
                       }
                     }}
                     disabled={isLoadingQuote}
-                    className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded"
+                    className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"
                     title="Utiliser le prix actuel"
                   >
                     <RefreshCw className={cn('h-4 w-4', isLoadingQuote && 'animate-spin')} />
@@ -269,7 +269,7 @@ export function AddPositionTransaction({
                 </div>
               </div>
               {currentPrice !== null && (
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Prix actuel : {currentPrice.toFixed(2)} {assetCurrency}
                   {quoteData?.quote && (
                     <span className={cn(
@@ -287,7 +287,7 @@ export function AddPositionTransaction({
 
           {/* Fees */}
           <div>
-            <label htmlFor="fees" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="fees" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Frais ({assetCurrency})
             </label>
             <input
@@ -297,14 +297,14 @@ export function AddPositionTransaction({
               min="0"
               value={fees}
               onChange={(e) => setFees(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
               placeholder="0.00"
             />
           </div>
 
           {/* Date */}
           <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Date
             </label>
             <input
@@ -312,14 +312,14 @@ export function AddPositionTransaction({
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
               required
             />
           </div>
 
           {/* Notes */}
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Notes (optionnel)
             </label>
             <textarea
@@ -327,17 +327,17 @@ export function AddPositionTransaction({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
               placeholder="Notes additionnelles..."
             />
           </div>
 
           {/* Total */}
           {type !== 'dividend' && quantity && price && (
-            <div className="p-3 bg-gray-50 rounded-lg">
+            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Total</span>
-                <span className="font-medium text-gray-900">
+                <span className="text-gray-600 dark:text-gray-400">Total</span>
+                <span className="font-medium text-gray-900 dark:text-white">
                   {calculateTotal().toFixed(2)} {assetCurrency}
                 </span>
               </div>
@@ -346,8 +346,8 @@ export function AddPositionTransaction({
 
           {/* Error */}
           {addTransactionMutation.isError && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">
+            <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400">
                 Erreur lors de l'ajout de la transaction
               </p>
             </div>
@@ -358,7 +358,7 @@ export function AddPositionTransaction({
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium"
+              className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 font-medium"
             >
               Annuler
             </button>

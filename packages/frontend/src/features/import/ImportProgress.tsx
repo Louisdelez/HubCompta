@@ -154,7 +154,7 @@ export function ImportProgress({
             fill="none"
             stroke="currentColor"
             strokeWidth="8"
-            className="text-gray-200 dark:text-gray-700"
+            className="text-gray-200 dark:text-gray-700 dark:text-gray-300"
           />
           {/* Progress circle */}
           <circle
@@ -186,16 +186,16 @@ export function ImportProgress({
         <div className="flex justify-center gap-6 mt-6 text-sm">
           <div>
             <span className="font-medium text-success-600">{jobStatus.importedRows}</span>
-            <span className="text-gray-500 ml-1">importées</span>
+            <span className="text-gray-500 dark:text-gray-400 ml-1">importées</span>
           </div>
           <div>
-            <span className="font-medium text-gray-600">{jobStatus.skippedRows}</span>
-            <span className="text-gray-500 ml-1">ignorées</span>
+            <span className="font-medium text-gray-600 dark:text-gray-400">{jobStatus.skippedRows}</span>
+            <span className="text-gray-500 dark:text-gray-400 ml-1">ignorées</span>
           </div>
           {jobStatus.errorRows > 0 && (
             <div>
               <span className="font-medium text-danger-600">{jobStatus.errorRows}</span>
-              <span className="text-gray-500 ml-1">erreurs</span>
+              <span className="text-gray-500 dark:text-gray-400 ml-1">erreurs</span>
             </div>
           )}
         </div>

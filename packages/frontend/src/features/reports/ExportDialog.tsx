@@ -120,15 +120,15 @@ export function ExportDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             {title || `Exporter - ${exportLabels[type]}`}
           </h2>
           <button
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+            className="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700"
           >
             <X className="h-5 w-5" />
           </button>
@@ -138,10 +138,10 @@ export function ExportDialog({
         <div className="p-6 space-y-4">
           {/* Date range info */}
           {dateRange && (
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">
+            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Période:{' '}
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-gray-900 dark:text-white">
                   {format(dateRange.from, 'dd/MM/yyyy')} - {format(dateRange.to, 'dd/MM/yyyy')}
                 </span>
               </p>
@@ -150,7 +150,7 @@ export function ExportDialog({
 
           {/* Format selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Format</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Format</label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
@@ -165,7 +165,7 @@ export function ExportDialog({
                 <FileText className="h-5 w-5" />
                 <div className="text-left">
                   <p className="font-medium">CSV</p>
-                  <p className="text-xs text-gray-500">Excel, tableurs</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Excel, tableurs</p>
                 </div>
               </button>
               <button
@@ -181,24 +181,24 @@ export function ExportDialog({
                 <FileJson className="h-5 w-5" />
                 <div className="text-left">
                   <p className="font-medium">JSON</p>
-                  <p className="text-xs text-gray-500">Données brutes</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Données brutes</p>
                 </div>
               </button>
             </div>
           </div>
 
           {/* Info */}
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Le fichier sera téléchargé automatiquement après la génération.
           </p>
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50">
+        <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50 dark:bg-gray-900">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-white border rounded-lg hover:bg-gray-50"
+            className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900"
           >
             Annuler
           </button>

@@ -147,9 +147,9 @@ export function PreviewStep({
 
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
+        <div className="p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg text-center">
           <p className="text-2xl font-bold">{preview.totalRows}</p>
-          <p className="text-sm text-gray-500">Lignes totales</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Lignes totales</p>
         </div>
         <div className="p-4 bg-success-50 dark:bg-success-900/20 rounded-lg text-center">
           <p className="text-2xl font-bold text-success-600">{preview.validRows}</p>
@@ -222,14 +222,14 @@ export function PreviewStep({
           </table>
         </div>
         {preview.validRows > 10 && (
-          <p className="text-xs text-gray-500 mt-2 text-center">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
             + {preview.validRows - 10} autres transactions
           </p>
         )}
       </div>
 
       {/* Import Options */}
-      <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+      <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg">
         <h3 className="font-medium">Options d'import</h3>
 
         <label className="flex items-center gap-3">
@@ -237,11 +237,11 @@ export function PreviewStep({
             type="checkbox"
             checked={skipDuplicates}
             onChange={(e) => setSkipDuplicates(e.target.checked)}
-            className="w-5 h-5 rounded border-gray-300"
+            className="w-5 h-5 rounded border-gray-300 dark:border-gray-600"
           />
           <div>
             <p className="font-medium">Ignorer les doublons</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {preview.duplicates} transaction(s) déjà présente(s)
             </p>
           </div>
@@ -252,11 +252,11 @@ export function PreviewStep({
             type="checkbox"
             checked={applyRules}
             onChange={(e) => setApplyRules(e.target.checked)}
-            className="w-5 h-5 rounded border-gray-300"
+            className="w-5 h-5 rounded border-gray-300 dark:border-gray-600"
           />
           <div>
             <p className="font-medium">Appliquer les règles de catégorisation</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Catégorise automatiquement selon vos règles
             </p>
           </div>

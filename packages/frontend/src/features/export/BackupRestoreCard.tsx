@@ -157,7 +157,7 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
               </div>
               <div className="flex-1">
                 <h4 className="font-medium">Créer une sauvegarde</h4>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   Téléchargez une copie complète de vos données au format JSON.
                   Inclut comptes, transactions, catégories, budgets et règles.
                 </p>
@@ -176,7 +176,7 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
               </div>
               <div className="flex-1">
                 <h4 className="font-medium">Restaurer depuis une sauvegarde</h4>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   Importez une sauvegarde précédente pour restaurer vos données.
                   Attention: cette action peut modifier vos données existantes.
                 </p>
@@ -207,36 +207,36 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
             </h4>
             <div className="space-y-2 text-sm">
               <p>
-                <span className="text-gray-500">Date:</span>{' '}
+                <span className="text-gray-500 dark:text-gray-400">Date:</span>{' '}
                 {new Date(backupPreview.exportedAt).toLocaleString('fr-FR')}
               </p>
               <p>
-                <span className="text-gray-500">Workspace:</span>{' '}
+                <span className="text-gray-500 dark:text-gray-400">Workspace:</span>{' '}
                 {backupPreview.workspace.name}
               </p>
               <p>
-                <span className="text-gray-500">Version:</span>{' '}
+                <span className="text-gray-500 dark:text-gray-400">Version:</span>{' '}
                 {backupPreview.version}
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
+            <div className="p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg text-center">
               <div className="text-2xl font-bold">{backupPreview.accounts.length}</div>
-              <div className="text-sm text-gray-500">Comptes</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Comptes</div>
             </div>
-            <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
+            <div className="p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg text-center">
               <div className="text-2xl font-bold">{backupPreview.transactions.length}</div>
-              <div className="text-sm text-gray-500">Transactions</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Transactions</div>
             </div>
-            <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
+            <div className="p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg text-center">
               <div className="text-2xl font-bold">{backupPreview.categories.length}</div>
-              <div className="text-sm text-gray-500">Catégories</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Catégories</div>
             </div>
-            <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
+            <div className="p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg text-center">
               <div className="text-2xl font-bold">{backupPreview.budgets.length}</div>
-              <div className="text-sm text-gray-500">Budgets</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Budgets</div>
             </div>
           </div>
 

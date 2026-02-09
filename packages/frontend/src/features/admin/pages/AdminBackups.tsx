@@ -149,21 +149,21 @@ export function AdminBackups() {
             {backups.map((backup, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4"
+                className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4"
               >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg">
                     {backup.type === 'full' ? (
-                      <HardDrive className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                      <HardDrive className="h-5 w-5 text-gray-600 dark:text-gray-400 dark:text-gray-300" />
                     ) : (
-                      <Building2 className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                      <Building2 className="h-5 w-5 text-gray-600 dark:text-gray-400 dark:text-gray-300" />
                     )}
                   </div>
                   <div>
                     <p className="font-medium text-sm truncate max-w-md">
                       {backup.path.split('/').pop()}
                     </p>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {formatDate(backup.lastModified)}
@@ -182,7 +182,7 @@ export function AdminBackups() {
                   </div>
                 </div>
                 <button
-                  className="btn-ghost p-2 text-gray-500 hover:text-gray-700"
+                  className="btn-ghost p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300"
                   title="Telecharger"
                 >
                   <Download className="h-4 w-4" />
@@ -191,7 +191,7 @@ export function AdminBackups() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
             <Database className="h-12 w-12 mx-auto text-gray-300 mb-3" />
             <p>Aucune sauvegarde disponible</p>
             <p className="text-sm mt-1">
@@ -202,7 +202,7 @@ export function AdminBackups() {
       </div>
 
       {/* Info */}
-      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 text-sm text-gray-600 dark:text-gray-400">
+      <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4 text-sm text-gray-600 dark:text-gray-400">
         <p>
           Les sauvegardes sont stockees dans le bucket S3 configure. Les sauvegardes
           completes incluent toutes les donnees, tandis que les sauvegardes

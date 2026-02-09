@@ -204,7 +204,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
                   className="input pr-10"
                   required
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
                   EUR
                 </span>
               </div>
@@ -215,7 +215,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
               <div>
                 <label className="label">Période</label>
                 <div className="flex gap-3">
-                  <label className="flex items-center gap-2 flex-1 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <label className="flex items-center gap-2 flex-1 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700">
                     <input
                       type="radio"
                       name="period"
@@ -226,7 +226,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
                     />
                     <span>Mensuel</span>
                   </label>
-                  <label className="flex items-center gap-2 flex-1 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <label className="flex items-center gap-2 flex-1 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700">
                     <input
                       type="radio"
                       name="period"
@@ -259,7 +259,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
                 />
                 <span className="w-12 text-right font-medium">{alertThreshold}%</span>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Vous serez alerté lorsque ce pourcentage sera atteint
               </p>
             </div>

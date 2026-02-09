@@ -5,8 +5,9 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Monitor, LayoutDashboard, Save, Loader2, RotateCcw } from 'lucide-react';
+import { Monitor, LayoutDashboard, Save, Loader2, RotateCcw, Sun, Moon, Laptop } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useTheme } from '@/providers/ThemeProvider';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -42,6 +43,7 @@ interface UserPreferences {
 
 export function DisplaySettings() {
   const queryClient = useQueryClient();
+  const { theme, setTheme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<UserPreferences>>({});
 
@@ -119,7 +121,7 @@ export function DisplaySettings() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
-            <Monitor className="h-5 w-5 text-gray-500" />
+            <Monitor className="h-5 w-5 text-gray-500 dark:text-gray-400" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Affichage</h2>
           </div>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -128,6 +130,54 @@ export function DisplaySettings() {
         </div>
 
         <div className="p-6 space-y-4">
+          {/* Theme Selector */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Theme
+            </label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setTheme('light')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                  theme === 'light'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                }`}
+              >
+                <Sun className="h-5 w-5" />
+                <span className="text-sm font-medium">Clair</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setTheme('dark')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                  theme === 'dark'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                }`}
+              >
+                <Moon className="h-5 w-5" />
+                <span className="text-sm font-medium">Sombre</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setTheme('system')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                  theme === 'system'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                }`}
+              >
+                <Laptop className="h-5 w-5" />
+                <span className="text-sm font-medium">Systeme</span>
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              Choisissez le theme de l'application ou suivez les preferences systeme
+            </p>
+          </div>
+
           {/* Compact Mode */}
           <label className="flex items-center justify-between cursor-pointer">
             <div>
@@ -172,7 +222,7 @@ export function DisplaySettings() {
             <select
               value={formData.display?.defaultCurrency ?? 'EUR'}
               onChange={(e) => handleChange('display', 'defaultCurrency', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="EUR">Euro (EUR)</option>
               <option value="USD">Dollar US (USD)</option>
@@ -190,7 +240,7 @@ export function DisplaySettings() {
             <select
               value={formData.display?.dateFormat ?? 'DD/MM/YYYY'}
               onChange={(e) => handleChange('display', 'dateFormat', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="DD/MM/YYYY">DD/MM/YYYY (31/12/2024)</option>
               <option value="MM/DD/YYYY">MM/DD/YYYY (12/31/2024)</option>
@@ -206,7 +256,7 @@ export function DisplaySettings() {
             <select
               value={formData.display?.numberFormat ?? 'fr-FR'}
               onChange={(e) => handleChange('display', 'numberFormat', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="fr-FR">Francais (1 234,56)</option>
               <option value="en-US">Anglais US (1,234.56)</option>
@@ -222,7 +272,7 @@ export function DisplaySettings() {
             <select
               value={formData.display?.startOfWeek ?? 1}
               onChange={(e) => handleChange('display', 'startOfWeek', parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value={1}>Lundi</option>
               <option value={0}>Dimanche</option>
@@ -235,7 +285,7 @@ export function DisplaySettings() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
-            <LayoutDashboard className="h-5 w-5 text-gray-500" />
+            <LayoutDashboard className="h-5 w-5 text-gray-500 dark:text-gray-400" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               Tableau de bord
             </h2>
@@ -256,7 +306,7 @@ export function DisplaySettings() {
               onChange={(e) =>
                 handleChange('dashboard', 'defaultPeriod', e.target.value)
               }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="month">Mois</option>
               <option value="quarter">Trimestre</option>
@@ -397,7 +447,7 @@ export function DisplaySettings() {
                 onChange={(e) =>
                   handleChange('privacy', 'inactivityTimeout', parseInt(e.target.value))
                 }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value={1}>1 minute</option>
                 <option value={5}>5 minutes</option>
@@ -418,7 +468,7 @@ export function DisplaySettings() {
               onChange={(e) =>
                 handleChange('privacy', 'sessionTimeout', parseInt(e.target.value))
               }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value={30}>30 minutes</option>
               <option value={60}>1 heure</option>
@@ -436,7 +486,7 @@ export function DisplaySettings() {
           type="button"
           onClick={() => resetMutation.mutate()}
           disabled={resetMutation.isPending}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-lg transition-colors"
         >
           <RotateCcw className="h-4 w-4" />
           Reinitialiser
@@ -456,7 +506,7 @@ export function DisplaySettings() {
                 }
                 setIsEditing(false);
               }}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
               Annuler
             </button>

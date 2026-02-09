@@ -253,16 +253,16 @@ export function ExchangeRatesPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-700">
-                      <th className="text-left py-2 px-3 text-sm font-medium text-gray-500">
+                      <th className="text-left py-2 px-3 text-sm font-medium text-gray-500 dark:text-gray-400">
                         Devise
                       </th>
-                      <th className="text-right py-2 px-3 text-sm font-medium text-gray-500">
+                      <th className="text-right py-2 px-3 text-sm font-medium text-gray-500 dark:text-gray-400">
                         Taux
                       </th>
-                      <th className="text-right py-2 px-3 text-sm font-medium text-gray-500">
+                      <th className="text-right py-2 px-3 text-sm font-medium text-gray-500 dark:text-gray-400">
                         Date
                       </th>
-                      <th className="text-center py-2 px-3 text-sm font-medium text-gray-500">
+                      <th className="text-center py-2 px-3 text-sm font-medium text-gray-500 dark:text-gray-400">
                         Source
                       </th>
                       <th className="py-2 px-3"></th>
@@ -284,7 +284,7 @@ export function ExchangeRatesPage() {
                         <td className="py-3 px-3 text-right font-mono">
                           {rate.rate.toFixed(4)}
                         </td>
-                        <td className="py-3 px-3 text-right text-sm text-gray-500">
+                        <td className="py-3 px-3 text-right text-sm text-gray-500 dark:text-gray-400">
                           {new Date(rate.date).toLocaleDateString('fr-FR')}
                         </td>
                         <td className="py-3 px-3 text-center">
@@ -326,7 +326,7 @@ export function ExchangeRatesPage() {
                 </table>
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <p>Aucun taux disponible</p>
                 <p className="text-sm mt-1">
                   Cliquez sur "Actualiser (BCE)" pour importer les taux de la Banque Centrale Europeenne
@@ -416,20 +416,20 @@ export function ExchangeRatesPage() {
 
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-4 text-center text-sm">
-                    <div className="p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
-                      <p className="text-gray-500">Min</p>
+                    <div className="p-2 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded">
+                      <p className="text-gray-500 dark:text-gray-400">Min</p>
                       <p className="font-mono font-medium">
                         {Math.min(...history.map((r) => r.rate)).toFixed(4)}
                       </p>
                     </div>
-                    <div className="p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
-                      <p className="text-gray-500">Max</p>
+                    <div className="p-2 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded">
+                      <p className="text-gray-500 dark:text-gray-400">Max</p>
                       <p className="font-mono font-medium">
                         {Math.max(...history.map((r) => r.rate)).toFixed(4)}
                       </p>
                     </div>
-                    <div className="p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
-                      <p className="text-gray-500">Moyenne</p>
+                    <div className="p-2 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded">
+                      <p className="text-gray-500 dark:text-gray-400">Moyenne</p>
                       <p className="font-mono font-medium">
                         {(
                           history.reduce((sum, r) => sum + r.rate, 0) /
@@ -440,7 +440,7 @@ export function ExchangeRatesPage() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   Aucun historique disponible
                 </div>
               )}
@@ -485,7 +485,7 @@ export function ExchangeRatesPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{source.name}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {source.currencies} devises - Base {source.baseCurrency}
                       </p>
                       {source.requiresApiKey && !source.available && (

@@ -124,7 +124,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
           </h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
           >
             ✕
           </button>
@@ -228,7 +228,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
               placeholder="12345678901234"
               maxLength={14}
             />
-            <p className="text-xs text-gray-500 mt-1">14 chiffres</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">14 chiffres</p>
           </div>
 
           {/* VAT Number */}

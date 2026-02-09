@@ -79,7 +79,7 @@ export function ImportWizard() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
         Sélectionnez un espace de travail
       </div>
     );
@@ -234,9 +234,9 @@ export function ImportWizard() {
                   Importées
                 </p>
               </div>
-              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg">
                 <p className="text-2xl font-bold">{importState.result?.skipped}</p>
-                <p className="text-sm text-gray-500">Ignorées</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Ignorées</p>
               </div>
               <div className="p-4 bg-warning-50 dark:bg-warning-900/20 rounded-lg">
                 <p className="text-2xl font-bold text-warning-600">

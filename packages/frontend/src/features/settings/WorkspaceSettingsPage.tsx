@@ -198,7 +198,7 @@ export function WorkspaceSettingsPage() {
 
   if (!workspace || !settings) {
     return (
-      <div className="text-center py-12 text-gray-500">Workspace non trouve</div>
+      <div className="text-center py-12 text-gray-500 dark:text-gray-400">Workspace non trouve</div>
     );
   }
 
@@ -223,7 +223,7 @@ export function WorkspaceSettingsPage() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
-            <Building2 className="h-5 w-5 text-gray-500" />
+            <Building2 className="h-5 w-5 text-gray-500 dark:text-gray-400" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               Informations
             </h2>
@@ -240,7 +240,7 @@ export function WorkspaceSettingsPage() {
                 type="text"
                 value={workspaceInfo.name}
                 onChange={(e) => setWorkspaceInfo({ ...workspaceInfo, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -253,7 +253,7 @@ export function WorkspaceSettingsPage() {
                 onChange={(e) =>
                   setWorkspaceInfo({ ...workspaceInfo, currency: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
                 <option value="EUR">Euro (EUR)</option>
                 <option value="USD">Dollar US (USD)</option>
@@ -354,7 +354,7 @@ export function WorkspaceSettingsPage() {
                   onChange={(e) =>
                     handleChange('general', 'fiscalYearStart', parseInt(e.target.value))
                   }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                 >
                   {[
                     'Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -414,7 +414,7 @@ export function WorkspaceSettingsPage() {
                 <select
                   value={formData.import?.defaultDateFormat ?? 'DD/MM/YYYY'}
                   onChange={(e) => handleChange('import', 'defaultDateFormat', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="DD/MM/YYYY">DD/MM/YYYY</option>
                   <option value="MM/DD/YYYY">MM/DD/YYYY</option>
@@ -429,7 +429,7 @@ export function WorkspaceSettingsPage() {
                 <select
                   value={formData.import?.defaultDelimiter ?? ';'}
                   onChange={(e) => handleChange('import', 'defaultDelimiter', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                 >
                   <option value=";">Point-virgule (;)</option>
                   <option value=",">Virgule (,)</option>
@@ -478,7 +478,7 @@ export function WorkspaceSettingsPage() {
             <div className="p-6 space-y-4">
               {!formData.features?.proMode ? (
                 <div className="text-center py-8">
-                  <Briefcase className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                  <Briefcase className="h-12 w-12 text-gray-300 dark:text-gray-600 dark:text-gray-400 mx-auto mb-3" />
                   <p className="text-gray-500 dark:text-gray-400">
                     Activez le mode Pro pour acceder a ces parametres
                   </p>
@@ -501,7 +501,7 @@ export function WorkspaceSettingsPage() {
                         type="text"
                         value={formData.pro?.companyName ?? ''}
                         onChange={(e) => handleChange('pro', 'companyName', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
 
@@ -513,7 +513,7 @@ export function WorkspaceSettingsPage() {
                         type="text"
                         value={formData.pro?.companySiret ?? ''}
                         onChange={(e) => handleChange('pro', 'companySiret', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                   </div>
@@ -526,7 +526,7 @@ export function WorkspaceSettingsPage() {
                       value={formData.pro?.companyAddress ?? ''}
                       onChange={(e) => handleChange('pro', 'companyAddress', e.target.value)}
                       rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
@@ -540,7 +540,7 @@ export function WorkspaceSettingsPage() {
                         value={formData.pro?.companyVat ?? ''}
                         onChange={(e) => handleChange('pro', 'companyVat', e.target.value)}
                         placeholder="FR12345678901"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
 
@@ -555,7 +555,7 @@ export function WorkspaceSettingsPage() {
                           handleChange('pro', 'defaultPaymentTerms', parseInt(e.target.value))
                         }
                         min={0}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                   </div>
@@ -569,7 +569,7 @@ export function WorkspaceSettingsPage() {
                         type="text"
                         value={formData.pro?.invoicePrefix ?? 'FAC'}
                         onChange={(e) => handleChange('pro', 'invoicePrefix', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
 
@@ -581,7 +581,7 @@ export function WorkspaceSettingsPage() {
                         type="text"
                         value={formData.pro?.quotePrefix ?? 'DEV'}
                         onChange={(e) => handleChange('pro', 'quotePrefix', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                   </div>
@@ -595,7 +595,7 @@ export function WorkspaceSettingsPage() {
                       onChange={(e) => handleChange('pro', 'bankDetails', e.target.value)}
                       rows={3}
                       placeholder="IBAN, BIC, nom de la banque..."
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
@@ -608,7 +608,7 @@ export function WorkspaceSettingsPage() {
                       onChange={(e) => handleChange('pro', 'legalNotice', e.target.value)}
                       rows={3}
                       placeholder="Penalites de retard, conditions de paiement..."
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </>
@@ -622,7 +622,7 @@ export function WorkspaceSettingsPage() {
               type="button"
               onClick={() => resetSettingsMutation.mutate()}
               disabled={resetSettingsMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
               <RotateCcw className="h-4 w-4" />
               Reinitialiser
@@ -636,7 +636,7 @@ export function WorkspaceSettingsPage() {
                     setFormData(settings);
                     setIsEditing(false);
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
                   Annuler
                 </button>

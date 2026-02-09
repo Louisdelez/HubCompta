@@ -29,8 +29,12 @@ import {
   Settings,
   LogOut,
   Wallet,
+  Sun,
+  Moon,
+  Monitor,
   type LucideIcon,
 } from 'lucide-react';
+import { useTheme } from '@/providers/ThemeProvider';
 
 // ----------------------------------------------------------------------------
 // Navigation Items
@@ -161,7 +165,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                <p className="text-sm font-medium text-gray-900 dark:text-white dark:text-gray-100 truncate">
                   {user?.displayName ?? 'User'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
@@ -182,7 +186,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               )}
               <NavLink
                 to="/settings"
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
                 onClick={() => onClose()}
               >
                 <Settings className="w-5 h-5" />
@@ -214,6 +218,21 @@ interface HeaderProps {
 
 function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
   const { currentWorkspace, switchWorkspace } = useWorkspace();
+  const { theme, toggleTheme, resolvedTheme } = useTheme();
+
+  const getThemeIcon = () => {
+    if (theme === 'system') return Monitor;
+    if (resolvedTheme === 'dark') return Moon;
+    return Sun;
+  };
+
+  const getThemeLabel = () => {
+    if (theme === 'system') return 'Theme: Systeme';
+    if (theme === 'dark') return 'Theme: Sombre';
+    return 'Theme: Clair';
+  };
+
+  const ThemeIcon = getThemeIcon();
 
   return (
     <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 safe-area-inset-top">
@@ -221,7 +240,7 @@ function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
         {/* Mobile menu button */}
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 -ml-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+          className="lg:hidden p-2 -ml-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-700"
           aria-label="Toggle menu"
         >
           <svg
@@ -255,6 +274,16 @@ function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
+            aria-label={getThemeLabel()}
+            title={getThemeLabel()}
+          >
+            <ThemeIcon className="w-5 h-5" />
+          </button>
+
           {/* Notifications */}
           <NotificationBell />
         </div>

@@ -72,7 +72,7 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4">
+      <div className="relative bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-md mx-4">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
@@ -81,12 +81,12 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
             </div>
             <div>
               <h2 className="text-lg font-semibold">Alerte de prix</h2>
-              <p className="text-sm text-gray-500">{asset.symbol} - {asset.name}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{asset.symbol} - {asset.name}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded"
+            className="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 rounded"
           >
             <X className="h-5 w-5" />
           </button>
@@ -95,7 +95,7 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
         {/* Current Price */}
         {asset.lastPrice && (
           <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-500">Prix actuel</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Prix actuel</p>
             <p className="text-xl font-bold">{formatCurrency(asset.lastPrice, asset.currency)}</p>
           </div>
         )}
@@ -149,7 +149,7 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
               value={targetPrice}
               onChange={(e) => setTargetPrice(e.target.value)}
               placeholder="0.00"
-              className="input w-full"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               required
             />
             {targetPrice && asset.lastPrice && (

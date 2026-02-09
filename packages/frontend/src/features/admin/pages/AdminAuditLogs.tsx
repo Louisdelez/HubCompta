@@ -96,7 +96,7 @@ export function AdminAuditLogs() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Logs d'audit</h2>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-gray-500 dark:text-gray-400">
           {pagination?.total ?? 0} entrees
         </span>
       </div>
@@ -128,7 +128,7 @@ export function AdminAuditLogs() {
           {logs.map((log) => (
             <div
               key={log.id}
-              className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4"
+              className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -139,12 +139,12 @@ export function AdminAuditLogs() {
                       {formatAction(log.action)}
                     </span>
                     {log.entityType && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
                         {log.entityType}
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300">
                     {log.user ? (
                       <>
                         <span className="font-medium">
@@ -157,17 +157,17 @@ export function AdminAuditLogs() {
                   </p>
                   {log.changes && Object.keys(log.changes).length > 0 && (
                     <details className="mt-2">
-                      <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
+                      <summary className="text-xs text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:text-gray-300">
                         Voir les details
                       </summary>
-                      <pre className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs overflow-x-auto">
+                      <pre className="mt-2 p-2 bg-gray-100 dark:bg-gray-700 dark:bg-gray-800 rounded text-xs overflow-x-auto">
                         {JSON.stringify(log.changes, null, 2)}
                       </pre>
                     </details>
                   )}
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                     <Clock className="h-3 w-3" />
                     {new Date(log.createdAt).toLocaleString('fr-FR')}
                   </div>
@@ -182,7 +182,7 @@ export function AdminAuditLogs() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
           Aucun log trouve
         </div>
       )}
@@ -190,7 +190,7 @@ export function AdminAuditLogs() {
       {/* Pagination */}
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Page {pagination.page} sur {pagination.totalPages}
           </p>
           <div className="flex gap-2">

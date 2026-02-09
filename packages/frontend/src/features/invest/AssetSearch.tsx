@@ -172,7 +172,8 @@ export function AssetSearch({
             'w-full pl-10 pr-4 py-2 border rounded-lg',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             'disabled:bg-gray-100 disabled:cursor-not-allowed',
-            'text-sm'
+            'text-sm',
+            'bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400'
           )}
         />
         {isLoading && (
@@ -182,9 +183,9 @@ export function AssetSearch({
 
       {/* Results dropdown */}
       {isOpen && query.length >= 2 && (
-        <div className="absolute z-50 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-64 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border rounded-lg shadow-lg max-h-64 overflow-y-auto">
           {isLoading ? (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
               <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
               Recherche en cours...
             </div>
@@ -196,22 +197,22 @@ export function AssetSearch({
                     type="button"
                     onClick={() => handleSelect(result)}
                     className={cn(
-                      'w-full px-4 py-2 text-left flex items-center gap-3 hover:bg-gray-50',
-                      index === selectedIndex && 'bg-blue-50'
+                      'w-full px-4 py-2 text-left flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700',
+                      index === selectedIndex && 'bg-blue-50 dark:bg-blue-900/30'
                     )}
                   >
                     {getAssetIcon(result.type)}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-900">{result.symbol}</span>
-                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">
+                        <span className="font-medium text-gray-900 dark:text-white">{result.symbol}</span>
+                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
                           {getTypeLabel(result.type)}
                         </span>
                         {result.exchange && (
                           <span className="text-xs text-gray-400">{result.exchange}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-500 truncate">{result.name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{result.name}</p>
                     </div>
                     <span className="text-xs text-gray-400">{result.currency}</span>
                   </button>
@@ -219,7 +220,7 @@ export function AssetSearch({
               ))}
             </ul>
           ) : (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
               Aucun résultat trouvé pour "{query}"
             </div>
           )}

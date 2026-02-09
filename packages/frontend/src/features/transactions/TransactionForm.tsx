@@ -220,7 +220,7 @@ export function TransactionForm({
           )}
 
           {isTransfer ? (
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               Les virements ne peuvent pas être modifiés directement.
             </p>
           ) : (

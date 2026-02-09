@@ -78,7 +78,7 @@ export function AdminLayout() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar Navigation */}
           <aside className="lg:col-span-1">
-            <nav className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+            <nav className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-900/20 overflow-hidden">
               {navItems.map((item, index) => {
                 const Icon = item.icon;
                 const isActive = item.end
@@ -114,7 +114,7 @@ export function AdminLayout() {
 
           {/* Main Content */}
           <main className="lg:col-span-3">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-900/20 p-6">
               <Outlet />
             </div>
           </main>

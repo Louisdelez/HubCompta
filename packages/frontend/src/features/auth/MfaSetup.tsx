@@ -130,7 +130,7 @@ export function MfaSetup() {
         </div>
 
         {/* QR Code */}
-        <div className="bg-white p-4 rounded-xl mb-6 flex justify-center">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl mb-6 flex justify-center">
           <img
             src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(setupData.qrCodeUrl)}`}
             alt="QR Code MFA"
@@ -143,7 +143,7 @@ export function MfaSetup() {
           <summary className="cursor-pointer text-sm text-gray-600 dark:text-gray-400">
             Entrer le code manuellement
           </summary>
-          <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg font-mono text-sm break-all">
+          <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-700 dark:bg-gray-800 rounded-lg font-mono text-sm break-all">
             {setupData.secret}
           </div>
         </details>
@@ -213,7 +213,7 @@ export function MfaSetup() {
           </p>
         </div>
 
-        <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 mb-4">
+        <div className="bg-gray-100 dark:bg-gray-700 dark:bg-gray-800 rounded-lg p-4 mb-4">
           <div className="grid grid-cols-2 gap-2 font-mono text-sm">
             {setupData.backupCodes.map((code, i) => (
               <div key={i} className="text-center py-1">

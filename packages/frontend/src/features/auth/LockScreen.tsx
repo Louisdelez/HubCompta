@@ -133,7 +133,7 @@ export function LockScreen() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-500 dark:text-gray-500 mt-4">
+        <p className="text-center text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-4">
           Session verrouillée après inactivité pour votre sécurité
         </p>
       </div>

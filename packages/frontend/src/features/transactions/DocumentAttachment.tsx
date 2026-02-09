@@ -118,18 +118,18 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
 
       {/* Attached Documents */}
       {isLoading ? (
-        <div className="text-sm text-gray-500">Chargement...</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Chargement...</div>
       ) : attachedDocs && attachedDocs.length > 0 ? (
         <div className="space-y-2 mb-3">
           {attachedDocs.map((doc) => (
             <div
               key={doc.id}
-              className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg"
+              className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg"
             >
-              {(() => { const Icon = getFileIcon(doc.mimeType); return <Icon className="w-5 h-5 text-gray-500" />; })()}
+              {(() => { const Icon = getFileIcon(doc.mimeType); return <Icon className="w-5 h-5 text-gray-500 dark:text-gray-400" />; })()}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{doc.filename}</p>
-                <p className="text-xs text-gray-500">{formatFileSize(doc.size)}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(doc.size)}</p>
               </div>
               <button
                 type="button"
@@ -149,7 +149,7 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
           ))}
         </div>
       ) : (
-        <p className="text-sm text-gray-500 mb-3">Aucun justificatif attaché</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Aucun justificatif attaché</p>
       )}
 
       {/* Add Button / Picker */}
@@ -160,7 +160,7 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
             <button
               type="button"
               onClick={() => setShowPicker(false)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 dark:text-gray-400"
             >
               <X className="w-4 h-4" />
             </button>
@@ -174,18 +174,18 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
                   type="button"
                   onClick={() => linkMutation.mutate(doc.id)}
                   disabled={linkMutation.isPending}
-                  className="w-full flex items-center gap-2 p-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
+                  className="w-full flex items-center gap-2 p-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 rounded"
                 >
-                  {(() => { const Icon = getFileIcon(doc.mimeType); return <Icon className="w-5 h-5 text-gray-500" />; })()}
+                  {(() => { const Icon = getFileIcon(doc.mimeType); return <Icon className="w-5 h-5 text-gray-500 dark:text-gray-400" />; })()}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm truncate">{doc.filename}</p>
-                    <p className="text-xs text-gray-500">{formatFileSize(doc.size)}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(doc.size)}</p>
                   </div>
                 </button>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500 text-center py-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
               Aucun document dans la boîte de réception
             </p>
           )}
@@ -194,7 +194,7 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
         <button
           type="button"
           onClick={() => setShowPicker(true)}
-          className="w-full py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-500 hover:border-primary-400 hover:text-primary-600 transition-colors text-sm"
+          className="w-full py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:border-primary-400 hover:text-primary-600 transition-colors text-sm"
         >
           + Ajouter un justificatif
         </button>

@@ -123,9 +123,9 @@ export function PositionList({
   };
 
   const getPnLBgColor = (value: number) => {
-    if (value > 0) return 'bg-green-50';
-    if (value < 0) return 'bg-red-50';
-    return 'bg-gray-50';
+    if (value > 0) return 'bg-green-50 dark:bg-green-900/30';
+    if (value < 0) return 'bg-red-50 dark:bg-red-900/30';
+    return 'bg-gray-50 dark:bg-gray-700';
   };
 
   if (isLoading) {
@@ -140,8 +140,8 @@ export function PositionList({
     return (
       <div className="text-center py-12">
         <TrendingUp className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune position</h3>
-        <p className="text-gray-500">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Aucune position</h3>
+        <p className="text-gray-500 dark:text-gray-400">
           Ajoutez votre première position d'investissement pour commencer le suivi.
         </p>
       </div>
@@ -153,39 +153,39 @@ export function PositionList({
       {positions.map((position) => (
         <div
           key={position.id}
-          className="bg-white border rounded-lg hover:shadow-md transition-shadow"
+          className="bg-white dark:bg-gray-800 border rounded-lg hover:shadow-md transition-shadow"
         >
           <div className="p-4">
             <div className="flex items-center gap-4">
               {/* Asset icon and info */}
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="p-2 bg-gray-50 rounded-lg">{getAssetIcon(position.asset.type)}</div>
+                <div className="p-2 bg-gray-50 dark:bg-gray-900 rounded-lg">{getAssetIcon(position.asset.type)}</div>
                 <div className="min-w-0">
                   <button
                     onClick={() => onPositionClick?.(position)}
-                    className="font-medium text-gray-900 hover:text-blue-600 flex items-center gap-1"
+                    className="font-medium text-gray-900 dark:text-white hover:text-blue-600 flex items-center gap-1"
                   >
                     {position.asset.symbol}
                     <ChevronRight className="h-4 w-4" />
                   </button>
-                  <p className="text-sm text-gray-500 truncate">{position.asset.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{position.asset.name}</p>
                 </div>
               </div>
 
               {/* Quantity and PRU */}
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {formatNumber(position.quantity)} unités
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   PRU: {formatCurrency(position.averageCost, position.asset.currency)}
                 </p>
               </div>
 
               {/* Current value */}
               <div className="text-right hidden md:block">
-                <p className="text-sm text-gray-500">Valeur actuelle</p>
-                <p className="font-medium text-gray-900">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Valeur actuelle</p>
+                <p className="font-medium text-gray-900 dark:text-white">
                   {formatCurrency(position.currentValue, 'EUR')}
                 </p>
               </div>
@@ -213,7 +213,7 @@ export function PositionList({
               <div className="relative">
                 <button
                   onClick={() => setOpenMenuId(openMenuId === position.id ? null : position.id)}
-                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 rounded-lg"
                 >
                   <MoreVertical className="h-5 w-5" />
                 </button>
@@ -224,13 +224,13 @@ export function PositionList({
                       className="fixed inset-0 z-10"
                       onClick={() => setOpenMenuId(null)}
                     />
-                    <div className="absolute right-0 top-full mt-1 w-48 bg-white border rounded-lg shadow-lg z-20 py-1">
+                    <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border rounded-lg shadow-lg z-20 py-1">
                       <button
                         onClick={() => {
                           onAddTransaction?.(position);
                           setOpenMenuId(null);
                         }}
-                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 flex items-center gap-2"
                       >
                         <Plus className="h-4 w-4" />
                         Acheter
@@ -240,7 +240,7 @@ export function PositionList({
                           onAddTransaction?.(position);
                           setOpenMenuId(null);
                         }}
-                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 flex items-center gap-2"
                       >
                         <Minus className="h-4 w-4" />
                         Vendre
@@ -262,17 +262,17 @@ export function PositionList({
             {/* Mobile details */}
             <div className="flex items-center justify-between mt-3 pt-3 border-t sm:hidden">
               <div>
-                <p className="text-xs text-gray-500">Quantité</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Quantité</p>
                 <p className="text-sm font-medium">{formatNumber(position.quantity)}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">PRU</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">PRU</p>
                 <p className="text-sm font-medium">
                   {formatCurrency(position.averageCost, position.asset.currency)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Valeur</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Valeur</p>
                 <p className="text-sm font-medium">{formatCurrency(position.currentValue, 'EUR')}</p>
               </div>
             </div>

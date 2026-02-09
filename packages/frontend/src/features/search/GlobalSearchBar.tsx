@@ -190,7 +190,7 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyNavigation}
           placeholder="Rechercher..."
-          className="flex-1 bg-transparent border-0 outline-none text-sm placeholder-gray-400"
+          className="flex-1 bg-transparent border-0 outline-none text-sm placeholder-gray-400 dark:placeholder-gray-500"
         />
         <kbd className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">
           <span>⌘</span>K
@@ -201,12 +201,12 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
       {isOpen && query.length >= 2 && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50 max-h-96 overflow-y-auto">
           {isLoading ? (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
               <div className="animate-spin w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full mx-auto" />
               <p className="mt-2 text-sm">Recherche en cours...</p>
             </div>
           ) : results.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
               <p className="text-sm">Aucun résultat pour "{query}"</p>
             </div>
           ) : (
@@ -247,7 +247,7 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{result.title}</p>
                           {result.subtitle && (
-                            <p className="text-xs text-gray-500 truncate">{result.subtitle}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{result.subtitle}</p>
                           )}
                         </div>
                         {result.amount !== undefined && (
@@ -279,7 +279,7 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
                     setIsOpen(false);
                     setQuery('');
                   }}
-                  className="w-full px-3 py-2 text-center text-sm text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  className="w-full px-3 py-2 text-center text-sm text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50"
                 >
                   Voir tous les résultats ({searchData.totalCount})
                 </button>

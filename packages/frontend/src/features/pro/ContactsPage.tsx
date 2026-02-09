@@ -122,7 +122,7 @@ export function ContactsPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
         Sélectionnez un espace de travail
       </div>
     );
@@ -210,7 +210,7 @@ export function ContactsPage() {
         <div className="card text-center py-12">
           <Users className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucun contact</h2>
-          <p className="text-gray-500 mb-4">
+          <p className="text-gray-500 dark:text-gray-400 mb-4">
             Ajoutez vos premiers clients ou fournisseurs
           </p>
           <button
@@ -255,7 +255,7 @@ export function ContactsPage() {
                     {contact.type === 'client' ? 'Client' : 'Fournisseur'}
                   </span>
                 </div>
-                <div className="text-sm text-gray-500 space-x-4">
+                <div className="text-sm text-gray-500 dark:text-gray-400 space-x-4">
                   {contact.email && <span>{contact.email}</span>}
                   {contact.phone && <span>{contact.phone}</span>}
                 </div>
@@ -265,14 +265,14 @@ export function ContactsPage() {
               <div className="hidden md:flex items-center gap-6 text-sm">
                 <div className="text-center">
                   <p className="font-medium">{contact._count.invoices}</p>
-                  <p className="text-gray-500">Factures</p>
+                  <p className="text-gray-500 dark:text-gray-400">Factures</p>
                 </div>
                 {contact.type === 'client' && (
                   <div className="text-center">
                     <p className="font-medium">
                       {formatCurrency(contact.totalInvoiced ?? 0)}
                     </p>
-                    <p className="text-gray-500">Facturé</p>
+                    <p className="text-gray-500 dark:text-gray-400">Facturé</p>
                   </div>
                 )}
               </div>
@@ -281,7 +281,7 @@ export function ContactsPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleEdit(contact)}
-                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
                   title="Modifier"
                 >
                   <Pencil className="w-4 h-4" />

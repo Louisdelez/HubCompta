@@ -67,7 +67,7 @@ export function SettlementHistory({ currency = 'EUR' }: SettlementHistoryProps) 
     return (
       <div className="text-center py-12">
         <Clock className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-        <p className="text-gray-500">Aucun historique disponible</p>
+        <p className="text-gray-500 dark:text-gray-400">Aucun historique disponible</p>
       </div>
     );
   }
@@ -86,15 +86,15 @@ export function SettlementHistory({ currency = 'EUR' }: SettlementHistoryProps) 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card text-center">
-          <p className="text-sm text-gray-500">Total 6 mois</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Total 6 mois</p>
           <p className="text-2xl font-bold">{formatCurrency(totalAll, currency)}</p>
         </div>
         <div className="card text-center">
-          <p className="text-sm text-gray-500">Moyenne mensuelle</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Moyenne mensuelle</p>
           <p className="text-2xl font-bold">{formatCurrency(average, currency)}</p>
         </div>
         <div className="card text-center">
-          <p className="text-sm text-gray-500">Tendance</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Tendance</p>
           <div className="flex items-center justify-center gap-2">
             {trend >= 0 ? (
               <TrendingUp className="h-5 w-5 text-red-500" />
@@ -135,7 +135,7 @@ export function SettlementHistory({ currency = 'EUR' }: SettlementHistoryProps) 
                 )}
                 <div>
                   <p className="font-medium capitalize">{entry.period}</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {entry.settled ? 'Reglement effectue' : 'En cours'}
                   </p>
                 </div>
@@ -143,7 +143,7 @@ export function SettlementHistory({ currency = 'EUR' }: SettlementHistoryProps) 
               <div className="text-right">
                 <p className="font-semibold">{formatCurrency(entry.totalExpenses, currency)}</p>
                 {index > 0 && history[index - 1] && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {(() => {
                       const prev = history[index - 1];
                       if (!prev || prev.totalExpenses === 0) return '';

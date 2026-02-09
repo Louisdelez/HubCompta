@@ -131,17 +131,17 @@ export function DocumentCard({
     >
       {/* Header */}
       <div className="flex items-start gap-3 mb-3">
-        {(() => { const Icon = getFileIcon(document.mimeType); return <Icon className="w-8 h-8 text-gray-500" />; })()}
+        {(() => { const Icon = getFileIcon(document.mimeType); return <Icon className="w-8 h-8 text-gray-500 dark:text-gray-400" />; })()}
         <div className="flex-1 min-w-0">
           <p className="font-medium truncate" title={document.filename}>
             {document.filename}
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {formatFileSize(document.size)} • {formatDate(document.createdAt)}
           </p>
         </div>
         {document.isVault && (
-          <span title="Document chiffré"><Lock className="w-5 h-5 text-gray-500" /></span>
+          <span title="Document chiffré"><Lock className="w-5 h-5 text-gray-500 dark:text-gray-400" /></span>
         )}
       </div>
 
@@ -158,7 +158,7 @@ export function DocumentCard({
           </span>
         )}
         {document.status === 'archived' && (
-          <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
+          <span className="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 dark:bg-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
             <Archive className="w-3 h-3" /> Archivé
           </span>
         )}
@@ -170,7 +170,7 @@ export function DocumentCard({
           {document.links.slice(0, 2).map((link) => (
             <div
               key={link.id}
-              className="flex items-center justify-between text-sm p-2 bg-gray-50 dark:bg-gray-700 rounded"
+              className="flex items-center justify-between text-sm p-2 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded"
               onClick={(e) => e.stopPropagation()}
             >
               <span className="truncate flex-1">{link.transaction.description}</span>
@@ -192,7 +192,7 @@ export function DocumentCard({
             </div>
           ))}
           {document.links.length > 2 && (
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
               + {document.links.length - 2} autre(s)
             </p>
           )}

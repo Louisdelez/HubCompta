@@ -157,7 +157,7 @@ export function RecurrencesPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500">Selectionnez un espace de travail</div>
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">Selectionnez un espace de travail</div>
     );
   }
 
@@ -267,7 +267,7 @@ export function RecurrencesPage() {
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <ArrowUpCircle className="w-6 h-6 text-success-500" />
                 Revenus recurrents
-                <span className="text-sm font-normal text-gray-500">
+                <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
                   ({incomeRecurrences.length})
                 </span>
               </h2>
@@ -291,7 +291,7 @@ export function RecurrencesPage() {
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <ArrowDownCircle className="w-6 h-6 text-danger-500" />
                 Depenses recurrentes
-                <span className="text-sm font-normal text-gray-500">
+                <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
                   ({expenseRecurrences.length})
                 </span>
               </h2>
@@ -312,7 +312,7 @@ export function RecurrencesPage() {
           {/* Empty filter state */}
           {filteredRecurrences.length === 0 && (
             <div className="card text-center py-12">
-              <p className="text-gray-500">Aucune recurrence ne correspond aux filtres</p>
+              <p className="text-gray-500 dark:text-gray-400">Aucune recurrence ne correspond aux filtres</p>
             </div>
           )}
         </div>
@@ -320,7 +320,7 @@ export function RecurrencesPage() {
         <div className="card text-center py-12">
           <RefreshCw className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucune transaction recurrente</h2>
-          <p className="text-gray-500 mb-6">
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
             Creez des recurrences pour automatiser vos revenus et depenses regulieres
             <br />
             (loyer, abonnements, salaire, etc.)
@@ -337,21 +337,21 @@ export function RecurrencesPage() {
           <div className="card text-center">
             <Settings className="w-8 h-8 mx-auto mb-2 text-primary-500" />
             <h3 className="font-semibold mb-1">Configurez</h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Definissez le montant, la frequence et le compte
             </p>
           </div>
           <div className="card text-center">
             <Cog className="w-8 h-8 mx-auto mb-2 text-primary-500" />
             <h3 className="font-semibold mb-1">Automatisez</h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Les transactions sont creees automatiquement
             </p>
           </div>
           <div className="card text-center">
             <CheckCircle className="w-8 h-8 mx-auto mb-2 text-primary-500" />
             <h3 className="font-semibold mb-1">Controlez</h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Pausez, modifiez ou passez des occurrences
             </p>
           </div>

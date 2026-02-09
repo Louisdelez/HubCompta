@@ -112,7 +112,7 @@ export function DataManagement() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
-            <Database className="h-5 w-5 text-gray-500" />
+            <Database className="h-5 w-5 text-gray-500 dark:text-gray-400" />
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Resume de vos donnees
@@ -132,7 +132,7 @@ export function DataManagement() {
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Informations du compte
                 </h3>
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
+                <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg p-4 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500 dark:text-gray-400">Email</span>
                     <span className="text-gray-900 dark:text-white">{summary.user.email}</span>
@@ -164,7 +164,7 @@ export function DataManagement() {
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center"
+                    className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg p-4 text-center"
                   >
                     <div className="text-2xl font-bold text-gray-900 dark:text-white">
                       {item.count}
@@ -182,7 +182,7 @@ export function DataManagement() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
-            <FileJson className="h-5 w-5 text-gray-500" />
+            <FileJson className="h-5 w-5 text-gray-500 dark:text-gray-400" />
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Exporter vos donnees

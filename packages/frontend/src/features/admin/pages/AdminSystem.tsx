@@ -48,11 +48,11 @@ export function AdminSystem() {
       {/* Cache Management */}
       <div className="space-y-4">
         <h3 className="font-medium flex items-center gap-2">
-          <Database className="h-5 w-5 text-gray-500" />
+          <Database className="h-5 w-5 text-gray-500 dark:text-gray-400" />
           Gestion du cache
         </h3>
 
-        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 space-y-4">
+        <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4 space-y-4">
           {/* Clear all cache */}
           <div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
@@ -73,7 +73,7 @@ export function AdminSystem() {
           </div>
 
           {/* Clear by pattern */}
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700 dark:border-gray-600">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
               Vider le cache par pattern (ex: cache:exchange-rates:*)
             </p>
@@ -118,28 +118,28 @@ export function AdminSystem() {
       {/* System Info */}
       <div className="space-y-4">
         <h3 className="font-medium flex items-center gap-2">
-          <Info className="h-5 w-5 text-gray-500" />
+          <Info className="h-5 w-5 text-gray-500 dark:text-gray-400" />
           Informations systeme
         </h3>
 
-        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+        <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4">
           <dl className="space-y-3">
             <div className="flex justify-between">
-              <dt className="text-gray-500">Application</dt>
+              <dt className="text-gray-500 dark:text-gray-400">Application</dt>
               <dd className="font-medium">HubCompta</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500">Version</dt>
+              <dt className="text-gray-500 dark:text-gray-400">Version</dt>
               <dd className="font-mono text-sm">1.0.0</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500">Environnement</dt>
+              <dt className="text-gray-500 dark:text-gray-400">Environnement</dt>
               <dd className="font-mono text-sm">
                 {import.meta.env.MODE}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500">API URL</dt>
+              <dt className="text-gray-500 dark:text-gray-400">API URL</dt>
               <dd className="font-mono text-sm truncate max-w-xs">
                 {import.meta.env.VITE_API_URL || 'http://localhost:3000'}
               </dd>

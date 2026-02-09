@@ -144,17 +144,17 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
     <div className={cn('relative', className)}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 text-sm"
+        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 text-sm"
       >
-        <Calendar className="h-4 w-4 text-gray-500" />
-        <span className="text-gray-700">{displayLabel}</span>
+        <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+        <span className="text-gray-700 dark:text-gray-300">{displayLabel}</span>
         <ChevronDown className="h-4 w-4 text-gray-400" />
       </button>
 
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 w-72 bg-white border rounded-lg shadow-lg z-20 p-4">
+          <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 border rounded-lg shadow-lg z-20 p-4">
             {/* Presets */}
             <div className="space-y-1 mb-4">
               {presets.map((preset) => (
@@ -188,7 +188,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
             {(isCustom || currentPreset === 'custom') && (
               <div className="border-t pt-4 space-y-3">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Du</label>
+                  <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Du</label>
                   <input
                     type="date"
                     value={customFrom}
@@ -197,7 +197,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Au</label>
+                  <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Au</label>
                   <input
                     type="date"
                     value={customTo}

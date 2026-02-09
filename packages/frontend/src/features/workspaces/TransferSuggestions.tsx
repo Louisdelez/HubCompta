@@ -79,7 +79,7 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
       <div className="card text-center py-8">
         <CheckCircle className="w-10 h-10 mx-auto mb-3 text-success-500" />
         <h3 className="text-lg font-semibold text-success-600">Tout est équilibré !</h3>
-        <p className="text-gray-500 mt-1">
+        <p className="text-gray-500 dark:text-gray-400 mt-1">
           Personne ne doit d'argent à personne
         </p>
       </div>
@@ -93,7 +93,7 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-semibold">Transferts suggérés</h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {transfers.length} transfert{transfers.length > 1 ? 's' : ''} pour équilibrer les comptes
           </p>
         </div>
@@ -143,7 +143,7 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
                   </div>
                   <div className="flex items-center">
                     <div className="h-0.5 w-8 bg-gray-300 dark:bg-gray-600" />
-                    <span className="text-gray-400 dark:text-gray-500">→</span>
+                    <span className="text-gray-400 dark:text-gray-500 dark:text-gray-400">→</span>
                   </div>
                 </div>
               </div>
@@ -188,7 +188,7 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
       {/* Total */}
       <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
         <div className="flex justify-between items-center">
-          <span className="text-gray-500">Total à transférer</span>
+          <span className="text-gray-500 dark:text-gray-400">Total à transférer</span>
           <span className="text-xl font-bold">
             {formatCurrency(
               transfers.reduce((sum, t) => sum + t.amount, 0),

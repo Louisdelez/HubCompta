@@ -89,7 +89,7 @@ export function DocumentsPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
         Sélectionnez un espace de travail
       </div>
     );
@@ -194,7 +194,7 @@ export function DocumentsPage() {
         <div className="card text-center py-12">
           <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucun document</h2>
-          <p className="text-gray-500 mb-6">
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
             {filterStatus !== 'all'
               ? 'Aucun document dans cette catégorie'
               : 'Commencez par ajouter vos premiers justificatifs'}

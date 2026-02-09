@@ -374,7 +374,7 @@ export function ExportDialog({ workspaceId, isOpen, onClose, initialType = 'tran
                 type="checkbox"
                 checked={includeArchived}
                 onChange={(e) => setIncludeArchived(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
               />
               <span className="text-sm">Inclure les éléments archivés</span>
             </label>

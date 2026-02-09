@@ -228,7 +228,7 @@ export function RecurrenceCard({
           </span>
           <div>
             <h3 className="font-medium">{recurrence.name}</h3>
-            <p className="text-sm text-gray-500">{recurrence.template.description}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{recurrence.template.description}</p>
           </div>
         </div>
         <span
@@ -246,7 +246,7 @@ export function RecurrenceCard({
       {/* Amount and Frequency */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <p className="text-sm text-gray-500">Montant</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Montant</p>
           <p
             className={clsx('text-lg font-bold', isExpense ? 'text-danger-600' : 'text-success-600')}
           >
@@ -255,7 +255,7 @@ export function RecurrenceCard({
           </p>
         </div>
         <div>
-          <p className="text-sm text-gray-500">Frequence</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Frequence</p>
           <p className="font-medium">
             {getFrequencyLabel(
               recurrence.frequency,
@@ -268,22 +268,22 @@ export function RecurrenceCard({
       </div>
 
       {/* Next Run & Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+      <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg">
         <div>
-          <p className="text-xs text-gray-500">Prochaine execution</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Prochaine execution</p>
           <p className="font-medium text-sm">
             {recurrence.isActive ? formatRelativeDate(recurrence.nextRunAt) : '-'}
           </p>
         </div>
         <div>
-          <p className="text-xs text-gray-500">Executions</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Executions</p>
           <p className="font-medium text-sm">{recurrence.executionCount} fois</p>
         </div>
       </div>
 
       {/* Account */}
       {recurrence.template.account && (
-        <div className="text-sm text-gray-500 mb-4">
+        <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           Compte: <span className="text-gray-700 dark:text-gray-300">{recurrence.template.account.name}</span>
         </div>
       )}

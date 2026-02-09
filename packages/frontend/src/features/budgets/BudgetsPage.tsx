@@ -101,7 +101,7 @@ export function BudgetsPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
         Sélectionnez un espace de travail
       </div>
     );
@@ -146,17 +146,17 @@ export function BudgetsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="card text-center">
             <p className="text-2xl font-bold">{summary.total}</p>
-            <p className="text-sm text-gray-500">Budgets actifs</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Budgets actifs</p>
           </div>
           <div className="card text-center">
             <p className="text-2xl font-bold">{formatCurrency(summary.totalBudgeted)}</p>
-            <p className="text-sm text-gray-500">Budget total</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Budget total</p>
           </div>
           <div className="card text-center">
             <p className="text-2xl font-bold text-primary-600">
               {formatCurrency(summary.totalSpent)}
             </p>
-            <p className="text-sm text-gray-500">Dépensé</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Dépensé</p>
           </div>
           <div className="card text-center">
             {summary.overBudgetCount > 0 ? (
@@ -227,7 +227,7 @@ export function BudgetsPage() {
         <div className="card text-center py-12">
           <Wallet className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucun budget configuré</h2>
-          <p className="text-gray-500 mb-6">
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
             Créez des budgets pour suivre vos dépenses par catégorie
           </p>
           <button onClick={() => setShowForm(true)} className="btn-primary">

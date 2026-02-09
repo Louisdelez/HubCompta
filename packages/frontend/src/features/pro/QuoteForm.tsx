@@ -303,7 +303,7 @@ export function QuoteForm() {
                 {lines.map((line, index) => (
                   <div
                     key={index}
-                    className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-3"
+                    className="p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg space-y-3"
                   >
                     <div className="flex items-start gap-3">
                       <div className="flex-1">
@@ -328,7 +328,7 @@ export function QuoteForm() {
 
                     <div className="grid grid-cols-4 gap-3">
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Quantité</label>
+                        <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Quantité</label>
                         <input
                           type="number"
                           value={line.quantity}
@@ -339,7 +339,7 @@ export function QuoteForm() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Prix unitaire HT</label>
+                        <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Prix unitaire HT</label>
                         <input
                           type="number"
                           value={line.unitPrice}
@@ -350,7 +350,7 @@ export function QuoteForm() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">TVA</label>
+                        <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">TVA</label>
                         <select
                           value={line.vatRate}
                           onChange={(e) => updateLine(index, 'vatRate', parseFloat(e.target.value))}
@@ -364,8 +364,8 @@ export function QuoteForm() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Total TTC</label>
-                        <div className="input w-full bg-gray-100 dark:bg-gray-600 font-medium">
+                        <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Total TTC</label>
+                        <div className="input w-full bg-gray-100 dark:bg-gray-700 dark:bg-gray-600 font-medium">
                           {formatCurrency(calculateLineTotal(line))}
                         </div>
                       </div>
@@ -408,11 +408,11 @@ export function QuoteForm() {
               <h3 className="font-semibold mb-4">Récapitulatif</h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Sous-total HT</span>
+                  <span className="text-gray-500 dark:text-gray-400">Sous-total HT</span>
                   <span>{formatCurrency(totals.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">TVA</span>
+                  <span className="text-gray-500 dark:text-gray-400">TVA</span>
                   <span>{formatCurrency(totals.vatAmount)}</span>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-gray-100 dark:border-gray-700">

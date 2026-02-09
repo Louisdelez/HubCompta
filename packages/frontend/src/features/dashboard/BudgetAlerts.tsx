@@ -206,7 +206,7 @@ export function BudgetAlerts({ workspaceId }: BudgetAlertsProps) {
       {(!alerts || alerts.length === 0) && (
         <div className="text-center py-4">
           <CheckCircle className="w-8 h-8 mx-auto text-success-500" />
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
             Tous vos budgets sont sous contrôle
           </p>
         </div>

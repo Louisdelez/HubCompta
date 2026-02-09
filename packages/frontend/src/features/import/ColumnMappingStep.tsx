@@ -170,13 +170,13 @@ export function ColumnMappingStep({
         </div>
 
         {/* Amount Type Toggle */}
-        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div className="p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg">
           <label className="flex items-center gap-3">
             <input
               type="checkbox"
               checked={useSplitAmount}
               onChange={(e) => setUseSplitAmount(e.target.checked)}
-              className="w-5 h-5 rounded border-gray-300"
+              className="w-5 h-5 rounded border-gray-300 dark:border-gray-600"
             />
             <div>
               <p className="font-medium">Colonnes crédit/débit séparées</p>
@@ -245,7 +245,7 @@ export function ColumnMappingStep({
                 </option>
               ))}
             </select>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Les montants négatifs seront traités comme des dépenses
             </p>
           </div>

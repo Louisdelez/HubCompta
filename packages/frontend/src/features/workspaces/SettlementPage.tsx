@@ -113,7 +113,7 @@ export function SettlementPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
         Sélectionnez un espace de travail
       </div>
     );
@@ -172,7 +172,7 @@ export function SettlementPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg w-fit">
+      <div className="flex gap-1 mb-6 p-1 bg-gray-100 dark:bg-gray-700 dark:bg-gray-800 rounded-lg w-fit">
         <button
           onClick={() => setActiveTab('current')}
           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -209,17 +209,17 @@ export function SettlementPage() {
               <p className="text-3xl font-bold">
                 {formatCurrency(settlement.totalExpenses, settlement.currency)}
               </p>
-              <p className="text-sm text-gray-500">Dépenses totales</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Dépenses totales</p>
             </div>
             <div className="card text-center">
               <p className="text-3xl font-bold">{settlement.memberCount}</p>
-              <p className="text-sm text-gray-500">Colocataires</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Colocataires</p>
             </div>
             <div className="card text-center">
               <p className="text-3xl font-bold text-primary-600">
                 {formatCurrency(settlement.fairSharePerMember, settlement.currency)}
               </p>
-              <p className="text-sm text-gray-500">Part équitable</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Part équitable</p>
             </div>
           </div>
 
@@ -266,7 +266,7 @@ export function SettlementPage() {
                   })}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-4">Aucune dépense</p>
+                <p className="text-gray-500 dark:text-gray-400 text-center py-4">Aucune dépense</p>
               )}
             </div>
           </div>
@@ -281,7 +281,7 @@ export function SettlementPage() {
         <div className="card text-center py-12">
           <Home className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucune donnee</h2>
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400">
             Ajoutez des depenses partagees pour voir l'equilibre
           </p>
         </div>

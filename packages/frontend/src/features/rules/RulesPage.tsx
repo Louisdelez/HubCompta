@@ -104,7 +104,7 @@ export function RulesPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
         Sélectionnez un espace de travail
       </div>
     );
@@ -253,7 +253,7 @@ export function RulesPage() {
       ) : (
         <div className="card text-center py-12">
           <ClipboardList className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-          <p className="text-gray-500 mb-4">Aucune règle configurée</p>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">Aucune règle configurée</p>
           <button onClick={() => setShowEditor(true)} className="btn-primary">
             Créer votre première règle
           </button>

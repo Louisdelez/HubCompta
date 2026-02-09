@@ -96,7 +96,7 @@ export function CurrencyConverter({
         />
         <button
           onClick={handleSwap}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded"
           title="Inverser"
         >
           ⇄
@@ -152,11 +152,11 @@ export function CurrencyConverter({
         <div className="flex justify-center">
           <button
             onClick={handleSwap}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-full transition-colors"
             title="Inverser les devises"
           >
             <svg
-              className="w-6 h-6 text-gray-500"
+              className="w-6 h-6 text-gray-500 dark:text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -178,9 +178,9 @@ export function CurrencyConverter({
         </div>
 
         {/* Result */}
-        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <div className="p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg">
           {isLoading ? (
-            <div className="text-center text-gray-500">Calcul en cours...</div>
+            <div className="text-center text-gray-500 dark:text-gray-400">Calcul en cours...</div>
           ) : error ? (
             <div className="text-center text-danger-500">
               Taux de change non disponible
@@ -190,7 +190,7 @@ export function CurrencyConverter({
               <p className="text-3xl font-bold text-primary-600">
                 {formatCurrency(conversion.convertedAmount, toCurrency)}
               </p>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                 1 {fromCurrency} = {conversion.rate.toFixed(4)} {toCurrency}
               </p>
               <p className="text-xs text-gray-400 mt-1">
@@ -198,7 +198,7 @@ export function CurrencyConverter({
               </p>
             </div>
           ) : (
-            <div className="text-center text-gray-500">
+            <div className="text-center text-gray-500 dark:text-gray-400">
               Entrez un montant pour convertir
             </div>
           )}

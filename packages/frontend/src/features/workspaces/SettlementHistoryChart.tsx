@@ -48,7 +48,7 @@ export function SettlementHistoryChart({ data, currency = 'EUR' }: SettlementHis
 
   if (chartData.length === 0) {
     return (
-      <div className="h-48 flex items-center justify-center text-gray-500">
+      <div className="h-48 flex items-center justify-center text-gray-500 dark:text-gray-400">
         Aucune donnee
       </div>
     );
@@ -82,7 +82,7 @@ export function SettlementHistoryChart({ data, currency = 'EUR' }: SettlementHis
 
               {/* Label */}
               <div className="text-center">
-                <p className="text-xs text-gray-500 truncate max-w-16">
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-16">
                   {entry.period.split(' ')[0]?.substring(0, 3)}
                 </p>
               </div>
@@ -95,17 +95,17 @@ export function SettlementHistoryChart({ data, currency = 'EUR' }: SettlementHis
       <div className="flex items-center justify-center gap-4 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-gray-300 dark:bg-gray-600 rounded" />
-          <span className="text-gray-500">Mois passes</span>
+          <span className="text-gray-500 dark:text-gray-400">Mois passes</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-primary-500 rounded" />
-          <span className="text-gray-500">Mois en cours</span>
+          <span className="text-gray-500 dark:text-gray-400">Mois en cours</span>
         </div>
       </div>
 
       {/* Average line info */}
       {chartData.length > 1 && (
-        <div className="text-center text-sm text-gray-500">
+        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
           <span>
             Moyenne:{' '}
             <span className="font-medium">

@@ -116,7 +116,7 @@ export function SavedFilters({
 
       {/* Create new filter */}
       {isCreating && (
-        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg">
           <div className="flex gap-2">
             <input
               type="text"
@@ -156,7 +156,7 @@ export function SavedFilters({
           {savedFilters.map((filter) => (
             <div
               key={filter.id}
-              className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
+              className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50 group"
             >
               <button
                 onClick={() => onApply(filter.filters)}
@@ -197,7 +197,7 @@ export function SavedFilters({
           ))}
         </div>
       ) : (
-        <p className="text-sm text-gray-500 text-center py-2">
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
           Aucun filtre sauvegardé
         </p>
       )}

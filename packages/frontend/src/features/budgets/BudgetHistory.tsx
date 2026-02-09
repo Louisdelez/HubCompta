@@ -82,11 +82,11 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
               {budget.category.icon ? (
                 <span className="text-3xl">{budget.category.icon}</span>
               ) : (
-                <Folder className="w-8 h-8 text-gray-500" />
+                <Folder className="w-8 h-8 text-gray-500 dark:text-gray-400" />
               )}
               <div>
                 <h2 className="text-xl font-bold">{budget.name}</h2>
-                <p className="text-gray-500 text-sm">
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
                   Historique {budget.period === 'monthly' ? 'mensuel' : 'annuel'}
                 </p>
               </div>
@@ -99,7 +99,7 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
           {isLoading ? (
             <div className="text-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full mx-auto mb-2" />
-              <p className="text-gray-500">Chargement...</p>
+              <p className="text-gray-500 dark:text-gray-400">Chargement...</p>
             </div>
           ) : history && history.length > 0 ? (
             <>
@@ -139,7 +139,7 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
                           />
                         </div>
                         {/* Label */}
-                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                           {entry.period}
                         </span>
                       </div>
@@ -213,10 +213,10 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
               </div>
 
               {/* Summary */}
-              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg">
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <p className="text-sm text-gray-500">Moyenne dépensée</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Moyenne dépensée</p>
                     <p className="text-lg font-bold">
                       {formatCurrency(
                         history.reduce((sum, h) => sum + h.spent, 0) / history.length
@@ -224,13 +224,13 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Mois dépassés</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Mois dépassés</p>
                     <p className="text-lg font-bold text-danger-600">
                       {history.filter((h) => h.spent > h.budgeted).length}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Taux moyen</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Taux moyen</p>
                     <p className="text-lg font-bold">
                       {Math.round(
                         history.reduce((sum, h) => sum + h.percentUsed, 0) / history.length
@@ -244,7 +244,7 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
           ) : (
             <div className="text-center py-12">
               <BarChart3 className="w-10 h-10 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-500">Pas encore d'historique disponible</p>
+              <p className="text-gray-500 dark:text-gray-400">Pas encore d'historique disponible</p>
             </div>
           )}
 

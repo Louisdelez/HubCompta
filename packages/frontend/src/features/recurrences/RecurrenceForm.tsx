@@ -304,7 +304,7 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
                     className="input pr-12"
                     required
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
                     EUR
                   </span>
                 </div>
@@ -477,10 +477,10 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
 
             {/* Active toggle (only for editing) */}
             {isEditing && (
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg">
                 <div>
                   <p className="font-medium">Recurrence active</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Desactivez pour mettre en pause temporairement
                   </p>
                 </div>

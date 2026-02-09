@@ -200,7 +200,7 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
           <div>
             <FileText className="w-10 h-10 mx-auto mb-2 text-primary-500" />
             <p className="font-medium">{selectedFile.name}</p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {(selectedFile.size / 1024).toFixed(1)} Ko
             </p>
             <button
@@ -216,7 +216,7 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
             <p className="font-medium mb-1">
               Glissez-déposez votre fichier CSV ici
             </p>
-            <p className="text-sm text-gray-500 mb-4">ou</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">ou</p>
             <label className="btn-secondary cursor-pointer">
               Parcourir
               <input

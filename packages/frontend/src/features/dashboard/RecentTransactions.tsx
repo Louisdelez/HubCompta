@@ -104,7 +104,7 @@ export function RecentTransactions({ workspaceId, limit = 10 }: RecentTransactio
             <Link
               key={txn.id}
               to={`/transactions/${txn.id}`}
-              className="flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+              className="flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors"
             >
               {/* Icon */}
               <div

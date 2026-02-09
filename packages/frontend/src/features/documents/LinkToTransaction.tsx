@@ -115,7 +115,7 @@ export function LinkToTransaction({
       <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden animate-scale-in">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold">Lier à une transaction</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Associez "{document.filename}" à une transaction
           </p>
         </div>
@@ -137,7 +137,7 @@ export function LinkToTransaction({
           {isLoading ? (
             <div className="p-6 text-center">
               <div className="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full mx-auto mb-2" />
-              <p className="text-gray-500">Chargement...</p>
+              <p className="text-gray-500 dark:text-gray-400">Chargement...</p>
             </div>
           ) : transactions.length > 0 ? (
             <div className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -159,7 +159,7 @@ export function LinkToTransaction({
                         )}
                         <p className="font-medium truncate">{txn.description}</p>
                       </div>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         {formatDate(txn.date)} • {txn.account.name}
                       </p>
                     </div>
@@ -177,7 +177,7 @@ export function LinkToTransaction({
             </div>
           ) : (
             <div className="p-6 text-center">
-              <p className="text-gray-500">
+              <p className="text-gray-500 dark:text-gray-400">
                 {searchQuery ? 'Aucun résultat' : 'Aucune transaction récente'}
               </p>
             </div>

@@ -89,7 +89,7 @@ export function ManualRateModal({
           <h2 className="text-lg font-semibold">Definir un taux manuel</h2>
           <button
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded"
+            className="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 rounded"
           >
             <X className="h-5 w-5" />
           </button>
@@ -140,7 +140,7 @@ export function ManualRateModal({
               required
             />
             {rate && parseFloat(rate) > 0 && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 1 {baseCurrency} = {parseFloat(rate).toFixed(4)} {targetCurrency}
               </p>
             )}

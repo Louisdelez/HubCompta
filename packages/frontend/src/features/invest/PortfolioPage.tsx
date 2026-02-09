@@ -183,9 +183,9 @@ export function PortfolioPage() {
   };
 
   const getPnLBgColor = (value: number) => {
-    if (value > 0) return 'bg-green-50';
-    if (value < 0) return 'bg-red-50';
-    return 'bg-gray-50';
+    if (value > 0) return 'bg-green-50 dark:bg-green-900/30';
+    if (value < 0) return 'bg-red-50 dark:bg-red-900/30';
+    return 'bg-gray-50 dark:bg-gray-700';
   };
 
   // Detail view
@@ -222,14 +222,14 @@ export function PortfolioPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Portefeuille</h1>
-          <p className="text-gray-500">Suivi de vos investissements</p>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Portefeuille</h1>
+          <p className="text-gray-500 dark:text-gray-400">Suivi de vos investissements</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={handleRefreshPrices}
             disabled={isRefreshing || isFetchingSummary}
-            className="px-3 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center gap-2 disabled:opacity-50"
+            className="px-3 py-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2 disabled:opacity-50"
           >
             <RefreshCw className={cn('h-4 w-4', (isRefreshing || isFetchingSummary) && 'animate-spin')} />
             <span className="hidden sm:inline">Actualiser</span>
@@ -253,12 +253,12 @@ export function PortfolioPage() {
           {/* Summary cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Total value */}
-            <div className="bg-white border rounded-lg p-4">
-              <div className="flex items-center gap-2 text-gray-500 mb-2">
+            <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
+              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
                 <Wallet className="h-4 w-4" />
                 <span className="text-sm">Valeur totale</span>
               </div>
-              <p className="text-2xl font-semibold text-gray-900">
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                 {formatCurrency(summary.totalValue, baseCurrency)}
               </p>
               <p className="text-xs text-gray-400 mt-1">
@@ -267,19 +267,19 @@ export function PortfolioPage() {
             </div>
 
             {/* Total cost */}
-            <div className="bg-white border rounded-lg p-4">
-              <div className="flex items-center gap-2 text-gray-500 mb-2">
+            <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
+              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
                 <TrendingUp className="h-4 w-4" />
                 <span className="text-sm">Montant investi</span>
               </div>
-              <p className="text-2xl font-semibold text-gray-900">
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                 {formatCurrency(summary.totalCost, baseCurrency)}
               </p>
             </div>
 
             {/* Unrealized P&L */}
             <div className={cn('border rounded-lg p-4', getPnLBgColor(summary.totalUnrealizedGain))}>
-              <div className="flex items-center gap-2 text-gray-500 mb-2">
+              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
                 {summary.totalUnrealizedGain >= 0 ? (
                   <TrendingUp className="h-4 w-4 text-green-500" />
                 ) : (
@@ -299,7 +299,7 @@ export function PortfolioPage() {
 
             {/* Realized P&L */}
             <div className={cn('border rounded-lg p-4', getPnLBgColor(summary.totalRealizedGain))}>
-              <div className="flex items-center gap-2 text-gray-500 mb-2">
+              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
                 <LineChartIcon className="h-4 w-4" />
                 <span className="text-sm">P&L réalisé</span>
               </div>
@@ -313,10 +313,10 @@ export function PortfolioPage() {
           {/* Charts and positions */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Allocation chart */}
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
               <div className="flex items-center gap-2 mb-4">
-                <PieChartIcon className="h-4 w-4 text-gray-500" />
-                <h2 className="text-sm font-medium text-gray-700">Répartition par type</h2>
+                <PieChartIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300">Répartition par type</h2>
               </div>
               {allocation && allocation.byType.length > 0 ? (
                 <>
@@ -344,18 +344,18 @@ export function PortfolioPage() {
                   />
                 </>
               ) : (
-                <div className="flex items-center justify-center h-48 text-gray-500 text-sm">
+                <div className="flex items-center justify-center h-48 text-gray-500 dark:text-gray-400 text-sm">
                   Aucune donnée
                 </div>
               )}
             </div>
 
             {/* Position list */}
-            <div className="lg:col-span-2 bg-white border rounded-lg p-4">
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 border rounded-lg p-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <List className="h-4 w-4 text-gray-500" />
-                  <h2 className="text-sm font-medium text-gray-700">Positions</h2>
+                  <List className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300">Positions</h2>
                 </div>
                 <span className="text-xs text-gray-400">
                   {summary.positionCount} position{summary.positionCount > 1 ? 's' : ''}
@@ -373,16 +373,16 @@ export function PortfolioPage() {
 
           {/* Currency allocation */}
           {allocation && allocation.byCurrency.length > 1 && (
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
               <div className="flex items-center gap-2 mb-4">
-                <PieChartIcon className="h-4 w-4 text-gray-500" />
-                <h2 className="text-sm font-medium text-gray-700">Répartition par devise</h2>
+                <PieChartIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300">Répartition par devise</h2>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {allocation.byCurrency.map((item) => (
-                  <div key={item.currency} className="text-center p-4 bg-gray-50 rounded-lg">
-                    <p className="text-lg font-semibold text-gray-900">{item.currency}</p>
-                    <p className="text-sm text-gray-600">{formatCurrency(item.value, baseCurrency)}</p>
+                  <div key={item.currency} className="text-center p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className="text-lg font-semibold text-gray-900 dark:text-white">{item.currency}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{formatCurrency(item.value, baseCurrency)}</p>
                     <p className="text-xs text-gray-400">{formatPercent(item.percent)}</p>
                   </div>
                 ))}
@@ -391,17 +391,17 @@ export function PortfolioPage() {
           )}
 
           {/* Performance chart */}
-          <div className="bg-white border rounded-lg p-4">
+          <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
             <div className="flex items-center gap-2 mb-4">
-              <LineChartIcon className="h-4 w-4 text-gray-500" />
-              <h2 className="text-sm font-medium text-gray-700">Performance</h2>
+              <LineChartIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+              <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300">Performance</h2>
             </div>
             {performanceLoading ? (
               <div className="flex items-center justify-center h-64">
                 <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
               </div>
             ) : performanceError ? (
-              <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+              <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400">
                 <LineChartIcon className="h-8 w-8 mb-2 text-red-300" />
                 <p className="text-sm text-red-500">Erreur de chargement</p>
                 <p className="text-xs text-gray-400 mt-1">
@@ -415,7 +415,7 @@ export function PortfolioPage() {
                 height={250}
               />
             ) : (
-              <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+              <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400">
                 <LineChartIcon className="h-8 w-8 mb-2 text-gray-300" />
                 <p className="text-sm">Historique en cours de construction</p>
                 <p className="text-xs text-gray-400 mt-1">
@@ -426,10 +426,10 @@ export function PortfolioPage() {
           </div>
         </>
       ) : (
-        <div className="text-center py-12 bg-white border rounded-lg">
+        <div className="text-center py-12 bg-white dark:bg-gray-800 border rounded-lg">
           <Wallet className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Commencez votre portefeuille</h3>
-          <p className="text-gray-500 mb-4">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Commencez votre portefeuille</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">
             Ajoutez votre première position pour suivre vos investissements.
           </p>
           <button

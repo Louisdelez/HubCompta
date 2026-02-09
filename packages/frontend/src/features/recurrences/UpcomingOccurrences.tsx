@@ -91,11 +91,11 @@ export function UpcomingOccurrences({
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-xl font-bold">Prochaines executions</h2>
-              <p className="text-sm text-gray-500">{recurrence.name}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{recurrence.name}</p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-lg"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -109,8 +109,8 @@ export function UpcomingOccurrences({
           </div>
 
           {/* Amount preview */}
-          <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-4">
-            <p className="text-sm text-gray-500">Montant par occurrence</p>
+          <div className="p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg mb-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Montant par occurrence</p>
             <p
               className={`text-lg font-bold ${
                 isExpense ? 'text-danger-600' : 'text-success-600'
@@ -139,20 +139,20 @@ export function UpcomingOccurrences({
               {dates.map((date, index) => (
                 <div
                   key={date}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50"
                 >
                   <div className="w-10 h-10 flex items-center justify-center bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full font-bold text-sm">
                     {index + 1}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium capitalize">{formatDate(date)}</p>
-                    <p className="text-sm text-gray-500">{getRelativeLabel(date)}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{getRelativeLabel(date)}</p>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <p>Aucune occurrence programmee</p>
               <p className="text-sm mt-1">
                 La recurrence est peut-etre terminee ou en pause
@@ -164,7 +164,7 @@ export function UpcomingOccurrences({
           {dates && dates.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">
+                <span className="text-gray-500 dark:text-gray-400">
                   Total sur {dates.length} occurrences
                 </span>
                 <span

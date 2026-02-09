@@ -79,7 +79,7 @@ export function PriceAlertList() {
 
   if (!alerts || alerts.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
         <Bell className="h-12 w-12 mx-auto text-gray-300 mb-3" />
         <p>Aucune alerte de prix</p>
         <p className="text-sm mt-1">
@@ -114,7 +114,7 @@ export function PriceAlertList() {
             </div>
             <div>
               <p className="font-medium">{alert.config.assetSymbol}</p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {alert.type === 'price_above' ? 'Au-dessus de ' : 'En-dessous de '}
                 {formatCurrency(alert.config.targetPrice, 'USD')}
               </p>

@@ -88,7 +88,7 @@ export function ProDashboard() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
         Sélectionnez un espace de travail
       </div>
     );
@@ -140,7 +140,7 @@ export function ProDashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="card">
-          <p className="text-sm text-gray-500">Clients</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Clients</p>
           <p className="text-3xl font-bold text-primary-600">
             {contactStats?.clientCount ?? 0}
           </p>
@@ -153,34 +153,34 @@ export function ProDashboard() {
         </div>
 
         <div className="card">
-          <p className="text-sm text-gray-500">À encaisser</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">À encaisser</p>
           <p className="text-3xl font-bold text-warning-600">
             {formatCurrency(invoiceStats?.amountSent ?? 0)}
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {invoiceStats?.totalSent ?? 0} facture{(invoiceStats?.totalSent ?? 0) > 1 ? 's' : ''} en attente
           </p>
         </div>
 
         <div className="card">
-          <p className="text-sm text-gray-500">En retard</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">En retard</p>
           <p className={clsx(
             'text-3xl font-bold',
             (invoiceStats?.totalOverdue ?? 0) > 0 ? 'text-danger-600' : 'text-success-600'
           )}>
             {formatCurrency(invoiceStats?.amountOverdue ?? 0)}
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {invoiceStats?.totalOverdue ?? 0} facture{(invoiceStats?.totalOverdue ?? 0) > 1 ? 's' : ''}
           </p>
         </div>
 
         <div className="card">
-          <p className="text-sm text-gray-500">Encaissé ce mois</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Encaissé ce mois</p>
           <p className="text-3xl font-bold text-success-600">
             {formatCurrency(invoiceStats?.amountPaid ?? 0)}
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {invoiceStats?.totalPaid ?? 0} facture{(invoiceStats?.totalPaid ?? 0) > 1 ? 's' : ''} payée{(invoiceStats?.totalPaid ?? 0) > 1 ? 's' : ''}
           </p>
         </div>
@@ -210,11 +210,11 @@ export function ProDashboard() {
                   <Link
                     key={invoice.id}
                     to={`/workspaces/${workspaceId}/pro/invoices/${invoice.id}`}
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
                   >
                     <div>
                       <p className="font-medium">{invoice.number}</p>
-                      <p className="text-sm text-gray-500">{invoice.contact.name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{invoice.contact.name}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold">{formatCurrency(invoice.total)}</p>
@@ -233,7 +233,7 @@ export function ProDashboard() {
               })}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <Check className="w-8 h-8 mx-auto mb-2" />
               <p>Aucune facture en attente</p>
             </div>
@@ -252,7 +252,7 @@ export function ProDashboard() {
               </div>
               <div className="text-right">
                 <span className="font-medium">{invoiceStats?.totalDraft ?? 0}</span>
-                <span className="text-gray-500 ml-2">
+                <span className="text-gray-500 dark:text-gray-400 ml-2">
                   ({formatCurrency(invoiceStats?.amountDraft ?? 0)})
                 </span>
               </div>
@@ -265,7 +265,7 @@ export function ProDashboard() {
               </div>
               <div className="text-right">
                 <span className="font-medium">{invoiceStats?.totalSent ?? 0}</span>
-                <span className="text-gray-500 ml-2">
+                <span className="text-gray-500 dark:text-gray-400 ml-2">
                   ({formatCurrency(invoiceStats?.amountSent ?? 0)})
                 </span>
               </div>
@@ -278,7 +278,7 @@ export function ProDashboard() {
               </div>
               <div className="text-right">
                 <span className="font-medium">{invoiceStats?.totalOverdue ?? 0}</span>
-                <span className="text-gray-500 ml-2">
+                <span className="text-gray-500 dark:text-gray-400 ml-2">
                   ({formatCurrency(invoiceStats?.amountOverdue ?? 0)})
                 </span>
               </div>
@@ -291,7 +291,7 @@ export function ProDashboard() {
               </div>
               <div className="text-right">
                 <span className="font-medium">{invoiceStats?.totalPaid ?? 0}</span>
-                <span className="text-gray-500 ml-2">
+                <span className="text-gray-500 dark:text-gray-400 ml-2">
                   ({formatCurrency(invoiceStats?.amountPaid ?? 0)})
                 </span>
               </div>
@@ -336,9 +336,9 @@ export function ProDashboard() {
           to={`/workspaces/${workspaceId}/pro/contacts`}
           className="card hover:border-primary-500 transition-colors"
         >
-          <Users className="w-8 h-8 mb-3 text-gray-500" />
+          <Users className="w-8 h-8 mb-3 text-gray-500 dark:text-gray-400" />
           <h3 className="font-semibold mb-1">Contacts</h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Gérez vos clients et fournisseurs
           </p>
         </Link>
@@ -347,9 +347,9 @@ export function ProDashboard() {
           to={`/workspaces/${workspaceId}/pro/quotes`}
           className="card hover:border-primary-500 transition-colors"
         >
-          <PenLine className="w-8 h-8 mb-3 text-gray-500" />
+          <PenLine className="w-8 h-8 mb-3 text-gray-500 dark:text-gray-400" />
           <h3 className="font-semibold mb-1">Devis</h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Créez et suivez vos devis
           </p>
         </Link>
@@ -358,9 +358,9 @@ export function ProDashboard() {
           to={`/workspaces/${workspaceId}/pro/invoices`}
           className="card hover:border-primary-500 transition-colors"
         >
-          <FileText className="w-8 h-8 mb-3 text-gray-500" />
+          <FileText className="w-8 h-8 mb-3 text-gray-500 dark:text-gray-400" />
           <h3 className="font-semibold mb-1">Factures</h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Facturez et suivez les paiements
           </p>
         </Link>

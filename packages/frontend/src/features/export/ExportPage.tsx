@@ -19,7 +19,7 @@ export function ExportPage() {
 
   if (!currentWorkspace) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
         Sélectionnez un espace de travail
       </div>
     );
@@ -52,7 +52,7 @@ export function ExportPage() {
             </div>
             <div>
               <h3 className="font-medium">Exporter les transactions</h3>
-              <p className="text-sm text-gray-500">CSV, JSON avec filtres par date et compte</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">CSV, JSON avec filtres par date et compte</p>
             </div>
           </div>
         </button>
@@ -68,7 +68,7 @@ export function ExportPage() {
             </div>
             <div>
               <h3 className="font-medium">Exporter les comptes</h3>
-              <p className="text-sm text-gray-500">Liste des comptes avec soldes</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Liste des comptes avec soldes</p>
             </div>
           </div>
         </button>
@@ -84,7 +84,7 @@ export function ExportPage() {
             </div>
             <div>
               <h3 className="font-medium">Générer un rapport</h3>
-              <p className="text-sm text-gray-500">Rapport mensuel, annuel ou par catégorie</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Rapport mensuel, annuel ou par catégorie</p>
             </div>
           </div>
         </button>
@@ -100,7 +100,7 @@ export function ExportPage() {
             </div>
             <div>
               <h3 className="font-medium">Sauvegarde rapide</h3>
-              <p className="text-sm text-gray-500">Télécharger toutes vos données en JSON</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Télécharger toutes vos données en JSON</p>
             </div>
           </div>
         </button>

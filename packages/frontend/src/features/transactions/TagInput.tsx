@@ -173,7 +173,7 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
                     toggleTag(tag.id);
                     setSearchQuery('');
                   }}
-                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700"
                 >
                   <span
                     className="w-3 h-3 rounded-full"
@@ -191,7 +191,7 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
                   type="button"
                   onClick={handleCreateTag}
                   disabled={createTagMutation.isPending}
-                  className="w-full px-3 py-2 text-left text-primary-600 dark:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="w-full px-3 py-2 text-left text-primary-600 dark:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700"
                 >
                   {createTagMutation.isPending ? (
                     'Création...'

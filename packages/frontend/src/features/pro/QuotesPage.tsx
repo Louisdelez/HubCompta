@@ -145,7 +145,7 @@ export function QuotesPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
         Sélectionnez un espace de travail
       </div>
     );
@@ -203,7 +203,7 @@ export function QuotesPage() {
         <div className="card text-center py-12">
           <PenLine className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucun devis</h2>
-          <p className="text-gray-500 mb-4">
+          <p className="text-gray-500 dark:text-gray-400 mb-4">
             Créez votre premier devis pour commencer
           </p>
           <Link
@@ -242,7 +242,7 @@ export function QuotesPage() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {quote.contact.name}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   Émis le {formatDate(quote.issueDate)} • Valide jusqu'au {formatDate(quote.validUntil)}
                 </p>
               </div>
@@ -268,7 +268,7 @@ export function QuotesPage() {
                     </button>
                     <Link
                       to={`/workspaces/${workspaceId}/pro/quotes/${quote.id}/edit`}
-                      className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
                       title="Modifier"
                     >
                       <Pencil className="w-4 h-4" />
@@ -319,7 +319,7 @@ export function QuotesPage() {
                 )}
                 <button
                   onClick={() => duplicateMutation.mutate(quote.id)}
-                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
                   title="Dupliquer"
                 >
                   <Copy className="w-4 h-4" />

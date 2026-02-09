@@ -71,7 +71,7 @@ function getNotificationIcon(type: string) {
       return <Clock className="h-5 w-5 text-blue-500" />;
     case 'system':
     default:
-      return <Bell className="h-5 w-5 text-gray-500" />;
+      return <Bell className="h-5 w-5 text-gray-500 dark:text-gray-400" />;
   }
 }
 
@@ -151,9 +151,9 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
   if (notifications.length === 0) {
     return (
       <div className="text-center py-8 px-4">
-        <Bell className="h-10 w-10 mx-auto text-gray-300 mb-3" />
-        <p className="text-sm text-gray-500">Aucune notification</p>
-        <p className="text-xs text-gray-400 mt-1">
+        <Bell className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 dark:text-gray-400 mb-3" />
+        <p className="text-sm text-gray-500 dark:text-gray-400">Aucune notification</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 mt-1">
           Vous serez notifié des événements importants ici
         </p>
       </div>
@@ -161,15 +161,15 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
   }
 
   return (
-    <div className="divide-y">
+    <div className="divide-y dark:divide-gray-700">
       {notifications.map((notification) => (
         <div
           key={notification.id}
           className={cn(
-            'relative px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer',
+            'relative px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer',
             'border-l-4',
             getNotificationColor(notification.type),
-            !notification.isRead && 'bg-blue-50/50'
+            !notification.isRead && 'bg-blue-50/50 dark:bg-blue-900/20'
           )}
           onClick={() => handleNotificationClick(notification)}
         >
@@ -182,7 +182,7 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
-                <p className={cn('text-sm', !notification.isRead && 'font-medium text-gray-900')}>
+                <p className={cn('text-sm dark:text-gray-200', !notification.isRead && 'font-medium text-gray-900 dark:text-white')}>
                   {notification.title}
                 </p>
                 {/* Delete button */}
@@ -191,14 +191,14 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
                     e.stopPropagation();
                     deleteMutation.mutate(notification.id);
                   }}
-                  className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 rounded"
+                  className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 rounded"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
-              <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">{notification.message}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-2">{notification.message}</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400">
                   {formatDistanceToNow(new Date(notification.createdAt), {
                     addSuffix: true,
                     locale: fr,
@@ -206,8 +206,8 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
                 </span>
                 {notification.workspace && (
                   <>
-                    <span className="text-gray-300">·</span>
-                    <span className="text-xs text-gray-400">{notification.workspace.name}</span>
+                    <span className="text-gray-300 dark:text-gray-600 dark:text-gray-400">·</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400">{notification.workspace.name}</span>
                   </>
                 )}
               </div>

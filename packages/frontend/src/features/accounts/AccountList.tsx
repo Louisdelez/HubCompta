@@ -119,7 +119,7 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
           {(accounts ?? []).slice(0, 5).map((account) => (
             <div
               key={account.id}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50"
             >
               <div className="flex items-center gap-2">
                 {account.icon ? (

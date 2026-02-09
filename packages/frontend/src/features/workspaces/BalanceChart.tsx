@@ -92,7 +92,7 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{balance.memberName}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     A payé {formatCurrency(balance.totalPaid, currency)}
                   </p>
                 </div>
@@ -106,7 +106,7 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
                     {isPositive ? '+' : ''}
                     {formatCurrency(balance.balance, currency)}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {isPositive ? 'doit recevoir' : 'doit payer'}
                   </p>
                 </div>
@@ -156,10 +156,10 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
 
       {/* Summary */}
       {balances.length > 0 && (
-        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg">
           <div className="grid grid-cols-2 gap-4 text-center text-sm">
             <div>
-              <p className="text-gray-500">Total à redistribuer</p>
+              <p className="text-gray-500 dark:text-gray-400">Total à redistribuer</p>
               <p className="font-bold text-lg">
                 {formatCurrency(
                   balances.filter((b) => b.balance > 0).reduce((sum, b) => sum + b.balance, 0),
@@ -168,7 +168,7 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
               </p>
             </div>
             <div>
-              <p className="text-gray-500">Équilibre</p>
+              <p className="text-gray-500 dark:text-gray-400">Équilibre</p>
               <p className="font-bold text-lg">
                 {Math.abs(balances.reduce((sum, b) => sum + b.balance, 0)) < 0.01 ? (
                   <span className="text-success-600 flex items-center justify-center gap-1">

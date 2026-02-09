@@ -164,26 +164,26 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="px-6 py-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">Nouvelle alerte</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Nouvelle alerte</h2>
         </div>
 
         <div className="p-6 space-y-4">
           {/* Alert type selection */}
           {!alertType ? (
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Type d'alerte</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type d'alerte</label>
               {Object.entries(alertTypeConfig).map(([type, config]) => (
                 <button
                   key={type}
                   onClick={() => setAlertType(type)}
                   className="w-full p-3 text-left border rounded-lg hover:border-blue-500 hover:bg-blue-50 flex items-center gap-3"
                 >
-                  <config.icon className="h-5 w-5 text-gray-500" />
+                  <config.icon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                   <div>
-                    <p className="font-medium text-gray-900">{config.label}</p>
-                    <p className="text-xs text-gray-500">{config.description}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{config.label}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{config.description}</p>
                   </div>
                 </button>
               ))}
@@ -194,7 +194,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
               {alertType === 'budget_threshold' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Budget</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Budget</label>
                     <select
                       value={budgetId}
                       onChange={(e) => setBudgetId(e.target.value)}
@@ -209,7 +209,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Seuil d'alerte (%)
                     </label>
                     <input
@@ -220,7 +220,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                       onChange={(e) => setThresholdPercent(e.target.value)}
                       className="w-full px-3 py-2 border rounded-lg"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Vous serez notifié quand le budget atteint ce pourcentage
                     </p>
                   </div>
@@ -231,7 +231,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
               {alertType === 'low_balance' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Compte</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Compte</label>
                     <select
                       value={accountId}
                       onChange={(e) => setAccountId(e.target.value)}
@@ -246,7 +246,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Seuil minimum (€)
                     </label>
                     <input
@@ -265,7 +265,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
               {(alertType === 'price_above' || alertType === 'price_below') && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Direction
                     </label>
                     <div className="flex gap-2">
@@ -292,7 +292,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Prix cible (€)
                     </label>
                     <input
@@ -305,7 +305,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                       placeholder="100.00"
                     />
                   </div>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Note: Vous pouvez créer cette alerte depuis la page de votre portefeuille
                   </p>
                 </>
@@ -314,13 +314,13 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
           )}
         </div>
 
-        <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50">
+        <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50 dark:bg-gray-900">
           <button
             onClick={() => {
               setAlertType('');
               onClose();
             }}
-            className="px-4 py-2 text-gray-700 bg-white border rounded-lg hover:bg-gray-50"
+            className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900"
           >
             Annuler
           </button>
@@ -381,9 +381,9 @@ export function AlertSettings() {
     const config = alertTypeConfig[type];
     if (config) {
       const Icon = config.icon;
-      return <Icon className="h-5 w-5 text-gray-500" />;
+      return <Icon className="h-5 w-5 text-gray-500 dark:text-gray-400" />;
     }
-    return <Bell className="h-5 w-5 text-gray-500" />;
+    return <Bell className="h-5 w-5 text-gray-500 dark:text-gray-400" />;
   };
 
   return (
@@ -391,8 +391,8 @@ export function AlertSettings() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Règles d'alerte</h2>
-          <p className="text-sm text-gray-500">Configurez des alertes automatiques</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Règles d'alerte</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Configurez des alertes automatiques</p>
         </div>
         <button
           onClick={() => setShowCreateDialog(true)}
@@ -419,12 +419,12 @@ export function AlertSettings() {
               )}
             >
               {/* Icon */}
-              <div className="p-2 bg-gray-100 rounded-lg">{getAlertIcon(rule.type)}</div>
+              <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">{getAlertIcon(rule.type)}</div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900">{rule.name}</p>
-                <p className="text-xs text-gray-500">
+                <p className="font-medium text-gray-900 dark:text-white">{rule.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {alertTypeConfig[rule.type]?.label || rule.type}
                 </p>
               </div>
@@ -461,10 +461,10 @@ export function AlertSettings() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-white border rounded-lg">
+        <div className="text-center py-12 bg-white dark:bg-gray-800 border rounded-lg">
           <Bell className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune alerte configurée</h3>
-          <p className="text-gray-500 mb-4">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Aucune alerte configurée</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">
             Créez des alertes pour être notifié des événements importants.
           </p>
           <button

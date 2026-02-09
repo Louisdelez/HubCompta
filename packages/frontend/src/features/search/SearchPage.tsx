@@ -197,7 +197,7 @@ export function SearchPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
         Sélectionnez un espace de travail pour effectuer une recherche.
       </div>
     );
@@ -256,7 +256,7 @@ export function SearchPage() {
               value={globalQuery}
               onChange={(e) => setGlobalQuery(e.target.value)}
               placeholder="Rechercher partout..."
-              className="w-full pl-12 pr-4 py-3 text-lg rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-12 pr-4 py-3 text-lg rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               autoFocus
             />
           </div>
@@ -289,14 +289,14 @@ export function SearchPage() {
           {isGlobalLoading ? (
             <div className="text-center py-12">
               <div className="animate-spin w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full mx-auto" />
-              <p className="mt-4 text-gray-500">Recherche en cours...</p>
+              <p className="mt-4 text-gray-500 dark:text-gray-400">Recherche en cours...</p>
             </div>
           ) : globalQuery.length < 2 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               <p>Entrez au moins 2 caractères pour rechercher</p>
             </div>
           ) : globalResults?.results.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               <p className="text-lg">Aucun résultat pour "{globalQuery}"</p>
               <p className="mt-2 text-sm">Essayez avec d'autres termes</p>
             </div>
@@ -304,11 +304,11 @@ export function SearchPage() {
             <div className="space-y-6">
               {Object.entries(groupedResults).map(([type, results]) => (
                 <div key={type} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                  <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
                     <h3 className="font-medium inline-flex items-center gap-1">
                       {(() => { const Icon = TYPE_CONFIG[type as keyof typeof TYPE_CONFIG]?.icon; return Icon ? <Icon className="w-4 h-4" /> : null; })()}
                       {TYPE_CONFIG[type as keyof typeof TYPE_CONFIG]?.label}
-                      <span className="ml-2 text-sm text-gray-500">({results.length})</span>
+                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({results.length})</span>
                     </h3>
                   </div>
                   <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -316,7 +316,7 @@ export function SearchPage() {
                       <button
                         key={result.id}
                         onClick={() => handleResultClick(result)}
-                        className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors"
                       >
                         <span className="text-lg">
                           {result.icon ? <span>{result.icon}</span> : (() => { const Icon = TYPE_CONFIG[result.type as keyof typeof TYPE_CONFIG]?.icon; return Icon ? <Icon className="w-5 h-5" /> : null; })()}
@@ -324,7 +324,7 @@ export function SearchPage() {
                         <div className="flex-1 min-w-0">
                           <p className="font-medium truncate">{result.title}</p>
                           {result.subtitle && (
-                            <p className="text-sm text-gray-500 truncate">{result.subtitle}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{result.subtitle}</p>
                           )}
                         </div>
                         {result.amount !== undefined && (
@@ -376,23 +376,23 @@ export function SearchPage() {
             {transactionResults?.totals && (
               <div className="grid grid-cols-4 gap-4 mb-6">
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                  <p className="text-sm text-gray-500">Transactions</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Transactions</p>
                   <p className="text-2xl font-bold">{transactionResults.totals.count}</p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                  <p className="text-sm text-gray-500">Revenus</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Revenus</p>
                   <p className="text-2xl font-bold text-success-600">
                     {formatCurrency(transactionResults.totals.income, 'EUR')}
                   </p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                  <p className="text-sm text-gray-500">Dépenses</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Dépenses</p>
                   <p className="text-2xl font-bold text-danger-600">
                     {formatCurrency(transactionResults.totals.expense, 'EUR')}
                   </p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                  <p className="text-sm text-gray-500">Solde</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Solde</p>
                   <p
                     className={clsx(
                       'text-2xl font-bold',
@@ -411,7 +411,7 @@ export function SearchPage() {
                 <div className="animate-spin w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full mx-auto" />
               </div>
             ) : transactionResults?.transactions.length === 0 ? (
-              <div className="text-center py-12 text-gray-500 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                 <p>Aucune transaction trouvée</p>
               </div>
             ) : (
@@ -421,7 +421,7 @@ export function SearchPage() {
                     <button
                       key={transaction.id}
                       onClick={() => handleTransactionClick(transaction)}
-                      className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors"
                     >
                       <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
@@ -431,7 +431,7 @@ export function SearchPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{transaction.description}</p>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                           <span>{transaction.account.name}</span>
                           {transaction.category && (
                             <>
@@ -467,7 +467,7 @@ export function SearchPage() {
                 {/* Pagination */}
                 {transactionResults && transactionResults.total > pageSize && (
                   <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {((page - 1) * pageSize) + 1} - {Math.min(page * pageSize, transactionResults.total)} sur {transactionResults.total}
                     </p>
                     <div className="flex gap-2">

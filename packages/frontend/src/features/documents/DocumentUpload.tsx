@@ -224,7 +224,7 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
                 className="hidden"
               />
             </label>
-            <p className="text-xs text-gray-500 mt-3">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
               PDF, Images, CSV, Excel • Max 10MB par fichier
             </p>
           </div>
@@ -235,12 +235,12 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
               {uploads.map((upload, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                  className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg"
                 >
-                  {(() => { const Icon = getFileIcon(upload.file.type); return <Icon className="w-5 h-5 text-gray-500" />; })()}
+                  {(() => { const Icon = getFileIcon(upload.file.type); return <Icon className="w-5 h-5 text-gray-500 dark:text-gray-400" />; })()}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{upload.file.name}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       {formatFileSize(upload.file.size)}
                     </p>
                     {upload.status === 'uploading' && (

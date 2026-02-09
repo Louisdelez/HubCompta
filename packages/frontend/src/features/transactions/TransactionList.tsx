@@ -116,7 +116,7 @@ export function TransactionList() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
         Sélectionnez un espace de travail
       </div>
     );
@@ -273,7 +273,7 @@ export function TransactionList() {
           >
             Précédent
           </button>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             Page {meta.page} sur {meta.totalPages}
           </span>
           <button
