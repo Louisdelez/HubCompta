@@ -1,6 +1,7 @@
 // ============================================================================
 // REPORTS PAGE - Finance Hub
 // Main reports dashboard with various analytics
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -98,17 +99,19 @@ interface SummaryData {
 // Chart Colors
 // ----------------------------------------------------------------------------
 
+// Catppuccin-compatible chart colors that work in both light and dark themes
+// Using CSS variables would be ideal but these are close approximations
 const CHART_COLORS = [
-  '#3B82F6',
-  '#10B981',
-  '#F59E0B',
-  '#EF4444',
-  '#8B5CF6',
-  '#EC4899',
-  '#14B8A6',
-  '#6366F1',
-  '#84CC16',
-  '#F97316',
+  'var(--ctp-blue, #89b4fa)',
+  'var(--ctp-green, #a6e3a1)',
+  'var(--ctp-yellow, #f9e2af)',
+  'var(--ctp-red, #f38ba8)',
+  'var(--ctp-mauve, #cba6f7)',
+  'var(--ctp-pink, #f5c2e7)',
+  'var(--ctp-teal, #94e2d5)',
+  'var(--ctp-lavender, #b4befe)',
+  'var(--ctp-peach, #fab387)',
+  'var(--ctp-sky, #89dceb)',
 ];
 
 // ----------------------------------------------------------------------------
@@ -189,22 +192,22 @@ export function ReportsPage() {
   }));
 
   const getChangeIcon = (value: number) => {
-    if (value > 0) return <ArrowUpRight className="h-4 w-4 text-green-500" />;
-    if (value < 0) return <ArrowDownRight className="h-4 w-4 text-red-500" />;
+    if (value > 0) return <ArrowUpRight className="h-4 w-4 text-ctp-green" />;
+    if (value < 0) return <ArrowDownRight className="h-4 w-4 text-ctp-red" />;
     return null;
   };
 
   const getChangeColor = (value: number, inverse: boolean = false) => {
     const positive = inverse ? value < 0 : value > 0;
-    if (positive) return 'text-green-600';
-    if (!positive && value !== 0) return 'text-red-600';
-    return 'text-gray-500';
+    if (positive) return 'text-ctp-green';
+    if (!positive && value !== 0) return 'text-ctp-red';
+    return 'text-ctp-subtext0';
   };
 
   if (summaryLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-ctp-blue" />
       </div>
     );
   }
@@ -214,14 +217,14 @@ export function ReportsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Rapports</h1>
-          <p className="text-gray-500 dark:text-gray-400">Analysez vos finances en détail</p>
+          <h1 className="text-2xl font-semibold text-ctp-text">Rapports</h1>
+          <p className="text-ctp-subtext0">Analysez vos finances en détail</p>
         </div>
         <div className="flex items-center gap-3">
           <DateRangePicker value={dateRange} onChange={setDateRange} />
           <button
             onClick={() => setExportType('transactions')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            className="px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg hover:bg-ctp-blue/90 flex items-center gap-2"
           >
             <Download className="h-4 w-4" />
             Exporter
@@ -233,12 +236,12 @@ export function ReportsPage() {
       {summary && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Revenus */}
-          <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
+          <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <TrendingUp className="h-4 w-4" />
               <span className="text-sm">Revenus</span>
             </div>
-            <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+            <p className="text-2xl font-semibold text-ctp-text">
               {formatCurrency(summary.flow.income, 'EUR')}
             </p>
             <div className="flex items-center gap-1 mt-1">
@@ -251,12 +254,12 @@ export function ReportsPage() {
           </div>
 
           {/* Dépenses */}
-          <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
+          <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <TrendingDown className="h-4 w-4" />
               <span className="text-sm">Dépenses</span>
             </div>
-            <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+            <p className="text-2xl font-semibold text-ctp-text">
               {formatCurrency(summary.flow.expenses, 'EUR')}
             </p>
             <div className="flex items-center gap-1 mt-1">
@@ -269,27 +272,27 @@ export function ReportsPage() {
           </div>
 
           {/* Épargne */}
-          <div className={cn('border rounded-lg p-4', summary.flow.net >= 0 ? 'bg-green-50' : 'bg-red-50')}>
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
+          <div className={cn('border border-ctp-surface1 rounded-lg p-4', summary.flow.net >= 0 ? 'bg-ctp-green/10' : 'bg-ctp-red/10')}>
+            <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <Wallet className="h-4 w-4" />
               <span className="text-sm">Épargne nette</span>
             </div>
-            <p className={cn('text-2xl font-semibold', summary.flow.net >= 0 ? 'text-green-600' : 'text-red-600')}>
+            <p className={cn('text-2xl font-semibold', summary.flow.net >= 0 ? 'text-ctp-green' : 'text-ctp-red')}>
               {summary.flow.net >= 0 ? '+' : ''}
               {formatCurrency(summary.flow.net, 'EUR')}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-sm text-ctp-subtext0 mt-1">
               Taux: {formatPercent(summary.flow.savingsRate)}
             </p>
           </div>
 
           {/* Solde total */}
-          <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
+          <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <DollarSign className="h-4 w-4" />
               <span className="text-sm">Solde total</span>
             </div>
-            <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+            <p className="text-2xl font-semibold text-ctp-text">
               {formatCurrency(summary.totalBalance, 'EUR')}
             </p>
           </div>
@@ -299,15 +302,15 @@ export function ReportsPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income/Expense Trend */}
-        <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
+        <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300">Évolution Revenus/Dépenses</h2>
+              <BarChart3 className="h-4 w-4 text-ctp-subtext0" />
+              <h2 className="text-sm font-medium text-ctp-subtext1">Évolution Revenus/Dépenses</h2>
             </div>
             <button
               onClick={() => setExportType('cash_flow')}
-              className="text-xs text-blue-600 hover:text-blue-800"
+              className="text-xs text-ctp-blue hover:text-ctp-blue/80"
             >
               Exporter
             </button>
@@ -316,36 +319,37 @@ export function ReportsPage() {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={trendChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#6B7280' }} />
-                  <YAxis tick={{ fontSize: 12, fill: '#6B7280' }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-ctp-surface1" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} className="fill-ctp-subtext0" />
+                  <YAxis tick={{ fontSize: 12 }} className="fill-ctp-subtext0" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                   <Tooltip
                     formatter={(value: number) => formatCurrency(value, 'EUR')}
                     labelFormatter={(label) => `Mois: ${label}`}
+                    contentStyle={{ backgroundColor: 'var(--ctp-surface0)', borderColor: 'var(--ctp-surface1)' }}
                   />
                   <Legend />
-                  <Bar dataKey="revenus" name="Revenus" fill="#10B981" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="depenses" name="Dépenses" fill="#EF4444" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="revenus" name="Revenus" fill="var(--ctp-green, #a6e3a1)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="depenses" name="Dépenses" fill="var(--ctp-red, #f38ba8)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
+            <div className="h-64 flex items-center justify-center text-ctp-subtext0">
               Pas de données disponibles
             </div>
           )}
         </div>
 
         {/* Category Breakdown */}
-        <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
+        <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <PieChart className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300">Dépenses par catégorie</h2>
+              <PieChart className="h-4 w-4 text-ctp-subtext0" />
+              <h2 className="text-sm font-medium text-ctp-subtext1">Dépenses par catégorie</h2>
             </div>
             <button
               onClick={() => setExportType('categories')}
-              className="text-xs text-blue-600 hover:text-blue-800"
+              className="text-xs text-ctp-blue hover:text-ctp-blue/80"
             >
               Exporter
             </button>
@@ -372,13 +376,13 @@ export function ReportsPage() {
                     layout="vertical"
                     align="right"
                     verticalAlign="middle"
-                    formatter={(value) => <span className="text-xs text-gray-600 dark:text-gray-400">{value}</span>}
+                    formatter={(value) => <span className="text-xs text-ctp-subtext0">{value}</span>}
                   />
                 </RechartsPieChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
+            <div className="h-64 flex items-center justify-center text-ctp-subtext0">
               Pas de données disponibles
             </div>
           )}
@@ -387,15 +391,15 @@ export function ReportsPage() {
 
       {/* Budget vs Actual */}
       {budgetData && budgetData.categories.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
+        <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300">Budget vs Réalisé</h2>
+              <Target className="h-4 w-4 text-ctp-subtext0" />
+              <h2 className="text-sm font-medium text-ctp-subtext1">Budget vs Réalisé</h2>
             </div>
             <button
               onClick={() => setExportType('budget_report')}
-              className="text-xs text-blue-600 hover:text-blue-800"
+              className="text-xs text-ctp-blue hover:text-ctp-blue/80"
             >
               Exporter
             </button>
@@ -403,17 +407,17 @@ export function ReportsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left text-xs font-medium text-gray-500 dark:text-gray-400 py-2">Catégorie</th>
-                  <th className="text-right text-xs font-medium text-gray-500 dark:text-gray-400 py-2">Budget</th>
-                  <th className="text-right text-xs font-medium text-gray-500 dark:text-gray-400 py-2">Réalisé</th>
-                  <th className="text-right text-xs font-medium text-gray-500 dark:text-gray-400 py-2">Écart</th>
-                  <th className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2">Statut</th>
+                <tr className="border-b border-ctp-surface1">
+                  <th className="text-left text-xs font-medium text-ctp-subtext0 py-2">Catégorie</th>
+                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">Budget</th>
+                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">Réalisé</th>
+                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">Écart</th>
+                  <th className="text-center text-xs font-medium text-ctp-subtext0 py-2">Statut</th>
                 </tr>
               </thead>
               <tbody>
                 {budgetData.categories.map((cat) => (
-                  <tr key={cat.categoryId} className="border-b last:border-0">
+                  <tr key={cat.categoryId} className="border-b border-ctp-surface1 last:border-0">
                     <td className="py-3">
                       <div className="flex items-center gap-2">
                         {cat.categoryColor && (
@@ -422,14 +426,14 @@ export function ReportsPage() {
                             style={{ backgroundColor: cat.categoryColor }}
                           />
                         )}
-                        <span className="text-sm text-gray-900 dark:text-white">{cat.categoryName}</span>
+                        <span className="text-sm text-ctp-text">{cat.categoryName}</span>
                       </div>
                     </td>
-                    <td className="text-right text-sm text-gray-600 dark:text-gray-400">{formatCurrency(cat.budgeted, 'EUR')}</td>
-                    <td className="text-right text-sm text-gray-900 dark:text-white font-medium">
+                    <td className="text-right text-sm text-ctp-subtext0">{formatCurrency(cat.budgeted, 'EUR')}</td>
+                    <td className="text-right text-sm text-ctp-text font-medium">
                       {formatCurrency(cat.actual, 'EUR')}
                     </td>
-                    <td className={cn('text-right text-sm', cat.variance >= 0 ? 'text-green-600' : 'text-red-600')}>
+                    <td className={cn('text-right text-sm', cat.variance >= 0 ? 'text-ctp-green' : 'text-ctp-red')}>
                       {cat.variance >= 0 ? '+' : ''}
                       {formatCurrency(cat.variance, 'EUR')}
                     </td>
@@ -437,9 +441,9 @@ export function ReportsPage() {
                       <span
                         className={cn(
                           'text-xs px-2 py-1 rounded-full',
-                          cat.status === 'under' && 'bg-green-100 text-green-700',
-                          cat.status === 'on_track' && 'bg-blue-100 text-blue-700',
-                          cat.status === 'over' && 'bg-red-100 text-red-700'
+                          cat.status === 'under' && 'bg-ctp-green/20 text-ctp-green',
+                          cat.status === 'on_track' && 'bg-ctp-blue/20 text-ctp-blue',
+                          cat.status === 'over' && 'bg-ctp-red/20 text-ctp-red'
                         )}
                       >
                         {cat.status === 'under' && 'Sous budget'}
@@ -451,18 +455,18 @@ export function ReportsPage() {
                 ))}
               </tbody>
               <tfoot>
-                <tr className="bg-gray-50 dark:bg-gray-900">
-                  <td className="py-3 font-medium text-gray-900 dark:text-white">Total</td>
-                  <td className="text-right font-medium text-gray-900 dark:text-white">
+                <tr className="bg-ctp-surface1">
+                  <td className="py-3 font-medium text-ctp-text">Total</td>
+                  <td className="text-right font-medium text-ctp-text">
                     {formatCurrency(budgetData.totalBudget, 'EUR')}
                   </td>
-                  <td className="text-right font-medium text-gray-900 dark:text-white">
+                  <td className="text-right font-medium text-ctp-text">
                     {formatCurrency(budgetData.totalActual, 'EUR')}
                   </td>
                   <td
                     className={cn(
                       'text-right font-medium',
-                      budgetData.totalBudget - budgetData.totalActual >= 0 ? 'text-green-600' : 'text-red-600'
+                      budgetData.totalBudget - budgetData.totalActual >= 0 ? 'text-ctp-green' : 'text-ctp-red'
                     )}
                   >
                     {budgetData.totalBudget - budgetData.totalActual >= 0 ? '+' : ''}
@@ -478,43 +482,43 @@ export function ReportsPage() {
 
       {/* Cash Flow Summary */}
       {cashFlow && (
-        <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
+        <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300">Flux de trésorerie</h2>
+              <TrendingUp className="h-4 w-4 text-ctp-subtext0" />
+              <h2 className="text-sm font-medium text-ctp-subtext1">Flux de trésorerie</h2>
             </div>
             <button
               onClick={() => setExportType('cash_flow')}
-              className="text-xs text-blue-600 hover:text-blue-800"
+              className="text-xs text-ctp-blue hover:text-ctp-blue/80"
             >
               Exporter
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Solde d'ouverture</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="p-4 bg-ctp-surface1 rounded-lg">
+              <p className="text-xs text-ctp-subtext0 mb-1">Solde d'ouverture</p>
+              <p className="text-lg font-semibold text-ctp-text">
                 {formatCurrency(cashFlow.openingBalance, 'EUR')}
               </p>
             </div>
-            <div className="p-4 bg-green-50 rounded-lg">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Flux opérationnel</p>
-              <p className={cn('text-lg font-semibold', cashFlow.operating.net >= 0 ? 'text-green-600' : 'text-red-600')}>
+            <div className="p-4 bg-ctp-green/10 rounded-lg">
+              <p className="text-xs text-ctp-subtext0 mb-1">Flux opérationnel</p>
+              <p className={cn('text-lg font-semibold', cashFlow.operating.net >= 0 ? 'text-ctp-green' : 'text-ctp-red')}>
                 {cashFlow.operating.net >= 0 ? '+' : ''}
                 {formatCurrency(cashFlow.operating.net, 'EUR')}
               </p>
             </div>
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Flux d'investissement</p>
-              <p className={cn('text-lg font-semibold', cashFlow.investing.net >= 0 ? 'text-blue-600' : 'text-blue-600')}>
+            <div className="p-4 bg-ctp-blue/10 rounded-lg">
+              <p className="text-xs text-ctp-subtext0 mb-1">Flux d'investissement</p>
+              <p className={cn('text-lg font-semibold', cashFlow.investing.net >= 0 ? 'text-ctp-blue' : 'text-ctp-blue')}>
                 {cashFlow.investing.net >= 0 ? '+' : ''}
                 {formatCurrency(cashFlow.investing.net, 'EUR')}
               </p>
             </div>
-            <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Solde de clôture</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="p-4 bg-ctp-surface1 rounded-lg">
+              <p className="text-xs text-ctp-subtext0 mb-1">Solde de clôture</p>
+              <p className="text-lg font-semibold text-ctp-text">
                 {formatCurrency(cashFlow.closingBalance, 'EUR')}
               </p>
             </div>

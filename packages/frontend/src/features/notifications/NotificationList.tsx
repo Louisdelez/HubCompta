@@ -1,6 +1,7 @@
 // ============================================================================
 // NOTIFICATION LIST COMPONENT - Finance Hub
 // Display list of notifications
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -45,33 +46,33 @@ interface NotificationListProps {
 }
 
 // ----------------------------------------------------------------------------
-// Helpers
+// Helpers - Catppuccin Colors
 // ----------------------------------------------------------------------------
 
 function getNotificationIcon(type: string) {
   switch (type) {
     case 'budget_alert':
     case 'budget_warning':
-      return <AlertTriangle className="h-5 w-5 text-amber-500" />;
+      return <AlertTriangle className="h-5 w-5 text-ctp-peach" />;
     case 'price_alert':
-      return <TrendingUp className="h-5 w-5 text-blue-500" />;
+      return <TrendingUp className="h-5 w-5 text-ctp-blue" />;
     case 'import_complete':
-      return <FileText className="h-5 w-5 text-green-500" />;
+      return <FileText className="h-5 w-5 text-ctp-green" />;
     case 'export_ready':
-      return <Download className="h-5 w-5 text-purple-500" />;
+      return <Download className="h-5 w-5 text-ctp-mauve" />;
     case 'invoice_overdue':
-      return <Receipt className="h-5 w-5 text-red-500" />;
+      return <Receipt className="h-5 w-5 text-ctp-red" />;
     case 'invoice_paid':
-      return <CheckCircle className="h-5 w-5 text-green-500" />;
+      return <CheckCircle className="h-5 w-5 text-ctp-green" />;
     case 'quote_accepted':
-      return <CheckCircle className="h-5 w-5 text-green-500" />;
+      return <CheckCircle className="h-5 w-5 text-ctp-green" />;
     case 'quote_expiring':
-      return <Clock className="h-5 w-5 text-amber-500" />;
+      return <Clock className="h-5 w-5 text-ctp-yellow" />;
     case 'bill_reminder':
-      return <Clock className="h-5 w-5 text-blue-500" />;
+      return <Clock className="h-5 w-5 text-ctp-sky" />;
     case 'system':
     default:
-      return <Bell className="h-5 w-5 text-gray-500 dark:text-gray-400" />;
+      return <Bell className="h-5 w-5 text-ctp-overlay1" />;
   }
 }
 
@@ -79,21 +80,21 @@ function getNotificationColor(type: string): string {
   switch (type) {
     case 'budget_alert':
     case 'invoice_overdue':
-      return 'border-l-red-500';
+      return 'border-l-ctp-red';
     case 'budget_warning':
     case 'quote_expiring':
-      return 'border-l-amber-500';
+      return 'border-l-ctp-peach';
     case 'import_complete':
     case 'invoice_paid':
     case 'quote_accepted':
-      return 'border-l-green-500';
+      return 'border-l-ctp-green';
     case 'price_alert':
     case 'bill_reminder':
-      return 'border-l-blue-500';
+      return 'border-l-ctp-blue';
     case 'export_ready':
-      return 'border-l-purple-500';
+      return 'border-l-ctp-mauve';
     default:
-      return 'border-l-gray-300';
+      return 'border-l-ctp-surface1';
   }
 }
 
@@ -143,7 +144,7 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-ctp-overlay1" />
       </div>
     );
   }
@@ -151,9 +152,9 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
   if (notifications.length === 0) {
     return (
       <div className="text-center py-8 px-4">
-        <Bell className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 dark:text-gray-400 mb-3" />
-        <p className="text-sm text-gray-500 dark:text-gray-400">Aucune notification</p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 mt-1">
+        <Bell className="h-10 w-10 mx-auto text-ctp-surface2 mb-3" />
+        <p className="text-sm text-ctp-subtext0">Aucune notification</p>
+        <p className="text-xs text-ctp-overlay0 mt-1">
           Vous serez notifié des événements importants ici
         </p>
       </div>
@@ -161,15 +162,17 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
   }
 
   return (
-    <div className="divide-y dark:divide-gray-700">
+    <div className="divide-y divide-ctp-surface1">
       {notifications.map((notification) => (
         <div
           key={notification.id}
           className={cn(
-            'relative px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer',
+            'relative px-4 py-3 transition-colors cursor-pointer',
             'border-l-4',
             getNotificationColor(notification.type),
-            !notification.isRead && 'bg-blue-50/50 dark:bg-blue-900/20'
+            notification.isRead
+              ? 'bg-ctp-surface0 hover:bg-ctp-surface1'
+              : 'bg-ctp-blue/10 hover:bg-ctp-blue/15'
           )}
           onClick={() => handleNotificationClick(notification)}
         >
@@ -182,7 +185,7 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
-                <p className={cn('text-sm dark:text-gray-200', !notification.isRead && 'font-medium text-gray-900 dark:text-white')}>
+                <p className={cn('text-sm text-ctp-subtext1', !notification.isRead && 'font-medium text-ctp-text')}>
                   {notification.title}
                 </p>
                 {/* Delete button */}
@@ -191,14 +194,14 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
                     e.stopPropagation();
                     deleteMutation.mutate(notification.id);
                   }}
-                  className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 rounded"
+                  className="flex-shrink-0 p-1 text-ctp-overlay1 hover:text-ctp-text rounded"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-2">{notification.message}</p>
+              <p className="text-xs text-ctp-subtext0 mt-0.5 line-clamp-2">{notification.message}</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-ctp-overlay1">
                   {formatDistanceToNow(new Date(notification.createdAt), {
                     addSuffix: true,
                     locale: fr,
@@ -206,8 +209,8 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
                 </span>
                 {notification.workspace && (
                   <>
-                    <span className="text-gray-300 dark:text-gray-600 dark:text-gray-400">·</span>
-                    <span className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400">{notification.workspace.name}</span>
+                    <span className="text-ctp-overlay0">·</span>
+                    <span className="text-xs text-ctp-overlay1">{notification.workspace.name}</span>
                   </>
                 )}
               </div>
@@ -215,7 +218,7 @@ export function NotificationList({ onNotificationClick }: NotificationListProps)
 
             {/* Unread indicator */}
             {!notification.isRead && (
-              <div className="flex-shrink-0 w-2 h-2 mt-2 bg-blue-500 rounded-full" />
+              <div className="flex-shrink-0 w-2 h-2 mt-2 bg-ctp-blue rounded-full" />
             )}
           </div>
         </div>

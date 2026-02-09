@@ -1,6 +1,7 @@
 // ============================================================================
 // POSITION DETAIL COMPONENT - Finance Hub
 // Detailed view of a single investment position
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -135,22 +136,22 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
   const getAssetIcon = (type: string) => {
     switch (type) {
       case 'crypto':
-        return <Bitcoin className="h-6 w-6 text-orange-500" />;
+        return <Bitcoin className="h-6 w-6 text-ctp-peach" />;
       case 'etf':
-        return <Building2 className="h-6 w-6 text-purple-500" />;
+        return <Building2 className="h-6 w-6 text-ctp-sapphire" />;
       default:
-        return <TrendingUp className="h-6 w-6 text-blue-500" />;
+        return <TrendingUp className="h-6 w-6 text-ctp-blue" />;
     }
   };
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'buy':
-        return <Plus className="h-4 w-4 text-green-500" />;
+        return <Plus className="h-4 w-4 text-ctp-green" />;
       case 'sell':
-        return <Minus className="h-4 w-4 text-red-500" />;
+        return <Minus className="h-4 w-4 text-ctp-red" />;
       case 'dividend':
-        return <TrendingUp className="h-4 w-4 text-blue-500" />;
+        return <TrendingUp className="h-4 w-4 text-ctp-green" />;
       default:
         return null;
     }
@@ -170,15 +171,15 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
   };
 
   const getPnLColor = (value: number) => {
-    if (value > 0) return 'text-green-600';
-    if (value < 0) return 'text-red-600';
-    return 'text-gray-500';
+    if (value > 0) return 'text-ctp-green';
+    if (value < 0) return 'text-ctp-red';
+    return 'text-ctp-subtext0';
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-ctp-blue" />
       </div>
     );
   }
@@ -186,8 +187,8 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
   if (!position) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 dark:text-gray-400">Position introuvable</p>
-        <button onClick={onBack} className="mt-4 text-blue-600 hover:text-blue-800">
+        <p className="text-ctp-subtext0">Position introuvable</p>
+        <button onClick={onBack} className="mt-4 text-ctp-blue hover:text-ctp-blue/80">
           Retour
         </button>
       </div>
@@ -200,36 +201,36 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
       <div className="flex items-center gap-4">
         <button
           onClick={onBack}
-          className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 rounded-lg"
+          className="p-2 text-ctp-overlay1 hover:text-ctp-subtext0 bg-ctp-surface0 hover:bg-ctp-surface1 rounded-lg"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="flex items-center gap-3 flex-1">
-          <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">{getAssetIcon(position.asset.type)}</div>
+          <div className="p-3 bg-ctp-surface0 rounded-lg">{getAssetIcon(position.asset.type)}</div>
           <div>
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">{position.asset.symbol}</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{position.asset.name}</p>
+            <h1 className="text-xl font-semibold text-ctp-text">{position.asset.symbol}</h1>
+            <p className="text-sm text-ctp-subtext0">{position.asset.name}</p>
           </div>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => refreshMutation.mutate()}
             disabled={refreshMutation.isPending}
-            className="px-3 py-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2"
+            className="px-3 py-2 text-ctp-subtext0 bg-ctp-surface0 rounded-lg hover:bg-ctp-surface1 flex items-center gap-2"
           >
             <RefreshCw className={cn('h-4 w-4', refreshMutation.isPending && 'animate-spin')} />
             Actualiser
           </button>
           <button
             onClick={() => setShowPriceAlertModal(true)}
-            className="px-3 py-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2"
+            className="px-3 py-2 text-ctp-subtext0 bg-ctp-surface0 rounded-lg hover:bg-ctp-surface1 flex items-center gap-2"
           >
             <Bell className="h-4 w-4" />
             Alerte
           </button>
           <button
             onClick={onAddTransaction}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            className="px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg hover:bg-ctp-blue/90 flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
             Transaction
@@ -240,13 +241,13 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
       {/* Main stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Current value */}
-        <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Valeur actuelle</p>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+        <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
+          <p className="text-sm text-ctp-subtext0">Valeur actuelle</p>
+          <p className="text-2xl font-semibold text-ctp-text">
             {formatCurrency(position.currentValue, 'EUR')}
           </p>
           {position.asset.lastPrice && (
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-ctp-overlay1 mt-1">
               Prix: {formatCurrency(position.asset.lastPrice, position.asset.currency)}
               {position.asset.lastPriceAt && (
                 <span className="ml-1">
@@ -258,26 +259,26 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
         </div>
 
         {/* Quantity */}
-        <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Quantité</p>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-white">{formatNumber(position.quantity)}</p>
-          <p className="text-xs text-gray-400 mt-1">
+        <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
+          <p className="text-sm text-ctp-subtext0">Quantité</p>
+          <p className="text-2xl font-semibold text-ctp-text">{formatNumber(position.quantity)}</p>
+          <p className="text-xs text-ctp-overlay1 mt-1">
             PRU: {formatCurrency(position.averageCost, position.asset.currency)}
           </p>
         </div>
 
         {/* Unrealized P&L */}
-        <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">P&L latent</p>
+        <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
+          <p className="text-sm text-ctp-subtext0">P&L latent</p>
           <p className={cn('text-2xl font-semibold', getPnLColor(position.unrealizedPnL))}>
             {position.unrealizedPnL >= 0 ? '+' : ''}
             {formatCurrency(position.unrealizedPnL, 'EUR')}
           </p>
           <div className="flex items-center gap-1 mt-1">
             {position.unrealizedPnL >= 0 ? (
-              <TrendingUp className="h-3 w-3 text-green-500" />
+              <TrendingUp className="h-3 w-3 text-ctp-green" />
             ) : (
-              <TrendingDown className="h-3 w-3 text-red-500" />
+              <TrendingDown className="h-3 w-3 text-ctp-red" />
             )}
             <span className={cn('text-xs', getPnLColor(position.unrealizedPnLPercent))}>
               {position.unrealizedPnLPercent >= 0 ? '+' : ''}
@@ -287,13 +288,13 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
         </div>
 
         {/* Realized P&L */}
-        <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">P&L réalisé</p>
+        <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
+          <p className="text-sm text-ctp-subtext0">P&L réalisé</p>
           <p className={cn('text-2xl font-semibold', getPnLColor(position.realizedPnL))}>
             {position.realizedPnL >= 0 ? '+' : ''}
             {formatCurrency(position.realizedPnL, 'EUR')}
           </p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-ctp-overlay1 mt-1">
             Coût total: {formatCurrency(position.totalCost, 'EUR')}
           </p>
         </div>
@@ -302,12 +303,12 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
       {/* Additional info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Asset info */}
-        <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Informations de l'actif</h3>
+        <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-ctp-subtext1 mb-3">Informations de l'actif</h3>
           <dl className="space-y-2">
             <div className="flex justify-between">
-              <dt className="text-sm text-gray-500 dark:text-gray-400">Type</dt>
-              <dd className="text-sm font-medium text-gray-900 dark:text-white">
+              <dt className="text-sm text-ctp-subtext0">Type</dt>
+              <dd className="text-sm font-medium text-ctp-text">
                 {position.asset.type === 'stock' && 'Action'}
                 {position.asset.type === 'etf' && 'ETF'}
                 {position.asset.type === 'crypto' && 'Crypto-monnaie'}
@@ -316,29 +317,29 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
             </div>
             {position.asset.exchange && (
               <div className="flex justify-between">
-                <dt className="text-sm text-gray-500 dark:text-gray-400">Bourse</dt>
-                <dd className="text-sm font-medium text-gray-900 dark:text-white">{position.asset.exchange}</dd>
+                <dt className="text-sm text-ctp-subtext0">Bourse</dt>
+                <dd className="text-sm font-medium text-ctp-text">{position.asset.exchange}</dd>
               </div>
             )}
             <div className="flex justify-between">
-              <dt className="text-sm text-gray-500 dark:text-gray-400">Devise</dt>
-              <dd className="text-sm font-medium text-gray-900 dark:text-white">{position.asset.currency}</dd>
+              <dt className="text-sm text-ctp-subtext0">Devise</dt>
+              <dd className="text-sm font-medium text-ctp-text">{position.asset.currency}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-sm text-gray-500 dark:text-gray-400">Position ouverte le</dt>
-              <dd className="text-sm font-medium text-gray-900 dark:text-white">
+              <dt className="text-sm text-ctp-subtext0">Position ouverte le</dt>
+              <dd className="text-sm font-medium text-ctp-text">
                 {format(new Date(position.openedAt), 'dd/MM/yyyy', { locale: fr })}
               </dd>
             </div>
           </dl>
 
           {/* External links */}
-          <div className="mt-4 pt-4 border-t">
+          <div className="mt-4 pt-4 border-t border-ctp-surface1">
             <a
               href={`https://finance.yahoo.com/quote/${position.asset.symbol}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              className="text-sm text-ctp-blue hover:text-ctp-blue/80 flex items-center gap-1"
             >
               Voir sur Yahoo Finance
               <ExternalLink className="h-3 w-3" />
@@ -347,10 +348,10 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
         </div>
 
         {/* Transaction history */}
-        <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
+        <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Historique des transactions</h3>
-            <span className="text-xs text-gray-400">{position.transactions?.length || 0} transactions</span>
+            <h3 className="text-sm font-medium text-ctp-subtext1">Historique des transactions</h3>
+            <span className="text-xs text-ctp-overlay1">{position.transactions?.length || 0} transactions</span>
           </div>
 
           {position.transactions && position.transactions.length > 0 ? (
@@ -358,24 +359,24 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
               {position.transactions.map((tx) => (
                 <div
                   key={tx.id}
-                  className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded-lg"
+                  className="flex items-center justify-between p-2 bg-ctp-surface0 rounded-lg"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-1.5 bg-white dark:bg-gray-800 rounded">{getTransactionIcon(tx.type)}</div>
+                    <div className="p-1.5 bg-ctp-mantle rounded">{getTransactionIcon(tx.type)}</div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      <p className="text-sm font-medium text-ctp-text">
                         {getTransactionLabel(tx.type)}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-ctp-subtext0">
                         {format(new Date(tx.date), 'dd/MM/yyyy', { locale: fr })}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    <p className="text-sm font-medium text-ctp-text">
                       {tx.quantity} × {formatCurrency(tx.price, position.asset.currency)}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-ctp-subtext0">
                       {formatCurrency(tx.quantity * tx.price + tx.fees, 'EUR')}
                       {tx.fees > 0 && ` (frais: ${formatCurrency(tx.fees, 'EUR')})`}
                     </p>
@@ -384,8 +385,8 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <Calendar className="h-8 w-8 mx-auto text-gray-300 mb-2" />
+            <div className="text-center py-8 text-ctp-subtext0">
+              <Calendar className="h-8 w-8 mx-auto text-ctp-overlay1 mb-2" />
               <p className="text-sm">Aucune transaction</p>
             </div>
           )}

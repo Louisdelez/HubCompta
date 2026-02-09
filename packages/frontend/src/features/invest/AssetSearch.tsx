@@ -1,6 +1,7 @@
 // ============================================================================
 // ASSET SEARCH COMPONENT - Finance Hub
 // Search and select assets (stocks, ETFs, crypto)
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useCallback, useRef, useEffect } from 'react';
@@ -127,11 +128,11 @@ export function AssetSearch({
   const getAssetIcon = (type: string) => {
     switch (type) {
       case 'crypto':
-        return <Bitcoin className="h-4 w-4 text-orange-500" />;
+        return <Bitcoin className="h-4 w-4 text-ctp-peach" />;
       case 'etf':
-        return <Building2 className="h-4 w-4 text-purple-500" />;
+        return <Building2 className="h-4 w-4 text-ctp-sapphire" />;
       default:
-        return <TrendingUp className="h-4 w-4 text-blue-500" />;
+        return <TrendingUp className="h-4 w-4 text-ctp-blue" />;
     }
   };
 
@@ -155,7 +156,7 @@ export function AssetSearch({
   return (
     <div ref={containerRef} className={cn('relative', className)}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ctp-overlay1" />
         <input
           ref={inputRef}
           type="text"
@@ -169,23 +170,23 @@ export function AssetSearch({
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            'w-full pl-10 pr-4 py-2 border rounded-lg',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'disabled:bg-gray-100 disabled:cursor-not-allowed',
+            'w-full pl-10 pr-4 py-2 border border-ctp-surface1 rounded-lg',
+            'focus:outline-none focus:ring-2 focus:ring-ctp-blue focus:border-transparent',
+            'disabled:bg-ctp-surface0 disabled:cursor-not-allowed',
             'text-sm',
-            'bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400'
+            'bg-ctp-mantle text-ctp-text placeholder-ctp-overlay1'
           )}
         />
         {isLoading && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 animate-spin" />
+          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ctp-overlay1 animate-spin" />
         )}
       </div>
 
       {/* Results dropdown */}
       {isOpen && query.length >= 2 && (
-        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border rounded-lg shadow-lg max-h-64 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-1 bg-ctp-mantle border border-ctp-surface1 rounded-lg shadow-lg max-h-64 overflow-y-auto">
           {isLoading ? (
-            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+            <div className="p-4 text-center text-ctp-subtext0">
               <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
               Recherche en cours...
             </div>
@@ -197,30 +198,30 @@ export function AssetSearch({
                     type="button"
                     onClick={() => handleSelect(result)}
                     className={cn(
-                      'w-full px-4 py-2 text-left flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700',
-                      index === selectedIndex && 'bg-blue-50 dark:bg-blue-900/30'
+                      'w-full px-4 py-2 text-left flex items-center gap-3 hover:bg-ctp-surface0',
+                      index === selectedIndex && 'bg-ctp-blue/10'
                     )}
                   >
                     {getAssetIcon(result.type)}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-900 dark:text-white">{result.symbol}</span>
-                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                        <span className="font-medium text-ctp-text">{result.symbol}</span>
+                        <span className="text-xs px-1.5 py-0.5 bg-ctp-surface1 text-ctp-subtext0 rounded">
                           {getTypeLabel(result.type)}
                         </span>
                         {result.exchange && (
-                          <span className="text-xs text-gray-400">{result.exchange}</span>
+                          <span className="text-xs text-ctp-overlay1">{result.exchange}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{result.name}</p>
+                      <p className="text-sm text-ctp-subtext0 truncate">{result.name}</p>
                     </div>
-                    <span className="text-xs text-gray-400">{result.currency}</span>
+                    <span className="text-xs text-ctp-overlay1">{result.currency}</span>
                   </button>
                 </li>
               ))}
             </ul>
           ) : (
-            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+            <div className="p-4 text-center text-ctp-subtext0">
               Aucun résultat trouvé pour "{query}"
             </div>
           )}

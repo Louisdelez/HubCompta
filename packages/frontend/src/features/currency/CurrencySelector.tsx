@@ -1,6 +1,7 @@
 // ============================================================================
 // CURRENCY SELECTOR - Finance Hub
 // Dropdown for selecting currencies
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useQuery } from '@tanstack/react-query';

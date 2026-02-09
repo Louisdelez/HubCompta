@@ -1,6 +1,7 @@
 // ============================================================================
 // ADMIN DASHBOARD - Finance Hub
 // System statistics overview
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useQuery } from '@tanstack/react-query';
@@ -78,7 +79,7 @@ export function AdminDashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-ctp-blue" />
       </div>
     );
   }
@@ -86,7 +87,7 @@ export function AdminDashboard() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-500">Erreur lors du chargement des statistiques</p>
+        <p className="text-ctp-red">Erreur lors du chargement des statistiques</p>
       </div>
     );
   }
@@ -101,52 +102,52 @@ export function AdminDashboard() {
 
       {/* Database Stats */}
       <div>
-        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Base de donnees</h3>
+        <h3 className="text-sm font-medium text-ctp-subtext0 mb-3">Base de donnees</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4">
+          <div className="bg-ctp-surface0 rounded-lg p-4 border-l-4 border-ctp-blue">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
-                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 bg-ctp-blue/20 rounded-lg">
+                <Users className="h-5 w-5 text-ctp-blue" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{formatNumber(stats.database.users)}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Utilisateurs</p>
+                <p className="text-2xl font-bold text-ctp-text">{formatNumber(stats.database.users)}</p>
+                <p className="text-sm text-ctp-subtext0">Utilisateurs</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4">
+          <div className="bg-ctp-surface0 rounded-lg p-4 border-l-4 border-ctp-green">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
-                <Building2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <div className="p-2 bg-ctp-green/20 rounded-lg">
+                <Building2 className="h-5 w-5 text-ctp-green" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{formatNumber(stats.database.workspaces)}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Espaces</p>
+                <p className="text-2xl font-bold text-ctp-text">{formatNumber(stats.database.workspaces)}</p>
+                <p className="text-sm text-ctp-subtext0">Espaces</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4">
+          <div className="bg-ctp-surface0 rounded-lg p-4 border-l-4 border-ctp-yellow">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
-                <Receipt className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <div className="p-2 bg-ctp-yellow/20 rounded-lg">
+                <Receipt className="h-5 w-5 text-ctp-yellow" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{formatNumber(stats.database.transactions)}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Transactions</p>
+                <p className="text-2xl font-bold text-ctp-text">{formatNumber(stats.database.transactions)}</p>
+                <p className="text-sm text-ctp-subtext0">Transactions</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4">
+          <div className="bg-ctp-surface0 rounded-lg p-4 border-l-4 border-ctp-peach">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 dark:bg-orange-900/50 rounded-lg">
-                <FileText className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              <div className="p-2 bg-ctp-peach/20 rounded-lg">
+                <FileText className="h-5 w-5 text-ctp-peach" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{formatNumber(stats.database.documents)}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Documents</p>
+                <p className="text-2xl font-bold text-ctp-text">{formatNumber(stats.database.documents)}</p>
+                <p className="text-sm text-ctp-subtext0">Documents</p>
               </div>
             </div>
           </div>
@@ -156,61 +157,61 @@ export function AdminDashboard() {
       {/* System Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Server Info */}
-        <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4">
+        <div className="bg-ctp-surface0 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-4">
-            <Server className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-            <h3 className="font-medium">Serveur</h3>
+            <Server className="h-5 w-5 text-ctp-blue" />
+            <h3 className="font-medium text-ctp-text">Serveur</h3>
           </div>
           <dl className="space-y-3">
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">Node.js</dt>
+              <dt className="text-ctp-subtext0">Node.js</dt>
               <dd className="font-mono text-sm">{stats.system.nodeVersion}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">Uptime</dt>
+              <dt className="text-ctp-subtext0">Uptime</dt>
               <dd className="flex items-center gap-1">
-                <Clock className="h-4 w-4 text-gray-400" />
+                <Clock className="h-4 w-4 text-ctp-overlay1" />
                 {formatUptime(stats.system.uptime)}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">Memoire Heap</dt>
+              <dt className="text-ctp-subtext0">Memoire Heap</dt>
               <dd className="font-mono text-sm">
                 {stats.system.memory.heapUsed} / {stats.system.memory.heapTotal} MB
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">Memoire RSS</dt>
+              <dt className="text-ctp-subtext0">Memoire RSS</dt>
               <dd className="font-mono text-sm">{stats.system.memory.rss} MB</dd>
             </div>
           </dl>
         </div>
 
         {/* Redis Info */}
-        <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4">
+        <div className="bg-ctp-surface0 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-4">
-            <Database className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-            <h3 className="font-medium">Redis</h3>
+            <Database className="h-5 w-5 text-ctp-red" />
+            <h3 className="font-medium text-ctp-text">Redis</h3>
           </div>
           <dl className="space-y-3">
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">Statut</dt>
+              <dt className="text-ctp-subtext0">Statut</dt>
               <dd>
                 {stats.redis.connected ? (
-                  <span className="inline-flex items-center gap-1 text-green-600">
-                    <span className="w-2 h-2 bg-green-500 rounded-full" />
+                  <span className="inline-flex items-center gap-1 text-ctp-green">
+                    <span className="w-2 h-2 bg-ctp-green rounded-full" />
                     Connecte
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-red-600">
-                    <span className="w-2 h-2 bg-red-500 rounded-full" />
+                  <span className="inline-flex items-center gap-1 text-ctp-red">
+                    <span className="w-2 h-2 bg-ctp-red rounded-full" />
                     Deconnecte
                   </span>
                 )}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">Memoire utilisee</dt>
+              <dt className="text-ctp-subtext0">Memoire utilisee</dt>
               <dd className="font-mono text-sm">{stats.redis.memoryUsed}</dd>
             </div>
           </dl>

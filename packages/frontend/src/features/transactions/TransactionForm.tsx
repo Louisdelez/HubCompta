@@ -1,5 +1,6 @@
 // ============================================================================
 // TRANSACTION FORM - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -196,17 +197,17 @@ export function TransactionForm({
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl shadow-xl w-full sm:max-w-lg max-h-[90vh] overflow-auto animate-slide-up sm:animate-scale-in">
+      <div className="relative bg-ctp-mantle rounded-t-xl sm:rounded-xl shadow-xl w-full sm:max-w-lg max-h-[90vh] overflow-auto animate-slide-up sm:animate-scale-in">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">
+            <h2 className="text-xl font-bold text-ctp-text">
               {isEditing ? 'Modifier' : 'Nouvelle transaction'}
             </h2>
             {isEditing && !isTransfer && (
               <button
                 onClick={handleDelete}
                 disabled={deleteMutation.isPending}
-                className="text-danger-600 hover:text-danger-700"
+                className="text-ctp-red hover:text-ctp-red/80"
               >
                 Supprimer
               </button>
@@ -214,30 +215,30 @@ export function TransactionForm({
           </div>
 
           {error && (
-            <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm mb-4">
+            <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4">
               {error}
             </div>
           )}
 
           {isTransfer ? (
-            <p className="text-gray-500 dark:text-gray-400 mb-4">
+            <p className="text-ctp-subtext0 mb-4">
               Les virements ne peuvent pas être modifiés directement.
             </p>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* Type Toggle */}
-              <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+              <div className="flex rounded-lg overflow-hidden border border-ctp-surface1">
                 <button
                   type="button"
                   onClick={() => setValue('type', 'expense')}
                   className={clsx(
                     'flex-1 py-3 font-medium transition-colors',
                     selectedType === 'expense'
-                      ? 'bg-danger-500 text-white'
-                      : 'bg-white dark:bg-gray-800'
+                      ? 'bg-ctp-red text-ctp-base'
+                      : 'bg-ctp-surface0 text-ctp-subtext0 hover:bg-ctp-surface1'
                   )}
                 >
-                  Dépense
+                  Depense
                 </button>
                 <button
                   type="button"
@@ -245,8 +246,8 @@ export function TransactionForm({
                   className={clsx(
                     'flex-1 py-3 font-medium transition-colors',
                     selectedType === 'income'
-                      ? 'bg-success-500 text-white'
-                      : 'bg-white dark:bg-gray-800'
+                      ? 'bg-ctp-green text-ctp-base'
+                      : 'bg-ctp-surface0 text-ctp-subtext0 hover:bg-ctp-surface1'
                   )}
                 >
                   Revenu
@@ -283,7 +284,7 @@ export function TransactionForm({
                   <p className="error-text">{errors.amount.message}</p>
                 )}
                 {selectedAccount && selectedCurrency !== selectedAccount.currency && (
-                  <p className="text-xs text-warning-600 mt-1">
+                  <p className="text-xs text-ctp-yellow mt-1">
                     Le compte utilise {selectedAccount.currency}, le montant sera converti
                   </p>
                 )}

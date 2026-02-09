@@ -1,6 +1,7 @@
 // ============================================================================
 // DATA MANAGEMENT - Finance Hub
 // GDPR data export and account deletion
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -101,7 +102,7 @@ export function DataManagement() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-ctp-blue" />
       </div>
     );
   }
@@ -109,15 +110,15 @@ export function DataManagement() {
   return (
     <div className="space-y-6">
       {/* Data Summary */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-ctp-mantle rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-ctp-surface1">
           <div className="flex items-center gap-3">
-            <Database className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            <Database className="h-5 w-5 text-ctp-peach" />
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-semibold text-ctp-text">
                 Resume de vos donnees
               </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-ctp-subtext0">
                 Apercu des donnees stockees dans votre compte
               </p>
             </div>
@@ -129,23 +130,23 @@ export function DataManagement() {
             <>
               {/* User info */}
               <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <h3 className="text-sm font-medium text-ctp-subtext1 mb-2">
                   Informations du compte
                 </h3>
-                <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg p-4 space-y-2">
+                <div className="bg-ctp-surface0 rounded-lg p-4 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">Email</span>
-                    <span className="text-gray-900 dark:text-white">{summary.user.email}</span>
+                    <span className="text-ctp-subtext0">Email</span>
+                    <span className="text-ctp-text">{summary.user.email}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">Nom</span>
-                    <span className="text-gray-900 dark:text-white">
+                    <span className="text-ctp-subtext0">Nom</span>
+                    <span className="text-ctp-text">
                       {summary.user.displayName || '-'}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">Compte cree le</span>
-                    <span className="text-gray-900 dark:text-white">
+                    <span className="text-ctp-subtext0">Compte cree le</span>
+                    <span className="text-ctp-text">
                       {new Date(summary.user.createdAt).toLocaleDateString('fr-FR')}
                     </span>
                   </div>
@@ -164,12 +165,12 @@ export function DataManagement() {
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg p-4 text-center"
+                    className="bg-ctp-surface0 rounded-lg p-4 text-center"
                   >
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <div className="text-2xl font-bold text-ctp-text">
                       {item.count}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">{item.label}</div>
+                    <div className="text-xs text-ctp-subtext0">{item.label}</div>
                   </div>
                 ))}
               </div>
@@ -179,15 +180,15 @@ export function DataManagement() {
       </div>
 
       {/* Export Data */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-ctp-mantle rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-ctp-surface1">
           <div className="flex items-center gap-3">
-            <FileJson className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            <FileJson className="h-5 w-5 text-ctp-peach" />
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-semibold text-ctp-text">
                 Exporter vos donnees
               </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-ctp-subtext0">
                 Telechargez une copie de toutes vos donnees au format JSON
               </p>
             </div>
@@ -195,11 +196,11 @@ export function DataManagement() {
         </div>
 
         <div className="p-6">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-sm text-ctp-subtext1 mb-4">
             Conformement au RGPD, vous pouvez telecharger l'ensemble de vos donnees personnelles.
             L'export inclut :
           </p>
-          <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 mb-6 list-disc list-inside">
+          <ul className="text-sm text-ctp-subtext1 space-y-1 mb-6 list-disc list-inside">
             <li>Informations de profil</li>
             <li>Workspaces et comptes</li>
             <li>Transactions et categories</li>
@@ -209,7 +210,7 @@ export function DataManagement() {
           </ul>
 
           {exportSuccess && (
-            <div className="mb-4 flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg">
+            <div className="mb-4 flex items-center gap-2 p-3 bg-ctp-green/20 text-ctp-green rounded-lg">
               <CheckCircle className="h-5 w-5" />
               <span className="text-sm">Export telecharge avec succes</span>
             </div>
@@ -218,7 +219,7 @@ export function DataManagement() {
           <button
             onClick={() => exportMutation.mutate()}
             disabled={exportMutation.isPending}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-ctp-blue text-ctp-base text-sm font-medium rounded-lg hover:bg-ctp-sapphire disabled:opacity-50 transition-colors"
           >
             {exportMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -231,15 +232,15 @@ export function DataManagement() {
       </div>
 
       {/* Delete Account */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-red-200 dark:border-red-900">
-        <div className="px-6 py-4 border-b border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20 rounded-t-lg">
+      <div className="bg-ctp-mantle rounded-lg shadow border border-ctp-red/30">
+        <div className="px-6 py-4 border-b border-ctp-red/30 bg-ctp-red/10 rounded-t-lg">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            <AlertTriangle className="h-5 w-5 text-ctp-red" />
             <div>
-              <h2 className="text-lg font-semibold text-red-600 dark:text-red-400">
+              <h2 className="text-lg font-semibold text-ctp-red">
                 Zone de danger
               </h2>
-              <p className="text-sm text-red-500 dark:text-red-400/80">
+              <p className="text-sm text-ctp-red/80">
                 Actions irreversibles sur votre compte
               </p>
             </div>
@@ -247,14 +248,14 @@ export function DataManagement() {
         </div>
 
         <div className="p-6">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+          <h3 className="text-sm font-medium text-ctp-text mb-2">
             Supprimer le compte
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-sm text-ctp-subtext1 mb-4">
             La suppression de votre compte est <strong>permanente et irreversible</strong>. Toutes
             vos donnees seront definitivement effacees, y compris :
           </p>
-          <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 mb-6 list-disc list-inside">
+          <ul className="text-sm text-ctp-subtext1 space-y-1 mb-6 list-disc list-inside">
             <li>Tous vos workspaces et leurs donnees</li>
             <li>Toutes les transactions et documents</li>
             <li>Tous les contacts, devis et factures</li>
@@ -264,14 +265,14 @@ export function DataManagement() {
           {!showDeleteConfirm ? (
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-ctp-red text-ctp-base text-sm font-medium rounded-lg hover:bg-ctp-maroon transition-colors"
             >
               <Trash2 className="h-4 w-4" />
               Supprimer mon compte
             </button>
           ) : (
-            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
-              <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+            <div className="bg-ctp-red/10 rounded-lg p-4">
+              <p className="text-sm text-ctp-red mb-3">
                 Pour confirmer la suppression, tapez <strong>SUPPRIMER</strong> ci-dessous :
               </p>
               <input
@@ -279,7 +280,7 @@ export function DataManagement() {
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
                 placeholder="SUPPRIMER"
-                className="w-full px-3 py-2 border border-red-300 dark:border-red-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white mb-3 focus:ring-2 focus:ring-red-500"
+                className="w-full px-3 py-2 border border-ctp-red/50 rounded-lg bg-ctp-base text-ctp-text mb-3 focus:ring-2 focus:ring-ctp-red"
               />
               <div className="flex gap-3">
                 <button
@@ -287,14 +288,14 @@ export function DataManagement() {
                     setShowDeleteConfirm(false);
                     setDeleteConfirmText('');
                   }}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  className="flex-1 px-4 py-2 text-sm font-medium text-ctp-subtext1 bg-ctp-surface1 rounded-lg hover:bg-ctp-surface2 transition-colors"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={deleteConfirmText !== 'SUPPRIMER' || deleteMutation.isPending}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-ctp-red text-ctp-base text-sm font-medium rounded-lg hover:bg-ctp-maroon disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {deleteMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -306,7 +307,7 @@ export function DataManagement() {
               </div>
 
               {deleteMutation.isError && (
-                <p className="mt-3 text-sm text-red-600 dark:text-red-400">
+                <p className="mt-3 text-sm text-ctp-red">
                   Une erreur est survenue. Veuillez reessayer.
                 </p>
               )}

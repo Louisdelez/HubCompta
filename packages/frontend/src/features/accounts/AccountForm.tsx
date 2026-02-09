@@ -1,5 +1,6 @@
 // ============================================================================
 // ACCOUNT FORM - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -51,11 +52,24 @@ const ACCOUNT_TYPES = [
   { value: 'investment', label: 'Investissement', icon: TrendingUp },
 ] as const;
 
+// Catppuccin Mocha colors for account customization
 const COLORS = [
-  '#EF4444', '#F97316', '#F59E0B', '#EAB308',
-  '#84CC16', '#22C55E', '#10B981', '#14B8A6',
-  '#06B6D4', '#0EA5E9', '#3B82F6', '#6366F1',
-  '#8B5CF6', '#A855F7', '#D946EF', '#EC4899',
+  '#f38ba8', // red
+  '#fab387', // peach
+  '#f9e2af', // yellow
+  '#a6e3a1', // green
+  '#94e2d5', // teal
+  '#89dceb', // sky
+  '#74c7ec', // sapphire
+  '#89b4fa', // blue
+  '#b4befe', // lavender
+  '#cba6f7', // mauve
+  '#f5c2e7', // pink
+  '#eba0ac', // maroon
+  '#cdd6f4', // text
+  '#bac2de', // subtext1
+  '#a6adc8', // subtext0
+  '#9399b2', // overlay2
 ];
 
 // ----------------------------------------------------------------------------
@@ -145,14 +159,14 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-auto animate-scale-in">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-auto animate-scale-in">
         <div className="p-6">
           <h2 className="text-xl font-bold mb-4">
             {isEditing ? 'Modifier le compte' : 'Nouveau compte'}
           </h2>
 
           {error && (
-            <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm mb-4">
+            <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4">
               {error}
             </div>
           )}
@@ -169,8 +183,8 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
                       className={clsx(
                         'flex flex-col items-center p-3 rounded-lg border-2 cursor-pointer transition-colors',
                         selectedType === type.value
-                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                          ? 'border-ctp-blue bg-ctp-blue/10'
+                          : 'border-ctp-surface1 hover:border-ctp-surface2'
                       )}
                     >
                       <input
@@ -239,7 +253,7 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
                     onClick={() => setValue('color', color)}
                     className={clsx(
                       'w-8 h-8 rounded-full transition-transform',
-                      selectedColor === color && 'ring-2 ring-offset-2 ring-primary-500 scale-110'
+                      selectedColor === color && 'ring-2 ring-offset-2 ring-ctp-blue scale-110'
                     )}
                     style={{ backgroundColor: color }}
                   />

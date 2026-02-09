@@ -1,6 +1,7 @@
 // ============================================================================
 // PRICE ALERT LIST - Finance Hub
 // Display and manage active price alerts
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -72,15 +73,15 @@ export function PriceAlertList() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-primary-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-ctp-blue" />
       </div>
     );
   }
 
   if (!alerts || alerts.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-        <Bell className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+      <div className="text-center py-8 text-ctp-subtext0">
+        <Bell className="h-12 w-12 mx-auto text-ctp-overlay1 mb-3" />
         <p>Aucune alerte de prix</p>
         <p className="text-sm mt-1">
           Definissez des alertes sur vos positions pour etre notifie
@@ -96,25 +97,25 @@ export function PriceAlertList() {
           key={alert.id}
           className={`flex items-center justify-between p-3 rounded-lg border ${
             alert.isEnabled
-              ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-              : 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700/50 opacity-60'
+              ? 'bg-ctp-mantle border-ctp-surface1'
+              : 'bg-ctp-surface0 border-ctp-surface1/50 opacity-60'
           }`}
         >
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg ${
               alert.type === 'price_above'
-                ? 'bg-green-100 dark:bg-green-900/30'
-                : 'bg-red-100 dark:bg-red-900/30'
+                ? 'bg-ctp-green/10'
+                : 'bg-ctp-red/10'
             }`}>
               {alert.type === 'price_above' ? (
-                <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <TrendingUp className="h-4 w-4 text-ctp-green" />
               ) : (
-                <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <TrendingDown className="h-4 w-4 text-ctp-red" />
               )}
             </div>
             <div>
-              <p className="font-medium">{alert.config.assetSymbol}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="font-medium text-ctp-text">{alert.config.assetSymbol}</p>
+              <p className="text-sm text-ctp-subtext0">
                 {alert.type === 'price_above' ? 'Au-dessus de ' : 'En-dessous de '}
                 {formatCurrency(alert.config.targetPrice, 'USD')}
               </p>
@@ -127,8 +128,8 @@ export function PriceAlertList() {
               disabled={toggleMutation.isPending}
               className={`p-2 rounded-lg transition-colors ${
                 alert.isEnabled
-                  ? 'text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20'
-                  : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'text-ctp-blue hover:bg-ctp-blue/10'
+                  : 'text-ctp-overlay1 hover:bg-ctp-surface1'
               }`}
               title={alert.isEnabled ? 'Desactiver' : 'Activer'}
             >
@@ -141,7 +142,7 @@ export function PriceAlertList() {
                 }
               }}
               disabled={deleteMutation.isPending}
-              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+              className="p-2 text-ctp-overlay1 hover:text-ctp-red hover:bg-ctp-red/10 rounded-lg transition-colors"
               title="Supprimer"
             >
               <Trash2 className="h-4 w-4" />

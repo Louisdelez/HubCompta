@@ -1,5 +1,6 @@
 // ============================================================================
 // PREVIEW STEP - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useEffect, useState } from 'react';
@@ -102,8 +103,8 @@ export function PreviewStep({
   if (isLoading) {
     return (
       <div className="text-center py-12">
-        <div className="animate-spin w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full mx-auto mb-4" />
-        <p className="text-gray-600 dark:text-gray-400">Analyse des données...</p>
+        <div className="animate-spin w-12 h-12 border-4 border-ctp-blue border-t-transparent rounded-full mx-auto mb-4" />
+        <p className="text-ctp-subtext0">Analyse des données...</p>
       </div>
     );
   }
@@ -111,8 +112,8 @@ export function PreviewStep({
   if (error || !preview) {
     return (
       <div className="text-center py-12">
-        <XCircle className="w-10 h-10 mx-auto mb-4 text-danger-500" />
-        <p className="text-danger-600 mb-4">
+        <XCircle className="w-10 h-10 mx-auto mb-4 text-ctp-red" />
+        <p className="text-ctp-red mb-4">
           {error instanceof Error ? error.message : 'Erreur lors de l\'analyse'}
         </p>
         <button onClick={onBack} className="btn-secondary">
@@ -126,18 +127,18 @@ export function PreviewStep({
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold mb-2">Aperçu de l'import</h2>
-        <p className="text-gray-600 dark:text-gray-400 text-sm">
+        <p className="text-ctp-subtext0 text-sm">
           Vérifiez les données avant de lancer l'import.
         </p>
       </div>
 
       {/* Warnings */}
       {preview.warnings.length > 0 && (
-        <div className="p-4 bg-warning-50 dark:bg-warning-900/20 rounded-lg">
-          <p className="font-medium text-warning-700 dark:text-warning-300 mb-2">
+        <div className="p-4 bg-ctp-yellow/10 border border-ctp-yellow/30 rounded-lg">
+          <p className="font-medium text-ctp-yellow mb-2">
             Avertissements
           </p>
-          <ul className="list-disc list-inside text-sm text-warning-600 dark:text-warning-400">
+          <ul className="list-disc list-inside text-sm text-ctp-yellow">
             {preview.warnings.map((warning, i) => (
               <li key={i}>{warning}</li>
             ))}
@@ -147,17 +148,17 @@ export function PreviewStep({
 
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg text-center">
+        <div className="p-4 bg-ctp-surface0 rounded-lg text-center">
           <p className="text-2xl font-bold">{preview.totalRows}</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Lignes totales</p>
+          <p className="text-sm text-ctp-subtext0">Lignes totales</p>
         </div>
-        <div className="p-4 bg-success-50 dark:bg-success-900/20 rounded-lg text-center">
-          <p className="text-2xl font-bold text-success-600">{preview.validRows}</p>
-          <p className="text-sm text-success-700 dark:text-success-400">Valides</p>
+        <div className="p-4 bg-ctp-green/10 border border-ctp-green/30 rounded-lg text-center">
+          <p className="text-2xl font-bold text-ctp-green">{preview.validRows}</p>
+          <p className="text-sm text-ctp-green">Valides</p>
         </div>
-        <div className="p-4 bg-warning-50 dark:bg-warning-900/20 rounded-lg text-center">
-          <p className="text-2xl font-bold text-warning-600">{preview.duplicates}</p>
-          <p className="text-sm text-warning-700 dark:text-warning-400">Doublons</p>
+        <div className="p-4 bg-ctp-yellow/10 border border-ctp-yellow/30 rounded-lg text-center">
+          <p className="text-2xl font-bold text-ctp-yellow">{preview.duplicates}</p>
+          <p className="text-sm text-ctp-yellow">Doublons</p>
         </div>
       </div>
 
@@ -167,7 +168,7 @@ export function PreviewStep({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
+              <tr className="border-b border-ctp-surface1">
                 <th className="text-left py-2 px-3">Date</th>
                 <th className="text-left py-2 px-3">Description</th>
                 <th className="text-right py-2 px-3">Montant</th>
@@ -180,7 +181,7 @@ export function PreviewStep({
                 <tr
                   key={i}
                   className={clsx(
-                    'border-b border-gray-100 dark:border-gray-800',
+                    'border-b border-ctp-surface0',
                     txn.isDuplicate && 'opacity-50'
                   )}
                 >
@@ -191,27 +192,27 @@ export function PreviewStep({
                   <td
                     className={clsx(
                       'py-2 px-3 text-right font-medium',
-                      txn.amount >= 0 ? 'text-success-600' : ''
+                      txn.amount >= 0 ? 'text-ctp-green' : ''
                     )}
                   >
                     {formatCurrency(txn.amount)}
                   </td>
                   <td className="py-2 px-3">
                     {txn.suggestedCategory ? (
-                      <span className="text-primary-600 dark:text-primary-400">
+                      <span className="text-ctp-blue">
                         {txn.suggestedCategory.name}
                       </span>
                     ) : (
-                      <span className="text-gray-400">-</span>
+                      <span className="text-ctp-overlay1">-</span>
                     )}
                   </td>
                   <td className="py-2 px-3 text-center">
                     {txn.isDuplicate ? (
-                      <span className="px-2 py-0.5 rounded-full text-xs bg-warning-100 text-warning-700">
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-ctp-yellow/20 text-ctp-yellow">
                         Doublon
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full text-xs bg-success-100 text-success-700">
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-ctp-green/20 text-ctp-green">
                         Nouveau
                       </span>
                     )}
@@ -222,14 +223,14 @@ export function PreviewStep({
           </table>
         </div>
         {preview.validRows > 10 && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+          <p className="text-xs text-ctp-subtext0 mt-2 text-center">
             + {preview.validRows - 10} autres transactions
           </p>
         )}
       </div>
 
       {/* Import Options */}
-      <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg">
+      <div className="space-y-3 p-4 bg-ctp-surface0 rounded-lg">
         <h3 className="font-medium">Options d'import</h3>
 
         <label className="flex items-center gap-3">
@@ -237,11 +238,11 @@ export function PreviewStep({
             type="checkbox"
             checked={skipDuplicates}
             onChange={(e) => setSkipDuplicates(e.target.checked)}
-            className="w-5 h-5 rounded border-gray-300 dark:border-gray-600"
+            className="w-5 h-5 rounded border-ctp-surface1"
           />
           <div>
             <p className="font-medium">Ignorer les doublons</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-ctp-subtext0">
               {preview.duplicates} transaction(s) déjà présente(s)
             </p>
           </div>
@@ -252,11 +253,11 @@ export function PreviewStep({
             type="checkbox"
             checked={applyRules}
             onChange={(e) => setApplyRules(e.target.checked)}
-            className="w-5 h-5 rounded border-gray-300 dark:border-gray-600"
+            className="w-5 h-5 rounded border-ctp-surface1"
           />
           <div>
             <p className="font-medium">Appliquer les règles de catégorisation</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-ctp-subtext0">
               Catégorise automatiquement selon vos règles
             </p>
           </div>

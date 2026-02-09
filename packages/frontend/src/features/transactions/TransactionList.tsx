@@ -1,5 +1,6 @@
 // ============================================================================
 // TRANSACTION LIST - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -116,19 +117,19 @@ export function TransactionList() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+      <div className="p-6 text-center text-ctp-subtext0">
         Sélectionnez un espace de travail
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-ctp-base min-h-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Transactions</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h1 className="text-2xl font-bold text-ctp-text">Transactions</h1>
+          <p className="text-ctp-subtext0">
             {data?.total ?? 0} transaction{(data?.total ?? 0) !== 1 ? 's' : ''}
           </p>
         </div>
@@ -144,7 +145,7 @@ export function TransactionList() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Rechercher..."
-          className="input flex-1"
+          className="input flex-1 bg-ctp-surface0 border-ctp-surface1"
         />
         <button type="submit" className="btn-secondary">
           Rechercher
@@ -156,17 +157,17 @@ export function TransactionList() {
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="animate-pulse">
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-3" />
+              <div className="h-4 bg-ctp-surface1 rounded w-24 mb-3" />
               <div className="space-y-2">
-                <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-xl" />
-                <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+                <div className="h-16 bg-ctp-surface1 rounded-xl" />
+                <div className="h-16 bg-ctp-surface1 rounded-xl" />
               </div>
             </div>
           ))}
         </div>
       ) : transactions.length === 0 ? (
-        <div className="card text-center py-12">
-          <p className="text-gray-400 text-lg mb-4">Aucune transaction</p>
+        <div className="card bg-ctp-mantle text-center py-12">
+          <p className="text-ctp-subtext0 text-lg mb-4">Aucune transaction</p>
           <button onClick={() => setShowForm(true)} className="btn-primary">
             Ajouter une transaction
           </button>
@@ -175,7 +176,7 @@ export function TransactionList() {
         <div className="space-y-6">
           {Object.entries(groupedTransactions).map(([date, dayTransactions]) => (
             <div key={date}>
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+              <h3 className="text-sm font-medium text-ctp-subtext0 mb-2">
                 {formatDate(date)}
               </h3>
               <div className="space-y-2">
@@ -186,17 +187,24 @@ export function TransactionList() {
                       setEditingTransaction(txn);
                       setShowForm(true);
                     }}
-                    className="card flex items-center gap-3 cursor-pointer hover:shadow-md transition-shadow"
+                    className={clsx(
+                      'card flex items-center gap-3 cursor-pointer hover:shadow-md transition-shadow border-l-4',
+                      txn.type === 'income'
+                        ? 'border-l-ctp-green'
+                        : txn.type === 'transfer'
+                        ? 'border-l-ctp-blue'
+                        : 'border-l-ctp-red'
+                    )}
                   >
                     {/* Icon */}
                     <div
                       className={clsx(
                         'w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0',
                         txn.type === 'income'
-                          ? 'bg-success-100 dark:bg-success-900/30'
+                          ? 'bg-ctp-green/10 text-ctp-green'
                           : txn.type === 'transfer'
-                          ? 'bg-blue-100 dark:bg-blue-900/30'
-                          : 'bg-gray-100 dark:bg-gray-700'
+                          ? 'bg-ctp-blue/10 text-ctp-blue'
+                          : 'bg-ctp-red/10 text-ctp-red'
                       )}
                     >
                       {txn.category?.icon ? (
@@ -211,12 +219,12 @@ export function TransactionList() {
                     {/* Details */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium truncate">{txn.description}</p>
+                        <p className="font-medium text-ctp-text truncate">{txn.description}</p>
                         {txn.isReconciled && (
-                          <span title="Rapproché"><Check className="w-4 h-4 text-success-500" /></span>
+                          <span title="Rapproché"><Check className="w-4 h-4 text-ctp-green" /></span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-2 text-sm text-ctp-subtext0">
                         <span className="truncate">
                           {txn.category?.name ?? 'Non catégorisé'}
                         </span>
@@ -228,14 +236,14 @@ export function TransactionList() {
                           {txn.tags.slice(0, 3).map((tag) => (
                             <span
                               key={tag.id}
-                              className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700"
+                              className="text-xs px-2 py-0.5 rounded-full bg-ctp-mauve/20 text-ctp-mauve"
                               style={tag.color ? { backgroundColor: tag.color + '20', color: tag.color } : {}}
                             >
                               {tag.name}
                             </span>
                           ))}
                           {txn.tags.length > 3 && (
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-ctp-subtext0">
                               +{txn.tags.length - 3}
                             </span>
                           )}
@@ -248,8 +256,10 @@ export function TransactionList() {
                       className={clsx(
                         'text-lg font-bold flex-shrink-0',
                         txn.amount > 0
-                          ? 'text-success-600 dark:text-success-400'
-                          : 'text-gray-900 dark:text-white'
+                          ? 'text-ctp-green'
+                          : txn.amount < 0
+                          ? 'text-ctp-red'
+                          : 'text-ctp-text'
                       )}
                     >
                       {txn.amount > 0 ? '+' : ''}
@@ -273,7 +283,7 @@ export function TransactionList() {
           >
             Précédent
           </button>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="text-sm text-ctp-subtext0">
             Page {meta.page} sur {meta.totalPages}
           </span>
           <button

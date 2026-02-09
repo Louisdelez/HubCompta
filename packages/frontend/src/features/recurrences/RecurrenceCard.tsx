@@ -1,5 +1,6 @@
 // ============================================================================
 // RECURRENCE CARD - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -217,26 +218,26 @@ export function RecurrenceCard({
       className={clsx(
         'card relative',
         !recurrence.isActive && 'opacity-60',
-        isExpense ? 'border-l-4 border-l-danger-500' : 'border-l-4 border-l-success-500'
+        isExpense ? 'border-l-4 border-l-ctp-red' : 'border-l-4 border-l-ctp-green'
       )}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <span className="text-2xl">
-            {recurrence.template.category?.icon ? <span>{recurrence.template.category.icon}</span> : (isExpense ? <ArrowDownCircle className="w-6 h-6 text-danger-500" /> : <ArrowUpCircle className="w-6 h-6 text-success-500" />)}
+            {recurrence.template.category?.icon ? <span>{recurrence.template.category.icon}</span> : (isExpense ? <ArrowDownCircle className="w-6 h-6 text-ctp-red" /> : <ArrowUpCircle className="w-6 h-6 text-ctp-green" />)}
           </span>
           <div>
             <h3 className="font-medium">{recurrence.name}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{recurrence.template.description}</p>
+            <p className="text-sm text-ctp-subtext0">{recurrence.template.description}</p>
           </div>
         </div>
         <span
           className={clsx(
             'text-xs px-2 py-1 rounded-full font-medium',
             recurrence.isActive
-              ? 'bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-300'
-              : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+              ? 'bg-ctp-green/10 text-ctp-green'
+              : 'bg-ctp-yellow/10 text-ctp-yellow'
           )}
         >
           {recurrence.isActive ? 'Active' : 'En pause'}
@@ -246,16 +247,16 @@ export function RecurrenceCard({
       {/* Amount and Frequency */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Montant</p>
+          <p className="text-sm text-ctp-subtext0">Montant</p>
           <p
-            className={clsx('text-lg font-bold', isExpense ? 'text-danger-600' : 'text-success-600')}
+            className={clsx('text-lg font-bold', isExpense ? 'text-ctp-red' : 'text-ctp-green')}
           >
             {isExpense ? '-' : '+'}
             {formatCurrency(Number(recurrence.template.amount))}
           </p>
         </div>
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Frequence</p>
+          <p className="text-sm text-ctp-subtext0">Frequence</p>
           <p className="font-medium">
             {getFrequencyLabel(
               recurrence.frequency,
@@ -268,34 +269,34 @@ export function RecurrenceCard({
       </div>
 
       {/* Next Run & Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg">
+      <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-ctp-surface1 rounded-lg">
         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Prochaine execution</p>
+          <p className="text-xs text-ctp-subtext0">Prochaine execution</p>
           <p className="font-medium text-sm">
             {recurrence.isActive ? formatRelativeDate(recurrence.nextRunAt) : '-'}
           </p>
         </div>
         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Executions</p>
+          <p className="text-xs text-ctp-subtext0">Executions</p>
           <p className="font-medium text-sm">{recurrence.executionCount} fois</p>
         </div>
       </div>
 
       {/* Account */}
       {recurrence.template.account && (
-        <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          Compte: <span className="text-gray-700 dark:text-gray-300">{recurrence.template.account.name}</span>
+        <div className="text-sm text-ctp-subtext0 mb-4">
+          Compte: <span className="text-ctp-subtext1">{recurrence.template.account.name}</span>
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
+      <div className="flex flex-wrap gap-2 pt-4 border-t border-ctp-surface1">
         <button
           onClick={handleToggleActive}
           disabled={isPending}
           className={clsx(
             'btn-ghost text-xs',
-            recurrence.isActive ? 'text-warning-600' : 'text-success-600'
+            recurrence.isActive ? 'text-ctp-yellow' : 'text-ctp-green'
           )}
         >
           {recurrence.isActive ? <><Pause className="w-4 h-4 inline mr-1" />Pause</> : <><Play className="w-4 h-4 inline mr-1" />Reprendre</>}
@@ -305,7 +306,7 @@ export function RecurrenceCard({
             <button
               onClick={handleExecuteNow}
               disabled={executeMutation.isPending}
-              className="btn-ghost text-xs text-primary-600"
+              className="btn-ghost text-xs text-ctp-blue"
             >
               <Zap className="w-4 h-4 inline mr-1" />Executer
             </button>
@@ -327,7 +328,7 @@ export function RecurrenceCard({
         <button
           onClick={handleDelete}
           disabled={deleteMutation.isPending}
-          className="btn-ghost text-xs text-danger-600"
+          className="btn-ghost text-xs text-ctp-red"
         >
           <Trash2 className="w-4 h-4" />
         </button>

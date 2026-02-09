@@ -1,5 +1,6 @@
 // ============================================================================
 // TAG INPUT - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -99,11 +100,11 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
             <span
               key={tag.id}
               onClick={() => toggleTag(tag.id)}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm cursor-pointer hover:opacity-80"
-              style={{
-                backgroundColor: tag.color ? tag.color + '20' : '#E5E7EB',
-                color: tag.color ?? '#374151',
-              }}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm cursor-pointer hover:opacity-80 bg-ctp-mauve/20 text-ctp-mauve"
+              style={tag.color ? {
+                backgroundColor: tag.color + '20',
+                color: tag.color,
+              } : {}}
             >
               {tag.name}
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -135,11 +136,11 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
               className="fixed inset-0 z-10"
               onClick={() => setIsOpen(false)}
             />
-            <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-48 overflow-auto">
+            <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-ctp-base rounded-lg shadow-lg border border-ctp-surface1 max-h-48 overflow-auto">
               {/* Popular tags */}
               {!searchQuery && (popularTags?.length ?? 0) > 0 && (
-                <div className="p-2 border-b border-gray-200 dark:border-gray-700">
-                  <p className="text-xs text-gray-400 mb-1">Populaires</p>
+                <div className="p-2 border-b border-ctp-surface1">
+                  <p className="text-xs text-ctp-subtext0 mb-1">Populaires</p>
                   <div className="flex flex-wrap gap-1">
                     {popularTags
                       ?.filter((t) => !value.includes(t.id))
@@ -151,11 +152,11 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
                           onClick={() => {
                             toggleTag(tag.id);
                           }}
-                          className="px-2 py-0.5 rounded-full text-xs hover:opacity-80"
-                          style={{
-                            backgroundColor: tag.color ? tag.color + '20' : '#E5E7EB',
-                            color: tag.color ?? '#374151',
-                          }}
+                          className="px-2 py-0.5 rounded-full text-xs hover:opacity-80 bg-ctp-mauve/20 text-ctp-mauve"
+                          style={tag.color ? {
+                            backgroundColor: tag.color + '20',
+                            color: tag.color,
+                          } : {}}
                         >
                           {tag.name}
                         </button>
@@ -173,13 +174,13 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
                     toggleTag(tag.id);
                     setSearchQuery('');
                   }}
-                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700"
+                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-ctp-surface0"
                 >
                   <span
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: tag.color ?? '#9CA3AF' }}
+                    className="w-3 h-3 rounded-full bg-ctp-mauve"
+                    style={tag.color ? { backgroundColor: tag.color } : {}}
                   />
-                  <span>{tag.name}</span>
+                  <span className="text-ctp-text">{tag.name}</span>
                 </button>
               ))}
 
@@ -191,7 +192,7 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
                   type="button"
                   onClick={handleCreateTag}
                   disabled={createTagMutation.isPending}
-                  className="w-full px-3 py-2 text-left text-primary-600 dark:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700"
+                  className="w-full px-3 py-2 text-left text-ctp-blue hover:bg-ctp-surface0"
                 >
                   {createTagMutation.isPending ? (
                     'Création...'
@@ -203,7 +204,7 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
 
               {/* Empty state */}
               {!searchQuery && filteredTags.length === 0 && (popularTags?.length ?? 0) === 0 && (
-                <p className="px-3 py-2 text-gray-400 text-sm">
+                <p className="px-3 py-2 text-ctp-subtext0 text-sm">
                   Tapez pour créer un nouveau tag
                 </p>
               )}

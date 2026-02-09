@@ -1,6 +1,7 @@
 // ============================================================================
 // INVOICE FORM - Finance Hub
 // Create/Edit invoice
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useEffect } from 'react';
@@ -45,10 +46,10 @@ interface Invoice {
 
 const VAT_RATES = [
   { value: 20, label: 'TVA 20% (normal)' },
-  { value: 10, label: 'TVA 10% (intermédiaire)' },
-  { value: 5.5, label: 'TVA 5,5% (réduit)' },
-  { value: 2.1, label: 'TVA 2,1% (super-réduit)' },
-  { value: 0, label: 'Exonéré' },
+  { value: 10, label: 'TVA 10% (intermediaire)' },
+  { value: 5.5, label: 'TVA 5,5% (reduit)' },
+  { value: 2.1, label: 'TVA 2,1% (super-reduit)' },
+  { value: 0, label: 'Exonere' },
 ];
 
 // ----------------------------------------------------------------------------
@@ -210,7 +211,7 @@ export function InvoiceForm() {
 
     // Validation
     if (!contactId) {
-      setErrors({ contactId: 'Sélectionnez un client' });
+      setErrors({ contactId: 'Selectionnez un client' });
       return;
     }
 
@@ -249,8 +250,8 @@ export function InvoiceForm() {
         <h1 className="text-2xl font-bold">
           {isEditing ? 'Modifier la facture' : 'Nouvelle facture'}
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          {isEditing ? 'Modifiez les lignes de la facture' : 'Créez une nouvelle facture'}
+        <p className="text-ctp-subtext0">
+          {isEditing ? 'Modifiez les lignes de la facture' : 'Creez une nouvelle facture'}
         </p>
       </div>
 
@@ -262,14 +263,14 @@ export function InvoiceForm() {
             {!isEditing && (
               <div className="card">
                 <label className="block text-sm font-medium mb-2">
-                  Client <span className="text-danger-500">*</span>
+                  Client <span className="text-ctp-red">*</span>
                 </label>
                 <select
                   value={contactId}
                   onChange={(e) => setContactId(e.target.value)}
-                  className={clsx('input w-full', errors.contactId && 'border-danger-500')}
+                  className={clsx('input w-full', errors.contactId && 'border-ctp-red')}
                 >
-                  <option value="">Sélectionner un client...</option>
+                  <option value="">Selectionner un client...</option>
                   {contacts?.map((contact) => (
                     <option key={contact.id} value={contact.id}>
                       {contact.name}
@@ -277,7 +278,7 @@ export function InvoiceForm() {
                   ))}
                 </select>
                 {errors.contactId && (
-                  <p className="text-sm text-danger-500 mt-1">{errors.contactId}</p>
+                  <p className="text-sm text-ctp-red mt-1">{errors.contactId}</p>
                 )}
               </div>
             )}
@@ -296,14 +297,14 @@ export function InvoiceForm() {
               </div>
 
               {errors.lines && (
-                <p className="text-sm text-danger-500 mb-4">{errors.lines}</p>
+                <p className="text-sm text-ctp-red mb-4">{errors.lines}</p>
               )}
 
               <div className="space-y-4">
                 {lines.map((line, index) => (
                   <div
                     key={index}
-                    className="p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg space-y-3"
+                    className="p-4 bg-ctp-surface1 rounded-lg space-y-3"
                   >
                     <div className="flex items-start gap-3">
                       <div className="flex-1">
@@ -319,16 +320,16 @@ export function InvoiceForm() {
                         <button
                           type="button"
                           onClick={() => removeLine(index)}
-                          className="p-2 text-gray-400 hover:text-danger-600"
+                          className="p-2 text-ctp-overlay1 hover:text-ctp-red"
                         >
-                          ✕
+                          X
                         </button>
                       )}
                     </div>
 
                     <div className="grid grid-cols-4 gap-3">
                       <div>
-                        <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Quantité</label>
+                        <label className="block text-xs text-ctp-subtext0 mb-1">Quantite</label>
                         <input
                           type="number"
                           value={line.quantity}
@@ -339,7 +340,7 @@ export function InvoiceForm() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Prix unitaire HT</label>
+                        <label className="block text-xs text-ctp-subtext0 mb-1">Prix unitaire HT</label>
                         <input
                           type="number"
                           value={line.unitPrice}
@@ -350,7 +351,7 @@ export function InvoiceForm() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">TVA</label>
+                        <label className="block text-xs text-ctp-subtext0 mb-1">TVA</label>
                         <select
                           value={line.vatRate}
                           onChange={(e) => updateLine(index, 'vatRate', parseFloat(e.target.value))}
@@ -364,8 +365,8 @@ export function InvoiceForm() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Total TTC</label>
-                        <div className="input w-full bg-gray-100 dark:bg-gray-700 dark:bg-gray-600 font-medium">
+                        <label className="block text-xs text-ctp-subtext0 mb-1">Total TTC</label>
+                        <div className="input w-full bg-ctp-surface2 font-medium">
                           {formatCurrency(calculateLineTotal(line))}
                         </div>
                       </div>
@@ -382,7 +383,7 @@ export function InvoiceForm() {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="input w-full h-24 resize-none"
-                placeholder="Conditions de paiement, mentions légales..."
+                placeholder="Conditions de paiement, mentions legales..."
               />
             </div>
           </div>
@@ -392,7 +393,7 @@ export function InvoiceForm() {
             {/* Due Date */}
             {!isEditing && (
               <div className="card">
-                <label className="block text-sm font-medium mb-2">Date d'échéance</label>
+                <label className="block text-sm font-medium mb-2">Date d'echeance</label>
                 <input
                   type="date"
                   value={dueDate}
@@ -405,19 +406,19 @@ export function InvoiceForm() {
 
             {/* Totals */}
             <div className="card">
-              <h3 className="font-semibold mb-4">Récapitulatif</h3>
+              <h3 className="font-semibold mb-4">Recapitulatif</h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Sous-total HT</span>
+                  <span className="text-ctp-subtext0">Sous-total HT</span>
                   <span>{formatCurrency(totals.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">TVA</span>
+                  <span className="text-ctp-subtext0">TVA</span>
                   <span>{formatCurrency(totals.vatAmount)}</span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+                <div className="flex justify-between pt-2 border-t border-ctp-surface1">
                   <span className="font-semibold">Total TTC</span>
-                  <span className="text-xl font-bold text-primary-600">
+                  <span className="text-xl font-bold text-ctp-blue">
                     {formatCurrency(totals.total)}
                   </span>
                 </div>
@@ -426,7 +427,7 @@ export function InvoiceForm() {
 
             {/* Error */}
             {errors.submit && (
-              <div className="p-3 bg-danger-50 dark:bg-danger-900/20 text-danger-700 dark:text-danger-300 rounded-lg text-sm">
+              <div className="p-3 bg-ctp-red/10 text-ctp-red rounded-lg text-sm">
                 {errors.submit}
               </div>
             )}
@@ -438,7 +439,7 @@ export function InvoiceForm() {
                 className="btn btn-primary w-full"
                 disabled={isPending}
               >
-                {isPending ? 'Enregistrement...' : isEditing ? 'Mettre à jour' : 'Créer la facture'}
+                {isPending ? 'Enregistrement...' : isEditing ? 'Mettre a jour' : 'Creer la facture'}
               </button>
               <button
                 type="button"

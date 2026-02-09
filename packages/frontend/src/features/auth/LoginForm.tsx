@@ -1,5 +1,6 @@
 // ============================================================================
 // LOGIN FORM - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -141,105 +142,114 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto">
-          <Wallet className="w-8 h-8 text-white" />
-        </div>
-        <h1 className="text-2xl font-bold mt-4">Finance Hub</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Connectez-vous à votre compte
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {error && (
-          <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm">
-            {error}
+      {/* Card container with Catppuccin styling */}
+      <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-2xl p-8 shadow-xl">
+        <div className="text-center mb-8">
+          {/* Logo with gradient background */}
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-ctp-blue to-ctp-sapphire flex items-center justify-center mx-auto shadow-lg">
+            <Wallet className="w-10 h-10 text-ctp-crust" />
           </div>
-        )}
-
-        <div>
-          <label htmlFor="email" className="label">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            className="input"
-            placeholder="vous@exemple.com"
-            {...register('email', {
-              required: 'Email requis',
-              pattern: {
-                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: 'Email invalide',
-              },
-            })}
-          />
-          {errors.email && (
-            <p className="error-text">{errors.email.message}</p>
-          )}
+          <h1 className="text-2xl font-bold mt-6 text-ctp-text">Finance Hub</h1>
+          <p className="text-ctp-subtext0 mt-2">
+            Connectez-vous a votre compte
+          </p>
         </div>
 
-        <div>
-          <label htmlFor="password" className="label">
-            Mot de passe
-          </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            className="input"
-            placeholder="••••••••••••"
-            {...register('password', {
-              required: 'Mot de passe requis',
-            })}
-          />
-          {errors.password && (
-            <p className="error-text">{errors.password.message}</p>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {error && (
+            <div className="p-4 rounded-xl bg-ctp-red/10 border border-ctp-red/20 text-ctp-red text-sm flex items-center gap-3">
+              <div className="w-5 h-5 rounded-full bg-ctp-red/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold">!</span>
+              </div>
+              {error}
+            </div>
           )}
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-2 text-ctp-subtext1">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              className="w-full px-4 py-3 rounded-xl bg-ctp-mantle border border-ctp-surface1 text-ctp-text placeholder:text-ctp-overlay0 focus:border-ctp-blue focus:ring-2 focus:ring-ctp-blue/20 transition-all duration-200"
+              placeholder="vous@exemple.com"
+              {...register('email', {
+                required: 'Email requis',
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: 'Email invalide',
+                },
+              })}
+            />
+            {errors.email && (
+              <p className="text-sm mt-2 text-ctp-red">{errors.email.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium mb-2 text-ctp-subtext1">
+              Mot de passe
+            </label>
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              className="w-full px-4 py-3 rounded-xl bg-ctp-mantle border border-ctp-surface1 text-ctp-text placeholder:text-ctp-overlay0 focus:border-ctp-blue focus:ring-2 focus:ring-ctp-blue/20 transition-all duration-200"
+              placeholder="************"
+              {...register('password', {
+                required: 'Mot de passe requis',
+              })}
+            />
+            {errors.password && (
+              <p className="text-sm mt-2 text-ctp-red">{errors.password.message}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3 px-4 rounded-xl bg-ctp-blue text-ctp-crust font-semibold hover:bg-ctp-sapphire focus:ring-2 focus:ring-ctp-blue/50 focus:ring-offset-2 focus:ring-offset-ctp-surface0 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-ctp-blue/25"
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg
+                  className="animate-spin h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+                Connexion...
+              </span>
+            ) : (
+              'Se connecter'
+            )}
+          </button>
+        </form>
+
+        <div className="mt-6 pt-6 border-t border-ctp-surface1">
+          <p className="text-center text-sm text-ctp-subtext0">
+            Pas encore de compte ?{' '}
+            <a href="/register" className="text-ctp-blue hover:text-ctp-sapphire font-medium transition-colors">
+              Creer un compte
+            </a>
+          </p>
         </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="btn-primary w-full"
-        >
-          {isLoading ? (
-            <span className="flex items-center gap-2">
-              <svg
-                className="animate-spin h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
-              Connexion...
-            </span>
-          ) : (
-            'Se connecter'
-          )}
-        </button>
-      </form>
-
-      <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
-        Pas encore de compte ?{' '}
-        <a href="/register" className="link">
-          Créer un compte
-        </a>
-      </p>
+      </div>
     </div>
   );
 }

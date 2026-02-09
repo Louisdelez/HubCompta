@@ -1,10 +1,12 @@
 // ============================================================================
 // UPCOMING OCCURRENCES - Finance Hub
 // Preview of next recurrence executions
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
+import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -85,17 +87,17 @@ export function UpcomingOccurrences({
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full animate-scale-in">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-md w-full animate-scale-in">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-xl font-bold">Prochaines executions</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{recurrence.name}</p>
+              <p className="text-sm text-ctp-subtext0">{recurrence.name}</p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-lg"
+              className="p-2 hover:bg-ctp-surface1 rounded-lg"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -109,12 +111,18 @@ export function UpcomingOccurrences({
           </div>
 
           {/* Amount preview */}
-          <div className="p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg mb-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Montant par occurrence</p>
+          <div className={clsx(
+            'p-3 rounded-lg mb-4 border-l-4',
+            isExpense
+              ? 'bg-ctp-red/10 border-l-ctp-red'
+              : 'bg-ctp-green/10 border-l-ctp-green'
+          )}>
+            <p className="text-sm text-ctp-subtext0">Montant par occurrence</p>
             <p
-              className={`text-lg font-bold ${
-                isExpense ? 'text-danger-600' : 'text-success-600'
-              }`}
+              className={clsx(
+                'text-lg font-bold',
+                isExpense ? 'text-ctp-red' : 'text-ctp-green'
+              )}
             >
               {isExpense ? '-' : '+'}
               {formatCurrency(Number(recurrence.template.amount))}
@@ -126,10 +134,10 @@ export function UpcomingOccurrences({
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="animate-pulse flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full" />
+                  <div className="w-10 h-10 bg-ctp-surface1 rounded-full" />
                   <div className="flex-1">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-1" />
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                    <div className="h-4 bg-ctp-surface1 rounded w-3/4 mb-1" />
+                    <div className="h-3 bg-ctp-surface1 rounded w-1/2" />
                   </div>
                 </div>
               ))}
@@ -139,20 +147,20 @@ export function UpcomingOccurrences({
               {dates.map((date, index) => (
                 <div
                   key={date}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-ctp-surface1"
                 >
-                  <div className="w-10 h-10 flex items-center justify-center bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full font-bold text-sm">
+                  <div className="w-10 h-10 flex items-center justify-center bg-ctp-blue/20 text-ctp-blue rounded-full font-bold text-sm">
                     {index + 1}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium capitalize">{formatDate(date)}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{getRelativeLabel(date)}</p>
+                    <p className="text-sm text-ctp-subtext0">{getRelativeLabel(date)}</p>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <div className="text-center py-8 text-ctp-subtext0">
               <p>Aucune occurrence programmee</p>
               <p className="text-sm mt-1">
                 La recurrence est peut-etre terminee ou en pause
@@ -162,14 +170,14 @@ export function UpcomingOccurrences({
 
           {/* Total projection */}
           {dates && dates.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="mt-4 pt-4 border-t border-ctp-surface1">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500 dark:text-gray-400">
+                <span className="text-ctp-subtext0">
                   Total sur {dates.length} occurrences
                 </span>
                 <span
                   className={`font-bold ${
-                    isExpense ? 'text-danger-600' : 'text-success-600'
+                    isExpense ? 'text-ctp-red' : 'text-ctp-green'
                   }`}
                 >
                   {isExpense ? '-' : '+'}
@@ -181,7 +189,7 @@ export function UpcomingOccurrences({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4 border-t border-ctp-surface1">
           <button onClick={onClose} className="btn-secondary w-full">
             Fermer
           </button>

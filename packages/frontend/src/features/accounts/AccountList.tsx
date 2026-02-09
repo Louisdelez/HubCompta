@@ -1,5 +1,6 @@
 // ============================================================================
 // ACCOUNT LIST - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -41,6 +42,16 @@ const ACCOUNT_TYPE_ICONS: Record<Account['type'], typeof Landmark> = {
   credit_card: CreditCard,
   loan: FileText,
   investment: TrendingUp,
+};
+
+// Catppuccin accent colors for each account type
+const ACCOUNT_TYPE_COLORS: Record<Account['type'], string> = {
+  checking: 'text-ctp-blue',
+  savings: 'text-ctp-green',
+  cash: 'text-ctp-green',
+  credit_card: 'text-ctp-red',
+  loan: 'text-ctp-peach',
+  investment: 'text-ctp-mauve',
 };
 
 const ACCOUNT_TYPE_LABELS: Record<Account['type'], string> = {
@@ -94,9 +105,9 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
     return (
       <div className="card">
         <div className="animate-pulse space-y-3">
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-          <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded" />
-          <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded" />
+          <div className="h-6 bg-ctp-surface1 rounded w-1/3" />
+          <div className="h-12 bg-ctp-surface1 rounded" />
+          <div className="h-12 bg-ctp-surface1 rounded" />
         </div>
       </div>
     );
@@ -109,7 +120,7 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
           <h3 className="text-lg font-semibold">Comptes</h3>
           <button
             onClick={() => setShowForm(true)}
-            className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+            className="text-sm text-ctp-blue hover:underline"
           >
             + Ajouter
           </button>
@@ -119,7 +130,7 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
           {(accounts ?? []).slice(0, 5).map((account) => (
             <div
               key={account.id}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50"
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-ctp-surface0"
             >
               <div className="flex items-center gap-2">
                 {account.icon ? (
@@ -127,7 +138,8 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
                 ) : (
                   (() => {
                     const IconComponent = ACCOUNT_TYPE_ICONS[account.type];
-                    return <IconComponent className="w-5 h-5" />;
+                    const iconColor = ACCOUNT_TYPE_COLORS[account.type];
+                    return <IconComponent className={clsx('w-5 h-5', iconColor)} />;
                   })()
                 )}
                 <span className="font-medium">{account.name}</span>
@@ -135,7 +147,7 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
               <span
                 className={clsx(
                   'font-medium',
-                  account.balance >= 0 ? 'text-gray-900 dark:text-white' : 'text-danger-600'
+                  account.balance >= 0 ? 'text-ctp-green' : 'text-ctp-red'
                 )}
               >
                 {formatCurrency(account.balance, account.currency)}
@@ -144,7 +156,7 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
           ))}
         </div>
 
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+        <div className="mt-4 pt-4 border-t border-ctp-surface1 flex justify-between">
           <span className="font-medium">Total</span>
           <span className="font-bold">{formatCurrency(totalBalance)}</span>
         </div>
@@ -165,7 +177,7 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Comptes</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-ctp-subtext0">
             {accounts?.length ?? 0} compte{(accounts?.length ?? 0) > 1 ? 's' : ''}
           </p>
         </div>
@@ -175,18 +187,19 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
       </div>
 
       {/* Total Balance Card */}
-      <div className="card bg-gradient-to-r from-primary-500 to-primary-600 text-white">
-        <p className="text-primary-100">Solde total</p>
-        <p className="text-3xl font-bold mt-1">{formatCurrency(totalBalance)}</p>
+      <div className="card bg-gradient-to-r from-ctp-blue to-ctp-sapphire">
+        <p className="text-ctp-crust/70">Solde total</p>
+        <p className={clsx('text-3xl font-bold mt-1', totalBalance >= 0 ? 'text-ctp-crust' : 'text-ctp-red')}>{formatCurrency(totalBalance)}</p>
       </div>
 
       {/* Account Groups */}
       {Object.entries(groupedAccounts).map(([type, typeAccounts]) => {
         const IconComponent = ACCOUNT_TYPE_ICONS[type as Account['type']];
+        const iconColor = ACCOUNT_TYPE_COLORS[type as Account['type']];
         return (
         <div key={type}>
-          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <IconComponent className="w-5 h-5" />
+          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2 text-ctp-text">
+            <IconComponent className={clsx('w-5 h-5', iconColor)} />
             {ACCOUNT_TYPE_LABELS[type as Account['type']]}
           </h2>
           <div className="space-y-2">
@@ -198,21 +211,25 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: account.color ?? '#E5E7EB' }}
+                    className={clsx(
+                      'w-10 h-10 rounded-full flex items-center justify-center',
+                      !account.color && 'bg-ctp-surface1'
+                    )}
+                    style={account.color ? { backgroundColor: account.color } : undefined}
                   >
                     {account.icon ? (
                       <span className="text-lg">{account.icon}</span>
                     ) : (
                       (() => {
                         const AcctIcon = ACCOUNT_TYPE_ICONS[account.type];
-                        return <AcctIcon className="w-5 h-5" />;
+                        const acctIconColor = ACCOUNT_TYPE_COLORS[account.type];
+                        return <AcctIcon className={clsx('w-5 h-5', acctIconColor)} />;
                       })()
                     )}
                   </div>
                   <div>
                     <p className="font-medium">{account.name}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-ctp-subtext0">
                       {account.transactionCount} transaction
                       {account.transactionCount !== 1 ? 's' : ''}
                     </p>
@@ -222,8 +239,8 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
                   className={clsx(
                     'text-lg font-bold',
                     account.balance >= 0
-                      ? 'text-gray-900 dark:text-white'
-                      : 'text-danger-600'
+                      ? 'text-ctp-green'
+                      : 'text-ctp-red'
                   )}
                 >
                   {formatCurrency(account.balance, account.currency)}
@@ -237,7 +254,7 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
       {/* Empty State */}
       {(accounts?.length ?? 0) === 0 && (
         <div className="card text-center py-12">
-          <p className="text-gray-400 text-lg mb-4">Aucun compte</p>
+          <p className="text-ctp-overlay1 text-lg mb-4">Aucun compte</p>
           <button onClick={() => setShowForm(true)} className="btn-primary">
             Créer votre premier compte
           </button>

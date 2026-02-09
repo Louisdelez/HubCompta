@@ -1,5 +1,6 @@
 // ============================================================================
 // INVITE MEMBER - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -79,18 +80,18 @@ export function InviteMember({ workspaceId, onClose }: InviteMemberProps) {
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full animate-scale-in">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-md w-full animate-scale-in">
         <div className="p-6">
           <h2 className="text-xl font-bold mb-4">Inviter un membre</h2>
 
           {inviteLink ? (
             // Success state
             <div className="space-y-4">
-              <div className="p-4 bg-success-50 dark:bg-success-900/20 rounded-lg">
-                <p className="text-success-700 dark:text-success-300 font-medium">
-                  ✓ Invitation créée !
+              <div className="p-4 bg-ctp-green/10 rounded-lg">
+                <p className="text-ctp-green font-medium">
+                  Invitation créée !
                 </p>
-                <p className="text-sm text-success-600 dark:text-success-400 mt-1">
+                <p className="text-sm text-ctp-green/80 mt-1">
                   Partagez ce lien avec la personne à inviter.
                 </p>
               </div>
@@ -107,7 +108,7 @@ export function InviteMember({ workspaceId, onClose }: InviteMemberProps) {
                 </button>
               </div>
 
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-ctp-subtext0">
                 Ce lien expire dans 7 jours.
               </p>
 
@@ -119,7 +120,7 @@ export function InviteMember({ workspaceId, onClose }: InviteMemberProps) {
             // Form state
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {error && (
-                <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm">
+                <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm">
                   {error}
                 </div>
               )}
@@ -156,7 +157,7 @@ export function InviteMember({ workspaceId, onClose }: InviteMemberProps) {
                   <option value="member">Membre</option>
                   <option value="readonly">Lecture seule</option>
                 </select>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-ctp-subtext0 mt-1">
                   {getRoleDescription(register('role').name)}
                 </p>
               </div>

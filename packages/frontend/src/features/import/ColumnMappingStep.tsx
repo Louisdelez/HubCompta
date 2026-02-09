@@ -1,5 +1,6 @@
 // ============================================================================
 // COLUMN MAPPING STEP - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -113,19 +114,19 @@ export function ColumnMappingStep({
       <div>
         <h2 className="text-lg font-semibold mb-2">Mapper les colonnes</h2>
         {detectedFormat && (
-          <div className="p-3 rounded-lg bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300 text-sm flex items-center gap-2">
+          <div className="p-3 rounded-lg bg-ctp-green/10 text-ctp-green border border-ctp-green/30 text-sm flex items-center gap-2">
             <Check className="w-4 h-4" /> Format détecté : {detectedFormat.bank}
           </div>
         )}
         {!detectedFormat && (
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
+          <p className="text-ctp-subtext0 text-sm">
             Associez les colonnes de votre fichier aux champs requis.
           </p>
         )}
       </div>
 
       {error && (
-        <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm">
+        <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red border border-ctp-red/30 text-sm">
           {error}
         </div>
       )}
@@ -134,7 +135,7 @@ export function ColumnMappingStep({
         {/* Date Column */}
         <div>
           <label className="label">
-            Date <span className="text-danger-500">*</span>
+            Date <span className="text-ctp-red">*</span>
           </label>
           <select
             value={mapping.date}
@@ -153,7 +154,7 @@ export function ColumnMappingStep({
         {/* Description Column */}
         <div>
           <label className="label">
-            Description / Libellé <span className="text-danger-500">*</span>
+            Description / Libellé <span className="text-ctp-red">*</span>
           </label>
           <select
             value={mapping.description}
@@ -170,17 +171,17 @@ export function ColumnMappingStep({
         </div>
 
         {/* Amount Type Toggle */}
-        <div className="p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg">
+        <div className="p-4 bg-ctp-surface0 rounded-lg">
           <label className="flex items-center gap-3">
             <input
               type="checkbox"
               checked={useSplitAmount}
               onChange={(e) => setUseSplitAmount(e.target.checked)}
-              className="w-5 h-5 rounded border-gray-300 dark:border-gray-600"
+              className="w-5 h-5 rounded border-ctp-surface1"
             />
             <div>
               <p className="font-medium">Colonnes crédit/débit séparées</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-ctp-subtext0">
                 Cochez si votre fichier a des colonnes séparées pour les crédits et débits
               </p>
             </div>
@@ -192,7 +193,7 @@ export function ColumnMappingStep({
             {/* Credit Column */}
             <div>
               <label className="label">
-                Crédit <span className="text-danger-500">*</span>
+                Crédit <span className="text-ctp-red">*</span>
               </label>
               <select
                 value={mapping.credit ?? ''}
@@ -211,7 +212,7 @@ export function ColumnMappingStep({
             {/* Debit Column */}
             <div>
               <label className="label">
-                Débit <span className="text-danger-500">*</span>
+                Débit <span className="text-ctp-red">*</span>
               </label>
               <select
                 value={mapping.debit ?? ''}
@@ -231,7 +232,7 @@ export function ColumnMappingStep({
           /* Amount Column */
           <div>
             <label className="label">
-              Montant <span className="text-danger-500">*</span>
+              Montant <span className="text-ctp-red">*</span>
             </label>
             <select
               value={mapping.amount}
@@ -245,7 +246,7 @@ export function ColumnMappingStep({
                 </option>
               ))}
             </select>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs text-ctp-subtext0 mt-1">
               Les montants négatifs seront traités comme des dépenses
             </p>
           </div>
@@ -267,8 +268,8 @@ export function ColumnMappingStep({
                     header === mapping.description ||
                     header === mapping.credit ||
                     header === mapping.debit
-                    ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                    ? 'bg-ctp-blue/20 text-ctp-blue'
+                    : 'bg-ctp-surface1 text-ctp-subtext0'
                 )}
               >
                 {header}

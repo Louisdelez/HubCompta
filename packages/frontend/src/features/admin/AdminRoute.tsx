@@ -1,6 +1,7 @@
 // ============================================================================
 // ADMIN ROUTE GUARD - Finance Hub
 // Protects admin routes from non-admin users
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { Navigate } from 'react-router-dom';
@@ -17,7 +18,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-ctp-blue" />
       </div>
     );
   }

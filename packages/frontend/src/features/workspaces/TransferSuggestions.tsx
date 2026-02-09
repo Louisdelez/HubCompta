@@ -1,5 +1,6 @@
 // ============================================================================
 // TRANSFER SUGGESTIONS - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -43,18 +44,18 @@ function getInitials(name: string): string {
 
 function getAvatarColor(name: string): string {
   const colors = [
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-purple-500',
-    'bg-orange-500',
-    'bg-pink-500',
-    'bg-teal-500',
+    'bg-ctp-blue',
+    'bg-ctp-green',
+    'bg-ctp-mauve',
+    'bg-ctp-peach',
+    'bg-ctp-pink',
+    'bg-ctp-teal',
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return colors[Math.abs(hash) % colors.length] ?? 'bg-blue-500';
+  return colors[Math.abs(hash) % colors.length] ?? 'bg-ctp-blue';
 }
 
 // ----------------------------------------------------------------------------
@@ -77,9 +78,9 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
   if (transfers.length === 0) {
     return (
       <div className="card text-center py-8">
-        <CheckCircle className="w-10 h-10 mx-auto mb-3 text-success-500" />
-        <h3 className="text-lg font-semibold text-success-600">Tout est équilibré !</h3>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
+        <CheckCircle className="w-10 h-10 mx-auto mb-3 text-ctp-green" />
+        <h3 className="text-lg font-semibold text-ctp-green">Tout est équilibré !</h3>
+        <p className="text-ctp-subtext0 mt-1">
           Personne ne doit d'argent à personne
         </p>
       </div>
@@ -93,13 +94,13 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-semibold">Transferts suggérés</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-ctp-subtext0">
             {transfers.length} transfert{transfers.length > 1 ? 's' : ''} pour équilibrer les comptes
           </p>
         </div>
         {allCompleted && (
-          <span className="px-3 py-1 bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-300 rounded-full text-sm font-medium">
-            ✓ Tout réglé
+          <span className="px-3 py-1 bg-ctp-green/20 text-ctp-green rounded-full text-sm font-medium">
+            Tout réglé
           </span>
         )}
       </div>
@@ -114,8 +115,8 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
               className={clsx(
                 'flex items-center gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer',
                 isCompleted
-                  ? 'border-success-300 bg-success-50 dark:bg-success-900/10 dark:border-success-700 opacity-60'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
+                  ? 'border-ctp-green bg-ctp-green/10 opacity-60'
+                  : 'border-ctp-surface1 hover:border-ctp-blue'
               )}
               onClick={() => toggleCompleted(index)}
             >
@@ -135,15 +136,15 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
               {/* Arrow */}
               <div className="flex-1 flex items-center justify-center">
                 <div className="flex items-center gap-2">
-                  <div className="h-0.5 w-8 bg-gray-300 dark:bg-gray-600" />
-                  <div className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 rounded-full">
-                    <span className="font-bold text-primary-700 dark:text-primary-300">
+                  <div className="h-0.5 w-8 bg-ctp-surface2" />
+                  <div className="px-3 py-1 bg-ctp-blue/20 rounded-full">
+                    <span className="font-bold text-ctp-blue">
                       {formatCurrency(transfer.amount, currency)}
                     </span>
                   </div>
                   <div className="flex items-center">
-                    <div className="h-0.5 w-8 bg-gray-300 dark:bg-gray-600" />
-                    <span className="text-gray-400 dark:text-gray-500 dark:text-gray-400">→</span>
+                    <div className="h-0.5 w-8 bg-ctp-surface2" />
+                    <span className="text-ctp-overlay1">→</span>
                   </div>
                 </div>
               </div>
@@ -166,8 +167,8 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
                 className={clsx(
                   'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors',
                   isCompleted
-                    ? 'bg-success-500 border-success-500 text-white'
-                    : 'border-gray-300 dark:border-gray-600'
+                    ? 'bg-ctp-green border-ctp-green text-white'
+                    : 'border-ctp-surface2'
                 )}
               >
                 {isCompleted && <Check className="w-4 h-4" />}
@@ -178,17 +179,17 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
       </div>
 
       {/* Instructions */}
-      <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <p className="text-sm text-blue-700 dark:text-blue-300 flex items-start gap-2">
+      <div className="mt-4 p-3 bg-ctp-blue/10 rounded-lg">
+        <p className="text-sm text-ctp-blue flex items-start gap-2">
           <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <span>Cliquez sur un transfert pour le marquer comme effectué. Ces transferts minimisent le nombre d'échanges nécessaires.</span>
         </p>
       </div>
 
       {/* Total */}
-      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+      <div className="mt-4 pt-4 border-t border-ctp-surface1">
         <div className="flex justify-between items-center">
-          <span className="text-gray-500 dark:text-gray-400">Total à transférer</span>
+          <span className="text-ctp-subtext0">Total à transférer</span>
           <span className="text-xl font-bold">
             {formatCurrency(
               transfers.reduce((sum, t) => sum + t.amount, 0),

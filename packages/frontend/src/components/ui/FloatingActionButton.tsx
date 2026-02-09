@@ -1,5 +1,6 @@
 // ============================================================================
 // FLOATING ACTION BUTTON - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -29,7 +30,7 @@ interface FloatingActionButtonProps {
 export function FloatingActionButton({
   actions,
   mainIcon = '+',
-  mainColor = 'bg-primary-500 hover:bg-primary-600',
+  mainColor = 'bg-ctp-blue hover:bg-ctp-sapphire',
 }: FloatingActionButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -46,7 +47,7 @@ export function FloatingActionButton({
       <button
         onClick={() => action.onClick()}
         className={clsx(
-          'fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg text-white text-2xl flex items-center justify-center z-40 transition-transform hover:scale-110',
+          'fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg shadow-ctp-blue/30 text-ctp-crust text-2xl flex items-center justify-center z-40 transition-transform hover:scale-110',
           mainColor
         )}
         title={action.label}
@@ -81,14 +82,14 @@ export function FloatingActionButton({
               transitionDelay: isOpen ? `${index * 50}ms` : '0ms',
             }}
           >
-            <span className="bg-white dark:bg-gray-800 px-3 py-1 rounded-lg shadow text-sm font-medium whitespace-nowrap">
+            <span className="bg-ctp-surface0 px-3 py-1 rounded-lg shadow text-sm font-medium text-ctp-text whitespace-nowrap">
               {action.label}
             </span>
             <button
               onClick={() => handleAction(action)}
               className={clsx(
-                'w-12 h-12 rounded-full shadow-lg text-white text-xl flex items-center justify-center transition-transform hover:scale-110',
-                action.color ?? 'bg-gray-700 hover:bg-gray-800'
+                'w-12 h-12 rounded-full shadow-lg text-ctp-base text-xl flex items-center justify-center transition-transform hover:scale-110',
+                action.color ?? 'bg-ctp-overlay1 hover:bg-ctp-overlay2'
               )}
             >
               {action.icon}
@@ -101,7 +102,7 @@ export function FloatingActionButton({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={clsx(
-          'w-14 h-14 rounded-full shadow-lg text-white text-2xl flex items-center justify-center transition-all duration-200',
+          'w-14 h-14 rounded-full shadow-lg shadow-ctp-blue/30 text-ctp-crust text-2xl flex items-center justify-center transition-all duration-200',
           mainColor,
           isOpen && 'rotate-45'
         )}

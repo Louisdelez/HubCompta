@@ -1,6 +1,7 @@
 // ============================================================================
 // EXPORT DIALOG COMPONENT - Finance Hub
 // Dialog for exporting data
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -120,15 +121,15 @@ export function ExportDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-ctp-surface0 rounded-lg shadow-xl w-full max-w-md mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-ctp-surface1">
+          <h2 className="text-lg font-semibold text-ctp-text">
             {title || `Exporter - ${exportLabels[type]}`}
           </h2>
           <button
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700"
+            className="p-1 text-ctp-overlay1 hover:text-ctp-text rounded-full hover:bg-ctp-surface1"
           >
             <X className="h-5 w-5" />
           </button>
@@ -138,10 +139,10 @@ export function ExportDialog({
         <div className="p-6 space-y-4">
           {/* Date range info */}
           {dateRange && (
-            <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="p-3 bg-ctp-surface1 rounded-lg">
+              <p className="text-sm text-ctp-subtext0">
                 Période:{' '}
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className="font-medium text-ctp-text">
                   {format(dateRange.from, 'dd/MM/yyyy')} - {format(dateRange.to, 'dd/MM/yyyy')}
                 </span>
               </p>
@@ -150,7 +151,7 @@ export function ExportDialog({
 
           {/* Format selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Format</label>
+            <label className="block text-sm font-medium text-ctp-subtext1 mb-2">Format</label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
@@ -158,14 +159,14 @@ export function ExportDialog({
                 className={cn(
                   'flex items-center justify-center gap-2 px-4 py-3 border rounded-lg',
                   exportFormat === 'csv'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-ctp-blue bg-ctp-blue/10 text-ctp-blue'
+                    : 'border-ctp-surface1 hover:border-ctp-surface2'
                 )}
               >
                 <FileText className="h-5 w-5" />
                 <div className="text-left">
                   <p className="font-medium">CSV</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Excel, tableurs</p>
+                  <p className="text-xs text-ctp-subtext0">Excel, tableurs</p>
                 </div>
               </button>
               <button
@@ -174,31 +175,31 @@ export function ExportDialog({
                 className={cn(
                   'flex items-center justify-center gap-2 px-4 py-3 border rounded-lg',
                   exportFormat === 'json'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-ctp-blue bg-ctp-blue/10 text-ctp-blue'
+                    : 'border-ctp-surface1 hover:border-ctp-surface2'
                 )}
               >
                 <FileJson className="h-5 w-5" />
                 <div className="text-left">
                   <p className="font-medium">JSON</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Données brutes</p>
+                  <p className="text-xs text-ctp-subtext0">Données brutes</p>
                 </div>
               </button>
             </div>
           </div>
 
           {/* Info */}
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-ctp-subtext0">
             Le fichier sera téléchargé automatiquement après la génération.
           </p>
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50 dark:bg-gray-900">
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-ctp-surface1 bg-ctp-surface1">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900"
+            className="px-4 py-2 text-ctp-subtext1 bg-ctp-surface0 border border-ctp-surface1 rounded-lg hover:bg-ctp-surface1"
           >
             Annuler
           </button>
@@ -206,8 +207,8 @@ export function ExportDialog({
             onClick={handleExport}
             disabled={isExporting}
             className={cn(
-              'px-4 py-2 text-white rounded-lg flex items-center gap-2',
-              'bg-blue-600 hover:bg-blue-700',
+              'px-4 py-2 text-ctp-base rounded-lg flex items-center gap-2',
+              'bg-ctp-blue hover:bg-ctp-blue/90',
               'disabled:opacity-50 disabled:cursor-not-allowed'
             )}
           >

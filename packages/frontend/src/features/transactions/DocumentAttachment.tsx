@@ -1,5 +1,6 @@
 // ============================================================================
 // DOCUMENT ATTACHMENT - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -118,30 +119,30 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
 
       {/* Attached Documents */}
       {isLoading ? (
-        <div className="text-sm text-gray-500 dark:text-gray-400">Chargement...</div>
+        <div className="text-sm text-ctp-subtext0">Chargement...</div>
       ) : attachedDocs && attachedDocs.length > 0 ? (
         <div className="space-y-2 mb-3">
           {attachedDocs.map((doc) => (
             <div
               key={doc.id}
-              className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg"
+              className="flex items-center gap-2 p-2 bg-ctp-surface0 border border-ctp-surface1 rounded-lg"
             >
-              {(() => { const Icon = getFileIcon(doc.mimeType); return <Icon className="w-5 h-5 text-gray-500 dark:text-gray-400" />; })()}
+              {(() => { const Icon = getFileIcon(doc.mimeType); return <Icon className="w-5 h-5 text-ctp-subtext0" />; })()}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{doc.filename}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(doc.size)}</p>
+                <p className="text-sm font-medium text-ctp-text truncate">{doc.filename}</p>
+                <p className="text-xs text-ctp-subtext0">{formatFileSize(doc.size)}</p>
               </div>
               <button
                 type="button"
                 onClick={() => handleDownload(doc.id)}
-                className="text-primary-600 hover:text-primary-700 text-sm"
+                className="text-ctp-blue hover:text-ctp-blue/80 text-sm"
               >
                 <Download className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={() => unlinkMutation.mutate(doc.id)}
-                className="text-gray-400 hover:text-danger-500"
+                className="text-ctp-overlay1 hover:text-ctp-red"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -149,18 +150,18 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
           ))}
         </div>
       ) : (
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Aucun justificatif attaché</p>
+        <p className="text-sm text-ctp-subtext0 mb-3">Aucun justificatif attaché</p>
       )}
 
       {/* Add Button / Picker */}
       {showPicker ? (
-        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+        <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-3">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Sélectionner un document</span>
+            <span className="text-sm font-medium text-ctp-text">Sélectionner un document</span>
             <button
               type="button"
               onClick={() => setShowPicker(false)}
-              className="text-gray-400 hover:text-gray-600 dark:text-gray-400"
+              className="text-ctp-subtext0 hover:text-ctp-text"
             >
               <X className="w-4 h-4" />
             </button>
@@ -174,19 +175,19 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
                   type="button"
                   onClick={() => linkMutation.mutate(doc.id)}
                   disabled={linkMutation.isPending}
-                  className="w-full flex items-center gap-2 p-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 rounded"
+                  className="w-full flex items-center gap-2 p-2 text-left hover:bg-ctp-surface1 rounded"
                 >
-                  {(() => { const Icon = getFileIcon(doc.mimeType); return <Icon className="w-5 h-5 text-gray-500 dark:text-gray-400" />; })()}
+                  {(() => { const Icon = getFileIcon(doc.mimeType); return <Icon className="w-5 h-5 text-ctp-subtext0" />; })()}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate">{doc.filename}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(doc.size)}</p>
+                    <p className="text-sm text-ctp-text truncate">{doc.filename}</p>
+                    <p className="text-xs text-ctp-subtext0">{formatFileSize(doc.size)}</p>
                   </div>
                 </button>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-              Aucun document dans la boîte de réception
+            <p className="text-sm text-ctp-subtext0 text-center py-4">
+              Aucun document dans la boite de reception
             </p>
           )}
         </div>
@@ -194,7 +195,7 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
         <button
           type="button"
           onClick={() => setShowPicker(true)}
-          className="w-full py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:border-primary-400 hover:text-primary-600 transition-colors text-sm"
+          className="w-full py-2 bg-ctp-surface0 border-2 border-dashed border-ctp-surface1 rounded-lg text-ctp-subtext0 hover:border-ctp-blue hover:text-ctp-blue transition-colors text-sm"
         >
           + Ajouter un justificatif
         </button>

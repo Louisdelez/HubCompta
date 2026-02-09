@@ -1,6 +1,7 @@
 // ============================================================================
 // CONTACTS PAGE - Finance Hub
 // Client & Supplier management
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -55,14 +56,14 @@ function getInitials(name: string): string {
 
 function getAvatarColor(name: string): string {
   const colors = [
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-purple-500',
-    'bg-orange-500',
-    'bg-pink-500',
-    'bg-teal-500',
-    'bg-indigo-500',
-    'bg-red-500',
+    'bg-ctp-blue',
+    'bg-ctp-green',
+    'bg-ctp-mauve',
+    'bg-ctp-peach',
+    'bg-ctp-pink',
+    'bg-ctp-teal',
+    'bg-ctp-lavender',
+    'bg-ctp-red',
   ] as const;
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
@@ -122,8 +123,8 @@ export function ContactsPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-        Sélectionnez un espace de travail
+      <div className="p-6 text-center text-ctp-subtext0">
+        Selectionnez un espace de travail
       </div>
     );
   }
@@ -134,8 +135,8 @@ export function ContactsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Contacts</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Gérez vos clients et fournisseurs
+          <p className="text-ctp-subtext0">
+            Gerez vos clients et fournisseurs
           </p>
         </div>
         <button
@@ -164,8 +165,8 @@ export function ContactsPage() {
               className={clsx(
                 'px-4 py-2 rounded-lg transition-colors',
                 typeFilter === 'all'
-                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                  : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-ctp-blue/20 text-ctp-blue'
+                  : 'bg-ctp-surface1 hover:bg-ctp-surface2'
               )}
             >
               Tous
@@ -175,8 +176,8 @@ export function ContactsPage() {
               className={clsx(
                 'px-4 py-2 rounded-lg transition-colors',
                 typeFilter === 'client'
-                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                  : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-ctp-blue/20 text-ctp-blue'
+                  : 'bg-ctp-surface1 hover:bg-ctp-surface2'
               )}
             >
               Clients
@@ -186,8 +187,8 @@ export function ContactsPage() {
               className={clsx(
                 'px-4 py-2 rounded-lg transition-colors',
                 typeFilter === 'supplier'
-                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                  : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-ctp-blue/20 text-ctp-blue'
+                  : 'bg-ctp-surface1 hover:bg-ctp-surface2'
               )}
             >
               Fournisseurs
@@ -200,7 +201,7 @@ export function ContactsPage() {
       {isLoading && (
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+            <div key={i} className="h-24 bg-ctp-surface1 rounded-xl" />
           ))}
         </div>
       )}
@@ -208,9 +209,9 @@ export function ContactsPage() {
       {/* Empty State */}
       {!isLoading && contacts?.length === 0 && (
         <div className="card text-center py-12">
-          <Users className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <Users className="w-12 h-12 mx-auto mb-4 text-ctp-overlay1" />
           <h2 className="text-xl font-bold mb-2">Aucun contact</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
+          <p className="text-ctp-subtext0 mb-4">
             Ajoutez vos premiers clients ou fournisseurs
           </p>
           <button
@@ -228,7 +229,7 @@ export function ContactsPage() {
           {contacts.map((contact) => (
             <div
               key={contact.id}
-              className="card flex items-center gap-4 hover:border-primary-300 dark:hover:border-primary-600 transition-colors"
+              className="card flex items-center gap-4 hover:border-ctp-blue transition-colors"
             >
               {/* Avatar */}
               <div
@@ -248,14 +249,14 @@ export function ContactsPage() {
                     className={clsx(
                       'px-2 py-0.5 text-xs rounded-full',
                       contact.type === 'client'
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                        : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                        ? 'bg-ctp-blue/10 text-ctp-blue'
+                        : 'bg-ctp-peach/10 text-ctp-peach'
                     )}
                   >
                     {contact.type === 'client' ? 'Client' : 'Fournisseur'}
                   </span>
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400 space-x-4">
+                <div className="text-sm text-ctp-subtext0 space-x-4">
                   {contact.email && <span>{contact.email}</span>}
                   {contact.phone && <span>{contact.phone}</span>}
                 </div>
@@ -265,14 +266,14 @@ export function ContactsPage() {
               <div className="hidden md:flex items-center gap-6 text-sm">
                 <div className="text-center">
                   <p className="font-medium">{contact._count.invoices}</p>
-                  <p className="text-gray-500 dark:text-gray-400">Factures</p>
+                  <p className="text-ctp-subtext0">Factures</p>
                 </div>
                 {contact.type === 'client' && (
                   <div className="text-center">
                     <p className="font-medium">
                       {formatCurrency(contact.totalInvoiced ?? 0)}
                     </p>
-                    <p className="text-gray-500 dark:text-gray-400">Facturé</p>
+                    <p className="text-ctp-subtext0">Facture</p>
                   </div>
                 )}
               </div>
@@ -281,14 +282,14 @@ export function ContactsPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleEdit(contact)}
-                  className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+                  className="p-2 text-ctp-overlay1 hover:text-ctp-text"
                   title="Modifier"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => handleDelete(contact)}
-                  className="p-2 text-gray-400 hover:text-danger-600"
+                  className="p-2 text-ctp-overlay1 hover:text-ctp-red"
                   title="Supprimer"
                   disabled={deleteMutation.isPending}
                 >

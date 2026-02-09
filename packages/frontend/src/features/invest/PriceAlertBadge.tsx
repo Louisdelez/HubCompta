@@ -27,9 +27,9 @@ export function PriceAlertBadge({ hasAlert, alertCount = 0, size = 'sm' }: Price
 
   return (
     <div className="relative inline-flex" title={`${count} alerte(s) active(s)`}>
-      <Bell className={`${sizeClasses} text-primary-500`} />
+      <Bell className={`${sizeClasses} text-ctp-yellow`} />
       {count > 1 && (
-        <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-primary-500 text-[8px] font-bold text-white">
+        <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-ctp-yellow text-[8px] font-bold text-ctp-base">
           {count > 9 ? '9+' : count}
         </span>
       )}

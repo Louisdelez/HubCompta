@@ -1,5 +1,6 @@
 // ============================================================================
 // ACCOUNTS PAGE - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { AccountList } from './AccountList';
@@ -11,7 +12,7 @@ export function AccountsPage() {
   if (!currentWorkspaceId) {
     return (
       <div className="p-6">
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-ctp-subtext0">
           Sélectionnez un espace de travail
         </p>
       </div>
@@ -22,10 +23,10 @@ export function AccountsPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white dark:text-gray-100">
+          <h1 className="text-2xl font-bold text-ctp-text">
             Comptes
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-ctp-subtext0 mt-1">
             Gérez vos comptes bancaires et portefeuilles
           </p>
         </div>

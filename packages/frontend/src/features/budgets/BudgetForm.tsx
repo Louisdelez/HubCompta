@@ -1,5 +1,6 @@
 // ============================================================================
 // BUDGET FORM - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -135,14 +136,14 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full animate-scale-in">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-md w-full animate-scale-in">
         <form onSubmit={handleSubmit} className="p-6">
           <h2 className="text-xl font-bold mb-4">
             {isEditing ? 'Modifier le budget' : 'Nouveau budget'}
           </h2>
 
           {error && (
-            <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm mb-4">
+            <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4">
               {error}
             </div>
           )}
@@ -152,7 +153,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
             {!isEditing && (
               <div>
                 <label htmlFor="category" className="label">
-                  Catégorie <span className="text-danger-500">*</span>
+                  Catégorie <span className="text-ctp-red">*</span>
                 </label>
                 <select
                   id="category"
@@ -174,7 +175,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
             {/* Name */}
             <div>
               <label htmlFor="name" className="label">
-                Nom du budget <span className="text-danger-500">*</span>
+                Nom du budget <span className="text-ctp-red">*</span>
               </label>
               <input
                 id="name"
@@ -190,7 +191,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
             {/* Amount */}
             <div>
               <label htmlFor="amount" className="label">
-                Montant <span className="text-danger-500">*</span>
+                Montant <span className="text-ctp-red">*</span>
               </label>
               <div className="relative">
                 <input
@@ -204,7 +205,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
                   className="input pr-10"
                   required
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-ctp-subtext0">
                   EUR
                 </span>
               </div>
@@ -215,25 +216,25 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
               <div>
                 <label className="label">Période</label>
                 <div className="flex gap-3">
-                  <label className="flex items-center gap-2 flex-1 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700">
+                  <label className="flex items-center gap-2 flex-1 p-3 rounded-lg border border-ctp-surface1 cursor-pointer hover:bg-ctp-surface0">
                     <input
                       type="radio"
                       name="period"
                       value="monthly"
                       checked={period === 'monthly'}
                       onChange={() => setPeriod('monthly')}
-                      className="text-primary-600"
+                      className="text-ctp-blue"
                     />
                     <span>Mensuel</span>
                   </label>
-                  <label className="flex items-center gap-2 flex-1 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700">
+                  <label className="flex items-center gap-2 flex-1 p-3 rounded-lg border border-ctp-surface1 cursor-pointer hover:bg-ctp-surface0">
                     <input
                       type="radio"
                       name="period"
                       value="yearly"
                       checked={period === 'yearly'}
                       onChange={() => setPeriod('yearly')}
-                      className="text-primary-600"
+                      className="text-ctp-blue"
                     />
                     <span>Annuel</span>
                   </label>
@@ -259,7 +260,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
                 />
                 <span className="w-12 text-right font-medium">{alertThreshold}%</span>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-ctp-subtext0 mt-1">
                 Vous serez alerté lorsque ce pourcentage sera atteint
               </p>
             </div>

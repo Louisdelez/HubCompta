@@ -1,5 +1,6 @@
 // ============================================================================
 // BALANCE CHART - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { Check, AlertTriangle } from 'lucide-react';
@@ -24,7 +25,7 @@ interface BalanceChartProps {
 }
 
 // ----------------------------------------------------------------------------
-// Helpers
+// Helpers - Catppuccin Colors
 // ----------------------------------------------------------------------------
 
 function formatCurrency(amount: number, currency = 'EUR'): string {
@@ -43,22 +44,29 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
+// Avatar colors using all 14 Catppuccin accent colors
 function getAvatarColor(name: string): string {
   const colors = [
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-purple-500',
-    'bg-orange-500',
-    'bg-pink-500',
-    'bg-teal-500',
-    'bg-indigo-500',
-    'bg-red-500',
+    'bg-ctp-blue',
+    'bg-ctp-green',
+    'bg-ctp-mauve',
+    'bg-ctp-peach',
+    'bg-ctp-pink',
+    'bg-ctp-teal',
+    'bg-ctp-sapphire',
+    'bg-ctp-lavender',
+    'bg-ctp-yellow',
+    'bg-ctp-flamingo',
+    'bg-ctp-sky',
+    'bg-ctp-maroon',
+    'bg-ctp-red',
+    'bg-ctp-rosewater',
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return colors[Math.abs(hash) % colors.length] ?? 'bg-blue-500';
+  return colors[Math.abs(hash) % colors.length] ?? 'bg-ctp-blue';
 }
 
 // ----------------------------------------------------------------------------
@@ -71,7 +79,7 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
 
   return (
     <div className="card">
-      <h2 className="text-lg font-semibold mb-4">Situation par membre</h2>
+      <h2 className="text-lg font-semibold text-ctp-text mb-4">Situation par membre</h2>
 
       <div className="space-y-4">
         {balances.map((balance) => {
@@ -84,15 +92,15 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
               <div className="flex items-center gap-3">
                 <div
                   className={clsx(
-                    'w-10 h-10 rounded-full flex items-center justify-center text-white font-medium',
+                    'w-10 h-10 rounded-full flex items-center justify-center text-ctp-base font-medium',
                     getAvatarColor(balance.memberName)
                   )}
                 >
                   {getInitials(balance.memberName)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{balance.memberName}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="font-medium text-ctp-text truncate">{balance.memberName}</p>
+                  <p className="text-xs text-ctp-subtext0">
                     A payé {formatCurrency(balance.totalPaid, currency)}
                   </p>
                 </div>
@@ -100,13 +108,13 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
                   <p
                     className={clsx(
                       'font-bold',
-                      isPositive ? 'text-success-600' : 'text-danger-600'
+                      isPositive ? 'text-ctp-green' : 'text-ctp-red'
                     )}
                   >
                     {isPositive ? '+' : ''}
                     {formatCurrency(balance.balance, currency)}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-ctp-subtext0">
                     {isPositive ? 'doit recevoir' : 'doit payer'}
                   </p>
                 </div>
@@ -115,23 +123,23 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
               {/* Balance Bar */}
               <div className="flex items-center gap-2">
                 {/* Negative side (owes money) */}
-                <div className="flex-1 h-3 bg-gray-100 dark:bg-gray-700 rounded-l-full overflow-hidden flex justify-end">
+                <div className="flex-1 h-3 bg-ctp-surface1 rounded-l-full overflow-hidden flex justify-end">
                   {!isPositive && (
                     <div
-                      className="h-full bg-danger-500 rounded-l-full transition-all duration-500"
+                      className="h-full bg-ctp-red rounded-l-full transition-all duration-500"
                       style={{ width: `${barWidth}%` }}
                     />
                   )}
                 </div>
 
                 {/* Center indicator */}
-                <div className="w-0.5 h-4 bg-gray-400" />
+                <div className="w-0.5 h-4 bg-ctp-overlay1" />
 
                 {/* Positive side (is owed money) */}
-                <div className="flex-1 h-3 bg-gray-100 dark:bg-gray-700 rounded-r-full overflow-hidden">
+                <div className="flex-1 h-3 bg-ctp-surface1 rounded-r-full overflow-hidden">
                   {isPositive && (
                     <div
-                      className="h-full bg-success-500 rounded-r-full transition-all duration-500"
+                      className="h-full bg-ctp-green rounded-r-full transition-all duration-500"
                       style={{ width: `${barWidth}%` }}
                     />
                   )}
@@ -143,24 +151,24 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
       </div>
 
       {/* Legend */}
-      <div className="flex justify-center gap-6 mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+      <div className="flex justify-center gap-6 mt-6 pt-4 border-t border-ctp-surface1">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-danger-500" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">Doit payer</span>
+          <div className="w-3 h-3 rounded-full bg-ctp-red" />
+          <span className="text-sm text-ctp-subtext0">Doit payer</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-success-500" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">Doit recevoir</span>
+          <div className="w-3 h-3 rounded-full bg-ctp-green" />
+          <span className="text-sm text-ctp-subtext0">Doit recevoir</span>
         </div>
       </div>
 
       {/* Summary */}
       {balances.length > 0 && (
-        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg">
+        <div className="mt-4 p-3 bg-ctp-surface0 rounded-lg">
           <div className="grid grid-cols-2 gap-4 text-center text-sm">
             <div>
-              <p className="text-gray-500 dark:text-gray-400">Total à redistribuer</p>
-              <p className="font-bold text-lg">
+              <p className="text-ctp-subtext0">Total à redistribuer</p>
+              <p className="font-bold text-lg text-ctp-text">
                 {formatCurrency(
                   balances.filter((b) => b.balance > 0).reduce((sum, b) => sum + b.balance, 0),
                   currency
@@ -168,14 +176,14 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
               </p>
             </div>
             <div>
-              <p className="text-gray-500 dark:text-gray-400">Équilibre</p>
+              <p className="text-ctp-subtext0">Équilibre</p>
               <p className="font-bold text-lg">
                 {Math.abs(balances.reduce((sum, b) => sum + b.balance, 0)) < 0.01 ? (
-                  <span className="text-success-600 flex items-center justify-center gap-1">
+                  <span className="text-ctp-green flex items-center justify-center gap-1">
                     <Check className="w-4 h-4" /> Équilibré
                   </span>
                 ) : (
-                  <span className="text-warning-600 flex items-center justify-center gap-1">
+                  <span className="text-ctp-yellow flex items-center justify-center gap-1">
                     <AlertTriangle className="w-4 h-4" /> Déséquilibre
                   </span>
                 )}

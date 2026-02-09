@@ -1,6 +1,7 @@
 // ============================================================================
 // ADMIN BACKUPS - Finance Hub
 // Backup management for administrators
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -94,7 +95,7 @@ export function AdminBackups() {
       </div>
 
       {/* Trigger Backup */}
-      <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4">
+      <div className="bg-ctp-blue/10 border border-ctp-blue/30 rounded-lg p-4">
         <h3 className="font-medium mb-3">Nouvelle sauvegarde</h3>
         <div className="flex gap-3">
           <select
@@ -120,7 +121,7 @@ export function AdminBackups() {
         </div>
 
         {triggerBackupMutation.isSuccess && (
-          <div className="mt-3 flex items-center gap-2 text-green-600">
+          <div className="mt-3 flex items-center gap-2 text-ctp-green">
             <CheckCircle className="h-4 w-4" />
             <span className="text-sm">
               Sauvegarde lancee (Job ID: {triggerBackupMutation.data?.jobId})
@@ -129,7 +130,7 @@ export function AdminBackups() {
         )}
 
         {triggerBackupMutation.isError && (
-          <div className="mt-3 flex items-center gap-2 text-red-600">
+          <div className="mt-3 flex items-center gap-2 text-ctp-red">
             <AlertCircle className="h-4 w-4" />
             <span className="text-sm">Erreur lors du lancement</span>
           </div>
@@ -142,28 +143,28 @@ export function AdminBackups() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-ctp-blue" />
           </div>
         ) : backups.length > 0 ? (
           <div className="space-y-2">
             {backups.map((backup, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4"
+                className="flex items-center justify-between bg-ctp-surface0 rounded-lg p-4"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg">
+                  <div className="p-2 bg-ctp-surface1 rounded-lg">
                     {backup.type === 'full' ? (
-                      <HardDrive className="h-5 w-5 text-gray-600 dark:text-gray-400 dark:text-gray-300" />
+                      <HardDrive className="h-5 w-5 text-ctp-blue" />
                     ) : (
-                      <Building2 className="h-5 w-5 text-gray-600 dark:text-gray-400 dark:text-gray-300" />
+                      <Building2 className="h-5 w-5 text-ctp-mauve" />
                     )}
                   </div>
                   <div>
                     <p className="font-medium text-sm truncate max-w-md">
                       {backup.path.split('/').pop()}
                     </p>
-                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center gap-3 text-xs text-ctp-subtext0">
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {formatDate(backup.lastModified)}
@@ -172,8 +173,8 @@ export function AdminBackups() {
                       <span
                         className={`px-1.5 py-0.5 rounded ${
                           backup.type === 'full'
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                            : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                            ? 'bg-ctp-blue/20 text-ctp-blue'
+                            : 'bg-ctp-mauve/20 text-ctp-mauve'
                         }`}
                       >
                         {backup.type === 'full' ? 'Complete' : 'Espace'}
@@ -182,7 +183,7 @@ export function AdminBackups() {
                   </div>
                 </div>
                 <button
-                  className="btn-ghost p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300"
+                  className="btn-ghost p-2 text-ctp-subtext0 hover:text-ctp-text"
                   title="Telecharger"
                 >
                   <Download className="h-4 w-4" />
@@ -191,8 +192,8 @@ export function AdminBackups() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-            <Database className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+          <div className="text-center py-12 text-ctp-subtext0">
+            <Database className="h-12 w-12 mx-auto text-ctp-surface2 mb-3" />
             <p>Aucune sauvegarde disponible</p>
             <p className="text-sm mt-1">
               Lancez votre premiere sauvegarde ci-dessus
@@ -202,7 +203,7 @@ export function AdminBackups() {
       </div>
 
       {/* Info */}
-      <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4 text-sm text-gray-600 dark:text-gray-400">
+      <div className="bg-ctp-surface0 rounded-lg p-4 text-sm text-ctp-subtext0">
         <p>
           Les sauvegardes sont stockees dans le bucket S3 configure. Les sauvegardes
           completes incluent toutes les donnees, tandis que les sauvegardes

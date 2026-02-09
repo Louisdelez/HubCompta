@@ -1,5 +1,6 @@
 // ============================================================================
 // RULE EDITOR - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -179,14 +180,14 @@ export function RuleEditor({ workspaceId, rule, onClose, onSave }: RuleEditorPro
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto animate-scale-in">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto animate-scale-in">
         <form onSubmit={handleSubmit} className="p-6">
           <h2 className="text-xl font-bold mb-4">
             {isEditing ? 'Modifier la règle' : 'Nouvelle règle'}
           </h2>
 
           {error && (
-            <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm mb-4">
+            <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4">
               {error}
             </div>
           )}
@@ -214,7 +215,7 @@ export function RuleEditor({ workspaceId, rule, onClose, onSave }: RuleEditorPro
                   onChange={(e) => setPriority(parseInt(e.target.value) || 0)}
                   className="input"
                 />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-ctp-subtext0 mt-1">
                   Les règles avec une priorité plus élevée s'appliquent en premier
                 </p>
               </div>
@@ -227,7 +228,7 @@ export function RuleEditor({ workspaceId, rule, onClose, onSave }: RuleEditorPro
                 <button
                   type="button"
                   onClick={addCondition}
-                  className="text-sm text-primary-600 hover:underline"
+                  className="text-sm text-ctp-blue hover:underline"
                 >
                   + Ajouter
                 </button>
@@ -280,7 +281,7 @@ export function RuleEditor({ workspaceId, rule, onClose, onSave }: RuleEditorPro
                       <button
                         type="button"
                         onClick={() => removeCondition(index)}
-                        className="btn-ghost text-danger-600"
+                        className="btn-ghost text-ctp-red"
                       >
                         ✕
                       </button>
@@ -289,7 +290,7 @@ export function RuleEditor({ workspaceId, rule, onClose, onSave }: RuleEditorPro
                 ))}
               </div>
 
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              <p className="text-xs text-ctp-subtext0 mt-2">
                 Toutes les conditions doivent être remplies (ET logique)
               </p>
             </div>
@@ -306,7 +307,7 @@ export function RuleEditor({ workspaceId, rule, onClose, onSave }: RuleEditorPro
 
             {/* Test Results */}
             {testMutation.data && (
-              <div className="p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg">
+              <div className="p-4 bg-ctp-surface0 rounded-lg">
                 <p className="text-sm font-medium mb-2">
                   {testMutation.data.filter((t) => t.matches).length} correspondance(s) sur{' '}
                   {testMutation.data.length} transactions récentes
@@ -316,7 +317,7 @@ export function RuleEditor({ workspaceId, rule, onClose, onSave }: RuleEditorPro
                     .filter((t) => t.matches)
                     .slice(0, 5)
                     .map((t) => (
-                      <p key={t.id} className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                      <p key={t.id} className="text-xs text-ctp-subtext0 truncate">
                         ✓ {t.description}
                       </p>
                     ))}
@@ -331,7 +332,7 @@ export function RuleEditor({ workspaceId, rule, onClose, onSave }: RuleEditorPro
                 <button
                   type="button"
                   onClick={addAction}
-                  className="text-sm text-primary-600 hover:underline"
+                  className="text-sm text-ctp-blue hover:underline"
                 >
                   + Ajouter
                 </button>
@@ -398,7 +399,7 @@ export function RuleEditor({ workspaceId, rule, onClose, onSave }: RuleEditorPro
                       <button
                         type="button"
                         onClick={() => removeAction(index)}
-                        className="btn-ghost text-danger-600"
+                        className="btn-ghost text-ctp-red"
                       >
                         ✕
                       </button>

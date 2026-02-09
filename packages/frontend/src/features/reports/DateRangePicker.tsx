@@ -1,6 +1,7 @@
 // ============================================================================
 // DATE RANGE PICKER COMPONENT - Finance Hub
 // Select date ranges for reports
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useMemo } from 'react';
@@ -144,17 +145,17 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
     <div className={cn('relative', className)}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 text-sm"
+        className="flex items-center gap-2 px-4 py-2 bg-ctp-surface0 border border-ctp-surface1 rounded-lg hover:bg-ctp-surface1 text-sm"
       >
-        <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-        <span className="text-gray-700 dark:text-gray-300">{displayLabel}</span>
-        <ChevronDown className="h-4 w-4 text-gray-400" />
+        <Calendar className="h-4 w-4 text-ctp-subtext0" />
+        <span className="text-ctp-subtext1">{displayLabel}</span>
+        <ChevronDown className="h-4 w-4 text-ctp-overlay1" />
       </button>
 
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 border rounded-lg shadow-lg z-20 p-4">
+          <div className="absolute right-0 top-full mt-2 w-72 bg-ctp-surface0 border border-ctp-surface1 rounded-lg shadow-lg z-20 p-4">
             {/* Presets */}
             <div className="space-y-1 mb-4">
               {presets.map((preset) => (
@@ -164,8 +165,8 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
                   className={cn(
                     'w-full px-3 py-2 text-left text-sm rounded-lg',
                     currentPreset === preset.key
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'hover:bg-gray-50 text-gray-700'
+                      ? 'bg-ctp-blue/20 text-ctp-blue'
+                      : 'hover:bg-ctp-surface1 text-ctp-subtext1'
                   )}
                 >
                   {preset.label}
@@ -176,8 +177,8 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
                 className={cn(
                   'w-full px-3 py-2 text-left text-sm rounded-lg',
                   isCustom || currentPreset === 'custom'
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'hover:bg-gray-50 text-gray-700'
+                    ? 'bg-ctp-blue/20 text-ctp-blue'
+                    : 'hover:bg-ctp-surface1 text-ctp-subtext1'
                 )}
               >
                 Personnalisé
@@ -186,28 +187,28 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
 
             {/* Custom date inputs */}
             {(isCustom || currentPreset === 'custom') && (
-              <div className="border-t pt-4 space-y-3">
+              <div className="border-t border-ctp-surface1 pt-4 space-y-3">
                 <div>
-                  <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Du</label>
+                  <label className="block text-xs text-ctp-subtext0 mb-1">Du</label>
                   <input
                     type="date"
                     value={customFrom}
                     onChange={(e) => setCustomFrom(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ctp-blue bg-ctp-base"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Au</label>
+                  <label className="block text-xs text-ctp-subtext0 mb-1">Au</label>
                   <input
                     type="date"
                     value={customTo}
                     onChange={(e) => setCustomTo(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ctp-blue bg-ctp-base"
                   />
                 </div>
                 <button
                   onClick={handleCustomApply}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+                  className="w-full px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg text-sm hover:bg-ctp-blue/90"
                 >
                   Appliquer
                 </button>

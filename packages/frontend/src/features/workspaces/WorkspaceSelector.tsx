@@ -1,5 +1,6 @@
 // ============================================================================
 // WORKSPACE SELECTOR - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -66,15 +67,16 @@ export function WorkspaceSelector({
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-700 w-full"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-ctp-text hover:bg-ctp-surface0 w-full"
       >
         {currentWorkspace ? (
           (() => {
             const IconComponent = WORKSPACE_ICONS[currentWorkspace.type];
-            return <IconComponent className="w-5 h-5" />;
+            const iconColor = currentWorkspace.type === 'personal' ? 'text-ctp-blue' : 'text-ctp-mauve';
+            return <IconComponent className={clsx('w-5 h-5', iconColor)} />;
           })()
         ) : (
-          <Folder className="w-5 h-5" />
+          <Folder className="w-5 h-5 text-ctp-subtext0" />
         )}
         <span className="flex-1 text-left truncate">
           {isLoading
@@ -108,7 +110,7 @@ export function WorkspaceSelector({
           />
 
           {/* Dropdown */}
-          <div className="absolute left-0 right-0 top-full mt-1 z-20 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-64 overflow-auto">
+          <div className="absolute left-0 right-0 top-full mt-1 z-20 bg-ctp-base rounded-lg shadow-lg border border-ctp-surface1 py-1 max-h-64 overflow-auto">
             {workspaces?.map((workspace) => (
               <button
                 key={workspace.id}
@@ -117,25 +119,26 @@ export function WorkspaceSelector({
                   setIsOpen(false);
                 }}
                 className={clsx(
-                  'w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700',
+                  'w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-ctp-surface0',
                   workspace.id === currentWorkspaceId &&
-                    'bg-primary-50 dark:bg-primary-900/20'
+                    'bg-ctp-blue/20 border-l-2 border-ctp-blue'
                 )}
               >
                 {(() => {
                   const IconComponent = WORKSPACE_ICONS[workspace.type];
-                  return <IconComponent className="w-5 h-5" />;
+                  const iconColor = workspace.type === 'personal' ? 'text-ctp-blue' : 'text-ctp-mauve';
+                  return <IconComponent className={clsx('w-5 h-5', iconColor)} />;
                 })()}
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{workspace.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-ctp-subtext0">
                     {WORKSPACE_LABELS[workspace.type]} • {workspace.memberCount} membre
                     {workspace.memberCount > 1 ? 's' : ''}
                   </p>
                 </div>
                 {workspace.id === currentWorkspaceId && (
                   <svg
-                    className="w-4 h-4 text-primary-600"
+                    className="w-4 h-4 text-ctp-blue"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -149,13 +152,13 @@ export function WorkspaceSelector({
               </button>
             ))}
 
-            <div className="border-t border-gray-200 dark:border-gray-700 mt-1 pt-1">
+            <div className="border-t border-ctp-surface1 mt-1 pt-1">
               <button
                 onClick={() => {
                   onCreateNew();
                   setIsOpen(false);
                 }}
-                className="w-full flex items-center gap-3 px-3 py-2 text-left text-primary-600 dark:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700"
+                className="w-full flex items-center gap-3 px-3 py-2 text-left text-ctp-blue hover:bg-ctp-surface0"
               >
                 <Plus className="w-5 h-5" />
                 <span>Créer un espace</span>

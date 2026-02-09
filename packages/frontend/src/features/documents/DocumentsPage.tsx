@@ -1,5 +1,6 @@
 // ============================================================================
 // DOCUMENTS PAGE - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -89,7 +90,7 @@ export function DocumentsPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+      <div className="p-6 text-center text-ctp-subtext0">
         Sélectionnez un espace de travail
       </div>
     );
@@ -103,7 +104,7 @@ export function DocumentsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Documents</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-ctp-subtext0">
             Gérez vos justificatifs et pièces jointes
           </p>
         </div>
@@ -114,14 +115,14 @@ export function DocumentsPage() {
 
       {/* Inbox Alert */}
       {inboxCount && inboxCount.count > 0 && (
-        <div className="card bg-warning-50 dark:bg-warning-900/20 border-warning-200 dark:border-warning-800 mb-6">
+        <div className="card bg-ctp-yellow/10 border-ctp-yellow mb-6">
           <div className="flex items-center gap-3">
-            <Inbox className="w-6 h-6 text-warning-600" />
+            <Inbox className="w-6 h-6 text-ctp-yellow" />
             <div className="flex-1">
-              <p className="font-medium text-warning-800 dark:text-warning-200">
+              <p className="font-medium text-ctp-yellow">
                 {inboxCount.count} document{inboxCount.count > 1 ? 's' : ''} à traiter
               </p>
-              <p className="text-sm text-warning-700 dark:text-warning-300">
+              <p className="text-sm text-ctp-yellow/80">
                 Ces documents n'ont pas encore été liés à une transaction
               </p>
             </div>
@@ -138,7 +139,7 @@ export function DocumentsPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-6">
         {/* Status Filter */}
-        <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="flex rounded-lg border border-ctp-surface1 overflow-hidden">
           {(['all', 'inbox', 'linked', 'archived'] as FilterStatus[]).map((status) => (
             <button
               key={status}
@@ -146,8 +147,8 @@ export function DocumentsPage() {
               className={clsx(
                 'px-4 py-2 text-sm font-medium transition-colors',
                 filterStatus === status
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  ? 'bg-ctp-blue text-white'
+                  : 'bg-ctp-base text-ctp-subtext0 hover:bg-ctp-surface0'
               )}
             >
               {status === 'all' && 'Tous'}
@@ -165,7 +166,7 @@ export function DocumentsPage() {
             placeholder="Rechercher un document..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="input"
+            className="w-full px-4 py-2 rounded-lg bg-ctp-surface0 border border-ctp-surface1 text-ctp-text placeholder-ctp-overlay0 focus:border-ctp-blue focus:ring-2 focus:ring-ctp-blue/20 outline-none transition-colors"
           />
         </div>
       </div>
@@ -174,7 +175,7 @@ export function DocumentsPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-40 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
+            <div key={i} className="h-40 bg-ctp-surface1 rounded-xl animate-pulse" />
           ))}
         </div>
       ) : documents.length > 0 ? (
@@ -192,9 +193,9 @@ export function DocumentsPage() {
         </div>
       ) : (
         <div className="card text-center py-12">
-          <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <FileText className="w-12 h-12 mx-auto mb-4 text-ctp-overlay1" />
           <h2 className="text-xl font-bold mb-2">Aucun document</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-ctp-subtext0 mb-6">
             {filterStatus !== 'all'
               ? 'Aucun document dans cette catégorie'
               : 'Commencez par ajouter vos premiers justificatifs'}

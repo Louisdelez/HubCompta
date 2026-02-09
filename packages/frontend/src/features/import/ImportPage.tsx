@@ -1,5 +1,6 @@
 // ============================================================================
 // IMPORT PAGE - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { ImportWizard } from './ImportWizard';
@@ -11,7 +12,7 @@ export function ImportPage() {
   if (!currentWorkspaceId) {
     return (
       <div className="p-6">
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-ctp-subtext0">
           Sélectionnez un espace de travail
         </p>
       </div>
@@ -21,10 +22,10 @@ export function ImportPage() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white dark:text-gray-100">
+        <h1 className="text-2xl font-bold text-ctp-text">
           Import
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
+        <p className="text-ctp-subtext0 mt-1">
           Importez vos transactions depuis un fichier CSV ou OFX
         </p>
       </div>

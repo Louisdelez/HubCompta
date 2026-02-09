@@ -1,5 +1,6 @@
 // ============================================================================
 // ADMIN MODULE - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 export { AdminRoute } from './AdminRoute';

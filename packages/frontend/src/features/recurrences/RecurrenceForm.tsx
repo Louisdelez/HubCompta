@@ -1,5 +1,6 @@
 // ============================================================================
 // RECURRENCE FORM - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useEffect } from 'react';
@@ -193,14 +194,14 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto animate-scale-in">
         <form onSubmit={handleSubmit} className="p-6">
           <h2 className="text-xl font-bold mb-4">
             {isEditing ? 'Modifier la recurrence' : 'Nouvelle recurrence'}
           </h2>
 
           {error && (
-            <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm mb-4">
+            <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4">
               {error}
             </div>
           )}
@@ -209,7 +210,7 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
             {/* Name */}
             <div>
               <label htmlFor="name" className="label">
-                Nom <span className="text-danger-500">*</span>
+                Nom <span className="text-ctp-red">*</span>
               </label>
               <input
                 id="name"
@@ -228,10 +229,10 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
               <div className="flex gap-3">
                 <label
                   className={clsx(
-                    'flex items-center gap-2 flex-1 p-3 rounded-lg border cursor-pointer',
+                    'flex items-center gap-2 flex-1 p-3 rounded-lg border-2 cursor-pointer transition-colors',
                     type === 'expense'
-                      ? 'border-danger-500 bg-danger-50 dark:bg-danger-900/20'
-                      : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      ? 'border-ctp-red bg-ctp-red/10 text-ctp-red'
+                      : 'border-ctp-surface1 hover:bg-ctp-surface0'
                   )}
                 >
                   <input
@@ -240,16 +241,16 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
                     value="expense"
                     checked={type === 'expense'}
                     onChange={() => setType('expense')}
-                    className="text-danger-600"
+                    className="text-ctp-red accent-ctp-red"
                   />
                   <span>Depense</span>
                 </label>
                 <label
                   className={clsx(
-                    'flex items-center gap-2 flex-1 p-3 rounded-lg border cursor-pointer',
+                    'flex items-center gap-2 flex-1 p-3 rounded-lg border-2 cursor-pointer transition-colors',
                     type === 'income'
-                      ? 'border-success-500 bg-success-50 dark:bg-success-900/20'
-                      : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      ? 'border-ctp-green bg-ctp-green/10 text-ctp-green'
+                      : 'border-ctp-surface1 hover:bg-ctp-surface0'
                   )}
                 >
                   <input
@@ -258,7 +259,7 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
                     value="income"
                     checked={type === 'income'}
                     onChange={() => setType('income')}
-                    className="text-success-600"
+                    className="text-ctp-green accent-ctp-green"
                   />
                   <span>Revenu</span>
                 </label>
@@ -268,7 +269,7 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
             {/* Account */}
             <div>
               <label htmlFor="account" className="label">
-                Compte <span className="text-danger-500">*</span>
+                Compte <span className="text-ctp-red">*</span>
               </label>
               <select
                 id="account"
@@ -290,7 +291,7 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="amount" className="label">
-                  Montant <span className="text-danger-500">*</span>
+                  Montant <span className="text-ctp-red">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -304,7 +305,7 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
                     className="input pr-12"
                     required
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-ctp-subtext0">
                     EUR
                   </span>
                 </div>
@@ -332,7 +333,7 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
             {/* Description */}
             <div>
               <label htmlFor="description" className="label">
-                Description <span className="text-danger-500">*</span>
+                Description <span className="text-ctp-red">*</span>
               </label>
               <input
                 id="description"
@@ -346,7 +347,7 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
             </div>
 
             {/* Frequency Section */}
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div className="border-t border-ctp-surface1 pt-4">
               <h3 className="font-medium mb-3">Frequence</h3>
 
               {/* Frequency */}
@@ -477,10 +478,10 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
 
             {/* Active toggle (only for editing) */}
             {isEditing && (
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-ctp-surface1 rounded-lg">
                 <div>
                   <p className="font-medium">Recurrence active</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-ctp-subtext0">
                     Desactivez pour mettre en pause temporairement
                   </p>
                 </div>
@@ -489,7 +490,7 @@ export function RecurrenceForm({ workspaceId, recurrence, onClose, onSave }: Rec
                   onClick={() => setIsActive(!isActive)}
                   className={clsx(
                     'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                    isActive ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'
+                    isActive ? 'bg-ctp-blue' : 'bg-ctp-surface2'
                   )}
                 >
                   <span

@@ -1,5 +1,6 @@
 // ============================================================================
 // IMPORT PROGRESS - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useEffect, useState } from 'react';
@@ -125,9 +126,9 @@ export function ImportProgress({
   if (error) {
     return (
       <div className="text-center py-12">
-        <XCircle className="w-12 h-12 mx-auto mb-4 text-danger-500" />
-        <h2 className="text-xl font-bold mb-2 text-danger-600">Erreur</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
+        <XCircle className="w-12 h-12 mx-auto mb-4 text-ctp-red" />
+        <h2 className="text-xl font-bold mb-2 text-ctp-red">Erreur</h2>
+        <p className="text-ctp-subtext0 mb-6">{error}</p>
         <button
           onClick={() => {
             setError(null);
@@ -154,7 +155,7 @@ export function ImportProgress({
             fill="none"
             stroke="currentColor"
             strokeWidth="8"
-            className="text-gray-200 dark:text-gray-700 dark:text-gray-300"
+            className="text-ctp-surface1"
           />
           {/* Progress circle */}
           <circle
@@ -166,7 +167,7 @@ export function ImportProgress({
             strokeWidth="8"
             strokeLinecap="round"
             strokeDasharray={`${progress * 2.83} 283`}
-            className="text-primary-500 transition-all duration-300"
+            className="text-ctp-blue transition-all duration-300"
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
@@ -175,7 +176,7 @@ export function ImportProgress({
       </div>
 
       <h2 className="text-xl font-bold mb-2">Import en cours...</h2>
-      <p className="text-gray-600 dark:text-gray-400">
+      <p className="text-ctp-subtext0">
         {jobStatus
           ? `${jobStatus.processedRows} / ${jobStatus.totalRows} lignes traitées`
           : 'Préparation de l\'import...'}
@@ -185,23 +186,23 @@ export function ImportProgress({
       {jobStatus && jobStatus.processedRows > 0 && (
         <div className="flex justify-center gap-6 mt-6 text-sm">
           <div>
-            <span className="font-medium text-success-600">{jobStatus.importedRows}</span>
-            <span className="text-gray-500 dark:text-gray-400 ml-1">importées</span>
+            <span className="font-medium text-ctp-green">{jobStatus.importedRows}</span>
+            <span className="text-ctp-subtext0 ml-1">importées</span>
           </div>
           <div>
-            <span className="font-medium text-gray-600 dark:text-gray-400">{jobStatus.skippedRows}</span>
-            <span className="text-gray-500 dark:text-gray-400 ml-1">ignorées</span>
+            <span className="font-medium text-ctp-subtext0">{jobStatus.skippedRows}</span>
+            <span className="text-ctp-subtext0 ml-1">ignorées</span>
           </div>
           {jobStatus.errorRows > 0 && (
             <div>
-              <span className="font-medium text-danger-600">{jobStatus.errorRows}</span>
-              <span className="text-gray-500 dark:text-gray-400 ml-1">erreurs</span>
+              <span className="font-medium text-ctp-red">{jobStatus.errorRows}</span>
+              <span className="text-ctp-subtext0 ml-1">erreurs</span>
             </div>
           )}
         </div>
       )}
 
-      <p className="text-xs text-gray-400 mt-4">
+      <p className="text-xs text-ctp-overlay1 mt-4">
         Ne fermez pas cette fenêtre
       </p>
     </div>

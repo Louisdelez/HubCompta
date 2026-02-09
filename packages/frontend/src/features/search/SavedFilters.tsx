@@ -1,5 +1,6 @@
 // ============================================================================
 // SAVED FILTERS - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -101,13 +102,13 @@ export function SavedFilters({
   };
 
   return (
-    <div className={clsx('bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4', className)}>
+    <div className={clsx('bg-ctp-surface0 rounded-lg border border-ctp-surface1 p-4', className)}>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-medium">Filtres sauvegardés</h3>
         {hasFilters && !isCreating && (
           <button
             onClick={() => setIsCreating(true)}
-            className="text-sm text-primary-600 hover:text-primary-700"
+            className="text-sm text-ctp-blue hover:text-ctp-blue/80"
           >
             + Sauvegarder
           </button>
@@ -116,14 +117,14 @@ export function SavedFilters({
 
       {/* Create new filter */}
       {isCreating && (
-        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg">
+        <div className="mb-4 p-3 bg-ctp-surface1 rounded-lg">
           <div className="flex gap-2">
             <input
               type="text"
               value={newFilterName}
               onChange={(e) => setNewFilterName(e.target.value)}
               placeholder="Nom du filtre..."
-              className="input flex-1 text-sm"
+              className="flex-1 text-sm px-3 py-2 rounded-lg bg-ctp-surface0 border border-ctp-surface1 text-ctp-text placeholder-ctp-overlay0 focus:border-ctp-blue focus:ring-2 focus:ring-ctp-blue/20 outline-none transition-colors"
               autoFocus
             />
             <button
@@ -149,14 +150,19 @@ export function SavedFilters({
       {/* Filters list */}
       {isLoading ? (
         <div className="text-center py-4">
-          <div className="animate-spin w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full mx-auto" />
+          <div className="animate-spin w-5 h-5 border-2 border-ctp-blue border-t-transparent rounded-full mx-auto" />
         </div>
       ) : savedFilters && savedFilters.length > 0 ? (
         <div className="space-y-2">
           {savedFilters.map((filter) => (
             <div
               key={filter.id}
-              className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50 group"
+              className={clsx(
+                'flex items-center gap-2 p-2 rounded-lg group transition-colors',
+                filter.isDefault
+                  ? 'bg-ctp-blue/20 border border-ctp-blue'
+                  : 'hover:bg-ctp-surface1'
+              )}
             >
               <button
                 onClick={() => onApply(filter.filters)}
@@ -164,7 +170,7 @@ export function SavedFilters({
               >
                 <span className="text-sm font-medium">{filter.name}</span>
                 {filter.isDefault && (
-                  <span className="ml-2 text-xs text-primary-600 dark:text-primary-400">
+                  <span className="ml-2 text-xs text-ctp-blue">
                     (par défaut)
                   </span>
                 )}
@@ -174,8 +180,8 @@ export function SavedFilters({
                 <button
                   onClick={() => handleSetDefault(filter)}
                   className={clsx(
-                    'p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600',
-                    filter.isDefault ? 'text-primary-600' : 'text-gray-400'
+                    'p-1 rounded hover:bg-ctp-surface2',
+                    filter.isDefault ? 'text-ctp-blue' : 'text-ctp-overlay1'
                   )}
                   title={filter.isDefault ? 'Retirer par défaut' : 'Définir par défaut'}
                 >
@@ -185,7 +191,7 @@ export function SavedFilters({
                 </button>
                 <button
                   onClick={() => handleDelete(filter)}
-                  className="p-1 rounded text-gray-400 hover:text-danger-600 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  className="p-1 rounded text-ctp-overlay1 hover:text-ctp-red hover:bg-ctp-surface2"
                   title="Supprimer"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,7 +203,7 @@ export function SavedFilters({
           ))}
         </div>
       ) : (
-        <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+        <p className="text-sm text-ctp-subtext0 text-center py-2">
           Aucun filtre sauvegardé
         </p>
       )}

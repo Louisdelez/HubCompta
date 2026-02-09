@@ -1,6 +1,7 @@
 // ============================================================================
 // ADMIN LAYOUT - Finance Hub
 // Layout with sidebar navigation for admin pages
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
@@ -63,14 +64,14 @@ export function AdminLayout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-ctp-base">
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-ctp-text">
             Administration
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-ctp-subtext0">
             Gestion de l'instance HubCompta
           </p>
         </div>
@@ -78,7 +79,7 @@ export function AdminLayout() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar Navigation */}
           <aside className="lg:col-span-1">
-            <nav className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-900/20 overflow-hidden">
+            <nav className="bg-ctp-mantle rounded-xl shadow-sm overflow-hidden">
               {navItems.map((item, index) => {
                 const Icon = item.icon;
                 const isActive = item.end
@@ -90,16 +91,16 @@ export function AdminLayout() {
                     key={item.to}
                     to={item.to}
                     end={item.end}
-                    className={`flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors ${
+                    className={`flex items-center gap-3 px-4 py-3 border-b border-ctp-surface1 last:border-b-0 transition-colors ${
                       isActive
-                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                        ? 'bg-ctp-blue/10 text-ctp-blue'
+                        : 'text-ctp-subtext1 hover:bg-ctp-surface1'
                     } ${index === 0 ? 'rounded-t-xl' : ''} ${index === navItems.length - 1 ? 'rounded-b-xl' : ''}`}
                   >
                     <Icon className="h-5 w-5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{item.label}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      <p className="text-xs text-ctp-subtext0 truncate">
                         {item.description}
                       </p>
                     </div>
@@ -114,7 +115,7 @@ export function AdminLayout() {
 
           {/* Main Content */}
           <main className="lg:col-span-3">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-900/20 p-6">
+            <div className="bg-ctp-mantle rounded-xl shadow-sm p-6">
               <Outlet />
             </div>
           </main>

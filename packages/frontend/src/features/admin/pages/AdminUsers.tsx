@@ -1,6 +1,7 @@
 // ============================================================================
 // ADMIN USERS - Finance Hub
 // User management for administrators
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -73,14 +74,14 @@ export function AdminUsers() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Utilisateurs</h2>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-sm text-ctp-subtext0">
           {pagination?.total ?? 0} utilisateurs
         </span>
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ctp-overlay1" />
         <input
           type="text"
           value={search}
@@ -96,23 +97,23 @@ export function AdminUsers() {
       {/* Users Table */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-ctp-blue" />
         </div>
       ) : users.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+              <tr className="border-b border-ctp-surface1 bg-ctp-surface0">
+                <th className="text-left py-3 px-4 text-sm font-medium text-ctp-subtext1">
                   Utilisateur
                 </th>
-                <th className="text-center py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+                <th className="text-center py-3 px-4 text-sm font-medium text-ctp-subtext1">
                   Espaces
                 </th>
-                <th className="text-center py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+                <th className="text-center py-3 px-4 text-sm font-medium text-ctp-subtext1">
                   Admin
                 </th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+                <th className="text-right py-3 px-4 text-sm font-medium text-ctp-subtext1">
                   Inscription
                 </th>
                 <th className="py-3 px-4"></th>
@@ -122,32 +123,32 @@ export function AdminUsers() {
               {users.map((user) => (
                 <tr
                   key={user.id}
-                  className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50"
+                  className="border-b border-ctp-surface1 hover:bg-ctp-surface0"
                 >
                   <td className="py-3 px-4">
                     <div>
-                      <p className="font-medium">
+                      <p className="font-medium text-ctp-text">
                         {user.displayName || user.email.split('@')[0]}
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
+                      <p className="text-sm text-ctp-subtext0">{user.email}</p>
                     </div>
                   </td>
                   <td className="py-3 px-4 text-center">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-gray-100 dark:bg-gray-700 rounded-full text-sm">
+                    <span className="inline-flex items-center justify-center w-6 h-6 bg-ctp-surface1 rounded-full text-sm">
                       {user._count.memberships}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-center">
                     {user.isInstanceAdmin ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-ctp-mauve/20 text-ctp-mauve rounded-full text-xs font-medium">
                         <Shield className="h-3 w-3" />
                         Admin
                       </span>
                     ) : (
-                      <span className="text-gray-400">-</span>
+                      <span className="text-ctp-overlay1">-</span>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-right text-sm text-gray-500 dark:text-gray-400">
+                  <td className="py-3 px-4 text-right text-sm text-ctp-subtext0">
                     {new Date(user.createdAt).toLocaleDateString('fr-FR')}
                   </td>
                   <td className="py-3 px-4">
@@ -161,8 +162,8 @@ export function AdminUsers() {
                       disabled={toggleAdminMutation.isPending}
                       className={`p-2 rounded-lg transition-colors ${
                         user.isInstanceAdmin
-                          ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
-                          : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          ? 'text-ctp-red hover:bg-ctp-red/10'
+                          : 'text-ctp-overlay1 hover:bg-ctp-surface1'
                       }`}
                       title={user.isInstanceAdmin ? 'Retirer les droits admin' : 'Promouvoir admin'}
                     >
@@ -179,7 +180,7 @@ export function AdminUsers() {
           </table>
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-12 text-ctp-subtext0">
           Aucun utilisateur trouve
         </div>
       )}
@@ -187,7 +188,7 @@ export function AdminUsers() {
       {/* Pagination */}
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-ctp-subtext0">
             Page {pagination.page} sur {pagination.totalPages}
           </p>
           <div className="flex gap-2">

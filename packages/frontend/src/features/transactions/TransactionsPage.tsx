@@ -1,5 +1,6 @@
 // ============================================================================
 // TRANSACTIONS PAGE - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { TransactionList } from './TransactionList';
@@ -11,7 +12,7 @@ export function TransactionsPage() {
   if (!currentWorkspaceId) {
     return (
       <div className="p-6">
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-ctp-subtext0">
           Sélectionnez un espace de travail
         </p>
       </div>
@@ -19,17 +20,7 @@ export function TransactionsPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white dark:text-gray-100">
-            Transactions
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Gérez vos revenus et dépenses
-          </p>
-        </div>
-      </div>
+    <div className="min-h-full bg-ctp-base">
       <TransactionList />
     </div>
   );

@@ -1,6 +1,7 @@
 // ============================================================================
 // SETTINGS PAGE - Finance Hub
 // Main settings page with navigation
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -36,6 +37,24 @@ interface NavItem {
 // ----------------------------------------------------------------------------
 // Navigation
 // ----------------------------------------------------------------------------
+
+// Section colors for Catppuccin theme - complete class names for Tailwind JIT
+const sectionColors: Record<SettingsSection, string> = {
+  profile: 'text-ctp-blue',
+  display: 'text-ctp-mauve',
+  notifications: 'text-ctp-yellow',
+  security: 'text-ctp-red',
+  data: 'text-ctp-peach',
+};
+
+// Background colors for active state - complete class names for Tailwind JIT
+const sectionBgColors: Record<SettingsSection, string> = {
+  profile: 'bg-ctp-blue/20',
+  display: 'bg-ctp-mauve/20',
+  notifications: 'bg-ctp-yellow/20',
+  security: 'bg-ctp-red/20',
+  data: 'bg-ctp-peach/20',
+};
 
 const navItems: NavItem[] = [
   {
@@ -104,19 +123,19 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-ctp-base">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <Link
             to="/dashboard"
-            className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 dark:text-gray-400 dark:hover:text-gray-200 mb-4"
+            className="inline-flex items-center gap-2 text-sm text-ctp-subtext0 hover:text-ctp-text mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
             Retour au tableau de bord
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Parametres</h1>
-          <p className="text-gray-500 dark:text-gray-400">
+          <h1 className="text-2xl font-bold text-ctp-text">Parametres</h1>
+          <p className="text-ctp-subtext0">
             Gerez votre compte et vos preferences
           </p>
         </div>
@@ -124,7 +143,7 @@ export function SettingsPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Navigation */}
           <aside className="w-full lg:w-64 flex-shrink-0">
-            <nav className="bg-white dark:bg-gray-800 rounded-lg shadow divide-y divide-gray-200 dark:divide-gray-700">
+            <nav className="bg-ctp-mantle rounded-lg shadow divide-y divide-ctp-surface1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeSection === item.id;
@@ -135,36 +154,36 @@ export function SettingsPage() {
                     onClick={() => handleSectionChange(item.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors first:rounded-t-lg last:rounded-b-lg ${
                       isActive
-                        ? 'bg-blue-50 dark:bg-blue-900/30'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? sectionBgColors[item.id]
+                        : 'hover:bg-ctp-surface0'
                     }`}
                   >
                     <Icon
                       className={`h-5 w-5 flex-shrink-0 ${
                         isActive
-                          ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-gray-400 dark:text-gray-500'
+                          ? sectionColors[item.id]
+                          : 'text-ctp-overlay1'
                       }`}
                     />
                     <div className="flex-1 min-w-0">
                       <p
                         className={`text-sm font-medium truncate ${
                           isActive
-                            ? 'text-blue-600 dark:text-blue-400'
-                            : 'text-gray-900 dark:text-white'
+                            ? sectionColors[item.id]
+                            : 'text-ctp-text'
                         }`}
                       >
                         {item.label}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      <p className="text-xs text-ctp-subtext0 truncate">
                         {item.description}
                       </p>
                     </div>
                     <ChevronRight
                       className={`h-4 w-4 flex-shrink-0 ${
                         isActive
-                          ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-gray-300 dark:text-gray-600'
+                          ? sectionColors[item.id]
+                          : 'text-ctp-overlay0'
                       }`}
                     />
                   </button>
@@ -173,16 +192,16 @@ export function SettingsPage() {
             </nav>
 
             {/* Workspace Settings Link */}
-            <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+            <div className="mt-6 bg-ctp-mantle rounded-lg shadow p-4">
+              <h3 className="text-sm font-medium text-ctp-text mb-2">
                 Parametres workspace
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              <p className="text-xs text-ctp-subtext0 mb-3">
                 Configurez les parametres specifiques a chaque workspace
               </p>
               <Link
                 to="/workspaces"
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm text-ctp-blue hover:text-ctp-sapphire font-medium"
               >
                 Gerer les workspaces
               </Link>

@@ -1,5 +1,6 @@
 // ============================================================================
 // BUDGETS PAGE - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -101,7 +102,7 @@ export function BudgetsPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+      <div className="p-6 text-center text-ctp-subtext0">
         Sélectionnez un espace de travail
       </div>
     );
@@ -111,10 +112,10 @@ export function BudgetsPage() {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
+          <div className="h-8 bg-ctp-surface1 rounded w-1/4" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-40 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+              <div key={i} className="h-40 bg-ctp-surface1 rounded-xl" />
             ))}
           </div>
         </div>
@@ -132,7 +133,7 @@ export function BudgetsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Budgets</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-ctp-subtext0">
             Suivez vos dépenses par catégorie
           </p>
         </div>
@@ -146,33 +147,33 @@ export function BudgetsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="card text-center">
             <p className="text-2xl font-bold">{summary.total}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Budgets actifs</p>
+            <p className="text-sm text-ctp-subtext0">Budgets actifs</p>
           </div>
           <div className="card text-center">
             <p className="text-2xl font-bold">{formatCurrency(summary.totalBudgeted)}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Budget total</p>
+            <p className="text-sm text-ctp-subtext0">Budget total</p>
           </div>
           <div className="card text-center">
-            <p className="text-2xl font-bold text-primary-600">
+            <p className="text-2xl font-bold text-ctp-blue">
               {formatCurrency(summary.totalSpent)}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Dépensé</p>
+            <p className="text-sm text-ctp-subtext0">Dépensé</p>
           </div>
           <div className="card text-center">
             {summary.overBudgetCount > 0 ? (
               <>
-                <p className="text-2xl font-bold text-danger-600">{summary.overBudgetCount}</p>
-                <p className="text-sm text-danger-600">Dépassés</p>
+                <p className="text-2xl font-bold text-ctp-red">{summary.overBudgetCount}</p>
+                <p className="text-sm text-ctp-red">Dépassés</p>
               </>
             ) : summary.alertCount > 0 ? (
               <>
-                <p className="text-2xl font-bold text-warning-600">{summary.alertCount}</p>
-                <p className="text-sm text-warning-600">En alerte</p>
+                <p className="text-2xl font-bold text-ctp-yellow">{summary.alertCount}</p>
+                <p className="text-sm text-ctp-yellow">En alerte</p>
               </>
             ) : (
               <>
-                <p className="text-2xl font-bold text-success-600">0</p>
-                <p className="text-sm text-success-600">Problème</p>
+                <p className="text-2xl font-bold text-ctp-green">0</p>
+                <p className="text-sm text-ctp-green">Problème</p>
               </>
             )}
           </div>
@@ -225,9 +226,9 @@ export function BudgetsPage() {
         </div>
       ) : (
         <div className="card text-center py-12">
-          <Wallet className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <Wallet className="w-12 h-12 mx-auto mb-4 text-ctp-overlay1" />
           <h2 className="text-xl font-bold mb-2">Aucun budget configuré</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-ctp-subtext0 mb-6">
             Créez des budgets pour suivre vos dépenses par catégorie
           </p>
           <button onClick={() => setShowForm(true)} className="btn-primary">

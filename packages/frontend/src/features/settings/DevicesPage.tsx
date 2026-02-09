@@ -1,5 +1,6 @@
 // ============================================================================
 // DEVICES PAGE - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -88,9 +89,9 @@ export function DevicesPage() {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-          <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded" />
-          <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded" />
+          <div className="h-8 bg-ctp-surface1 rounded w-1/3" />
+          <div className="h-24 bg-ctp-surface1 rounded" />
+          <div className="h-24 bg-ctp-surface1 rounded" />
         </div>
       </div>
     );
@@ -98,8 +99,8 @@ export function DevicesPage() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-2">Appareils connectés</h1>
-      <p className="text-gray-600 dark:text-gray-400 mb-6">
+      <h1 className="text-2xl font-bold mb-2 text-ctp-text">Appareils connectés</h1>
+      <p className="text-ctp-subtext0 mb-6">
         Gérez les appareils ayant accès à votre compte
       </p>
 
@@ -109,7 +110,7 @@ export function DevicesPage() {
             key={device.id}
             className="card flex items-start gap-4"
           >
-            {(() => { const Icon = getDeviceIcon(device.name); return <Icon className="w-6 h-6 text-gray-500 dark:text-gray-400" />; })()}
+            {(() => { const Icon = getDeviceIcon(device.name); return <Icon className="w-6 h-6 text-ctp-subtext0" />; })()}
 
             <div className="flex-1 min-w-0">
               {selectedDevice === device.id ? (
@@ -144,12 +145,12 @@ export function DevicesPage() {
               ) : (
                 <>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-medium">{device.name}</h3>
+                    <h3 className="font-medium text-ctp-text">{device.name}</h3>
                     {device.isTrusted && (
                       <span className="badge-success">Fiable</span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-ctp-subtext0">
                     Dernière utilisation: {formatDate(device.lastUsedAt)}
                   </p>
                 </>
@@ -187,7 +188,7 @@ export function DevicesPage() {
                       revokeMutation.mutate(device.id);
                     }
                   }}
-                  className="btn-ghost text-sm text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20"
+                  className="btn-ghost text-sm text-ctp-red hover:bg-ctp-red/10"
                   title="Révoquer l'accès"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -198,15 +199,15 @@ export function DevicesPage() {
         ))}
 
         {(!devices || devices.length === 0) && (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-8 text-ctp-subtext0">
             Aucun appareil connecté
           </div>
         )}
       </div>
 
-      <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-700 dark:bg-gray-800 rounded-lg">
-        <h3 className="font-medium mb-2">À propos des appareils</h3>
-        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+      <div className="mt-6 p-4 bg-ctp-surface0 rounded-lg">
+        <h3 className="font-medium mb-2 text-ctp-text">À propos des appareils</h3>
+        <ul className="text-sm text-ctp-subtext0 space-y-1">
           <li>• Les appareils fiables bénéficient de vérifications de sécurité réduites</li>
           <li>• La révocation d'un appareil déconnecte toutes ses sessions</li>
           <li>• Un maximum de 10 appareils peut être connecté simultanément</li>

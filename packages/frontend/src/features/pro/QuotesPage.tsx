@@ -1,6 +1,7 @@
 // ============================================================================
 // QUOTES PAGE - Finance Hub
 // Quote list and management
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -57,11 +58,11 @@ function formatDate(dateStr: string): string {
 }
 
 const STATUS_CONFIG: Record<QuoteStatus, { label: string; color: string }> = {
-  draft: { label: 'Brouillon', color: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' },
-  sent: { label: 'Envoyé', color: 'bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-300' },
-  accepted: { label: 'Accepté', color: 'bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-300' },
-  rejected: { label: 'Refusé', color: 'bg-danger-100 text-danger-700 dark:bg-danger-900/30 dark:text-danger-300' },
-  expired: { label: 'Expiré', color: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400' },
+  draft: { label: 'Brouillon', color: 'bg-ctp-surface1 text-ctp-subtext0' },
+  sent: { label: 'Envoye', color: 'bg-ctp-yellow/10 text-ctp-yellow' },
+  accepted: { label: 'Accepte', color: 'bg-ctp-green/10 text-ctp-green' },
+  rejected: { label: 'Refuse', color: 'bg-ctp-red/10 text-ctp-red' },
+  expired: { label: 'Expire', color: 'bg-ctp-surface1 text-ctp-overlay1' },
 };
 
 // ----------------------------------------------------------------------------
@@ -145,8 +146,8 @@ export function QuotesPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-        Sélectionnez un espace de travail
+      <div className="p-6 text-center text-ctp-subtext0">
+        Selectionnez un espace de travail
       </div>
     );
   }
@@ -157,8 +158,8 @@ export function QuotesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Devis</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Créez et suivez vos devis
+          <p className="text-ctp-subtext0">
+            Creez et suivez vos devis
           </p>
         </div>
         <Link
@@ -179,8 +180,8 @@ export function QuotesPage() {
               className={clsx(
                 'px-4 py-2 rounded-lg transition-colors',
                 statusFilter === status
-                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                  : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-ctp-blue/20 text-ctp-blue'
+                  : 'bg-ctp-surface1 hover:bg-ctp-surface2'
               )}
             >
               {status === 'all' ? 'Tous' : STATUS_CONFIG[status].label}
@@ -193,7 +194,7 @@ export function QuotesPage() {
       {isLoading && (
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+            <div key={i} className="h-24 bg-ctp-surface1 rounded-xl" />
           ))}
         </div>
       )}
@@ -201,16 +202,16 @@ export function QuotesPage() {
       {/* Empty State */}
       {!isLoading && quotes?.length === 0 && (
         <div className="card text-center py-12">
-          <PenLine className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <PenLine className="w-12 h-12 mx-auto mb-4 text-ctp-overlay1" />
           <h2 className="text-xl font-bold mb-2">Aucun devis</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            Créez votre premier devis pour commencer
+          <p className="text-ctp-subtext0 mb-4">
+            Creez votre premier devis pour commencer
           </p>
           <Link
             to={`/workspaces/${workspaceId}/pro/quotes/new`}
             className="btn btn-primary"
           >
-            + Créer un devis
+            + Creer un devis
           </Link>
         </div>
       )}
@@ -221,14 +222,14 @@ export function QuotesPage() {
           {quotes.map((quote) => (
             <div
               key={quote.id}
-              className="card flex flex-col sm:flex-row sm:items-center gap-4 hover:border-primary-300 dark:hover:border-primary-600 transition-colors"
+              className="card flex flex-col sm:flex-row sm:items-center gap-4 hover:border-ctp-blue transition-colors"
             >
               {/* Main Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1">
                   <Link
                     to={`/workspaces/${workspaceId}/pro/quotes/${quote.id}`}
-                    className="font-semibold text-primary-600 hover:underline"
+                    className="font-semibold text-ctp-blue hover:underline"
                   >
                     {quote.number}
                   </Link>
@@ -239,11 +240,11 @@ export function QuotesPage() {
                     {STATUS_CONFIG[quote.status].label}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-ctp-subtext0">
                   {quote.contact.name}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Émis le {formatDate(quote.issueDate)} • Valide jusqu'au {formatDate(quote.validUntil)}
+                <p className="text-xs text-ctp-subtext0">
+                  Emis le {formatDate(quote.issueDate)} - Valide jusqu'au {formatDate(quote.validUntil)}
                 </p>
               </div>
 
@@ -251,7 +252,7 @@ export function QuotesPage() {
               <div className="text-right">
                 <p className="text-lg font-bold">{formatCurrency(quote.total)}</p>
                 {quote._count?.invoices && quote._count.invoices > 0 && (
-                  <p className="text-sm text-success-600">Facturé</p>
+                  <p className="text-sm text-ctp-green">Facture</p>
                 )}
               </div>
 
@@ -268,7 +269,7 @@ export function QuotesPage() {
                     </button>
                     <Link
                       to={`/workspaces/${workspaceId}/pro/quotes/${quote.id}/edit`}
-                      className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+                      className="p-2 text-ctp-overlay1 hover:text-ctp-text"
                       title="Modifier"
                     >
                       <Pencil className="w-4 h-4" />
@@ -279,7 +280,7 @@ export function QuotesPage() {
                           deleteMutation.mutate(quote.id);
                         }
                       }}
-                      className="p-2 text-gray-400 hover:text-danger-600"
+                      className="p-2 text-ctp-overlay1 hover:text-ctp-red"
                       title="Supprimer"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -297,7 +298,7 @@ export function QuotesPage() {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm('Marquer comme refusé ?')) {
+                        if (confirm('Marquer comme refuse ?')) {
                           rejectMutation.mutate(quote.id);
                         }
                       }}
@@ -319,7 +320,7 @@ export function QuotesPage() {
                 )}
                 <button
                   onClick={() => duplicateMutation.mutate(quote.id)}
-                  className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+                  className="p-2 text-ctp-overlay1 hover:text-ctp-text"
                   title="Dupliquer"
                 >
                   <Copy className="w-4 h-4" />

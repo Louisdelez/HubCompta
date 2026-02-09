@@ -1,11 +1,14 @@
 // ============================================================================
 // ALLOCATION CHART COMPONENT - Finance Hub
 // Pie chart showing portfolio allocation by type/currency
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { formatCurrency, formatPercent, cn } from '@/lib/utils';
+import { useTheme } from '@/providers/ThemeProvider';
+import { CATPPUCCIN } from '@/lib/catppuccin-colors';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -27,30 +30,55 @@ interface AllocationChartProps {
 }
 
 // ----------------------------------------------------------------------------
-// Colors
+// Catppuccin Color Helper
+// Returns hex colors based on current theme
 // ----------------------------------------------------------------------------
 
-const CHART_COLORS = [
-  '#3B82F6', // blue
-  '#10B981', // green
-  '#F59E0B', // amber
-  '#EF4444', // red
-  '#8B5CF6', // violet
-  '#EC4899', // pink
-  '#14B8A6', // teal
-  '#6366F1', // indigo
-  '#84CC16', // lime
-  '#F97316', // orange
-];
+function rgbToHex(rgb: string): string {
+  const parts = rgb.split(' ').map(Number);
+  return '#' + parts.map(n => n.toString(16).padStart(2, '0')).join('');
+}
 
-const TYPE_COLORS: Record<string, string> = {
-  stock: '#3B82F6', // blue
-  etf: '#8B5CF6', // violet
-  crypto: '#F59E0B', // amber
-  bond: '#10B981', // green
-  commodity: '#EC4899', // pink
-  other: '#6B7280', // gray
-};
+function useCatppuccinColors() {
+  const { resolvedTheme } = useTheme();
+  const palette = CATPPUCCIN[resolvedTheme];
+
+  return useMemo(() => ({
+    // Chart colors - all 14 accent colors
+    chartColors: [
+      rgbToHex(palette.blue),
+      rgbToHex(palette.green),
+      rgbToHex(palette.peach),
+      rgbToHex(palette.mauve),
+      rgbToHex(palette.teal),
+      rgbToHex(palette.pink),
+      rgbToHex(palette.yellow),
+      rgbToHex(palette.sapphire),
+      rgbToHex(palette.red),
+      rgbToHex(palette.lavender),
+      rgbToHex(palette.sky),
+      rgbToHex(palette.flamingo),
+      rgbToHex(palette.maroon),
+      rgbToHex(palette.rosewater),
+    ],
+    // Type-specific colors
+    typeColors: {
+      stock: rgbToHex(palette.blue),
+      etf: rgbToHex(palette.sapphire),
+      crypto: rgbToHex(palette.peach),
+      bond: rgbToHex(palette.lavender),
+      fund: rgbToHex(palette.mauve),
+      commodity: rgbToHex(palette.yellow),
+      forex: rgbToHex(palette.green),
+      other: rgbToHex(palette.overlay1),
+      actions: rgbToHex(palette.blue),
+    } as Record<string, string>,
+    // Semantic colors
+    surface: rgbToHex(palette.surface0),
+    text: rgbToHex(palette.text),
+    subtext: rgbToHex(palette.subtext0),
+  }), [resolvedTheme, palette]);
+}
 
 // ----------------------------------------------------------------------------
 // Custom Tooltip
@@ -78,10 +106,10 @@ function CustomTooltip({
   const data = firstPayload.payload;
 
   return (
-    <div className="bg-white dark:bg-gray-800 border rounded-lg shadow-lg p-3">
-      <p className="font-medium text-gray-900 dark:text-white">{data.name}</p>
-      <p className="text-sm text-gray-600 dark:text-gray-400">{formatCurrency(data.value, currency)}</p>
-      <p className="text-sm text-gray-500 dark:text-gray-400">{formatPercent(data.percent)}</p>
+    <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg shadow-lg p-3">
+      <p className="font-medium text-ctp-text">{data.name}</p>
+      <p className="text-sm text-ctp-subtext0">{formatCurrency(data.value, currency)}</p>
+      <p className="text-sm text-ctp-overlay1">{formatPercent(data.percent)}</p>
     </div>
   );
 }
@@ -112,7 +140,7 @@ function renderLegend(props: { payload?: LegendPayload[] }) {
             className="w-3 h-3 rounded-full"
             style={{ backgroundColor: entry.color }}
           />
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+          <span className="text-sm text-ctp-subtext0">
             {entry.value} ({formatPercent(entry.payload.percent)})
           </span>
         </li>
@@ -132,13 +160,15 @@ export function AllocationChart({
   showLegend = true,
   className,
 }: AllocationChartProps) {
-  // Prepare chart data with colors
+  const colors = useCatppuccinColors();
+
+  // Prepare chart data with Catppuccin colors
   const chartData = useMemo(() => {
     return data.map((item, index) => ({
       ...item,
-      color: item.color || TYPE_COLORS[item.name.toLowerCase()] || CHART_COLORS[index % CHART_COLORS.length],
+      color: item.color || colors.typeColors[item.name.toLowerCase()] || colors.chartColors[index % colors.chartColors.length],
     }));
-  }, [data]);
+  }, [data, colors]);
 
   const total = useMemo(() => {
     return data.reduce((sum, item) => sum + item.value, 0);
@@ -146,7 +176,7 @@ export function AllocationChart({
 
   if (data.length === 0) {
     return (
-      <div className={cn('flex items-center justify-center h-64 text-gray-500', className)}>
+      <div className={cn('flex items-center justify-center h-64 text-ctp-overlay1', className)}>
         Aucune donnée disponible
       </div>
     );
@@ -154,7 +184,7 @@ export function AllocationChart({
 
   return (
     <div className={className}>
-      {title && <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">{title}</h3>}
+      {title && <h3 className="text-sm font-medium text-ctp-subtext1 mb-4">{title}</h3>}
 
       <div className="relative h-64">
         <ResponsiveContainer width="100%" height="100%">
@@ -181,8 +211,8 @@ export function AllocationChart({
         {/* Center text */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Total</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatCurrency(total, currency)}</p>
+            <p className="text-sm text-ctp-overlay1">Total</p>
+            <p className="text-lg font-semibold text-ctp-text">{formatCurrency(total, currency)}</p>
           </div>
         </div>
       </div>
@@ -203,12 +233,14 @@ export function AllocationLegend({
   currency?: string;
   className?: string;
 }) {
+  const colors = useCatppuccinColors();
+
   const chartData = useMemo(() => {
     return data.map((item, index) => ({
       ...item,
-      color: item.color || TYPE_COLORS[item.name.toLowerCase()] || CHART_COLORS[index % CHART_COLORS.length],
+      color: item.color || colors.typeColors[item.name.toLowerCase()] || colors.chartColors[index % colors.chartColors.length],
     }));
-  }, [data]);
+  }, [data, colors]);
 
   return (
     <ul className={cn('space-y-2', className)}>
@@ -216,13 +248,13 @@ export function AllocationLegend({
         <li key={index} className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-            <span className="text-sm text-gray-700 dark:text-gray-300">{item.name}</span>
+            <span className="text-sm text-ctp-subtext1">{item.name}</span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
+            <span className="text-sm font-medium text-ctp-text">
               {formatCurrency(item.value, currency)}
             </span>
-            <span className="text-sm text-gray-500 dark:text-gray-400 w-14 text-right">
+            <span className="text-sm text-ctp-overlay1 w-14 text-right">
               {formatPercent(item.percent)}
             </span>
           </div>

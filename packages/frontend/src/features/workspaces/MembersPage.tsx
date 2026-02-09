@@ -1,5 +1,6 @@
 // ============================================================================
 // MEMBERS PAGE - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -40,11 +41,11 @@ const ROLE_LABELS: Record<Member['role'], string> = {
 };
 
 const ROLE_COLORS: Record<Member['role'], string> = {
-  owner: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
-  admin: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-  accountant: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-  member: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
-  readonly: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+  owner: 'bg-ctp-yellow/20 text-ctp-yellow',
+  admin: 'bg-ctp-mauve/20 text-ctp-mauve',
+  accountant: 'bg-ctp-green/20 text-ctp-green',
+  member: 'bg-ctp-surface1 text-ctp-subtext0',
+  readonly: 'bg-ctp-surface0 text-ctp-overlay1',
 };
 
 // ----------------------------------------------------------------------------
@@ -97,9 +98,9 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-          <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded" />
-          <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded" />
+          <div className="h-8 bg-ctp-surface1 rounded w-1/3" />
+          <div className="h-16 bg-ctp-surface1 rounded" />
+          <div className="h-16 bg-ctp-surface1 rounded" />
         </div>
       </div>
     );
@@ -110,7 +111,7 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Membres</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-ctp-subtext0">
             {members?.length ?? 0} membre{(members?.length ?? 0) > 1 ? 's' : ''}
           </p>
         </div>
@@ -129,8 +130,8 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
         {members?.map((member) => (
           <div key={member.id} className="card flex items-center gap-4">
             {/* Avatar */}
-            <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-medium text-primary-700 dark:text-primary-300">
+            <div className="w-10 h-10 rounded-full bg-ctp-blue/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-sm font-medium text-ctp-blue">
                 {member.displayName.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -138,7 +139,7 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
             {/* Info */}
             <div className="flex-1 min-w-0">
               <p className="font-medium truncate">{member.displayName}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+              <p className="text-sm text-ctp-subtext0 truncate">
                 {member.email}
               </p>
             </div>
@@ -176,7 +177,7 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
             )}
 
             {/* Joined date */}
-            <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+            <span className="text-sm text-ctp-subtext0 hidden sm:block">
               {formatDate(member.joinedAt)}
             </span>
 
@@ -188,7 +189,7 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
                     removeMutation.mutate(member.id);
                   }
                 }}
-                className="btn-ghost text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20"
+                className="btn-ghost text-ctp-red hover:bg-ctp-red/10"
                 title="Retirer"
               >
                 <X className="w-4 h-4" />

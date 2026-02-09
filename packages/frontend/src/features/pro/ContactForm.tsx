@@ -1,6 +1,7 @@
 // ============================================================================
 // CONTACT FORM - Finance Hub
 // Create/Edit contact modal
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -116,17 +117,17 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-auto">
+      <div className="bg-ctp-base rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
+        <div className="flex items-center justify-between p-6 border-b border-ctp-surface1">
           <h2 className="text-xl font-semibold">
             {isEditing ? 'Modifier le contact' : 'Nouveau contact'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+            className="p-2 text-ctp-overlay1 hover:text-ctp-text"
           >
-            ✕
+            X
           </button>
         </div>
 
@@ -142,8 +143,8 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
                 className={clsx(
                   'flex-1 py-3 rounded-lg border-2 transition-colors',
                   formData.type === 'client'
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                    ? 'border-ctp-blue bg-ctp-blue/10'
+                    : 'border-ctp-surface1 hover:border-ctp-surface2'
                 )}
               >
                 <User className="w-6 h-6 mx-auto mb-1" />
@@ -155,8 +156,8 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
                 className={clsx(
                   'flex-1 py-3 rounded-lg border-2 transition-colors',
                   formData.type === 'supplier'
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                    ? 'border-ctp-peach bg-ctp-peach/10 text-ctp-peach'
+                    : 'border-ctp-surface1 hover:border-ctp-surface2'
                 )}
               >
                 <Building2 className="w-6 h-6 mx-auto mb-1" />
@@ -168,17 +169,17 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
           {/* Name */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              Nom <span className="text-danger-500">*</span>
+              Nom <span className="text-ctp-red">*</span>
             </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className={clsx('input w-full', errors.name && 'border-danger-500')}
+              className={clsx('input w-full', errors.name && 'border-ctp-red')}
               placeholder="Nom de l'entreprise ou du contact"
             />
             {errors.name && (
-              <p className="text-sm text-danger-500 mt-1">{errors.name}</p>
+              <p className="text-sm text-ctp-red mt-1">{errors.name}</p>
             )}
           </div>
 
@@ -196,7 +197,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-medium mb-1">Téléphone</label>
+            <label className="block text-sm font-medium mb-1">Telephone</label>
             <input
               type="tel"
               value={formData.phone}
@@ -213,7 +214,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               className="input w-full h-24 resize-none"
-              placeholder="Adresse complète..."
+              placeholder="Adresse complete..."
             />
           </div>
 
@@ -228,13 +229,13 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
               placeholder="12345678901234"
               maxLength={14}
             />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">14 chiffres</p>
+            <p className="text-xs text-ctp-subtext0 mt-1">14 chiffres</p>
           </div>
 
           {/* VAT Number */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              Numéro de TVA intracommunautaire
+              Numero de TVA intracommunautaire
             </label>
             <input
               type="text"
@@ -248,7 +249,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
 
           {/* Error Message */}
           {errors.submit && (
-            <div className="p-3 bg-danger-50 dark:bg-danger-900/20 text-danger-700 dark:text-danger-300 rounded-lg text-sm">
+            <div className="p-3 bg-ctp-red/10 text-ctp-red rounded-lg text-sm">
               {errors.submit}
             </div>
           )}
@@ -268,7 +269,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
               className="btn btn-primary flex-1"
               disabled={isPending}
             >
-              {isPending ? 'Enregistrement...' : isEditing ? 'Mettre à jour' : 'Créer'}
+              {isPending ? 'Enregistrement...' : isEditing ? 'Mettre a jour' : 'Creer'}
             </button>
           </div>
         </form>

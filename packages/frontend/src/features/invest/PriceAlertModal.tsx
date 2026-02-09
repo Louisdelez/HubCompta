@@ -1,6 +1,7 @@
 // ============================================================================
 // PRICE ALERT MODAL - Finance Hub
 // Create/edit price alerts for assets
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -72,21 +73,21 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-md mx-4">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl w-full max-w-md mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-ctp-surface1">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary-100 dark:bg-primary-900/50 rounded-lg">
-              <Bell className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+            <div className="p-2 bg-ctp-blue/10 rounded-lg">
+              <Bell className="h-5 w-5 text-ctp-blue" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold">Alerte de prix</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{asset.symbol} - {asset.name}</p>
+              <h2 className="text-lg font-semibold text-ctp-text">Alerte de prix</h2>
+              <p className="text-sm text-ctp-subtext0">{asset.symbol} - {asset.name}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 rounded"
+            className="p-1 text-ctp-overlay1 hover:text-ctp-subtext0 rounded"
           >
             <X className="h-5 w-5" />
           </button>
@@ -94,9 +95,9 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
 
         {/* Current Price */}
         {asset.lastPrice && (
-          <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Prix actuel</p>
-            <p className="text-xl font-bold">{formatCurrency(asset.lastPrice, asset.currency)}</p>
+          <div className="px-4 py-3 bg-ctp-surface0 border-b border-ctp-surface1">
+            <p className="text-sm text-ctp-subtext0">Prix actuel</p>
+            <p className="text-xl font-bold text-ctp-text">{formatCurrency(asset.lastPrice, asset.currency)}</p>
           </div>
         )}
 
@@ -104,7 +105,7 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           {/* Direction */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-ctp-subtext1 mb-2">
               M'alerter quand le prix passe
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -114,8 +115,8 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
                 className={cn(
                   'flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-colors',
                   direction === 'above'
-                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'
+                    ? 'border-ctp-green bg-ctp-green/10 text-ctp-green'
+                    : 'border-ctp-surface1 hover:border-ctp-surface2 text-ctp-subtext0'
                 )}
               >
                 <TrendingUp className="h-5 w-5" />
@@ -127,8 +128,8 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
                 className={cn(
                   'flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-colors',
                   direction === 'below'
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
-                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'
+                    ? 'border-ctp-red bg-ctp-red/10 text-ctp-red'
+                    : 'border-ctp-surface1 hover:border-ctp-surface2 text-ctp-subtext0'
                 )}
               >
                 <TrendingDown className="h-5 w-5" />
@@ -139,7 +140,7 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
 
           {/* Target Price */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
               Prix cible ({asset.currency})
             </label>
             <input
@@ -149,13 +150,13 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
               value={targetPrice}
               onChange={(e) => setTargetPrice(e.target.value)}
               placeholder="0.00"
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg focus:outline-none focus:ring-2 focus:ring-ctp-blue bg-ctp-mantle text-ctp-text"
               required
             />
             {targetPrice && asset.lastPrice && (
               <p className={cn(
                 'text-xs mt-1',
-                percentChange >= 0 ? 'text-green-600' : 'text-red-600'
+                percentChange >= 0 ? 'text-ctp-green' : 'text-ctp-red'
               )}>
                 {percentChange >= 0 ? '+' : ''}{percentChange.toFixed(2)}% par rapport au prix actuel
               </p>
@@ -163,7 +164,7 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
           </div>
 
           {/* Info */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm text-blue-700 dark:text-blue-300">
+          <div className="bg-ctp-blue/10 border border-ctp-blue/20 rounded-lg p-3 text-sm text-ctp-blue">
             <p>
               Vous recevrez une notification lorsque le prix de {asset.symbol}{' '}
               {direction === 'above' ? 'depassera' : 'passera en-dessous de'}{' '}
@@ -173,8 +174,8 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
 
           {/* Error */}
           {createAlertMutation.isError && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-sm text-red-600 dark:text-red-400">
+            <div className="p-3 bg-ctp-red/10 border border-ctp-red/20 rounded-lg">
+              <p className="text-sm text-ctp-red">
                 Erreur lors de la creation de l'alerte
               </p>
             </div>
@@ -182,13 +183,13 @@ export function PriceAlertModal({ isOpen, onClose, asset }: PriceAlertModalProps
 
           {/* Actions */}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1">
+            <button type="button" onClick={onClose} className="flex-1 px-4 py-2 text-ctp-subtext1 bg-ctp-surface0 rounded-lg hover:bg-ctp-surface1 font-medium">
               Annuler
             </button>
             <button
               type="submit"
               disabled={createAlertMutation.isPending || !targetPrice || parseFloat(targetPrice) <= 0}
-              className="btn-primary flex-1"
+              className="flex-1 px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg hover:bg-ctp-blue/90 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {createAlertMutation.isPending ? 'Creation...' : 'Creer l\'alerte'}
             </button>

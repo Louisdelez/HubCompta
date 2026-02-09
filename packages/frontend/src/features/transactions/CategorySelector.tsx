@@ -1,5 +1,6 @@
 // ============================================================================
 // CATEGORY SELECTOR - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -93,11 +94,11 @@ export function CategorySelector({
         >
           {selectedCategory ? (
             <>
-              <span className="text-lg">{selectedCategory.icon ? <span>{selectedCategory.icon}</span> : <Folder className="w-5 h-5 text-gray-500 dark:text-gray-400" />}</span>
-              <span>{selectedCategory.name}</span>
+              <span className="text-lg">{selectedCategory.icon ? <span>{selectedCategory.icon}</span> : <Folder className="w-5 h-5 text-ctp-subtext0" />}</span>
+              <span className="text-ctp-text">{selectedCategory.name}</span>
             </>
           ) : (
-            <span className="text-gray-400">Sélectionner une catégorie</span>
+            <span className="text-ctp-overlay1">Sélectionner une catégorie</span>
           )}
           <svg
             className={clsx(
@@ -123,14 +124,14 @@ export function CategorySelector({
               className="fixed inset-0 z-10"
               onClick={() => setIsOpen(false)}
             />
-            <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-64 overflow-auto">
+            <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-ctp-mantle rounded-lg shadow-lg border border-ctp-surface1 max-h-64 overflow-auto">
               {/* Clear option */}
               <button
                 type="button"
                 onClick={handleClear}
-                className="w-full px-3 py-2 text-left text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700"
+                className="w-full px-3 py-2 text-left text-ctp-subtext0 hover:bg-ctp-surface0"
               >
-                Aucune catégorie
+                Aucune categorie
               </button>
 
               {/* Categories */}
@@ -146,12 +147,12 @@ export function CategorySelector({
                       }
                     }}
                     className={clsx(
-                      'w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700',
-                      value === category.id && 'bg-primary-50 dark:bg-primary-900/20'
+                      'w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-ctp-surface0',
+                      value === category.id && 'bg-ctp-surface1 text-ctp-text'
                     )}
                   >
-                    <span className="text-lg">{category.icon ? <span>{category.icon}</span> : <Folder className="w-5 h-5 text-gray-500 dark:text-gray-400" />}</span>
-                    <span className="flex-1">{category.name}</span>
+                    <span className="text-lg">{category.icon ? <span>{category.icon}</span> : <Folder className="w-5 h-5 text-ctp-subtext0" />}</span>
+                    <span className="flex-1 text-ctp-text">{category.name}</span>
                     {category.children.length > 0 && (
                       <svg
                         className={clsx(
@@ -174,19 +175,19 @@ export function CategorySelector({
 
                   {/* Children */}
                   {expandedParents.has(category.id) && (
-                    <div className="pl-6">
+                    <div className="pl-6 bg-ctp-base/50">
                       {category.children.map((child) => (
                         <button
                           key={child.id}
                           type="button"
                           onClick={() => handleSelect(child)}
                           className={clsx(
-                            'w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700',
-                            value === child.id && 'bg-primary-50 dark:bg-primary-900/20'
+                            'w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-ctp-surface0',
+                            value === child.id && 'bg-ctp-surface1 text-ctp-text'
                           )}
                         >
-                          <span className="text-lg">{child.icon ? <span>{child.icon}</span> : <Folder className="w-5 h-5 text-gray-500 dark:text-gray-400" />}</span>
-                          <span>{child.name}</span>
+                          <span className="text-lg">{child.icon ? <span>{child.icon}</span> : <Folder className="w-5 h-5 text-ctp-subtext0" />}</span>
+                          <span className="text-ctp-text">{child.name}</span>
                         </button>
                       ))}
                     </div>

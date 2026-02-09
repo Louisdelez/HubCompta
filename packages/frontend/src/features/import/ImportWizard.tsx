@@ -1,5 +1,6 @@
 // ============================================================================
 // IMPORT WIZARD - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -79,7 +80,7 @@ export function ImportWizard() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+      <div className="p-6 text-center text-ctp-subtext0">
         Sélectionnez un espace de travail
       </div>
     );
@@ -90,7 +91,7 @@ export function ImportWizard() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Importer des transactions</h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-ctp-subtext0">
           Importez vos relevés bancaires au format CSV
         </p>
       </div>
@@ -104,10 +105,10 @@ export function ImportWizard() {
                 className={clsx(
                   'w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm',
                   index < currentStepIndex
-                    ? 'bg-success-500 text-white'
+                    ? 'bg-ctp-green text-ctp-crust'
                     : index === currentStepIndex
-                    ? 'bg-primary-500 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
+                    ? 'bg-ctp-blue text-ctp-crust'
+                    : 'bg-ctp-surface1 text-ctp-subtext0'
                 )}
               >
                 {index < currentStepIndex ? <Check className="w-4 h-4" /> : index + 1}
@@ -117,7 +118,7 @@ export function ImportWizard() {
                   'ml-2 text-sm hidden sm:inline',
                   index === currentStepIndex
                     ? 'font-medium'
-                    : 'text-gray-500 dark:text-gray-400'
+                    : 'text-ctp-subtext0'
                 )}
               >
                 {s.label}
@@ -127,8 +128,8 @@ export function ImportWizard() {
                   className={clsx(
                     'w-12 sm:w-24 h-1 mx-2',
                     index < currentStepIndex
-                      ? 'bg-success-500'
-                      : 'bg-gray-200 dark:bg-gray-700'
+                      ? 'bg-ctp-green'
+                      : 'bg-ctp-surface1'
                   )}
                 />
               )}
@@ -216,9 +217,9 @@ export function ImportWizard() {
 
         {step === 'complete' && (
           <div className="text-center py-8">
-            <CheckCircle className="w-12 h-12 mx-auto mb-4 text-success-500" />
+            <CheckCircle className="w-12 h-12 mx-auto mb-4 text-ctp-green" />
             <h2 className="text-xl font-bold mb-2">Import terminé !</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-ctp-subtext0 mb-6">
               {importState.result?.imported} transactions importées
               {importState.result?.duplicates && importState.result.duplicates > 0 && (
                 <>, {importState.result.duplicates} doublons ignorés</>
@@ -226,31 +227,31 @@ export function ImportWizard() {
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-              <div className="p-4 bg-success-50 dark:bg-success-900/20 rounded-lg">
-                <p className="text-2xl font-bold text-success-600">
+              <div className="p-4 bg-ctp-green/10 border border-ctp-green/30 rounded-lg">
+                <p className="text-2xl font-bold text-ctp-green">
                   {importState.result?.imported}
                 </p>
-                <p className="text-sm text-success-700 dark:text-success-400">
+                <p className="text-sm text-ctp-green">
                   Importées
                 </p>
               </div>
-              <div className="p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg">
+              <div className="p-4 bg-ctp-surface0 rounded-lg">
                 <p className="text-2xl font-bold">{importState.result?.skipped}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Ignorées</p>
+                <p className="text-sm text-ctp-subtext0">Ignorées</p>
               </div>
-              <div className="p-4 bg-warning-50 dark:bg-warning-900/20 rounded-lg">
-                <p className="text-2xl font-bold text-warning-600">
+              <div className="p-4 bg-ctp-yellow/10 border border-ctp-yellow/30 rounded-lg">
+                <p className="text-2xl font-bold text-ctp-yellow">
                   {importState.result?.duplicates}
                 </p>
-                <p className="text-sm text-warning-700 dark:text-warning-400">
+                <p className="text-sm text-ctp-yellow">
                   Doublons
                 </p>
               </div>
-              <div className="p-4 bg-danger-50 dark:bg-danger-900/20 rounded-lg">
-                <p className="text-2xl font-bold text-danger-600">
+              <div className="p-4 bg-ctp-red/10 border border-ctp-red/30 rounded-lg">
+                <p className="text-2xl font-bold text-ctp-red">
                   {importState.result?.errors}
                 </p>
-                <p className="text-sm text-danger-700 dark:text-danger-400">
+                <p className="text-sm text-ctp-red">
                   Erreurs
                 </p>
               </div>

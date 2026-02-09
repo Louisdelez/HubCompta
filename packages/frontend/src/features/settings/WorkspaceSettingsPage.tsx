@@ -1,6 +1,7 @@
 // ============================================================================
 // WORKSPACE SETTINGS PAGE - Finance Hub
 // Workspace configuration and settings
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useEffect } from 'react';
@@ -191,14 +192,14 @@ export function WorkspaceSettingsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-ctp-blue" />
       </div>
     );
   }
 
   if (!workspace || !settings) {
     return (
-      <div className="text-center py-12 text-gray-500 dark:text-gray-400">Workspace non trouve</div>
+      <div className="text-center py-12 text-ctp-subtext0">Workspace non trouve</div>
     );
   }
 
@@ -213,18 +214,18 @@ export function WorkspaceSettingsPage() {
     <div className="max-w-4xl mx-auto py-8 px-4">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-bold text-ctp-text">
           Parametres du workspace
         </h1>
-        <p className="text-gray-500 dark:text-gray-400">{workspace.name}</p>
+        <p className="text-ctp-subtext0">{workspace.name}</p>
       </div>
 
       {/* Workspace Info Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-ctp-mantle rounded-lg shadow mb-6">
+        <div className="px-6 py-4 border-b border-ctp-surface1">
           <div className="flex items-center gap-3">
-            <Building2 className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <Building2 className="h-5 w-5 text-ctp-blue" />
+            <h2 className="text-lg font-semibold text-ctp-text">
               Informations
             </h2>
           </div>
@@ -233,19 +234,19 @@ export function WorkspaceSettingsPage() {
         <div className="p-6">
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                 Nom du workspace
               </label>
               <input
                 type="text"
                 value={workspaceInfo.name}
                 onChange={(e) => setWorkspaceInfo({ ...workspaceInfo, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                 Devise
               </label>
               <select
@@ -253,7 +254,7 @@ export function WorkspaceSettingsPage() {
                 onChange={(e) =>
                   setWorkspaceInfo({ ...workspaceInfo, currency: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
               >
                 <option value="EUR">Euro (EUR)</option>
                 <option value="USD">Dollar US (USD)</option>
@@ -264,30 +265,30 @@ export function WorkspaceSettingsPage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="grid grid-cols-4 gap-4 mt-6 pt-6 border-t border-ctp-surface1">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="text-2xl font-bold text-ctp-text">
                 {workspace._count.accounts}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Comptes</div>
+              <div className="text-xs text-ctp-subtext0">Comptes</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="text-2xl font-bold text-ctp-text">
                 {workspace._count.transactions}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Transactions</div>
+              <div className="text-xs text-ctp-subtext0">Transactions</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="text-2xl font-bold text-ctp-text">
                 {workspace._count.categories}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Categories</div>
+              <div className="text-xs text-ctp-subtext0">Categories</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="text-2xl font-bold text-ctp-text">
                 {workspace._count.memberships}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Membres</div>
+              <div className="text-xs text-ctp-subtext0">Membres</div>
             </div>
           </div>
 
@@ -302,7 +303,7 @@ export function WorkspaceSettingsPage() {
                   })
                 }
                 disabled={updateWorkspaceMutation.isPending}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-ctp-blue text-ctp-base text-sm font-medium rounded-lg hover:bg-ctp-sapphire"
               >
                 {updateWorkspaceMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -317,9 +318,9 @@ export function WorkspaceSettingsPage() {
       </div>
 
       {/* Settings Tabs */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div className="bg-ctp-mantle rounded-lg shadow">
         {/* Tab Navigation */}
-        <div className="border-b border-gray-200 dark:border-gray-700">
+        <div className="border-b border-ctp-surface1">
           <nav className="flex -mb-px">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -329,8 +330,8 @@ export function WorkspaceSettingsPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
                     activeTab === tab.id
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-ctp-blue text-ctp-blue'
+                      : 'border-transparent text-ctp-subtext0 hover:text-ctp-text hover:border-ctp-surface2'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -346,7 +347,7 @@ export function WorkspaceSettingsPage() {
           {activeTab === 'general' && (
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                   Debut de l'annee fiscale
                 </label>
                 <select
@@ -354,7 +355,7 @@ export function WorkspaceSettingsPage() {
                   onChange={(e) =>
                     handleChange('general', 'fiscalYearStart', parseInt(e.target.value))
                   }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
                 >
                   {[
                     'Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -385,10 +386,10 @@ export function WorkspaceSettingsPage() {
                   className="flex items-center justify-between cursor-pointer"
                 >
                   <div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span className="text-sm font-medium text-ctp-subtext1">
                       {feature.label}
                     </span>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{feature.desc}</p>
+                    <p className="text-xs text-ctp-subtext0">{feature.desc}</p>
                   </div>
                   <input
                     type="checkbox"
@@ -397,7 +398,7 @@ export function WorkspaceSettingsPage() {
                       false
                     }
                     onChange={(e) => handleChange('features', feature.key, e.target.checked)}
-                    className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                    className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
                   />
                 </label>
               ))}
@@ -408,13 +409,13 @@ export function WorkspaceSettingsPage() {
           {activeTab === 'import' && (
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                   Format de date par defaut
                 </label>
                 <select
                   value={formData.import?.defaultDateFormat ?? 'DD/MM/YYYY'}
                   onChange={(e) => handleChange('import', 'defaultDateFormat', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
                 >
                   <option value="DD/MM/YYYY">DD/MM/YYYY</option>
                   <option value="MM/DD/YYYY">MM/DD/YYYY</option>
@@ -423,13 +424,13 @@ export function WorkspaceSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                   Separateur CSV par defaut
                 </label>
                 <select
                   value={formData.import?.defaultDelimiter ?? ';'}
                   onChange={(e) => handleChange('import', 'defaultDelimiter', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
                 >
                   <option value=";">Point-virgule (;)</option>
                   <option value=",">Virgule (,)</option>
@@ -439,10 +440,10 @@ export function WorkspaceSettingsPage() {
 
               <label className="flex items-center justify-between cursor-pointer">
                 <div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span className="text-sm font-medium text-ctp-subtext1">
                     Appliquer les regles automatiquement
                   </span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-ctp-subtext0">
                     Categoriser automatiquement lors de l'import
                   </p>
                 </div>
@@ -450,16 +451,16 @@ export function WorkspaceSettingsPage() {
                   type="checkbox"
                   checked={formData.import?.autoApplyRules ?? true}
                   onChange={(e) => handleChange('import', 'autoApplyRules', e.target.checked)}
-                  className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                  className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
                 />
               </label>
 
               <label className="flex items-center justify-between cursor-pointer">
                 <div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span className="text-sm font-medium text-ctp-subtext1">
                     Detection des doublons
                   </span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-ctp-subtext0">
                     Detecter et signaler les transactions en double
                   </p>
                 </div>
@@ -467,7 +468,7 @@ export function WorkspaceSettingsPage() {
                   type="checkbox"
                   checked={formData.import?.duplicateDetection ?? true}
                   onChange={(e) => handleChange('import', 'duplicateDetection', e.target.checked)}
-                  className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                  className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
                 />
               </label>
             </div>
@@ -478,14 +479,14 @@ export function WorkspaceSettingsPage() {
             <div className="p-6 space-y-4">
               {!formData.features?.proMode ? (
                 <div className="text-center py-8">
-                  <Briefcase className="h-12 w-12 text-gray-300 dark:text-gray-600 dark:text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-500 dark:text-gray-400">
+                  <Briefcase className="h-12 w-12 text-ctp-overlay0 mx-auto mb-3" />
+                  <p className="text-ctp-subtext0">
                     Activez le mode Pro pour acceder a ces parametres
                   </p>
                   <button
                     type="button"
                     onClick={() => handleChange('features', 'proMode', true)}
-                    className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+                    className="mt-4 px-4 py-2 bg-ctp-blue text-ctp-base text-sm font-medium rounded-lg hover:bg-ctp-sapphire"
                   >
                     Activer le mode Pro
                   </button>
@@ -494,45 +495,45 @@ export function WorkspaceSettingsPage() {
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                         Nom de l'entreprise
                       </label>
                       <input
                         type="text"
                         value={formData.pro?.companyName ?? ''}
                         onChange={(e) => handleChange('pro', 'companyName', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                         SIRET
                       </label>
                       <input
                         type="text"
                         value={formData.pro?.companySiret ?? ''}
                         onChange={(e) => handleChange('pro', 'companySiret', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                       Adresse
                     </label>
                     <textarea
                       value={formData.pro?.companyAddress ?? ''}
                       onChange={(e) => handleChange('pro', 'companyAddress', e.target.value)}
                       rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                         N° TVA
                       </label>
                       <input
@@ -540,12 +541,12 @@ export function WorkspaceSettingsPage() {
                         value={formData.pro?.companyVat ?? ''}
                         onChange={(e) => handleChange('pro', 'companyVat', e.target.value)}
                         placeholder="FR12345678901"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                         Delai de paiement (jours)
                       </label>
                       <input
@@ -555,39 +556,39 @@ export function WorkspaceSettingsPage() {
                           handleChange('pro', 'defaultPaymentTerms', parseInt(e.target.value))
                         }
                         min={0}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                         Prefixe factures
                       </label>
                       <input
                         type="text"
                         value={formData.pro?.invoicePrefix ?? 'FAC'}
                         onChange={(e) => handleChange('pro', 'invoicePrefix', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                         Prefixe devis
                       </label>
                       <input
                         type="text"
                         value={formData.pro?.quotePrefix ?? 'DEV'}
                         onChange={(e) => handleChange('pro', 'quotePrefix', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                       Coordonnees bancaires
                     </label>
                     <textarea
@@ -595,12 +596,12 @@ export function WorkspaceSettingsPage() {
                       onChange={(e) => handleChange('pro', 'bankDetails', e.target.value)}
                       rows={3}
                       placeholder="IBAN, BIC, nom de la banque..."
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                       Mentions legales
                     </label>
                     <textarea
@@ -608,7 +609,7 @@ export function WorkspaceSettingsPage() {
                       onChange={(e) => handleChange('pro', 'legalNotice', e.target.value)}
                       rows={3}
                       placeholder="Penalites de retard, conditions de paiement..."
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue"
                     />
                   </div>
                 </>
@@ -617,12 +618,12 @@ export function WorkspaceSettingsPage() {
           )}
 
           {/* Actions */}
-          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+          <div className="px-6 py-4 border-t border-ctp-surface1 flex justify-between">
             <button
               type="button"
               onClick={() => resetSettingsMutation.mutate()}
               disabled={resetSettingsMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-ctp-subtext1 hover:bg-ctp-surface0 rounded-lg transition-colors"
             >
               <RotateCcw className="h-4 w-4" />
               Reinitialiser
@@ -636,14 +637,14 @@ export function WorkspaceSettingsPage() {
                     setFormData(settings);
                     setIsEditing(false);
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-ctp-subtext1 hover:bg-ctp-surface0 rounded-lg transition-colors"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={updateSettingsMutation.isPending}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-ctp-blue text-ctp-base text-sm font-medium rounded-lg hover:bg-ctp-sapphire disabled:opacity-50 transition-colors"
                 >
                   {updateSettingsMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

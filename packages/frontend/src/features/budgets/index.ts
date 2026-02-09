@@ -1,5 +1,6 @@
 // ============================================================================
 // BUDGETS FEATURE EXPORTS - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 export { BudgetsPage } from './BudgetsPage';

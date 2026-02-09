@@ -84,7 +84,7 @@ import { RegisterForm } from './features/auth/RegisterForm';
 // Login page with proper form
 function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-ctp-mantle p-4">
       <div className="card max-w-md w-full p-8">
         <LoginForm />
       </div>
@@ -95,7 +95,7 @@ function LoginPage() {
 // Register page
 function RegisterPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-ctp-mantle p-4">
       <div className="card max-w-md w-full p-8">
         <RegisterForm />
       </div>
@@ -105,10 +105,10 @@ function RegisterPage() {
 
 function NotFoundPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-ctp-base">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white dark:text-gray-100">404</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Page not found</p>
+        <h1 className="text-4xl font-bold text-ctp-text">404</h1>
+        <p className="text-ctp-subtext0 mt-2">Page not found</p>
       </div>
     </div>
   );
@@ -120,8 +120,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
+      <div className="min-h-screen flex items-center justify-center bg-ctp-base">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ctp-blue" />
       </div>
     );
   }

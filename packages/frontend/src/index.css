@@ -1,54 +1,95 @@
+/* ============================================================================
+   FINANCE HUB - Main Stylesheet
+   Catppuccin Theme Integration
+   ============================================================================ */
+
+@import './styles/catppuccin.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom base styles */
+/* ============================================================================
+   BASE LAYER - Foundation styles
+   ============================================================================ */
 @layer base {
+  /* Smooth scrolling */
   html {
     @apply scroll-smooth;
   }
 
+  /* Body with font features */
   body {
-    @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
-  /* Improve focus visibility */
+  /* Focus states */
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-primary-500;
+    outline: 2px solid rgb(var(--ctp-blue));
+    outline-offset: 2px;
   }
 
-  /* Remove default focus ring */
   :focus:not(:focus-visible) {
-    @apply outline-none;
+    outline: none;
   }
 
-  /* Custom scrollbar */
+  /* Selection */
+  ::selection {
+    background-color: rgb(var(--ctp-blue) / 0.3);
+    color: rgb(var(--ctp-text));
+  }
+
+  /* Scrollbar styling */
   ::-webkit-scrollbar {
-    @apply w-2 h-2;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+    background-color: rgb(var(--color-scrollbar));
+    border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400 dark:bg-gray-500;
+    background-color: rgb(var(--color-scrollbar-hover));
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--color-scrollbar)) transparent;
   }
 }
 
-/* Custom component styles */
+/* ============================================================================
+   COMPONENTS LAYER - Reusable UI components
+   ============================================================================ */
 @layer components {
-  /* Card styles */
+  /* ----------------------------------------------------------------------------
+     Cards
+     ---------------------------------------------------------------------------- */
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-xl shadow-soft p-4;
+    background-color: rgb(var(--color-surface));
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
   }
 
-  /* Button base */
+  .card-hover {
+    @apply card transition-all duration-200;
+  }
+
+  .card-hover:hover {
+    background-color: rgb(var(--color-surface-hover));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Buttons
+     ---------------------------------------------------------------------------- */
   .btn {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium
            transition-all duration-200 focus:outline-none focus-visible:ring-2
@@ -56,75 +97,442 @@
   }
 
   .btn-primary {
-    @apply btn bg-primary-600 text-white hover:bg-primary-700
-           focus-visible:ring-primary-500;
+    @apply btn;
+    background-color: rgb(var(--ctp-blue));
+    color: rgb(var(--ctp-crust));
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: rgb(var(--ctp-sapphire));
+  }
+
+  .btn-primary:focus-visible {
+    --tw-ring-color: rgb(var(--ctp-blue));
   }
 
   .btn-secondary {
-    @apply btn bg-gray-100 text-gray-700 hover:bg-gray-200
-           dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600
-           focus-visible:ring-gray-500;
+    @apply btn;
+    background-color: rgb(var(--color-surface));
+    color: rgb(var(--color-text));
+    border: 1px solid rgb(var(--color-border));
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: rgb(var(--color-surface-hover));
   }
 
   .btn-ghost {
-    @apply btn bg-transparent text-gray-600 hover:bg-gray-100
-           dark:text-gray-400 dark:hover:bg-gray-800
-           focus-visible:ring-gray-500;
+    @apply btn;
+    background-color: transparent;
+    color: rgb(var(--color-text-secondary));
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background-color: rgb(var(--color-surface));
+    color: rgb(var(--color-text));
   }
 
   .btn-danger {
-    @apply btn bg-danger-600 text-white hover:bg-danger-700
-           focus-visible:ring-danger-500;
+    @apply btn;
+    background-color: rgb(var(--ctp-red));
+    color: rgb(var(--ctp-crust));
   }
 
-  /* Input base */
+  .btn-danger:hover:not(:disabled) {
+    background-color: rgb(var(--ctp-maroon));
+  }
+
+  .btn-success {
+    @apply btn;
+    background-color: rgb(var(--ctp-green));
+    color: rgb(var(--ctp-crust));
+  }
+
+  .btn-success:hover:not(:disabled) {
+    background-color: rgb(var(--ctp-teal));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Inputs
+     ---------------------------------------------------------------------------- */
   .input {
-    @apply w-full px-3 py-2 rounded-lg border border-gray-300
-           bg-white dark:bg-gray-800 dark:border-gray-600
-           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
-           disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-700
-           placeholder:text-gray-400 dark:placeholder:text-gray-500;
+    @apply w-full px-3 py-2 rounded-lg;
+    background-color: rgb(var(--color-surface));
+    border: 1px solid rgb(var(--color-border));
+    color: rgb(var(--color-text));
   }
 
-  /* Label */
+  .input::placeholder {
+    color: rgb(var(--color-text-muted));
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: rgb(var(--ctp-blue));
+    box-shadow: 0 0 0 2px rgb(var(--ctp-blue) / 0.2);
+  }
+
+  .input:disabled {
+    opacity: 0.5;
+    background-color: rgb(var(--color-surface-hover));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Labels
+     ---------------------------------------------------------------------------- */
   .label {
-    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+    @apply block text-sm font-medium mb-1;
+    color: rgb(var(--color-text-secondary));
   }
 
-  /* Error text */
-  .error-text {
-    @apply text-sm text-danger-600 dark:text-danger-400 mt-1;
-  }
-
-  /* Link */
-  .link {
-    @apply text-primary-600 hover:text-primary-700 dark:text-primary-400
-           dark:hover:text-primary-300 underline-offset-2 hover:underline;
-  }
-
-  /* Badge */
+  /* ----------------------------------------------------------------------------
+     Badges
+     ---------------------------------------------------------------------------- */
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
+  .badge-primary {
+    @apply badge;
+    background-color: rgb(var(--ctp-blue) / 0.2);
+    color: rgb(var(--ctp-blue));
+  }
+
   .badge-success {
-    @apply badge bg-success-100 text-success-700 dark:bg-success-900 dark:text-success-300;
+    @apply badge;
+    background-color: rgb(var(--ctp-green) / 0.2);
+    color: rgb(var(--ctp-green));
   }
 
   .badge-warning {
-    @apply badge bg-warning-100 text-warning-700 dark:bg-warning-900 dark:text-warning-300;
+    @apply badge;
+    background-color: rgb(var(--ctp-yellow) / 0.2);
+    color: rgb(var(--ctp-yellow));
   }
 
   .badge-danger {
-    @apply badge bg-danger-100 text-danger-700 dark:bg-danger-900 dark:text-danger-300;
+    @apply badge;
+    background-color: rgb(var(--ctp-red) / 0.2);
+    color: rgb(var(--ctp-red));
   }
 
   .badge-info {
-    @apply badge bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300;
+    @apply badge;
+    background-color: rgb(var(--ctp-sky) / 0.2);
+    color: rgb(var(--ctp-sky));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Accounting Badges (Income/Expense)
+     ---------------------------------------------------------------------------- */
+  .badge-income {
+    @apply badge;
+    background-color: rgb(var(--color-income) / 0.15);
+    color: rgb(var(--color-income));
+  }
+
+  .badge-expense {
+    @apply badge;
+    background-color: rgb(var(--color-expense) / 0.15);
+    color: rgb(var(--color-expense));
+  }
+
+  .badge-transfer {
+    @apply badge;
+    background-color: rgb(var(--color-transfer) / 0.15);
+    color: rgb(var(--color-transfer));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Links
+     ---------------------------------------------------------------------------- */
+  .link {
+    color: rgb(var(--ctp-blue));
+    text-decoration: none;
+    @apply underline-offset-2;
+  }
+
+  .link:hover {
+    color: rgb(var(--ctp-sapphire));
+    text-decoration: underline;
+  }
+
+  /* ----------------------------------------------------------------------------
+     Error/Help Text
+     ---------------------------------------------------------------------------- */
+  .error-text {
+    @apply text-sm mt-1;
+    color: rgb(var(--ctp-red));
+  }
+
+  .help-text {
+    @apply text-sm mt-1;
+    color: rgb(var(--color-text-muted));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Accounting Amount Display
+     ---------------------------------------------------------------------------- */
+  .amount-positive {
+    color: rgb(var(--ctp-green));
+    font-weight: 500;
+  }
+
+  .amount-negative {
+    color: rgb(var(--ctp-red));
+    font-weight: 500;
+  }
+
+  .amount-neutral {
+    color: rgb(var(--color-text));
+    font-weight: 500;
+  }
+
+  /* ----------------------------------------------------------------------------
+     Transaction Type Indicators
+     ---------------------------------------------------------------------------- */
+  .tx-income {
+    border-left: 3px solid rgb(var(--ctp-green));
+  }
+
+  .tx-expense {
+    border-left: 3px solid rgb(var(--ctp-red));
+  }
+
+  .tx-transfer {
+    border-left: 3px solid rgb(var(--ctp-blue));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Stat Cards (Dashboard)
+     ---------------------------------------------------------------------------- */
+  .stat-card {
+    @apply card;
+  }
+
+  .stat-card-income {
+    @apply stat-card;
+    border-top: 3px solid rgb(var(--ctp-green));
+  }
+
+  .stat-card-expense {
+    @apply stat-card;
+    border-top: 3px solid rgb(var(--ctp-red));
+  }
+
+  .stat-card-balance {
+    @apply stat-card;
+    border-top: 3px solid rgb(var(--ctp-teal));
+  }
+
+  .stat-card-savings {
+    @apply stat-card;
+    border-top: 3px solid rgb(var(--ctp-mauve));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Budget Progress
+     ---------------------------------------------------------------------------- */
+  .budget-progress {
+    @apply h-2 rounded-full overflow-hidden;
+    background-color: rgb(var(--color-surface-hover));
+  }
+
+  .budget-progress-bar {
+    @apply h-full rounded-full transition-all duration-300;
+  }
+
+  .budget-progress-ok {
+    background-color: rgb(var(--ctp-green));
+  }
+
+  .budget-progress-warning {
+    background-color: rgb(var(--ctp-yellow));
+  }
+
+  .budget-progress-exceeded {
+    background-color: rgb(var(--ctp-red));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Tables
+     ---------------------------------------------------------------------------- */
+  .table-container {
+    @apply overflow-x-auto rounded-lg;
+    background-color: rgb(var(--color-surface));
+  }
+
+  .table {
+    @apply w-full text-sm;
+  }
+
+  .table th {
+    @apply px-4 py-3 text-left font-medium;
+    color: rgb(var(--color-text-secondary));
+    background-color: rgb(var(--color-surface-hover));
+    border-bottom: 1px solid rgb(var(--color-border));
+  }
+
+  .table td {
+    @apply px-4 py-3;
+    border-bottom: 1px solid rgb(var(--color-border));
+  }
+
+  .table tbody tr:hover {
+    background-color: rgb(var(--color-surface-hover));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Modals/Dialogs
+     ---------------------------------------------------------------------------- */
+  .modal-backdrop {
+    background-color: rgb(var(--ctp-crust) / 0.8);
+  }
+
+  .modal-content {
+    @apply rounded-xl p-6;
+    background-color: rgb(var(--color-surface));
+    border: 1px solid rgb(var(--color-border));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Dropdowns/Menus
+     ---------------------------------------------------------------------------- */
+  .dropdown {
+    @apply rounded-lg py-1;
+    background-color: rgb(var(--color-surface));
+    border: 1px solid rgb(var(--color-border));
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  }
+
+  .dropdown-item {
+    @apply px-4 py-2 text-sm cursor-pointer;
+    color: rgb(var(--color-text));
+  }
+
+  .dropdown-item:hover {
+    background-color: rgb(var(--color-surface-hover));
+  }
+
+  .dropdown-item-danger {
+    @apply dropdown-item;
+    color: rgb(var(--ctp-red));
+  }
+
+  .dropdown-item-danger:hover {
+    background-color: rgb(var(--ctp-red) / 0.1);
+  }
+
+  /* ----------------------------------------------------------------------------
+     Tabs
+     ---------------------------------------------------------------------------- */
+  .tabs {
+    @apply flex gap-1 p-1 rounded-lg;
+    background-color: rgb(var(--color-surface));
+  }
+
+  .tab {
+    @apply px-4 py-2 rounded-md text-sm font-medium transition-colors;
+    color: rgb(var(--color-text-secondary));
+  }
+
+  .tab:hover:not(.tab-active) {
+    color: rgb(var(--color-text));
+    background-color: rgb(var(--color-surface-hover));
+  }
+
+  .tab-active {
+    background-color: rgb(var(--ctp-blue));
+    color: rgb(var(--ctp-crust));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Tooltips
+     ---------------------------------------------------------------------------- */
+  .tooltip {
+    @apply px-2 py-1 text-xs rounded;
+    background-color: rgb(var(--ctp-crust));
+    color: rgb(var(--ctp-text));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Navigation
+     ---------------------------------------------------------------------------- */
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors;
+    color: rgb(var(--color-text-secondary));
+  }
+
+  .nav-item:hover:not(.nav-item-active) {
+    background-color: rgb(var(--color-surface));
+    color: rgb(var(--color-text));
+  }
+
+  .nav-item-active {
+    background-color: rgb(var(--ctp-blue) / 0.2);
+    color: rgb(var(--ctp-blue));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Alerts/Notifications
+     ---------------------------------------------------------------------------- */
+  .alert {
+    @apply p-4 rounded-lg flex items-start gap-3;
+  }
+
+  .alert-info {
+    @apply alert;
+    background-color: rgb(var(--ctp-sky) / 0.15);
+    border-left: 4px solid rgb(var(--ctp-sky));
+    color: rgb(var(--ctp-sky));
+  }
+
+  .alert-success {
+    @apply alert;
+    background-color: rgb(var(--ctp-green) / 0.15);
+    border-left: 4px solid rgb(var(--ctp-green));
+    color: rgb(var(--ctp-green));
+  }
+
+  .alert-warning {
+    @apply alert;
+    background-color: rgb(var(--ctp-yellow) / 0.15);
+    border-left: 4px solid rgb(var(--ctp-yellow));
+    color: rgb(var(--ctp-yellow));
+  }
+
+  .alert-danger {
+    @apply alert;
+    background-color: rgb(var(--ctp-red) / 0.15);
+    border-left: 4px solid rgb(var(--ctp-red));
+    color: rgb(var(--ctp-red));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Skeleton Loading
+     ---------------------------------------------------------------------------- */
+  .skeleton {
+    @apply animate-pulse rounded;
+    background-color: rgb(var(--color-surface-hover));
+  }
+
+  /* ----------------------------------------------------------------------------
+     Dividers
+     ---------------------------------------------------------------------------- */
+  .divider {
+    @apply border-t;
+    border-color: rgb(var(--color-border));
+  }
+
+  .divider-vertical {
+    @apply border-l h-full;
+    border-color: rgb(var(--color-border));
   }
 }
 
-/* Utility classes */
+/* ============================================================================
+   UTILITIES LAYER - Helper classes
+   ============================================================================ */
 @layer utilities {
   /* Safe area padding for PWA */
   .safe-area-inset-top {
@@ -150,8 +558,56 @@
     display: none;
   }
 
-  /* Gradient text */
+  /* Gradient text using Catppuccin colors */
   .gradient-text {
-    @apply bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, rgb(var(--ctp-blue)), rgb(var(--ctp-mauve)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
+
+  /* Accounting color utilities */
+  .text-income {
+    color: rgb(var(--color-income));
+  }
+
+  .text-expense {
+    color: rgb(var(--color-expense));
+  }
+
+  .text-transfer {
+    color: rgb(var(--color-transfer));
+  }
+
+  .text-balance {
+    color: rgb(var(--color-balance));
+  }
+
+  .bg-income {
+    background-color: rgb(var(--color-income) / 0.15);
+  }
+
+  .bg-expense {
+    background-color: rgb(var(--color-expense) / 0.15);
+  }
+
+  .bg-transfer {
+    background-color: rgb(var(--color-transfer) / 0.15);
+  }
+}
+
+/* ============================================================================
+   CHART COLORS - For Recharts and other chart libraries
+   ============================================================================ */
+:root {
+  --chart-1: rgb(var(--ctp-blue));
+  --chart-2: rgb(var(--ctp-green));
+  --chart-3: rgb(var(--ctp-peach));
+  --chart-4: rgb(var(--ctp-mauve));
+  --chart-5: rgb(var(--ctp-teal));
+  --chart-6: rgb(var(--ctp-pink));
+  --chart-7: rgb(var(--ctp-yellow));
+  --chart-8: rgb(var(--ctp-sapphire));
+  --chart-9: rgb(var(--ctp-red));
+  --chart-10: rgb(var(--ctp-lavender));
 }

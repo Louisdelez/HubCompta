@@ -1,5 +1,6 @@
 // ============================================================================
 // BACKUP & RESTORE CARD - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useRef } from 'react';
@@ -138,11 +139,11 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-ctp-base rounded-xl border border-ctp-surface1 p-6">
       <h3 className="text-lg font-semibold mb-4">Sauvegarde & Restauration</h3>
 
       {error && (
-        <div className="mb-4 p-3 bg-danger-50 dark:bg-danger-900/20 rounded-lg text-danger-600 dark:text-danger-400 text-sm">
+        <div className="mb-4 p-3 bg-ctp-red/10 border border-ctp-red/30 rounded-lg text-ctp-red text-sm">
           {error}
         </div>
       )}
@@ -150,14 +151,14 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
       {restoreStep === 'idle' && (
         <div className="space-y-4">
           {/* Backup */}
-          <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <div className="p-4 border border-ctp-surface1 rounded-lg">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
-                <HardDrive className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+              <div className="p-3 bg-ctp-blue/20 rounded-lg">
+                <HardDrive className="w-6 h-6 text-ctp-blue" />
               </div>
               <div className="flex-1">
                 <h4 className="font-medium">Créer une sauvegarde</h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-ctp-subtext0 mt-1">
                   Téléchargez une copie complète de vos données au format JSON.
                   Inclut comptes, transactions, catégories, budgets et règles.
                 </p>
@@ -169,14 +170,14 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
           </div>
 
           {/* Restore */}
-          <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <div className="p-4 border border-ctp-surface1 rounded-lg">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-warning-100 dark:bg-warning-900/30 rounded-lg">
-                <Download className="w-6 h-6 text-warning-600 dark:text-warning-400" />
+              <div className="p-3 bg-ctp-yellow/20 rounded-lg">
+                <Download className="w-6 h-6 text-ctp-yellow" />
               </div>
               <div className="flex-1">
                 <h4 className="font-medium">Restaurer depuis une sauvegarde</h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-ctp-subtext0 mt-1">
                   Importez une sauvegarde précédente pour restaurer vos données.
                   Attention: cette action peut modifier vos données existantes.
                 </p>
@@ -201,46 +202,46 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
 
       {restoreStep === 'preview' && backupPreview && (
         <div className="space-y-4">
-          <div className="p-4 bg-warning-50 dark:bg-warning-900/20 rounded-lg">
-            <h4 className="font-medium text-warning-700 dark:text-warning-300 mb-2">
+          <div className="p-4 bg-ctp-yellow/10 border border-ctp-yellow/30 rounded-lg">
+            <h4 className="font-medium text-ctp-yellow mb-2">
               Aperçu de la sauvegarde
             </h4>
             <div className="space-y-2 text-sm">
               <p>
-                <span className="text-gray-500 dark:text-gray-400">Date:</span>{' '}
+                <span className="text-ctp-subtext0">Date:</span>{' '}
                 {new Date(backupPreview.exportedAt).toLocaleString('fr-FR')}
               </p>
               <p>
-                <span className="text-gray-500 dark:text-gray-400">Workspace:</span>{' '}
+                <span className="text-ctp-subtext0">Workspace:</span>{' '}
                 {backupPreview.workspace.name}
               </p>
               <p>
-                <span className="text-gray-500 dark:text-gray-400">Version:</span>{' '}
+                <span className="text-ctp-subtext0">Version:</span>{' '}
                 {backupPreview.version}
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg text-center">
+            <div className="p-3 bg-ctp-surface0 rounded-lg text-center">
               <div className="text-2xl font-bold">{backupPreview.accounts.length}</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Comptes</div>
+              <div className="text-sm text-ctp-subtext0">Comptes</div>
             </div>
-            <div className="p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg text-center">
+            <div className="p-3 bg-ctp-surface0 rounded-lg text-center">
               <div className="text-2xl font-bold">{backupPreview.transactions.length}</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Transactions</div>
+              <div className="text-sm text-ctp-subtext0">Transactions</div>
             </div>
-            <div className="p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg text-center">
+            <div className="p-3 bg-ctp-surface0 rounded-lg text-center">
               <div className="text-2xl font-bold">{backupPreview.categories.length}</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Catégories</div>
+              <div className="text-sm text-ctp-subtext0">Catégories</div>
             </div>
-            <div className="p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg text-center">
+            <div className="p-3 bg-ctp-surface0 rounded-lg text-center">
               <div className="text-2xl font-bold">{backupPreview.budgets.length}</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Budgets</div>
+              <div className="text-sm text-ctp-subtext0">Budgets</div>
             </div>
           </div>
 
-          <div className="p-4 bg-danger-50 dark:bg-danger-900/20 rounded-lg text-sm text-danger-700 dark:text-danger-300">
+          <div className="p-4 bg-ctp-red/10 border border-ctp-red/30 rounded-lg text-sm text-ctp-red">
             <strong>Attention:</strong> La restauration peut remplacer ou fusionner
             vos données existantes. Assurez-vous de créer une sauvegarde de vos
             données actuelles avant de continuer.
@@ -263,8 +264,8 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
 
       {restoreStep === 'restoring' && (
         <div className="text-center py-8">
-          <div className="animate-spin w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Restauration en cours...</p>
+          <div className="animate-spin w-8 h-8 border-2 border-ctp-blue border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-ctp-subtext0">Restauration en cours...</p>
         </div>
       )}
     </div>

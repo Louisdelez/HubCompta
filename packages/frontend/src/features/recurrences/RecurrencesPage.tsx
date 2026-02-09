@@ -1,6 +1,7 @@
 // ============================================================================
 // RECURRENCES PAGE - Finance Hub
 // Recurring transactions management
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -157,7 +158,7 @@ export function RecurrencesPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-400">Selectionnez un espace de travail</div>
+      <div className="p-6 text-center text-ctp-subtext0">Selectionnez un espace de travail</div>
     );
   }
 
@@ -165,10 +166,10 @@ export function RecurrencesPage() {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
+          <div className="h-8 bg-ctp-surface1 rounded w-1/4" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-48 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+              <div key={i} className="h-48 bg-ctp-surface1 rounded-xl" />
             ))}
           </div>
         </div>
@@ -182,7 +183,7 @@ export function RecurrencesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Transactions recurrentes</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-ctp-subtext0">
             Automatisez vos revenus et depenses regulieres
           </p>
         </div>
@@ -198,15 +199,15 @@ export function RecurrencesPage() {
             Prevision pour {formatMonth(forecastMonth)}
           </h2>
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-success-50 dark:bg-success-900/20 rounded-lg">
-              <p className="text-sm text-success-600 dark:text-success-400">Revenus prevus</p>
-              <p className="text-2xl font-bold text-success-600">
+            <div className="text-center p-4 bg-ctp-green/10 rounded-lg border-l-4 border-l-ctp-green">
+              <p className="text-sm text-ctp-green">Revenus prevus</p>
+              <p className="text-2xl font-bold text-ctp-green">
                 +{formatCurrency(forecast.income)}
               </p>
             </div>
-            <div className="text-center p-4 bg-danger-50 dark:bg-danger-900/20 rounded-lg">
-              <p className="text-sm text-danger-600 dark:text-danger-400">Depenses prevues</p>
-              <p className="text-2xl font-bold text-danger-600">
+            <div className="text-center p-4 bg-ctp-red/10 rounded-lg border-l-4 border-l-ctp-red">
+              <p className="text-sm text-ctp-red">Depenses prevues</p>
+              <p className="text-2xl font-bold text-ctp-red">
                 -{formatCurrency(forecast.expense)}
               </p>
             </div>
@@ -214,15 +215,15 @@ export function RecurrencesPage() {
               className={clsx(
                 'text-center p-4 rounded-lg',
                 forecast.net >= 0
-                  ? 'bg-success-50 dark:bg-success-900/20'
-                  : 'bg-danger-50 dark:bg-danger-900/20'
+                  ? 'bg-ctp-green/10'
+                  : 'bg-ctp-red/10'
               )}
             >
-              <p className="text-sm text-gray-600 dark:text-gray-400">Solde net</p>
+              <p className="text-sm text-ctp-subtext0">Solde net</p>
               <p
                 className={clsx(
                   'text-2xl font-bold',
-                  forecast.net >= 0 ? 'text-success-600' : 'text-danger-600'
+                  forecast.net >= 0 ? 'text-ctp-green' : 'text-ctp-red'
                 )}
               >
                 {forecast.net >= 0 ? '+' : ''}
@@ -249,8 +250,8 @@ export function RecurrencesPage() {
               className={clsx(
                 'px-4 py-2 rounded-full text-sm font-medium transition-colors',
                 filter === f.value
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-ctp-blue text-ctp-base'
+                  : 'bg-ctp-surface1 text-ctp-subtext1 hover:bg-ctp-surface2'
               )}
             >
               {f.label}
@@ -265,9 +266,9 @@ export function RecurrencesPage() {
           {incomeRecurrences.length > 0 && (filter === 'all' || filter === 'income' || filter === 'active' || filter === 'paused') && (
             <section>
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <ArrowUpCircle className="w-6 h-6 text-success-500" />
+                <ArrowUpCircle className="w-6 h-6 text-ctp-green" />
                 Revenus recurrents
-                <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                <span className="text-sm font-normal text-ctp-subtext0">
                   ({incomeRecurrences.length})
                 </span>
               </h2>
@@ -289,9 +290,9 @@ export function RecurrencesPage() {
           {expenseRecurrences.length > 0 && (filter === 'all' || filter === 'expense' || filter === 'active' || filter === 'paused') && (
             <section>
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <ArrowDownCircle className="w-6 h-6 text-danger-500" />
+                <ArrowDownCircle className="w-6 h-6 text-ctp-red" />
                 Depenses recurrentes
-                <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                <span className="text-sm font-normal text-ctp-subtext0">
                   ({expenseRecurrences.length})
                 </span>
               </h2>
@@ -312,15 +313,15 @@ export function RecurrencesPage() {
           {/* Empty filter state */}
           {filteredRecurrences.length === 0 && (
             <div className="card text-center py-12">
-              <p className="text-gray-500 dark:text-gray-400">Aucune recurrence ne correspond aux filtres</p>
+              <p className="text-ctp-subtext0">Aucune recurrence ne correspond aux filtres</p>
             </div>
           )}
         </div>
       ) : (
         <div className="card text-center py-12">
-          <RefreshCw className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <RefreshCw className="w-12 h-12 mx-auto mb-4 text-ctp-overlay1" />
           <h2 className="text-xl font-bold mb-2">Aucune transaction recurrente</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-ctp-subtext0 mb-6">
             Creez des recurrences pour automatiser vos revenus et depenses regulieres
             <br />
             (loyer, abonnements, salaire, etc.)
@@ -335,23 +336,23 @@ export function RecurrencesPage() {
       {recurrences.length === 0 && (
         <div className="mt-8 grid md:grid-cols-3 gap-6">
           <div className="card text-center">
-            <Settings className="w-8 h-8 mx-auto mb-2 text-primary-500" />
+            <Settings className="w-8 h-8 mx-auto mb-2 text-ctp-blue" />
             <h3 className="font-semibold mb-1">Configurez</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-ctp-subtext0">
               Definissez le montant, la frequence et le compte
             </p>
           </div>
           <div className="card text-center">
-            <Cog className="w-8 h-8 mx-auto mb-2 text-primary-500" />
+            <Cog className="w-8 h-8 mx-auto mb-2 text-ctp-blue" />
             <h3 className="font-semibold mb-1">Automatisez</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-ctp-subtext0">
               Les transactions sont creees automatiquement
             </p>
           </div>
           <div className="card text-center">
-            <CheckCircle className="w-8 h-8 mx-auto mb-2 text-primary-500" />
+            <CheckCircle className="w-8 h-8 mx-auto mb-2 text-ctp-blue" />
             <h3 className="font-semibold mb-1">Controlez</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-ctp-subtext0">
               Pausez, modifiez ou passez des occurrences
             </p>
           </div>

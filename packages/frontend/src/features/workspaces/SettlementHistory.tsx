@@ -1,6 +1,7 @@
 // ============================================================================
 // SETTLEMENT HISTORY - Finance Hub
 // Display historical settlement data
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useQuery } from '@tanstack/react-query';
@@ -53,10 +54,10 @@ export function SettlementHistory({ currency = 'EUR' }: SettlementHistoryProps) 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+        <div className="h-48 bg-ctp-surface1 rounded-lg animate-pulse" />
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+            <div key={i} className="h-16 bg-ctp-surface1 rounded-lg animate-pulse" />
           ))}
         </div>
       </div>
@@ -66,8 +67,8 @@ export function SettlementHistory({ currency = 'EUR' }: SettlementHistoryProps) 
   if (!history || history.length === 0) {
     return (
       <div className="text-center py-12">
-        <Clock className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-        <p className="text-gray-500 dark:text-gray-400">Aucun historique disponible</p>
+        <Clock className="h-12 w-12 text-ctp-overlay1 mx-auto mb-3" />
+        <p className="text-ctp-subtext0">Aucun historique disponible</p>
       </div>
     );
   }
@@ -86,22 +87,22 @@ export function SettlementHistory({ currency = 'EUR' }: SettlementHistoryProps) 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Total 6 mois</p>
+          <p className="text-sm text-ctp-subtext0">Total 6 mois</p>
           <p className="text-2xl font-bold">{formatCurrency(totalAll, currency)}</p>
         </div>
         <div className="card text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Moyenne mensuelle</p>
+          <p className="text-sm text-ctp-subtext0">Moyenne mensuelle</p>
           <p className="text-2xl font-bold">{formatCurrency(average, currency)}</p>
         </div>
         <div className="card text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Tendance</p>
+          <p className="text-sm text-ctp-subtext0">Tendance</p>
           <div className="flex items-center justify-center gap-2">
             {trend >= 0 ? (
-              <TrendingUp className="h-5 w-5 text-red-500" />
+              <TrendingUp className="h-5 w-5 text-ctp-red" />
             ) : (
-              <TrendingDown className="h-5 w-5 text-green-500" />
+              <TrendingDown className="h-5 w-5 text-ctp-green" />
             )}
-            <p className={`text-2xl font-bold ${trend >= 0 ? 'text-red-500' : 'text-green-500'}`}>
+            <p className={`text-2xl font-bold ${trend >= 0 ? 'text-ctp-red' : 'text-ctp-green'}`}>
               {trend >= 0 ? '+' : ''}{trend.toFixed(1)}%
             </p>
           </div>
@@ -123,19 +124,19 @@ export function SettlementHistory({ currency = 'EUR' }: SettlementHistoryProps) 
               key={entry.period}
               className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
                 index === 0
-                  ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800'
-                  : 'bg-gray-50 dark:bg-gray-700/50'
+                  ? 'bg-ctp-blue/10 border border-ctp-blue'
+                  : 'bg-ctp-surface0'
               }`}
             >
               <div className="flex items-center gap-3">
                 {entry.settled ? (
-                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <CheckCircle className="h-5 w-5 text-ctp-green" />
                 ) : (
-                  <Clock className="h-5 w-5 text-yellow-500" />
+                  <Clock className="h-5 w-5 text-ctp-yellow" />
                 )}
                 <div>
                   <p className="font-medium capitalize">{entry.period}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-ctp-subtext0">
                     {entry.settled ? 'Reglement effectue' : 'En cours'}
                   </p>
                 </div>
@@ -143,13 +144,13 @@ export function SettlementHistory({ currency = 'EUR' }: SettlementHistoryProps) 
               <div className="text-right">
                 <p className="font-semibold">{formatCurrency(entry.totalExpenses, currency)}</p>
                 {index > 0 && history[index - 1] && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-ctp-subtext0">
                     {(() => {
                       const prev = history[index - 1];
                       if (!prev || prev.totalExpenses === 0) return '';
                       const diff = ((entry.totalExpenses - prev.totalExpenses) / prev.totalExpenses) * 100;
                       return (
-                        <span className={diff >= 0 ? 'text-red-500' : 'text-green-500'}>
+                        <span className={diff >= 0 ? 'text-ctp-red' : 'text-ctp-green'}>
                           {diff >= 0 ? '+' : ''}{diff.toFixed(1)}% vs mois suivant
                         </span>
                       );

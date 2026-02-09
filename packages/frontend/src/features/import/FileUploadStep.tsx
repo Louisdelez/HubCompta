@@ -1,5 +1,6 @@
 // ============================================================================
 // FILE UPLOAD STEP - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useCallback } from 'react';
@@ -152,14 +153,14 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold mb-2">Sélectionnez un fichier CSV</h2>
-        <p className="text-gray-600 dark:text-gray-400 text-sm">
+        <p className="text-ctp-subtext0 text-sm">
           Formats supportés : relevés de Boursorama, Crédit Agricole, BNP, Société Générale,
           La Banque Postale, N26, Revolut et autres formats CSV standard.
         </p>
       </div>
 
       {error && (
-        <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm">
+        <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red border border-ctp-red/30 text-sm">
           {error}
         </div>
       )}
@@ -192,31 +193,31 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
         className={clsx(
           'border-2 border-dashed rounded-xl p-8 text-center transition-colors',
           isDragging
-            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+            ? 'border-ctp-blue bg-ctp-blue/10'
+            : 'border-ctp-surface1 hover:border-ctp-blue bg-ctp-surface0'
         )}
       >
         {selectedFile ? (
           <div>
-            <FileText className="w-10 h-10 mx-auto mb-2 text-primary-500" />
+            <FileText className="w-10 h-10 mx-auto mb-2 text-ctp-blue" />
             <p className="font-medium">{selectedFile.name}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-sm text-ctp-subtext0 mt-1">
               {(selectedFile.size / 1024).toFixed(1)} Ko
             </p>
             <button
               onClick={() => setSelectedFile(null)}
-              className="text-sm text-danger-600 mt-2 hover:underline"
+              className="text-sm text-ctp-red mt-2 hover:underline"
             >
               Supprimer
             </button>
           </div>
         ) : (
           <div>
-            <Upload className="w-10 h-10 mx-auto mb-2 text-gray-400" />
+            <Upload className="w-10 h-10 mx-auto mb-2 text-ctp-overlay1" />
             <p className="font-medium mb-1">
               Glissez-déposez votre fichier CSV ici
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">ou</p>
+            <p className="text-sm text-ctp-subtext0 mb-4">ou</p>
             <label className="btn-secondary cursor-pointer">
               Parcourir
               <input

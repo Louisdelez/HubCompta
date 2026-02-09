@@ -1,6 +1,7 @@
 // ============================================================================
 // ALERT SETTINGS COMPONENT - Finance Hub
 // Manage alert rules
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -164,26 +165,26 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4">
-        <div className="px-6 py-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Nouvelle alerte</h2>
+      <div className="bg-ctp-base rounded-lg shadow-xl w-full max-w-md mx-4">
+        <div className="px-6 py-4 border-b border-ctp-surface1">
+          <h2 className="text-lg font-semibold text-ctp-text">Nouvelle alerte</h2>
         </div>
 
         <div className="p-6 space-y-4">
           {/* Alert type selection */}
           {!alertType ? (
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type d'alerte</label>
+              <label className="block text-sm font-medium text-ctp-subtext1">Type d'alerte</label>
               {Object.entries(alertTypeConfig).map(([type, config]) => (
                 <button
                   key={type}
                   onClick={() => setAlertType(type)}
-                  className="w-full p-3 text-left border rounded-lg hover:border-blue-500 hover:bg-blue-50 flex items-center gap-3"
+                  className="w-full p-3 text-left border border-ctp-surface1 rounded-lg hover:border-ctp-blue hover:bg-ctp-blue/10 flex items-center gap-3"
                 >
-                  <config.icon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                  <config.icon className="h-5 w-5 text-ctp-subtext0" />
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">{config.label}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{config.description}</p>
+                    <p className="font-medium text-ctp-text">{config.label}</p>
+                    <p className="text-xs text-ctp-subtext0">{config.description}</p>
                   </div>
                 </button>
               ))}
@@ -194,11 +195,11 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
               {alertType === 'budget_threshold' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Budget</label>
+                    <label className="block text-sm font-medium text-ctp-subtext1 mb-1">Budget</label>
                     <select
                       value={budgetId}
                       onChange={(e) => setBudgetId(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-mantle text-ctp-text"
                     >
                       <option value="">Sélectionner un budget...</option>
                       {budgets?.map((b) => (
@@ -209,7 +210,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                       Seuil d'alerte (%)
                     </label>
                     <input
@@ -218,9 +219,9 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                       max="100"
                       value={thresholdPercent}
                       onChange={(e) => setThresholdPercent(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-mantle text-ctp-text"
                     />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-ctp-subtext0 mt-1">
                       Vous serez notifié quand le budget atteint ce pourcentage
                     </p>
                   </div>
@@ -231,11 +232,11 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
               {alertType === 'low_balance' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Compte</label>
+                    <label className="block text-sm font-medium text-ctp-subtext1 mb-1">Compte</label>
                     <select
                       value={accountId}
                       onChange={(e) => setAccountId(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-mantle text-ctp-text"
                     >
                       <option value="">Sélectionner un compte...</option>
                       {accounts?.map((a) => (
@@ -246,7 +247,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                       Seuil minimum (€)
                     </label>
                     <input
@@ -254,7 +255,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                       min="0"
                       value={balanceThreshold}
                       onChange={(e) => setBalanceThreshold(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-mantle text-ctp-text"
                       placeholder="500"
                     />
                   </div>
@@ -265,7 +266,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
               {(alertType === 'price_above' || alertType === 'price_below') && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                       Direction
                     </label>
                     <div className="flex gap-2">
@@ -273,8 +274,8 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                         type="button"
                         onClick={() => setPriceDirection('above')}
                         className={cn(
-                          'flex-1 px-3 py-2 border rounded-lg',
-                          priceDirection === 'above' && 'border-blue-500 bg-blue-50'
+                          'flex-1 px-3 py-2 border border-ctp-surface1 rounded-lg',
+                          priceDirection === 'above' && 'border-ctp-blue bg-ctp-blue/10'
                         )}
                       >
                         Au-dessus de
@@ -283,8 +284,8 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                         type="button"
                         onClick={() => setPriceDirection('below')}
                         className={cn(
-                          'flex-1 px-3 py-2 border rounded-lg',
-                          priceDirection === 'below' && 'border-blue-500 bg-blue-50'
+                          'flex-1 px-3 py-2 border border-ctp-surface1 rounded-lg',
+                          priceDirection === 'below' && 'border-ctp-blue bg-ctp-blue/10'
                         )}
                       >
                         En-dessous de
@@ -292,7 +293,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
                       Prix cible (€)
                     </label>
                     <input
@@ -301,11 +302,11 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
                       step="0.01"
                       value={targetPrice}
                       onChange={(e) => setTargetPrice(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-mantle text-ctp-text"
                       placeholder="100.00"
                     />
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-ctp-subtext0">
                     Note: Vous pouvez créer cette alerte depuis la page de votre portefeuille
                   </p>
                 </>
@@ -314,13 +315,13 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
           )}
         </div>
 
-        <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50 dark:bg-gray-900">
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-ctp-surface1 bg-ctp-mantle">
           <button
             onClick={() => {
               setAlertType('');
               onClose();
             }}
-            className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900"
+            className="px-4 py-2 text-ctp-subtext1 bg-ctp-surface0 border border-ctp-surface1 rounded-lg hover:bg-ctp-surface1"
           >
             Annuler
           </button>
@@ -328,7 +329,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 bg-ctp-blue text-ctp-crust rounded-lg hover:bg-ctp-sapphire disabled:opacity-50 flex items-center gap-2"
             >
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               Créer l'alerte
@@ -381,9 +382,9 @@ export function AlertSettings() {
     const config = alertTypeConfig[type];
     if (config) {
       const Icon = config.icon;
-      return <Icon className="h-5 w-5 text-gray-500 dark:text-gray-400" />;
+      return <Icon className="h-5 w-5 text-ctp-subtext0" />;
     }
-    return <Bell className="h-5 w-5 text-gray-500 dark:text-gray-400" />;
+    return <Bell className="h-5 w-5 text-ctp-subtext0" />;
   };
 
   return (
@@ -391,12 +392,12 @@ export function AlertSettings() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Règles d'alerte</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Configurez des alertes automatiques</p>
+          <h2 className="text-lg font-semibold text-ctp-text">Règles d'alerte</h2>
+          <p className="text-sm text-ctp-subtext0">Configurez des alertes automatiques</p>
         </div>
         <button
           onClick={() => setShowCreateDialog(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          className="px-4 py-2 bg-ctp-blue text-ctp-crust rounded-lg hover:bg-ctp-sapphire flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           Nouvelle alerte
@@ -406,7 +407,7 @@ export function AlertSettings() {
       {/* Alert list */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-ctp-overlay1" />
         </div>
       ) : alertRules && alertRules.length > 0 ? (
         <div className="space-y-2">
@@ -414,17 +415,17 @@ export function AlertSettings() {
             <div
               key={rule.id}
               className={cn(
-                'flex items-center gap-4 p-4 bg-white border rounded-lg',
+                'flex items-center gap-4 p-4 bg-ctp-surface0 border border-ctp-surface1 rounded-lg',
                 !rule.isEnabled && 'opacity-60'
               )}
             >
               {/* Icon */}
-              <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">{getAlertIcon(rule.type)}</div>
+              <div className="p-2 bg-ctp-surface1 rounded-lg">{getAlertIcon(rule.type)}</div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 dark:text-white">{rule.name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="font-medium text-ctp-text">{rule.name}</p>
+                <p className="text-xs text-ctp-subtext0">
                   {alertTypeConfig[rule.type]?.label || rule.type}
                 </p>
               </div>
@@ -435,8 +436,8 @@ export function AlertSettings() {
                 className={cn(
                   'p-1.5 rounded-lg transition-colors',
                   rule.isEnabled
-                    ? 'text-blue-600 hover:bg-blue-50'
-                    : 'text-gray-400 hover:bg-gray-100'
+                    ? 'text-ctp-blue hover:bg-ctp-blue/10'
+                    : 'text-ctp-overlay1 hover:bg-ctp-surface1'
                 )}
               >
                 {rule.isEnabled ? (
@@ -453,7 +454,7 @@ export function AlertSettings() {
                     deleteMutation.mutate(rule.id);
                   }
                 }}
-                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                className="p-2 text-ctp-overlay1 hover:text-ctp-red hover:bg-ctp-red/10 rounded-lg"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -461,15 +462,15 @@ export function AlertSettings() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 border rounded-lg">
-          <Bell className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Aucune alerte configurée</h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
+        <div className="text-center py-12 bg-ctp-surface0 border border-ctp-surface1 rounded-lg">
+          <Bell className="h-12 w-12 mx-auto text-ctp-overlay0 mb-4" />
+          <h3 className="text-lg font-medium text-ctp-text mb-2">Aucune alerte configurée</h3>
+          <p className="text-ctp-subtext0 mb-4">
             Créez des alertes pour être notifié des événements importants.
           </p>
           <button
             onClick={() => setShowCreateDialog(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 inline-flex items-center gap-2"
+            className="px-4 py-2 bg-ctp-blue text-ctp-crust rounded-lg hover:bg-ctp-sapphire inline-flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
             Créer une alerte

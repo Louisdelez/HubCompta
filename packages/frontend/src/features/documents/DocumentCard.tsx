@@ -1,5 +1,6 @@
 // ============================================================================
 // DOCUMENT CARD - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useMutation } from '@tanstack/react-query';
@@ -56,12 +57,12 @@ function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
-function getFileIcon(mimeType: string): LucideIcon {
-  if (mimeType.startsWith('image/')) return Image;
-  if (mimeType === 'application/pdf') return BookOpen;
-  if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return Sheet;
-  if (mimeType === 'text/csv') return FileSpreadsheet;
-  return FileText;
+function getFileIcon(mimeType: string): { icon: LucideIcon; colorClass: string } {
+  if (mimeType.startsWith('image/')) return { icon: Image, colorClass: 'text-ctp-green' };
+  if (mimeType === 'application/pdf') return { icon: BookOpen, colorClass: 'text-ctp-red' };
+  if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return { icon: Sheet, colorClass: 'text-ctp-green' };
+  if (mimeType === 'text/csv') return { icon: FileSpreadsheet, colorClass: 'text-ctp-green' };
+  return { icon: FileText, colorClass: 'text-ctp-blue' };
 }
 
 function formatDate(dateStr: string): string {
@@ -125,40 +126,42 @@ export function DocumentCard({
     <div
       className={clsx(
         'card hover:shadow-md transition-shadow cursor-pointer',
-        document.status === 'inbox' && 'ring-2 ring-warning-300 dark:ring-warning-700'
+        document.status === 'inbox' && 'ring-2 ring-ctp-yellow',
+        document.status === 'linked' && 'bg-ctp-green/10 border-ctp-green/30',
+        document.status !== 'linked' && 'bg-ctp-surface0'
       )}
       onClick={onView}
     >
       {/* Header */}
       <div className="flex items-start gap-3 mb-3">
-        {(() => { const Icon = getFileIcon(document.mimeType); return <Icon className="w-8 h-8 text-gray-500 dark:text-gray-400" />; })()}
+        {(() => { const { icon: Icon, colorClass } = getFileIcon(document.mimeType); return <Icon className={clsx('w-8 h-8', colorClass)} />; })()}
         <div className="flex-1 min-w-0">
           <p className="font-medium truncate" title={document.filename}>
             {document.filename}
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-ctp-subtext0">
             {formatFileSize(document.size)} • {formatDate(document.createdAt)}
           </p>
         </div>
         {document.isVault && (
-          <span title="Document chiffré"><Lock className="w-5 h-5 text-gray-500 dark:text-gray-400" /></span>
+          <span title="Document chiffré"><Lock className="w-5 h-5 text-ctp-subtext0" /></span>
         )}
       </div>
 
       {/* Status Badge */}
       <div className="mb-3">
         {document.status === 'inbox' && (
-          <span className="px-2 py-1 text-xs rounded-full bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-300 inline-flex items-center gap-1">
+          <span className="px-2 py-1 text-xs rounded-full bg-ctp-yellow/20 text-ctp-yellow inline-flex items-center gap-1">
             <Inbox className="w-3 h-3" /> À traiter
           </span>
         )}
         {document.status === 'linked' && (
-          <span className="px-2 py-1 text-xs rounded-full bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-300 inline-flex items-center gap-1">
+          <span className="px-2 py-1 text-xs rounded-full bg-ctp-green/20 text-ctp-green inline-flex items-center gap-1">
             <Link2 className="w-3 h-3" /> Lié ({document.links.length})
           </span>
         )}
         {document.status === 'archived' && (
-          <span className="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 dark:bg-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
+          <span className="px-2 py-1 text-xs rounded-full bg-ctp-surface1 text-ctp-subtext0 inline-flex items-center gap-1">
             <Archive className="w-3 h-3" /> Archivé
           </span>
         )}
@@ -170,21 +173,21 @@ export function DocumentCard({
           {document.links.slice(0, 2).map((link) => (
             <div
               key={link.id}
-              className="flex items-center justify-between text-sm p-2 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded"
+              className="flex items-center justify-between text-sm p-2 bg-ctp-surface0 rounded"
               onClick={(e) => e.stopPropagation()}
             >
               <span className="truncate flex-1">{link.transaction.description}</span>
               <span
                 className={clsx(
                   'font-medium ml-2',
-                  link.transaction.amount >= 0 ? 'text-success-600' : ''
+                  link.transaction.amount >= 0 ? 'text-ctp-green' : ''
                 )}
               >
                 {formatCurrency(link.transaction.amount)}
               </span>
               <button
                 onClick={() => handleUnlink(link.transaction.id)}
-                className="ml-2 text-gray-400 hover:text-danger-500"
+                className="ml-2 text-ctp-overlay1 hover:text-ctp-red"
                 title="Délier"
               >
                 <X className="w-4 h-4" />
@@ -192,7 +195,7 @@ export function DocumentCard({
             </div>
           ))}
           {document.links.length > 2 && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+            <p className="text-xs text-ctp-subtext0 text-center">
               + {document.links.length - 2} autre(s)
             </p>
           )}
@@ -201,7 +204,7 @@ export function DocumentCard({
 
       {/* Actions */}
       <div
-        className="flex gap-2 pt-3 border-t border-gray-100 dark:border-gray-700"
+        className="flex gap-2 pt-3 border-t border-ctp-surface1"
         onClick={(e) => e.stopPropagation()}
       >
         {document.status === 'inbox' && (
@@ -225,7 +228,7 @@ export function DocumentCard({
         )}
         <button
           onClick={handleDelete}
-          className="btn-ghost text-danger-600 text-sm"
+          className="btn-ghost text-ctp-red text-sm"
           title="Supprimer"
         >
           <Trash2 className="w-4 h-4" />

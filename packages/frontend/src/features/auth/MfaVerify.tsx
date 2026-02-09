@@ -1,5 +1,6 @@
 // ============================================================================
 // MFA VERIFICATION - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -49,126 +50,131 @@ export function MfaVerify({
 
   return (
     <div className="w-full max-w-md">
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mx-auto">
-          <ShieldCheck className="w-8 h-8 text-primary-600 dark:text-primary-400" />
-        </div>
-        <h1 className="text-2xl font-bold mt-4">Vérification MFA</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Entrez le code de votre application d'authentification
-        </p>
-      </div>
-
-      {error && (
-        <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm mb-4">
-          {error}
-        </div>
-      )}
-
-      {/* Method selector if multiple methods */}
-      {methods.length > 1 && (
-        <div className="flex gap-2 mb-6">
-          {methods.map((method) => (
-            <button
-              key={method}
-              onClick={() => setSelectedMethod(method)}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                selectedMethod === method
-                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
-                  : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-              }`}
-            >
-              <span className="flex items-center justify-center gap-2">
-                {method === 'totp' ? <><Smartphone className="w-4 h-4" /> Authenticator</> : <><Key className="w-4 h-4" /> Security Key</>}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label htmlFor="code" className="label">
-            {showBackupInput ? 'Code de récupération' : 'Code à 6 chiffres'}
-          </label>
-          <input
-            id="code"
-            type="text"
-            inputMode={showBackupInput ? 'text' : 'numeric'}
-            autoComplete="one-time-code"
-            autoFocus
-            className="input text-center text-2xl tracking-widest"
-            placeholder={showBackupInput ? 'XXXX-XXXX' : '000000'}
-            maxLength={showBackupInput ? 9 : 6}
-            {...register('code', {
-              required: 'Code requis',
-              pattern: showBackupInput
-                ? {
-                    value: /^[A-Z0-9]{4}-?[A-Z0-9]{4}$/i,
-                    message: 'Format invalide',
-                  }
-                : {
-                    value: /^\d{6}$/,
-                    message: 'Le code doit contenir 6 chiffres',
-                  },
-            })}
-          />
-          {errors.code && (
-            <p className="error-text">{errors.code.message}</p>
-          )}
+      <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-2xl p-8 shadow-xl">
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-ctp-sapphire to-ctp-blue flex items-center justify-center mx-auto shadow-lg">
+            <ShieldCheck className="w-10 h-10 text-ctp-crust" />
+          </div>
+          <h1 className="text-2xl font-bold mt-6 text-ctp-text">Verification MFA</h1>
+          <p className="text-ctp-subtext0 mt-2">
+            Entrez le code de votre application d'authentification
+          </p>
         </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="btn-primary w-full"
-        >
-          {isLoading ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg
-                className="animate-spin h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
+        {error && (
+          <div className="p-4 rounded-xl bg-ctp-red/10 border border-ctp-red/20 text-ctp-red text-sm flex items-center gap-3 mb-6">
+            <div className="w-5 h-5 rounded-full bg-ctp-red/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-xs font-bold">!</span>
+            </div>
+            {error}
+          </div>
+        )}
+
+        {/* Method selector if multiple methods */}
+        {methods.length > 1 && (
+          <div className="flex gap-3 mb-6">
+            {methods.map((method) => (
+              <button
+                key={method}
+                onClick={() => setSelectedMethod(method)}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  selectedMethod === method
+                    ? 'bg-ctp-blue/20 text-ctp-blue border-2 border-ctp-blue/50 shadow-lg shadow-ctp-blue/10'
+                    : 'bg-ctp-mantle text-ctp-subtext1 border-2 border-ctp-surface1 hover:border-ctp-overlay0'
+                }`}
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
-              Vérification...
-            </span>
-          ) : (
-            'Vérifier'
-          )}
-        </button>
-      </form>
+                <span className="flex items-center justify-center gap-2">
+                  {method === 'totp' ? <><Smartphone className="w-4 h-4" /> Authenticator</> : <><Key className="w-4 h-4" /> Security Key</>}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
-      <div className="mt-6 text-center space-y-2">
-        <button
-          onClick={() => setShowBackupInput(!showBackupInput)}
-          className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white dark:hover:text-gray-200"
-        >
-          {showBackupInput
-            ? 'Utiliser le code authenticator'
-            : 'Utiliser un code de récupération'}
-        </button>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div>
+            <label htmlFor="code" className="block text-sm font-medium mb-2 text-ctp-subtext1">
+              {showBackupInput ? 'Code de recuperation' : 'Code a 6 chiffres'}
+            </label>
+            <input
+              id="code"
+              type="text"
+              inputMode={showBackupInput ? 'text' : 'numeric'}
+              autoComplete="one-time-code"
+              autoFocus
+              className="w-full px-4 py-4 rounded-xl bg-ctp-mantle border border-ctp-surface1 text-ctp-text text-center text-2xl tracking-[0.5em] font-mono placeholder:text-ctp-overlay0 placeholder:tracking-normal focus:border-ctp-blue focus:ring-2 focus:ring-ctp-blue/20 transition-all duration-200"
+              placeholder={showBackupInput ? 'XXXX-XXXX' : '000000'}
+              maxLength={showBackupInput ? 9 : 6}
+              {...register('code', {
+                required: 'Code requis',
+                pattern: showBackupInput
+                  ? {
+                      value: /^[A-Z0-9]{4}-?[A-Z0-9]{4}$/i,
+                      message: 'Format invalide',
+                    }
+                  : {
+                      value: /^\d{6}$/,
+                      message: 'Le code doit contenir 6 chiffres',
+                    },
+              })}
+            />
+            {errors.code && (
+              <p className="text-sm mt-2 text-ctp-red">{errors.code.message}</p>
+            )}
+          </div>
 
-        <div>
           <button
-            onClick={onCancel}
-            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white dark:hover:text-gray-200"
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3 px-4 rounded-xl bg-ctp-blue text-ctp-crust font-semibold hover:bg-ctp-sapphire focus:ring-2 focus:ring-ctp-blue/50 focus:ring-offset-2 focus:ring-offset-ctp-surface0 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-ctp-blue/25"
           >
-            ← Retour
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg
+                  className="animate-spin h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+                Verification...
+              </span>
+            ) : (
+              'Verifier'
+            )}
           </button>
+        </form>
+
+        <div className="mt-6 pt-6 border-t border-ctp-surface1 text-center space-y-3">
+          <button
+            onClick={() => setShowBackupInput(!showBackupInput)}
+            className="text-sm text-ctp-subtext0 hover:text-ctp-blue transition-colors"
+          >
+            {showBackupInput
+              ? 'Utiliser le code authenticator'
+              : 'Utiliser un code de recuperation'}
+          </button>
+
+          <div>
+            <button
+              onClick={onCancel}
+              className="text-sm text-ctp-overlay1 hover:text-ctp-text transition-colors flex items-center justify-center gap-1 mx-auto"
+            >
+              <span className="text-lg leading-none">&larr;</span> Retour
+            </button>
+          </div>
         </div>
       </div>
     </div>

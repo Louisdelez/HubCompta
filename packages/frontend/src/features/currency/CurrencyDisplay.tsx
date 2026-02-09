@@ -1,6 +1,7 @@
 // ============================================================================
 // CURRENCY DISPLAY - Finance Hub
 // Format and display currency amounts
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useMemo } from 'react';
@@ -71,9 +72,9 @@ export function CurrencyDisplay({
 
   const colorClass = useMemo(() => {
     if (!colorize) return '';
-    if (amount > 0) return 'text-success-600';
-    if (amount < 0) return 'text-danger-600';
-    return 'text-gray-600';
+    if (amount > 0) return 'text-ctp-green';
+    if (amount < 0) return 'text-ctp-red';
+    return 'text-ctp-subtext0';
   }, [amount, colorize]);
 
   return <span className={clsx(colorClass, className)}>{formattedAmount}</span>;

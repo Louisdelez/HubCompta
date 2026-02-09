@@ -1,6 +1,7 @@
 // ============================================================================
 // SETTLEMENT HISTORY CHART - Finance Hub
 // Bar chart showing expense trends
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useMemo } from 'react';
@@ -48,7 +49,7 @@ export function SettlementHistoryChart({ data, currency = 'EUR' }: SettlementHis
 
   if (chartData.length === 0) {
     return (
-      <div className="h-48 flex items-center justify-center text-gray-500 dark:text-gray-400">
+      <div className="h-48 flex items-center justify-center text-ctp-overlay1">
         Aucune donnee
       </div>
     );
@@ -72,8 +73,8 @@ export function SettlementHistoryChart({ data, currency = 'EUR' }: SettlementHis
                 <div
                   className={`w-full max-w-12 rounded-t-lg transition-all duration-300 ${
                     isCurrentMonth
-                      ? 'bg-primary-500'
-                      : 'bg-gray-300 dark:bg-gray-600'
+                      ? 'bg-ctp-blue'
+                      : 'bg-ctp-surface2'
                   }`}
                   style={{ height: `${Math.max(height, 2)}%` }}
                   title={`${entry.period}: ${formatCurrency(entry.totalExpenses, currency)}`}
@@ -82,7 +83,7 @@ export function SettlementHistoryChart({ data, currency = 'EUR' }: SettlementHis
 
               {/* Label */}
               <div className="text-center">
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-16">
+                <p className="text-xs text-ctp-subtext0 truncate max-w-16">
                   {entry.period.split(' ')[0]?.substring(0, 3)}
                 </p>
               </div>
@@ -94,21 +95,21 @@ export function SettlementHistoryChart({ data, currency = 'EUR' }: SettlementHis
       {/* Legend */}
       <div className="flex items-center justify-center gap-4 text-sm">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-gray-300 dark:bg-gray-600 rounded" />
-          <span className="text-gray-500 dark:text-gray-400">Mois passes</span>
+          <div className="w-3 h-3 bg-ctp-surface2 rounded" />
+          <span className="text-ctp-subtext0">Mois passes</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-primary-500 rounded" />
-          <span className="text-gray-500 dark:text-gray-400">Mois en cours</span>
+          <div className="w-3 h-3 bg-ctp-blue rounded" />
+          <span className="text-ctp-subtext0">Mois en cours</span>
         </div>
       </div>
 
       {/* Average line info */}
       {chartData.length > 1 && (
-        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+        <div className="text-center text-sm text-ctp-subtext0">
           <span>
             Moyenne:{' '}
-            <span className="font-medium">
+            <span className="font-medium text-ctp-text">
               {formatCurrency(
                 chartData.reduce((sum, d) => sum + d.totalExpenses, 0) / chartData.length,
                 currency

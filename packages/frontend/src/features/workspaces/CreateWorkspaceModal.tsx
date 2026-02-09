@@ -1,5 +1,6 @@
 // ============================================================================
 // CREATE WORKSPACE MODAL - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -57,9 +58,9 @@ const WORKSPACE_TYPES = [
 ] as const;
 
 const CURRENCIES = [
-  { value: 'EUR', label: '€ Euro' },
+  { value: 'EUR', label: 'Euro' },
   { value: 'USD', label: '$ Dollar US' },
-  { value: 'GBP', label: '£ Livre Sterling' },
+  { value: 'GBP', label: 'Livre Sterling' },
   { value: 'CHF', label: 'CHF Franc Suisse' },
 ];
 
@@ -120,12 +121,12 @@ export function CreateWorkspaceModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-auto animate-scale-in">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-auto animate-scale-in">
         <div className="p-6">
           <h2 className="text-xl font-bold mb-4">Créer un espace de travail</h2>
 
           {error && (
-            <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm mb-4">
+            <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4">
               {error}
             </div>
           )}
@@ -141,8 +142,10 @@ export function CreateWorkspaceModal({
                     className={clsx(
                       'flex flex-col items-center p-4 rounded-lg border-2 cursor-pointer transition-colors',
                       selectedType === type.value
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                        ? type.value === 'personal'
+                          ? 'border-ctp-blue bg-ctp-blue/20'
+                          : 'border-ctp-mauve bg-ctp-mauve/20'
+                        : 'border-ctp-surface1 hover:border-ctp-surface2'
                     )}
                   >
                     <input
@@ -151,9 +154,16 @@ export function CreateWorkspaceModal({
                       {...register('type')}
                       className="sr-only"
                     />
-                    <type.icon className="w-6 h-6 mb-1" />
+                    <type.icon className={clsx(
+                      'w-6 h-6 mb-1',
+                      selectedType === type.value
+                        ? type.value === 'personal'
+                          ? 'text-ctp-blue'
+                          : 'text-ctp-mauve'
+                        : 'text-ctp-subtext0'
+                    )} />
                     <span className="font-medium text-sm">{type.label}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">
+                    <span className="text-xs text-ctp-subtext0 text-center mt-1">
                       {type.description}
                     </span>
                   </label>

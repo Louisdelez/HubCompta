@@ -1,6 +1,7 @@
 // ============================================================================
 // ADMIN AUDIT LOGS - Finance Hub
 // View system audit logs
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -52,15 +53,15 @@ interface AuditLogsResponse {
 
 function getActionBadgeColor(action: string): string {
   if (action.includes('delete') || action.includes('revoke')) {
-    return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300';
+    return 'bg-ctp-red/20 text-ctp-red';
   }
   if (action.includes('create') || action.includes('grant')) {
-    return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
+    return 'bg-ctp-green/20 text-ctp-green';
   }
   if (action.includes('update') || action.includes('set')) {
-    return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
+    return 'bg-ctp-blue/20 text-ctp-blue';
   }
-  return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
+  return 'bg-ctp-surface1 text-ctp-subtext1';
 }
 
 function formatAction(action: string): string {
@@ -96,7 +97,7 @@ export function AdminAuditLogs() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Logs d'audit</h2>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-sm text-ctp-subtext0">
           {pagination?.total ?? 0} entrees
         </span>
       </div>
@@ -104,7 +105,7 @@ export function AdminAuditLogs() {
       {/* Filters */}
       <div className="flex gap-4">
         <div className="relative flex-1">
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ctp-overlay1" />
           <input
             type="text"
             value={actionFilter}
@@ -121,14 +122,14 @@ export function AdminAuditLogs() {
       {/* Logs Table */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-ctp-blue" />
         </div>
       ) : logs.length > 0 ? (
         <div className="space-y-2">
           {logs.map((log) => (
             <div
               key={log.id}
-              className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4"
+              className="bg-ctp-surface0 rounded-lg p-4"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -139,12 +140,12 @@ export function AdminAuditLogs() {
                       {formatAction(log.action)}
                     </span>
                     {log.entityType && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <span className="text-xs text-ctp-subtext0">
                         {log.entityType}
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-300">
+                  <p className="text-sm text-ctp-subtext1">
                     {log.user ? (
                       <>
                         <span className="font-medium">
@@ -152,27 +153,27 @@ export function AdminAuditLogs() {
                         </span>
                       </>
                     ) : (
-                      <span className="text-gray-400">Systeme</span>
+                      <span className="text-ctp-overlay1">Systeme</span>
                     )}
                   </p>
                   {log.changes && Object.keys(log.changes).length > 0 && (
                     <details className="mt-2">
-                      <summary className="text-xs text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:text-gray-300">
+                      <summary className="text-xs text-ctp-subtext0 cursor-pointer hover:text-ctp-subtext1">
                         Voir les details
                       </summary>
-                      <pre className="mt-2 p-2 bg-gray-100 dark:bg-gray-700 dark:bg-gray-800 rounded text-xs overflow-x-auto">
+                      <pre className="mt-2 p-2 bg-ctp-surface1 rounded text-xs overflow-x-auto text-ctp-text">
                         {JSON.stringify(log.changes, null, 2)}
                       </pre>
                     </details>
                   )}
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-1 text-xs text-ctp-subtext0">
                     <Clock className="h-3 w-3" />
                     {new Date(log.createdAt).toLocaleString('fr-FR')}
                   </div>
                   {log.ipAddress && (
-                    <p className="text-xs text-gray-400 mt-1 font-mono">
+                    <p className="text-xs text-ctp-overlay1 mt-1 font-mono">
                       {log.ipAddress}
                     </p>
                   )}
@@ -182,7 +183,7 @@ export function AdminAuditLogs() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-12 text-ctp-subtext0">
           Aucun log trouve
         </div>
       )}
@@ -190,7 +191,7 @@ export function AdminAuditLogs() {
       {/* Pagination */}
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-ctp-subtext0">
             Page {pagination.page} sur {pagination.totalPages}
           </p>
           <div className="flex gap-2">

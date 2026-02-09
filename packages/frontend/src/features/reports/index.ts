@@ -1,5 +1,6 @@
 // ============================================================================
 // REPORTS MODULE EXPORTS - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 export { ReportsPage } from './ReportsPage';

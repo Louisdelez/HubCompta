@@ -34,7 +34,7 @@ import {
   Monitor,
   type LucideIcon,
 } from 'lucide-react';
-import { useTheme } from '@/providers/ThemeProvider';
+import { useTheme, THEME_META, type CatppuccinFlavor } from '@/providers/ThemeProvider';
 
 // ----------------------------------------------------------------------------
 // Navigation Items
@@ -96,17 +96,17 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={clsx(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static',
+          'fixed inset-y-0 left-0 z-50 w-64 bg-ctp-mantle border-r border-ctp-surface0 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-ctp-surface0">
+            <div className="w-8 h-8 rounded-lg bg-ctp-blue flex items-center justify-center">
+              <Wallet className="w-5 h-5 text-ctp-crust" />
             </div>
-            <span className="font-bold text-lg">Finance Hub</span>
+            <span className="font-bold text-lg text-ctp-text">Finance Hub</span>
           </div>
 
           {/* Navigation */}
@@ -120,8 +120,8 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                     clsx(
                       'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                       isActive
-                        ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
-                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                        ? 'bg-ctp-blue/20 text-ctp-blue'
+                        : 'text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text'
                     )
                   }
                   onClick={() => onClose()}
@@ -132,7 +132,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               ))}
             </div>
 
-            <div className="my-4 border-t border-gray-200 dark:border-gray-700" />
+            <div className="my-4 border-t border-ctp-surface0" />
 
             <div className="space-y-1">
               {secondaryNavItems.map((item) => (
@@ -143,8 +143,8 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                     clsx(
                       'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                       isActive
-                        ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
-                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                        ? 'bg-ctp-blue/20 text-ctp-blue'
+                        : 'text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text'
                     )
                   }
                   onClick={() => onClose()}
@@ -157,18 +157,18 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
           </nav>
 
           {/* User menu */}
-          <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+          <div className="p-3 border-t border-ctp-surface0">
             <div className="flex items-center gap-3 px-3 py-2">
-              <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                <span className="text-sm font-medium text-primary-700 dark:text-primary-300">
+              <div className="w-8 h-8 rounded-full bg-ctp-blue/20 flex items-center justify-center">
+                <span className="text-sm font-medium text-ctp-blue">
                   {user?.displayName?.charAt(0).toUpperCase() ?? '?'}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white dark:text-gray-100 truncate">
+                <p className="text-sm font-medium text-ctp-text truncate">
                   {user?.displayName ?? 'User'}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                <p className="text-xs text-ctp-subtext0 truncate">
                   {user?.email ?? ''}
                 </p>
               </div>
@@ -177,7 +177,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               {user?.isInstanceAdmin && (
                 <NavLink
                   to="/admin"
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-purple-700 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20"
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-ctp-mauve hover:bg-ctp-mauve/10"
                   onClick={() => onClose()}
                 >
                   <Shield className="w-5 h-5" />
@@ -186,18 +186,18 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               )}
               <NavLink
                 to="/settings"
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-ctp-subtext1 hover:bg-ctp-surface1 hover:text-ctp-text"
                 onClick={() => onClose()}
               >
                 <Settings className="w-5 h-5" />
-                <span>Parametres</span>
+                <span>Paramètres</span>
               </NavLink>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-danger-600 hover:bg-danger-50 dark:text-danger-400 dark:hover:bg-danger-900/20 w-full"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-ctp-red hover:bg-ctp-red/10 w-full"
               >
                 <LogOut className="w-5 h-5" />
-                <span>Deconnexion</span>
+                <span>Déconnexion</span>
               </button>
             </div>
           </div>
@@ -218,29 +218,29 @@ interface HeaderProps {
 
 function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
   const { currentWorkspace, switchWorkspace } = useWorkspace();
-  const { theme, toggleTheme, resolvedTheme } = useTheme();
+  const { theme, cycleTheme, isDark } = useTheme();
 
   const getThemeIcon = () => {
     if (theme === 'system') return Monitor;
-    if (resolvedTheme === 'dark') return Moon;
+    if (isDark) return Moon;
     return Sun;
   };
 
   const getThemeLabel = () => {
-    if (theme === 'system') return 'Theme: Systeme';
-    if (theme === 'dark') return 'Theme: Sombre';
-    return 'Theme: Clair';
+    if (theme === 'system') return 'Thème: Système';
+    const meta = THEME_META[theme as CatppuccinFlavor];
+    return `Thème: ${meta?.label ?? theme}`;
   };
 
   const ThemeIcon = getThemeIcon();
 
   return (
-    <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 safe-area-inset-top">
+    <header className="sticky top-0 z-30 bg-ctp-base border-b border-ctp-surface1 safe-area-inset-top">
       <div className="flex items-center gap-4 px-4 py-3">
         {/* Mobile menu button */}
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 -ml-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-700"
+          className="lg:hidden p-2 -ml-2 rounded-lg text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text"
           aria-label="Toggle menu"
         >
           <svg
@@ -276,8 +276,8 @@ function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
         <div className="flex items-center gap-2">
           {/* Theme Toggle */}
           <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
+            onClick={cycleTheme}
+            className="p-2 rounded-lg text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text transition-colors"
             aria-label={getThemeLabel()}
             title={getThemeLabel()}
           >
@@ -306,7 +306,7 @@ export function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-ctp-base">
       <div className="flex">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 

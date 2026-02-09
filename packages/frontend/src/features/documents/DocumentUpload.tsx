@@ -1,5 +1,6 @@
 // ============================================================================
 // DOCUMENT UPLOAD - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useCallback } from 'react';
@@ -46,12 +47,12 @@ function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
-function getFileIcon(mimeType: string): LucideIcon {
-  if (mimeType.startsWith('image/')) return Image;
-  if (mimeType === 'application/pdf') return BookOpen;
-  if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return Sheet;
-  if (mimeType === 'text/csv') return FileSpreadsheet;
-  return FileText;
+function getFileIcon(mimeType: string): { icon: LucideIcon; colorClass: string } {
+  if (mimeType.startsWith('image/')) return { icon: Image, colorClass: 'text-ctp-green' };
+  if (mimeType === 'application/pdf') return { icon: BookOpen, colorClass: 'text-ctp-red' };
+  if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return { icon: Sheet, colorClass: 'text-ctp-green' };
+  if (mimeType === 'text/csv') return { icon: FileSpreadsheet, colorClass: 'text-ctp-green' };
+  return { icon: FileText, colorClass: 'text-ctp-blue' };
 }
 
 async function calculateHash(file: File): Promise<string> {
@@ -194,7 +195,7 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full animate-scale-in">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-lg w-full animate-scale-in">
         <div className="p-6">
           <h2 className="text-xl font-bold mb-4">Ajouter des documents</h2>
 
@@ -206,12 +207,12 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
             className={clsx(
               'border-2 border-dashed rounded-xl p-8 text-center transition-colors',
               isDragging
-                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-300 dark:border-gray-600 hover:border-primary-400'
+                ? 'border-ctp-blue bg-ctp-blue/10'
+                : 'border-ctp-surface2 hover:border-ctp-blue'
             )}
           >
-            <Folder className="w-10 h-10 mx-auto mb-3 text-gray-400" />
-            <p className="text-gray-600 dark:text-gray-400 mb-2">
+            <Folder className="w-10 h-10 mx-auto mb-3 text-ctp-overlay1" />
+            <p className="text-ctp-subtext0 mb-2">
               Glissez vos fichiers ici ou
             </p>
             <label className="btn-primary cursor-pointer inline-block">
@@ -224,7 +225,7 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
                 className="hidden"
               />
             </label>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+            <p className="text-xs text-ctp-subtext0 mt-3">
               PDF, Images, CSV, Excel • Max 10MB par fichier
             </p>
           </div>
@@ -235,38 +236,38 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
               {uploads.map((upload, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg"
+                  className="flex items-center gap-3 p-3 bg-ctp-surface0 rounded-lg"
                 >
-                  {(() => { const Icon = getFileIcon(upload.file.type); return <Icon className="w-5 h-5 text-gray-500 dark:text-gray-400" />; })()}
+                  {(() => { const { icon: Icon, colorClass } = getFileIcon(upload.file.type); return <Icon className={clsx('w-5 h-5', colorClass)} />; })()}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{upload.file.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-ctp-subtext0">
                       {formatFileSize(upload.file.size)}
                     </p>
                     {upload.status === 'uploading' && (
-                      <div className="mt-1 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                      <div className="mt-1 h-1.5 bg-ctp-surface2 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-primary-500 transition-all"
+                          className="h-full bg-ctp-blue transition-all"
                           style={{ width: `${upload.progress}%` }}
                         />
                       </div>
                     )}
                     {upload.status === 'error' && (
-                      <p className="text-xs text-danger-600 mt-1">{upload.error}</p>
+                      <p className="text-xs text-ctp-red mt-1">{upload.error}</p>
                     )}
                   </div>
                   <div>
                     {upload.status === 'pending' && (
-                      <Clock className="w-4 h-4 text-gray-400" />
+                      <Clock className="w-4 h-4 text-ctp-overlay1" />
                     )}
                     {upload.status === 'uploading' && (
-                      <span className="text-primary-500">{upload.progress}%</span>
+                      <span className="text-ctp-blue">{upload.progress}%</span>
                     )}
                     {upload.status === 'success' && (
-                      <Check className="w-4 h-4 text-success-500" />
+                      <Check className="w-4 h-4 text-ctp-green" />
                     )}
                     {upload.status === 'error' && (
-                      <X className="w-4 h-4 text-danger-500" />
+                      <X className="w-4 h-4 text-ctp-red" />
                     )}
                   </div>
                 </div>

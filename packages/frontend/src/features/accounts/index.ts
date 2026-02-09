@@ -1,5 +1,6 @@
 // ============================================================================
 // ACCOUNTS FEATURE EXPORTS - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 export { AccountsPage } from './AccountsPage';

@@ -1,5 +1,6 @@
 // ============================================================================
 // GLOBAL SEARCH BAR - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -163,14 +164,14 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
       {/* Search Input */}
       <div
         className={clsx(
-          'flex items-center gap-2 px-3 py-2 rounded-lg border transition-all',
+          'flex items-center gap-2 px-3 py-2 rounded-lg border transition-all bg-ctp-surface0',
           isOpen
-            ? 'border-primary-500 ring-2 ring-primary-500/20 bg-white dark:bg-gray-800'
-            : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
+            ? 'border-ctp-blue ring-2 ring-ctp-blue/20'
+            : 'border-ctp-surface1'
         )}
       >
         <svg
-          className="w-4 h-4 text-gray-400"
+          className="w-4 h-4 text-ctp-overlay1"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -190,23 +191,23 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyNavigation}
           placeholder="Rechercher..."
-          className="flex-1 bg-transparent border-0 outline-none text-sm placeholder-gray-400 dark:placeholder-gray-500"
+          className="flex-1 bg-transparent border-0 outline-none text-sm placeholder-ctp-overlay0"
         />
-        <kbd className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">
+        <kbd className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-xs text-ctp-overlay1 bg-ctp-surface1 rounded">
           <span>⌘</span>K
         </kbd>
       </div>
 
       {/* Results Dropdown */}
       {isOpen && query.length >= 2 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50 max-h-96 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-ctp-surface0 rounded-lg shadow-xl border border-ctp-surface1 overflow-hidden z-50 max-h-96 overflow-y-auto">
           {isLoading ? (
-            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-              <div className="animate-spin w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full mx-auto" />
+            <div className="p-4 text-center text-ctp-subtext0">
+              <div className="animate-spin w-5 h-5 border-2 border-ctp-blue border-t-transparent rounded-full mx-auto" />
               <p className="mt-2 text-sm">Recherche en cours...</p>
             </div>
           ) : results.length === 0 ? (
-            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+            <div className="p-4 text-center text-ctp-subtext0">
               <p className="text-sm">Aucun résultat pour "{query}"</p>
             </div>
           ) : (
@@ -221,7 +222,7 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
                 }, {})
               ).map(([type, typeResults]) => (
                 <div key={type}>
-                  <div className="px-3 py-1.5 text-xs font-medium text-gray-400 uppercase">
+                  <div className="px-3 py-1.5 text-xs font-medium text-ctp-overlay1 uppercase">
                     {TYPE_CONFIG[type as keyof typeof TYPE_CONFIG]?.label ?? type}
                   </div>
                   {typeResults.map((result) => {
@@ -235,8 +236,8 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
                         className={clsx(
                           'w-full px-3 py-2 flex items-center gap-3 text-left transition-colors',
                           globalIdx === selectedIndex
-                            ? 'bg-primary-50 dark:bg-primary-900/20'
-                            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                            ? 'bg-ctp-yellow/20'
+                            : 'hover:bg-ctp-surface1'
                         )}
                       >
                         {result.icon ? (
@@ -247,21 +248,21 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{result.title}</p>
                           {result.subtitle && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{result.subtitle}</p>
+                            <p className="text-xs text-ctp-subtext0 truncate">{result.subtitle}</p>
                           )}
                         </div>
                         {result.amount !== undefined && (
                           <span
                             className={clsx(
                               'text-sm font-medium',
-                              result.amount >= 0 ? 'text-success-600' : 'text-danger-600'
+                              result.amount >= 0 ? 'text-ctp-green' : 'text-ctp-red'
                             )}
                           >
                             {formatCurrency(result.amount, result.currency ?? 'EUR')}
                           </span>
                         )}
                         {result.date && (
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-ctp-overlay1">
                             {new Date(result.date).toLocaleDateString('fr-FR')}
                           </span>
                         )}
@@ -279,7 +280,7 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
                     setIsOpen(false);
                     setQuery('');
                   }}
-                  className="w-full px-3 py-2 text-center text-sm text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700/50"
+                  className="w-full px-3 py-2 text-center text-sm text-ctp-blue hover:bg-ctp-surface1"
                 >
                   Voir tous les résultats ({searchData.totalCount})
                 </button>

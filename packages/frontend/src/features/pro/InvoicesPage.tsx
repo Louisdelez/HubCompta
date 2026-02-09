@@ -1,6 +1,7 @@
 // ============================================================================
 // INVOICES PAGE - Finance Hub
 // Invoice list and management
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -59,11 +60,11 @@ function formatDate(dateStr: string): string {
 }
 
 const STATUS_CONFIG: Record<InvoiceStatus, { label: string; color: string }> = {
-  draft: { label: 'Brouillon', color: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' },
-  sent: { label: 'Envoyée', color: 'bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-300' },
-  paid: { label: 'Payée', color: 'bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-300' },
-  overdue: { label: 'En retard', color: 'bg-danger-100 text-danger-700 dark:bg-danger-900/30 dark:text-danger-300' },
-  cancelled: { label: 'Annulée', color: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400' },
+  draft: { label: 'Brouillon', color: 'bg-ctp-surface1 text-ctp-subtext0' },
+  sent: { label: 'Envoyee', color: 'bg-ctp-yellow/10 text-ctp-yellow' },
+  paid: { label: 'Payee', color: 'bg-ctp-green/10 text-ctp-green' },
+  overdue: { label: 'En retard', color: 'bg-ctp-red/10 text-ctp-red' },
+  cancelled: { label: 'Annulee', color: 'bg-ctp-surface1 text-ctp-overlay1' },
 };
 
 // ----------------------------------------------------------------------------
@@ -123,8 +124,8 @@ export function InvoicesPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-        Sélectionnez un espace de travail
+      <div className="p-6 text-center text-ctp-subtext0">
+        Selectionnez un espace de travail
       </div>
     );
   }
@@ -135,8 +136,8 @@ export function InvoicesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Factures</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Gérez vos factures et suivez les paiements
+          <p className="text-ctp-subtext0">
+            Gerez vos factures et suivez les paiements
           </p>
         </div>
         <Link
@@ -157,8 +158,8 @@ export function InvoicesPage() {
               className={clsx(
                 'px-4 py-2 rounded-lg transition-colors',
                 statusFilter === status
-                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                  : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-ctp-blue/20 text-ctp-blue'
+                  : 'bg-ctp-surface1 hover:bg-ctp-surface2'
               )}
             >
               {status === 'all' ? 'Toutes' : STATUS_CONFIG[status].label}
@@ -171,7 +172,7 @@ export function InvoicesPage() {
       {isLoading && (
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+            <div key={i} className="h-24 bg-ctp-surface1 rounded-xl" />
           ))}
         </div>
       )}
@@ -179,16 +180,16 @@ export function InvoicesPage() {
       {/* Empty State */}
       {!isLoading && invoices?.length === 0 && (
         <div className="card text-center py-12">
-          <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <FileText className="w-12 h-12 mx-auto mb-4 text-ctp-overlay1" />
           <h2 className="text-xl font-bold mb-2">Aucune facture</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            Créez votre première facture pour commencer
+          <p className="text-ctp-subtext0 mb-4">
+            Creez votre premiere facture pour commencer
           </p>
           <Link
             to={`/workspaces/${workspaceId}/pro/invoices/new`}
             className="btn btn-primary"
           >
-            + Créer une facture
+            + Creer une facture
           </Link>
         </div>
       )}
@@ -199,14 +200,14 @@ export function InvoicesPage() {
           {invoices.map((invoice) => (
             <div
               key={invoice.id}
-              className="card flex flex-col sm:flex-row sm:items-center gap-4 hover:border-primary-300 dark:hover:border-primary-600 transition-colors"
+              className="card flex flex-col sm:flex-row sm:items-center gap-4 hover:border-ctp-blue transition-colors"
             >
               {/* Main Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1">
                   <Link
                     to={`/workspaces/${workspaceId}/pro/invoices/${invoice.id}`}
-                    className="font-semibold text-primary-600 hover:underline"
+                    className="font-semibold text-ctp-blue hover:underline"
                   >
                     {invoice.number}
                   </Link>
@@ -217,11 +218,11 @@ export function InvoicesPage() {
                     {STATUS_CONFIG[invoice.status].label}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-ctp-subtext0">
                   {invoice.contact.name}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Émise le {formatDate(invoice.issueDate)} • Échéance {formatDate(invoice.dueDate)}
+                <p className="text-xs text-ctp-subtext0">
+                  Emise le {formatDate(invoice.issueDate)} - Echeance {formatDate(invoice.dueDate)}
                 </p>
               </div>
 
@@ -229,11 +230,11 @@ export function InvoicesPage() {
               <div className="text-right">
                 <p className="text-lg font-bold">{formatCurrency(invoice.total)}</p>
                 {invoice.status === 'paid' && (
-                  <p className="text-sm text-success-600">Payée</p>
+                  <p className="text-sm text-ctp-green">Payee</p>
                 )}
                 {parseFloat(invoice.paidAmount) > 0 && parseFloat(invoice.paidAmount) < parseFloat(invoice.total) && (
-                  <p className="text-sm text-warning-600">
-                    {formatCurrency(invoice.paidAmount)} reçu
+                  <p className="text-sm text-ctp-yellow">
+                    {formatCurrency(invoice.paidAmount)} recu
                   </p>
                 )}
               </div>
@@ -251,7 +252,7 @@ export function InvoicesPage() {
                     </button>
                     <Link
                       to={`/workspaces/${workspaceId}/pro/invoices/${invoice.id}/edit`}
-                      className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+                      className="p-2 text-ctp-overlay1 hover:text-ctp-text"
                       title="Modifier"
                     >
                       <Pencil className="w-4 h-4" />
@@ -262,7 +263,7 @@ export function InvoicesPage() {
                           deleteMutation.mutate(invoice.id);
                         }
                       }}
-                      className="p-2 text-gray-400 hover:text-danger-600"
+                      className="p-2 text-ctp-overlay1 hover:text-ctp-red"
                       title="Supprimer"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -283,7 +284,7 @@ export function InvoicesPage() {
                           cancelMutation.mutate(invoice.id);
                         }
                       }}
-                      className="p-2 text-gray-400 hover:text-danger-600"
+                      className="p-2 text-ctp-overlay1 hover:text-ctp-red"
                       title="Annuler"
                     >
                       <X className="w-4 h-4" />
@@ -292,7 +293,7 @@ export function InvoicesPage() {
                 )}
                 <button
                   onClick={() => duplicateMutation.mutate(invoice.id)}
-                  className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+                  className="p-2 text-ctp-overlay1 hover:text-ctp-text"
                   title="Dupliquer"
                 >
                   <Copy className="w-4 h-4" />

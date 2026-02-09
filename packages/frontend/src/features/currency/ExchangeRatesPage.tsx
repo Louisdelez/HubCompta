@@ -1,6 +1,7 @@
 // ============================================================================
 // EXCHANGE RATES PAGE - Finance Hub
 // View and manage exchange rates
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -39,35 +40,30 @@ interface ExchangeRateSource {
 }
 
 // Source colors and display config
-const SOURCE_CONFIG: Record<string, { color: string; bgColor: string; darkBgColor: string; label: string }> = {
+const SOURCE_CONFIG: Record<string, { color: string; bgColor: string; label: string }> = {
   ecb: {
-    color: 'text-blue-700 dark:text-blue-300',
-    bgColor: 'bg-blue-100',
-    darkBgColor: 'dark:bg-blue-900/30',
+    color: 'text-ctp-blue',
+    bgColor: 'bg-ctp-blue/20',
     label: 'BCE',
   },
   'fed-h10': {
-    color: 'text-emerald-700 dark:text-emerald-300',
-    bgColor: 'bg-emerald-100',
-    darkBgColor: 'dark:bg-emerald-900/30',
+    color: 'text-ctp-green',
+    bgColor: 'bg-ctp-green/20',
     label: 'FED',
   },
   snb: {
-    color: 'text-red-700 dark:text-red-300',
-    bgColor: 'bg-red-100',
-    darkBgColor: 'dark:bg-red-900/30',
+    color: 'text-ctp-red',
+    bgColor: 'bg-ctp-red/20',
     label: 'SNB',
   },
   fred: {
-    color: 'text-purple-700 dark:text-purple-300',
-    bgColor: 'bg-purple-100',
-    darkBgColor: 'dark:bg-purple-900/30',
+    color: 'text-ctp-mauve',
+    bgColor: 'bg-ctp-mauve/20',
     label: 'FRED',
   },
   manual: {
-    color: 'text-orange-700 dark:text-orange-300',
-    bgColor: 'bg-orange-100',
-    darkBgColor: 'dark:bg-orange-900/30',
+    color: 'text-ctp-peach',
+    bgColor: 'bg-ctp-peach/20',
     label: 'MANUEL',
   },
 };
@@ -189,7 +185,7 @@ export function ExchangeRatesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Taux de change</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-ctp-subtext0">
             Gerez les taux de change pour la conversion multi-devises
           </p>
         </div>
@@ -244,7 +240,7 @@ export function ExchangeRatesPage() {
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div
                     key={i}
-                    className="h-12 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"
+                    className="h-12 bg-ctp-surface1 rounded animate-pulse"
                   />
                 ))}
               </div>
@@ -252,17 +248,17 @@ export function ExchangeRatesPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700">
-                      <th className="text-left py-2 px-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <tr className="border-b border-ctp-surface1">
+                      <th className="text-left py-2 px-3 text-sm font-medium text-ctp-subtext0">
                         Devise
                       </th>
-                      <th className="text-right py-2 px-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <th className="text-right py-2 px-3 text-sm font-medium text-ctp-subtext0">
                         Taux
                       </th>
-                      <th className="text-right py-2 px-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <th className="text-right py-2 px-3 text-sm font-medium text-ctp-subtext0">
                         Date
                       </th>
-                      <th className="text-center py-2 px-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <th className="text-center py-2 px-3 text-sm font-medium text-ctp-subtext0">
                         Source
                       </th>
                       <th className="py-2 px-3"></th>
@@ -273,9 +269,9 @@ export function ExchangeRatesPage() {
                       <tr
                         key={rate.targetCurrency}
                         className={clsx(
-                          'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors',
+                          'border-b border-ctp-surface0 hover:bg-ctp-surface0 transition-colors',
                           selectedTarget === rate.targetCurrency &&
-                            'bg-primary-50 dark:bg-primary-900/20'
+                            'bg-ctp-blue/10'
                         )}
                       >
                         <td className="py-3 px-3">
@@ -284,15 +280,14 @@ export function ExchangeRatesPage() {
                         <td className="py-3 px-3 text-right font-mono">
                           {rate.rate.toFixed(4)}
                         </td>
-                        <td className="py-3 px-3 text-right text-sm text-gray-500 dark:text-gray-400">
+                        <td className="py-3 px-3 text-right text-sm text-ctp-subtext0">
                           {new Date(rate.date).toLocaleDateString('fr-FR')}
                         </td>
                         <td className="py-3 px-3 text-center">
                           {(() => {
                             const config = SOURCE_CONFIG[rate.source] ?? {
-                              color: 'text-gray-700 dark:text-gray-300',
-                              bgColor: 'bg-gray-100',
-                              darkBgColor: 'dark:bg-gray-700',
+                              color: 'text-ctp-subtext1',
+                              bgColor: 'bg-ctp-surface1',
                               label: rate.source.toUpperCase(),
                             };
                             return (
@@ -300,7 +295,6 @@ export function ExchangeRatesPage() {
                                 className={clsx(
                                   'text-xs px-2 py-1 rounded-full',
                                   config.bgColor,
-                                  config.darkBgColor,
                                   config.color
                                 )}
                               >
@@ -326,7 +320,7 @@ export function ExchangeRatesPage() {
                 </table>
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-8 text-ctp-subtext0">
                 <p>Aucun taux disponible</p>
                 <p className="text-sm mt-1">
                   Cliquez sur "Actualiser (BCE)" pour importer les taux de la Banque Centrale Europeenne
@@ -335,7 +329,7 @@ export function ExchangeRatesPage() {
             )}
 
             {rates.length > 0 && (
-              <p className="text-xs text-gray-400 mt-4">
+              <p className="text-xs text-ctp-overlay1 mt-4">
                 {rates.length} devises disponibles. Derniere mise a jour:{' '}
                 {rates[0]
                   ? new Date(rates[0].date).toLocaleDateString('fr-FR')
@@ -360,14 +354,14 @@ export function ExchangeRatesPage() {
               </div>
 
               {loadingHistory ? (
-                <div className="h-48 bg-gray-100 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-48 bg-ctp-surface1 rounded animate-pulse" />
               ) : history.length > 0 ? (
                 <div className="space-y-4">
                   {/* Simple list view - could be replaced with a chart library */}
                   <div className="max-h-64 overflow-y-auto">
                     <table className="w-full text-sm">
-                      <thead className="sticky top-0 bg-white dark:bg-gray-800">
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <thead className="sticky top-0 bg-ctp-base">
+                        <tr className="border-b border-ctp-surface1">
                           <th className="text-left py-2">Date</th>
                           <th className="text-right py-2">Taux</th>
                           <th className="text-right py-2">Variation</th>
@@ -382,7 +376,7 @@ export function ExchangeRatesPage() {
                           return (
                             <tr
                               key={rate.date}
-                              className="border-b border-gray-100 dark:border-gray-700"
+                              className="border-b border-ctp-surface0"
                             >
                               <td className="py-2">
                                 {new Date(rate.date).toLocaleDateString('fr-FR')}
@@ -394,10 +388,10 @@ export function ExchangeRatesPage() {
                                 className={clsx(
                                   'py-2 text-right',
                                   change > 0
-                                    ? 'text-success-600'
+                                    ? 'text-ctp-green'
                                     : change < 0
-                                      ? 'text-danger-600'
-                                      : 'text-gray-500'
+                                      ? 'text-ctp-red'
+                                      : 'text-ctp-subtext0'
                                 )}
                               >
                                 {change !== 0 && (
@@ -416,20 +410,20 @@ export function ExchangeRatesPage() {
 
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-4 text-center text-sm">
-                    <div className="p-2 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded">
-                      <p className="text-gray-500 dark:text-gray-400">Min</p>
+                    <div className="p-2 bg-ctp-surface1 rounded">
+                      <p className="text-ctp-subtext0">Min</p>
                       <p className="font-mono font-medium">
                         {Math.min(...history.map((r) => r.rate)).toFixed(4)}
                       </p>
                     </div>
-                    <div className="p-2 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded">
-                      <p className="text-gray-500 dark:text-gray-400">Max</p>
+                    <div className="p-2 bg-ctp-surface1 rounded">
+                      <p className="text-ctp-subtext0">Max</p>
                       <p className="font-mono font-medium">
                         {Math.max(...history.map((r) => r.rate)).toFixed(4)}
                       </p>
                     </div>
-                    <div className="p-2 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded">
-                      <p className="text-gray-500 dark:text-gray-400">Moyenne</p>
+                    <div className="p-2 bg-ctp-surface1 rounded">
+                      <p className="text-ctp-subtext0">Moyenne</p>
                       <p className="font-mono font-medium">
                         {(
                           history.reduce((sum, r) => sum + r.rate, 0) /
@@ -440,7 +434,7 @@ export function ExchangeRatesPage() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-8 text-ctp-subtext0">
                   Aucun historique disponible
                 </div>
               )}
@@ -459,14 +453,13 @@ export function ExchangeRatesPage() {
             <div className="space-y-2">
               {sources.map((source) => {
                 const config = SOURCE_CONFIG[source.id] ?? {
-                  color: 'text-gray-700 dark:text-gray-300',
-                  bgColor: 'bg-gray-100',
-                  darkBgColor: 'dark:bg-gray-700',
+                  color: 'text-ctp-subtext1',
+                  bgColor: 'bg-ctp-surface1',
                   label: source.id.toUpperCase(),
                 };
                 const bgClass = source.available
-                  ? config.bgColor.replace('100', '50') + ' ' + config.darkBgColor.replace('/30', '/20')
-                  : 'bg-gray-50 dark:bg-gray-700/50 opacity-60';
+                  ? 'bg-ctp-surface0'
+                  : 'bg-ctp-surface0 opacity-60';
 
                 return (
                   <div
@@ -477,25 +470,25 @@ export function ExchangeRatesPage() {
                       className={clsx(
                         'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold',
                         source.available
-                          ? `${config.bgColor} ${config.darkBgColor} ${config.color}`
-                          : 'bg-gray-200 dark:bg-gray-600 text-gray-500'
+                          ? `${config.bgColor} ${config.color}`
+                          : 'bg-ctp-surface2 text-ctp-overlay1'
                       )}
                     >
                       {config.label.slice(0, 3)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{source.name}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-ctp-subtext0">
                         {source.currencies} devises - Base {source.baseCurrency}
                       </p>
                       {source.requiresApiKey && !source.available && (
-                        <p className="text-xs text-orange-500 mt-1">
+                        <p className="text-xs text-ctp-peach mt-1">
                           Cle API requise
                         </p>
                       )}
                       {source.available && (
-                        <span className="inline-flex items-center text-xs text-green-600 dark:text-green-400 mt-1">
-                          <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1" />
+                        <span className="inline-flex items-center text-xs text-ctp-green mt-1">
+                          <span className="w-1.5 h-1.5 bg-ctp-green rounded-full mr-1" />
                           Actif
                         </span>
                       )}
@@ -550,12 +543,12 @@ export function ExchangeRatesPage() {
             </div>
 
             {isAnyMutationSuccess && (
-              <p className="text-sm text-success-600 mt-2">
+              <p className="text-sm text-ctp-green mt-2">
                 Taux mis a jour avec succes
               </p>
             )}
             {isAnyMutationError && (
-              <p className="text-sm text-danger-600 mt-2">
+              <p className="text-sm text-ctp-red mt-2">
                 Erreur lors de la mise a jour
               </p>
             )}

@@ -1,5 +1,6 @@
 // ============================================================================
 // SETTLEMENT PAGE - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -113,7 +114,7 @@ export function SettlementPage() {
 
   if (!workspaceId) {
     return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+      <div className="p-6 text-center text-ctp-subtext0">
         Sélectionnez un espace de travail
       </div>
     );
@@ -133,11 +134,11 @@ export function SettlementPage() {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
+          <div className="h-8 bg-ctp-surface1 rounded w-1/3" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-xl" />
-            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-xl" />
-            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+            <div className="h-32 bg-ctp-surface1 rounded-xl" />
+            <div className="h-32 bg-ctp-surface1 rounded-xl" />
+            <div className="h-32 bg-ctp-surface1 rounded-xl" />
           </div>
         </div>
       </div>
@@ -150,7 +151,7 @@ export function SettlementPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Equilibre des comptes</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-ctp-subtext0">
             Qui doit quoi a qui ?
           </p>
         </div>
@@ -172,13 +173,13 @@ export function SettlementPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 p-1 bg-gray-100 dark:bg-gray-700 dark:bg-gray-800 rounded-lg w-fit">
+      <div className="flex gap-1 mb-6 p-1 bg-ctp-surface0 rounded-lg w-fit">
         <button
           onClick={() => setActiveTab('current')}
           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
             activeTab === 'current'
-              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              ? 'bg-ctp-base text-ctp-text shadow-sm'
+              : 'text-ctp-subtext0 hover:text-ctp-text'
           }`}
         >
           Periode actuelle
@@ -187,8 +188,8 @@ export function SettlementPage() {
           onClick={() => setActiveTab('history')}
           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
             activeTab === 'history'
-              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              ? 'bg-ctp-base text-ctp-text shadow-sm'
+              : 'text-ctp-subtext0 hover:text-ctp-text'
           }`}
         >
           Historique
@@ -209,25 +210,25 @@ export function SettlementPage() {
               <p className="text-3xl font-bold">
                 {formatCurrency(settlement.totalExpenses, settlement.currency)}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Dépenses totales</p>
+              <p className="text-sm text-ctp-subtext0">Dépenses totales</p>
             </div>
             <div className="card text-center">
               <p className="text-3xl font-bold">{settlement.memberCount}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Colocataires</p>
+              <p className="text-sm text-ctp-subtext0">Colocataires</p>
             </div>
             <div className="card text-center">
-              <p className="text-3xl font-bold text-primary-600">
+              <p className="text-3xl font-bold text-ctp-blue">
                 {formatCurrency(settlement.fairSharePerMember, settlement.currency)}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Part équitable</p>
+              <p className="text-sm text-ctp-subtext0">Part équitable</p>
             </div>
           </div>
 
           {/* Period Info */}
-          <div className="card bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 mb-6">
+          <div className="card bg-ctp-blue/10 border-ctp-blue mb-6">
             <div className="flex items-center gap-3">
-              <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              <p className="text-blue-800 dark:text-blue-200">
+              <Calendar className="w-6 h-6 text-ctp-blue" />
+              <p className="text-ctp-blue">
                 Période: {formatDate(settlement.period.startDate)} au{' '}
                 {formatDate(settlement.period.endDate)}
               </p>
@@ -255,9 +256,9 @@ export function SettlementPage() {
                             {formatCurrency(item.amount, settlement.currency)}
                           </span>
                         </div>
-                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div className="h-2 bg-ctp-surface1 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-primary-500 rounded-full"
+                            className="h-full bg-ctp-blue rounded-full"
                             style={{ width: `${percent}%` }}
                           />
                         </div>
@@ -266,7 +267,7 @@ export function SettlementPage() {
                   })}
                 </div>
               ) : (
-                <p className="text-gray-500 dark:text-gray-400 text-center py-4">Aucune dépense</p>
+                <p className="text-ctp-subtext0 text-center py-4">Aucune dépense</p>
               )}
             </div>
           </div>
@@ -279,9 +280,9 @@ export function SettlementPage() {
         </>
       ) : activeTab === 'current' ? (
         <div className="card text-center py-12">
-          <Home className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <Home className="w-12 h-12 mx-auto mb-4 text-ctp-overlay1" />
           <h2 className="text-xl font-bold mb-2">Aucune donnee</h2>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-ctp-subtext0">
             Ajoutez des depenses partagees pour voir l'equilibre
           </p>
         </div>

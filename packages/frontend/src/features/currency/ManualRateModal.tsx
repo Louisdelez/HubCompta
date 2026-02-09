@@ -1,6 +1,7 @@
 // ============================================================================
 // MANUAL RATE MODAL - Finance Hub
 // Modal for setting manual exchange rates
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -83,13 +84,13 @@ export function ManualRateModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl w-full max-w-md mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-ctp-surface1">
           <h2 className="text-lg font-semibold">Definir un taux manuel</h2>
           <button
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 rounded"
+            className="p-1 text-ctp-overlay1 hover:text-ctp-text rounded"
           >
             <X className="h-5 w-5" />
           </button>
@@ -99,7 +100,7 @@ export function ManualRateModal({
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           {/* Base Currency */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
               Devise source
             </label>
             <CurrencySelector
@@ -110,7 +111,7 @@ export function ManualRateModal({
 
           {/* Target Currency */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
               Devise cible
             </label>
             <CurrencySelector
@@ -118,7 +119,7 @@ export function ManualRateModal({
               onChange={(code) => code && setTargetCurrency(code)}
             />
             {baseCurrency === targetCurrency && (
-              <p className="text-xs text-red-500 mt-1">
+              <p className="text-xs text-ctp-red mt-1">
                 Les devises doivent etre differentes
               </p>
             )}
@@ -126,7 +127,7 @@ export function ManualRateModal({
 
           {/* Rate */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
               Taux (1 {baseCurrency} = ? {targetCurrency})
             </label>
             <input
@@ -140,7 +141,7 @@ export function ManualRateModal({
               required
             />
             {rate && parseFloat(rate) > 0 && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-ctp-subtext0 mt-1">
                 1 {baseCurrency} = {parseFloat(rate).toFixed(4)} {targetCurrency}
               </p>
             )}
@@ -148,7 +149,7 @@ export function ManualRateModal({
 
           {/* Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
               Date du taux
             </label>
             <input
@@ -162,8 +163,8 @@ export function ManualRateModal({
 
           {/* Error */}
           {setRateMutation.isError && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-sm text-red-600 dark:text-red-400">
+            <div className="p-3 bg-ctp-red/10 border border-ctp-red/30 rounded-lg">
+              <p className="text-sm text-ctp-red">
                 Erreur lors de la definition du taux
               </p>
             </div>

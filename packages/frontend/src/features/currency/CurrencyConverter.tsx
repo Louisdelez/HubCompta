@@ -1,6 +1,7 @@
 // ============================================================================
 // CURRENCY CONVERTER - Finance Hub
 // Quick currency conversion tool
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useEffect } from 'react';
@@ -96,7 +97,7 @@ export function CurrencyConverter({
         />
         <button
           onClick={handleSwap}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded"
+          className="p-2 hover:bg-ctp-surface0 rounded"
           title="Inverser"
         >
           ⇄
@@ -109,11 +110,11 @@ export function CurrencyConverter({
         />
         <div className="font-medium min-w-[100px] text-right">
           {isLoading ? (
-            <span className="text-gray-400">...</span>
+            <span className="text-ctp-overlay1">...</span>
           ) : conversion ? (
             formatCurrency(conversion.convertedAmount, toCurrency)
           ) : error ? (
-            <span className="text-danger-500 text-sm">Erreur</span>
+            <span className="text-ctp-red text-sm">Erreur</span>
           ) : (
             '-'
           )}
@@ -152,11 +153,11 @@ export function CurrencyConverter({
         <div className="flex justify-center">
           <button
             onClick={handleSwap}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-full transition-colors"
+            className="p-2 hover:bg-ctp-surface0 rounded-full transition-colors"
             title="Inverser les devises"
           >
             <svg
-              className="w-6 h-6 text-gray-500 dark:text-gray-400"
+              className="w-6 h-6 text-ctp-subtext0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -178,27 +179,27 @@ export function CurrencyConverter({
         </div>
 
         {/* Result */}
-        <div className="p-4 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg">
+        <div className="p-4 bg-ctp-surface1 rounded-lg">
           {isLoading ? (
-            <div className="text-center text-gray-500 dark:text-gray-400">Calcul en cours...</div>
+            <div className="text-center text-ctp-subtext0">Calcul en cours...</div>
           ) : error ? (
-            <div className="text-center text-danger-500">
+            <div className="text-center text-ctp-red">
               Taux de change non disponible
             </div>
           ) : conversion ? (
             <div className="text-center">
-              <p className="text-3xl font-bold text-primary-600">
+              <p className="text-3xl font-bold text-ctp-blue">
                 {formatCurrency(conversion.convertedAmount, toCurrency)}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              <p className="text-sm text-ctp-subtext0 mt-2">
                 1 {fromCurrency} = {conversion.rate.toFixed(4)} {toCurrency}
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-ctp-overlay1 mt-1">
                 Source: {conversion.source} - {new Date(conversion.date).toLocaleDateString('fr-FR')}
               </p>
             </div>
           ) : (
-            <div className="text-center text-gray-500 dark:text-gray-400">
+            <div className="text-center text-ctp-subtext0">
               Entrez un montant pour convertir
             </div>
           )}

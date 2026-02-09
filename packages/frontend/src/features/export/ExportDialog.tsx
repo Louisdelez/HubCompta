@@ -1,5 +1,6 @@
 // ============================================================================
 // EXPORT DIALOG - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -161,10 +162,10 @@ export function ExportDialog({ workspaceId, isOpen, onClose, initialType = 'tran
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-ctp-crust/80" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-auto">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-auto">
         <div className="p-6">
           <h2 className="text-xl font-bold mb-4">Exporter les données</h2>
 
@@ -184,8 +185,8 @@ export function ExportDialog({ workspaceId, isOpen, onClose, initialType = 'tran
                   className={clsx(
                     'p-3 rounded-lg border-2 text-left transition-colors',
                     exportType === type.value
-                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      ? 'border-ctp-blue bg-ctp-blue/10'
+                      : 'border-ctp-surface1 hover:border-ctp-overlay1'
                   )}
                 >
                   <type.icon className="w-5 h-5 inline mr-2" />
@@ -210,8 +211,8 @@ export function ExportDialog({ workspaceId, isOpen, onClose, initialType = 'tran
                     className={clsx(
                       'px-4 py-2 rounded-lg font-medium transition-colors',
                       format === f.value
-                        ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                        ? 'bg-ctp-blue/20 text-ctp-blue'
+                        : 'bg-ctp-surface1 text-ctp-subtext0'
                     )}
                   >
                     {f.label}
@@ -263,8 +264,8 @@ export function ExportDialog({ workspaceId, isOpen, onClose, initialType = 'tran
                       className={clsx(
                         'px-3 py-1 rounded-lg text-sm transition-colors',
                         selectedAccounts.includes(account.id)
-                          ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                          ? 'bg-ctp-blue/20 text-ctp-blue'
+                          : 'bg-ctp-surface1 text-ctp-subtext0'
                       )}
                     >
                       {account.name}
@@ -290,8 +291,8 @@ export function ExportDialog({ workspaceId, isOpen, onClose, initialType = 'tran
                       className={clsx(
                         'px-3 py-1 rounded-lg text-sm transition-colors',
                         selectedCategories.includes(category.id)
-                          ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                          ? 'bg-ctp-blue/20 text-ctp-blue'
+                          : 'bg-ctp-surface1 text-ctp-subtext0'
                       )}
                     >
                       {category.name}
@@ -374,7 +375,7 @@ export function ExportDialog({ workspaceId, isOpen, onClose, initialType = 'tran
                 type="checkbox"
                 checked={includeArchived}
                 onChange={(e) => setIncludeArchived(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                className="w-4 h-4 rounded border-ctp-surface1 text-ctp-blue focus:ring-ctp-blue"
               />
               <span className="text-sm">Inclure les éléments archivés</span>
             </label>
@@ -382,8 +383,8 @@ export function ExportDialog({ workspaceId, isOpen, onClose, initialType = 'tran
 
           {/* Backup info */}
           {exportType === 'backup' && (
-            <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
+            <div className="mb-6 p-4 bg-ctp-blue/10 border border-ctp-blue/30 rounded-lg">
+              <p className="text-sm text-ctp-blue">
                 La sauvegarde complète inclut toutes vos données: comptes, transactions,
                 catégories, budgets, règles et récurrences au format JSON.
               </p>
@@ -392,7 +393,7 @@ export function ExportDialog({ workspaceId, isOpen, onClose, initialType = 'tran
 
           {/* Error */}
           {exportMutation.error && (
-            <div className="mb-4 p-3 bg-danger-50 dark:bg-danger-900/20 rounded-lg text-danger-600 dark:text-danger-400 text-sm">
+            <div className="mb-4 p-3 bg-ctp-red/10 border border-ctp-red/30 rounded-lg text-ctp-red text-sm">
               Une erreur est survenue lors de l'export
             </div>
           )}

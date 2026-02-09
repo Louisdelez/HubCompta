@@ -1,5 +1,6 @@
 // ============================================================================
 // DOCUMENT VIEWER - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -101,17 +102,25 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto animate-scale-in">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto animate-scale-in">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               <span className="text-4xl">
-                {document.mimeType.startsWith('image/') ? <Image className="w-10 h-10 text-gray-500 dark:text-gray-400" /> : <FileText className="w-10 h-10 text-gray-500 dark:text-gray-400" />}
+                {document.mimeType.startsWith('image/') ? (
+                  <Image className="w-10 h-10 text-ctp-green" />
+                ) : document.mimeType === 'application/pdf' ? (
+                  <FileText className="w-10 h-10 text-ctp-red" />
+                ) : document.mimeType.includes('spreadsheet') || document.mimeType.includes('excel') || document.mimeType === 'text/csv' ? (
+                  <FileText className="w-10 h-10 text-ctp-green" />
+                ) : (
+                  <FileText className="w-10 h-10 text-ctp-blue" />
+                )}
               </span>
               <div>
                 <h2 className="text-xl font-bold break-all">{document.filename}</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-ctp-subtext0">
                   {formatFileSize(document.size)} • {document.mimeType}
                 </p>
               </div>
@@ -132,12 +141,12 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
               </button>
 
               {showPreview && (
-                <div className="mt-4 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                <div className="mt-4 rounded-lg overflow-hidden border border-ctp-surface1">
                   {document.mimeType.startsWith('image/') ? (
                     <img
                       src={downloadData.url}
                       alt={document.filename}
-                      className="w-full max-h-96 object-contain bg-gray-100 dark:bg-gray-700 dark:bg-gray-900"
+                      className="w-full max-h-96 object-contain bg-ctp-surface0"
                     />
                   ) : (
                     <iframe
@@ -154,17 +163,17 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
           {/* Metadata */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Ajouté le</p>
+              <p className="text-sm text-ctp-subtext0">Ajouté le</p>
               <p className="font-medium">{formatDate(document.createdAt)}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Par</p>
+              <p className="text-sm text-ctp-subtext0">Par</p>
               <p className="font-medium">
                 {document.uploader.displayName || document.uploader.email}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Statut</p>
+              <p className="text-sm text-ctp-subtext0">Statut</p>
               <p className="font-medium flex items-center gap-1">
                 {document.status === 'inbox' && <><Inbox className="w-4 h-4" /> À traiter</>}
                 {document.status === 'linked' && <><Link2 className="w-4 h-4" /> Lié</>}
@@ -172,7 +181,7 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Sécurité</p>
+              <p className="text-sm text-ctp-subtext0">Sécurité</p>
               <p className="font-medium flex items-center gap-1">
                 {document.isVault ? <><Lock className="w-4 h-4" /> Chiffré (Vault)</> : <><FileText className="w-4 h-4" /> Standard</>}
               </p>
@@ -183,7 +192,7 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold">Transactions liées</h3>
-              <button onClick={onLink} className="text-sm text-primary-600 hover:underline">
+              <button onClick={onLink} className="text-sm text-ctp-blue hover:underline">
                 + Ajouter
               </button>
             </div>
@@ -193,17 +202,17 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
                 {document.links.map((link) => (
                   <div
                     key={link.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-ctp-green/10 border border-ctp-green/30 rounded-lg"
                   >
                     <div>
                       <p className="font-medium">{link.transaction.description}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-ctp-subtext0">
                         {new Date(link.transaction.date).toLocaleDateString('fr-FR')}
                       </p>
                     </div>
                     <p
                       className={`font-bold ${
-                        link.transaction.amount >= 0 ? 'text-success-600' : ''
+                        link.transaction.amount >= 0 ? 'text-ctp-green' : ''
                       }`}
                     >
                       {formatCurrency(link.transaction.amount)}
@@ -212,8 +221,8 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6 bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 rounded-lg">
-                <p className="text-gray-500 dark:text-gray-400 mb-2">Aucune transaction liée</p>
+              <div className="text-center py-6 bg-ctp-surface0 rounded-lg">
+                <p className="text-ctp-subtext0 mb-2">Aucune transaction liée</p>
                 <button onClick={onLink} className="btn-primary text-sm">
                   Lier à une transaction
                 </button>

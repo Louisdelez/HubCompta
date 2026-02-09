@@ -1,5 +1,6 @@
 // ============================================================================
 // WORKSPACE SETTINGS PAGE - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -52,9 +53,9 @@ interface WorkspaceSettingsProps {
 // ----------------------------------------------------------------------------
 
 const CURRENCIES = [
-  { value: 'EUR', label: '€ Euro' },
+  { value: 'EUR', label: 'Euro' },
   { value: 'USD', label: '$ Dollar US' },
-  { value: 'GBP', label: '£ Livre Sterling' },
+  { value: 'GBP', label: 'Livre Sterling' },
   { value: 'CHF', label: 'CHF Franc Suisse' },
 ];
 
@@ -178,9 +179,9 @@ export function WorkspaceSettings({
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-          <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded" />
-          <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded" />
+          <div className="h-8 bg-ctp-surface1 rounded w-1/3" />
+          <div className="h-32 bg-ctp-surface1 rounded" />
+          <div className="h-32 bg-ctp-surface1 rounded" />
         </div>
       </div>
     );
@@ -189,7 +190,7 @@ export function WorkspaceSettings({
   if (!workspace) {
     return (
       <div className="p-6">
-        <p className="text-gray-500 dark:text-gray-400">Espace non trouvé</p>
+        <p className="text-ctp-subtext0">Espace non trouvé</p>
       </div>
     );
   }
@@ -198,19 +199,19 @@ export function WorkspaceSettings({
     <div className="p-6 max-w-2xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Paramètres</h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-ctp-subtext0">
           {WORKSPACE_TYPE_LABELS[workspace.type]}
         </p>
       </div>
 
       {/* Alerts */}
       {error && (
-        <div className="p-3 rounded-lg bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 text-sm">
+        <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm">
           {error}
         </div>
       )}
       {success && (
-        <div className="p-3 rounded-lg bg-success-50 dark:bg-success-900/20 text-success-600 dark:text-success-400 text-sm">
+        <div className="p-3 rounded-lg bg-ctp-green/10 text-ctp-green text-sm">
           {success}
         </div>
       )}
@@ -220,16 +221,16 @@ export function WorkspaceSettings({
         <h2 className="text-lg font-semibold mb-4">Statistiques</h2>
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
-            <p className="text-2xl font-bold text-primary-600">{workspace.stats.accounts}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Comptes</p>
+            <p className="text-2xl font-bold text-ctp-blue">{workspace.stats.accounts}</p>
+            <p className="text-sm text-ctp-subtext0">Comptes</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-primary-600">{workspace.stats.transactions}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Transactions</p>
+            <p className="text-2xl font-bold text-ctp-blue">{workspace.stats.transactions}</p>
+            <p className="text-sm text-ctp-subtext0">Transactions</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-primary-600">{workspace.stats.documents}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Documents</p>
+            <p className="text-2xl font-bold text-ctp-blue">{workspace.stats.documents}</p>
+            <p className="text-sm text-ctp-subtext0">Documents</p>
           </div>
         </div>
       </div>
@@ -343,13 +344,13 @@ export function WorkspaceSettings({
             <label className="flex items-center gap-3">
               <input
                 type="checkbox"
-                className="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                className="w-5 h-5 rounded border-ctp-surface2 text-ctp-blue focus:ring-ctp-blue"
                 disabled={!canEdit}
                 {...register('enableProMode')}
               />
               <div>
                 <p className="font-medium">Mode Pro</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-ctp-subtext0">
                   Facturation, devis, clients et fournisseurs
                 </p>
               </div>
@@ -358,13 +359,13 @@ export function WorkspaceSettings({
             <label className="flex items-center gap-3">
               <input
                 type="checkbox"
-                className="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                className="w-5 h-5 rounded border-ctp-surface2 text-ctp-blue focus:ring-ctp-blue"
                 disabled={!canEdit}
                 {...register('enableInvestMode')}
               />
               <div>
                 <p className="font-medium">Mode Investissement</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-ctp-subtext0">
                   Suivi de portefeuille et cours des marchés
                 </p>
               </div>
@@ -386,8 +387,8 @@ export function WorkspaceSettings({
 
       {/* Danger Zone */}
       {isOwner && (
-        <div className="card border-danger-300 dark:border-danger-700">
-          <h2 className="text-lg font-semibold text-danger-600 dark:text-danger-400 mb-4">
+        <div className="card border-ctp-red">
+          <h2 className="text-lg font-semibold text-ctp-red mb-4">
             Zone dangereuse
           </h2>
 
@@ -395,7 +396,7 @@ export function WorkspaceSettings({
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Supprimer l'espace</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-ctp-subtext0">
                   Cette action est irréversible
                 </p>
               </div>
@@ -408,14 +409,14 @@ export function WorkspaceSettings({
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="p-4 bg-danger-50 dark:bg-danger-900/20 rounded-lg">
-                <p className="text-danger-700 dark:text-danger-300 font-medium mb-2">
+              <div className="p-4 bg-ctp-red/10 rounded-lg">
+                <p className="text-ctp-red font-medium mb-2">
                   Attention !
                 </p>
-                <p className="text-sm text-danger-600 dark:text-danger-400">
+                <p className="text-sm text-ctp-red/80">
                   Vous êtes sur le point de supprimer cet espace et toutes ses données :
                 </p>
-                <ul className="text-sm text-danger-600 dark:text-danger-400 mt-2 list-disc list-inside">
+                <ul className="text-sm text-ctp-red/80 mt-2 list-disc list-inside">
                   <li>{workspace.stats.accounts} compte(s)</li>
                   <li>{workspace.stats.transactions} transaction(s)</li>
                   <li>{workspace.stats.documents} document(s)</li>

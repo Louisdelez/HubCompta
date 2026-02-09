@@ -1,6 +1,7 @@
 // ============================================================================
 // PROFILE SETTINGS - Finance Hub
 // User profile management
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useEffect } from 'react';
@@ -77,19 +78,19 @@ export function ProfileSettings() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-ctp-blue" />
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <div className="bg-ctp-mantle rounded-lg shadow">
+      <div className="px-6 py-4 border-b border-ctp-surface1">
         <div className="flex items-center gap-3">
-          <User className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profil</h2>
+          <User className="h-5 w-5 text-ctp-blue" />
+          <h2 className="text-lg font-semibold text-ctp-text">Profil</h2>
         </div>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-ctp-subtext0">
           Gérez vos informations personnelles
         </p>
       </div>
@@ -97,21 +98,21 @@ export function ProfileSettings() {
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         {/* Email (read-only) */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
             Email
           </label>
           <input
             type="email"
             value={profile?.email || ''}
             disabled
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+            className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-surface0 text-ctp-subtext0 cursor-not-allowed"
           />
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">L'email ne peut pas être modifié</p>
+          <p className="mt-1 text-xs text-ctp-subtext0">L'email ne peut pas être modifié</p>
         </div>
 
         {/* Display Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
             Nom d'affichage
           </label>
           <input
@@ -122,13 +123,13 @@ export function ProfileSettings() {
               setIsEditing(true);
             }}
             placeholder="Votre nom"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
           />
         </div>
 
         {/* Locale */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
             Langue
           </label>
           <select
@@ -137,7 +138,7 @@ export function ProfileSettings() {
               setFormData({ ...formData, locale: e.target.value });
               setIsEditing(true);
             }}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
           >
             <option value="fr-FR">Francais</option>
             <option value="en-US">English (US)</option>
@@ -149,7 +150,7 @@ export function ProfileSettings() {
 
         {/* Timezone */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
             Fuseau horaire
           </label>
           <select
@@ -158,7 +159,7 @@ export function ProfileSettings() {
               setFormData({ ...formData, timezone: e.target.value });
               setIsEditing(true);
             }}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
           >
             <option value="Europe/Paris">Europe/Paris (CET)</option>
             <option value="Europe/London">Europe/London (GMT)</option>
@@ -171,7 +172,7 @@ export function ProfileSettings() {
 
         {/* Theme */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
             Theme
           </label>
           <select
@@ -180,7 +181,7 @@ export function ProfileSettings() {
               setFormData({ ...formData, theme: e.target.value });
               setIsEditing(true);
             }}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
           >
             <option value="system">Systeme</option>
             <option value="light">Clair</option>
@@ -189,8 +190,8 @@ export function ProfileSettings() {
         </div>
 
         {/* Account created */}
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="pt-4 border-t border-ctp-surface1">
+          <p className="text-sm text-ctp-subtext0">
             Compte cree le{' '}
             {profile?.createdAt
               ? new Date(profile.createdAt).toLocaleDateString('fr-FR', {
@@ -216,14 +217,14 @@ export function ProfileSettings() {
                 });
                 setIsEditing(false);
               }}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-ctp-subtext1 hover:bg-ctp-surface0 rounded-lg transition-colors"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={updateMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-ctp-blue text-ctp-base text-sm font-medium rounded-lg hover:bg-ctp-sapphire disabled:opacity-50 transition-colors"
             >
               {updateMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

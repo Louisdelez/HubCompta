@@ -1,6 +1,7 @@
 // ============================================================================
 // NOTIFICATION BELL COMPONENT - Finance Hub
 // Bell icon with unread count badge
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useRef, useEffect } from 'react';
@@ -59,16 +60,15 @@ export function NotificationBell() {
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           'relative p-2 rounded-lg transition-colors',
-          'text-gray-500 hover:text-gray-700 hover:bg-gray-100',
-          'dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700',
-          isOpen && 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
+          'text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0',
+          isOpen && 'bg-ctp-surface0 text-ctp-text'
         )}
       >
         <Bell className="h-5 w-5" />
 
         {/* Unread badge */}
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] text-xs font-medium text-white bg-red-500 rounded-full px-1">
+          <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] text-xs font-medium text-ctp-crust bg-ctp-red rounded-full px-1">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -76,15 +76,15 @@ export function NotificationBell() {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 top-full mt-2 w-96 bg-ctp-base border border-ctp-surface1 rounded-lg shadow-lg z-50">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b dark:border-gray-700">
-            <h3 className="font-medium text-gray-900 dark:text-white">Notifications</h3>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-ctp-surface1">
+            <h3 className="font-medium text-ctp-text">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={() => markAllReadMutation.mutate()}
                 disabled={markAllReadMutation.isPending}
-                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                className="text-xs text-ctp-blue hover:text-ctp-sapphire flex items-center gap-1"
               >
                 {markAllReadMutation.isPending ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -102,10 +102,10 @@ export function NotificationBell() {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-2 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+          <div className="px-4 py-2 border-t border-ctp-surface1 bg-ctp-mantle">
             <a
               href="/settings/notifications"
-              className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 dark:text-gray-400 dark:hover:text-gray-200"
+              className="text-xs text-ctp-subtext0 hover:text-ctp-text"
             >
               Gérer les paramètres de notification
             </a>

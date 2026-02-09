@@ -1,6 +1,7 @@
 // ============================================================================
 // ADMIN SYSTEM - Finance Hub
 // System management (cache, info)
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -48,14 +49,14 @@ export function AdminSystem() {
       {/* Cache Management */}
       <div className="space-y-4">
         <h3 className="font-medium flex items-center gap-2">
-          <Database className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          <Database className="h-5 w-5 text-ctp-subtext0" />
           Gestion du cache
         </h3>
 
-        <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4 space-y-4">
+        <div className="bg-ctp-surface0 rounded-lg p-4 space-y-4">
           {/* Clear all cache */}
           <div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+            <p className="text-sm text-ctp-subtext0 mb-3">
               Vider tout le cache (cles de cache et rate limits)
             </p>
             <button
@@ -73,8 +74,8 @@ export function AdminSystem() {
           </div>
 
           {/* Clear by pattern */}
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700 dark:border-gray-600">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+          <div className="pt-4 border-t border-ctp-surface1">
+            <p className="text-sm text-ctp-subtext0 mb-3">
               Vider le cache par pattern (ex: cache:exchange-rates:*)
             </p>
             <div className="flex gap-2">
@@ -98,7 +99,7 @@ export function AdminSystem() {
 
           {/* Result */}
           {clearCacheMutation.isSuccess && (
-            <div className="flex items-center gap-2 text-green-600 pt-2">
+            <div className="flex items-center gap-2 text-ctp-green pt-2">
               <CheckCircle className="h-4 w-4" />
               <span className="text-sm">
                 {clearCacheMutation.data?.cleared} cle(s) supprimee(s)
@@ -107,7 +108,7 @@ export function AdminSystem() {
           )}
 
           {clearCacheMutation.isError && (
-            <div className="flex items-center gap-2 text-red-600 pt-2">
+            <div className="flex items-center gap-2 text-ctp-red pt-2">
               <AlertCircle className="h-4 w-4" />
               <span className="text-sm">Erreur lors de la suppression</span>
             </div>
@@ -118,28 +119,28 @@ export function AdminSystem() {
       {/* System Info */}
       <div className="space-y-4">
         <h3 className="font-medium flex items-center gap-2">
-          <Info className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          <Info className="h-5 w-5 text-ctp-subtext0" />
           Informations systeme
         </h3>
 
-        <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-700/50 rounded-lg p-4">
+        <div className="bg-ctp-surface0 rounded-lg p-4">
           <dl className="space-y-3">
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">Application</dt>
-              <dd className="font-medium">HubCompta</dd>
+              <dt className="text-ctp-subtext0">Application</dt>
+              <dd className="font-medium text-ctp-text">HubCompta</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">Version</dt>
+              <dt className="text-ctp-subtext0">Version</dt>
               <dd className="font-mono text-sm">1.0.0</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">Environnement</dt>
+              <dt className="text-ctp-subtext0">Environnement</dt>
               <dd className="font-mono text-sm">
                 {import.meta.env.MODE}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500 dark:text-gray-400">API URL</dt>
+              <dt className="text-ctp-subtext0">API URL</dt>
               <dd className="font-mono text-sm truncate max-w-xs">
                 {import.meta.env.VITE_API_URL || 'http://localhost:3000'}
               </dd>
@@ -150,16 +151,16 @@ export function AdminSystem() {
 
       {/* Danger Zone */}
       <div className="space-y-4">
-        <h3 className="font-medium text-red-600">Zone dangereuse</h3>
+        <h3 className="font-medium text-ctp-red">Zone dangereuse</h3>
 
-        <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
-          <p className="text-sm text-red-600 dark:text-red-400 mb-3">
+        <div className="border border-ctp-red/30 rounded-lg p-4 bg-ctp-red/10">
+          <p className="text-sm text-ctp-red mb-3">
             Ces actions sont irreversibles et peuvent affecter le fonctionnement
             de l'application.
           </p>
           <div className="space-y-2">
             <button
-              className="btn-secondary text-red-600 border-red-300 hover:bg-red-100 dark:hover:bg-red-900/30"
+              className="btn-secondary text-ctp-red border-ctp-red/30 hover:bg-ctp-red/20"
               onClick={() => {
                 if (window.confirm('Etes-vous sur de vouloir reconstruire les index de recherche?')) {
                   // TODO: Implement rebuild search indexes

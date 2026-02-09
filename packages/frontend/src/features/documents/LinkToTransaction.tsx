@@ -1,5 +1,6 @@
 // ============================================================================
 // LINK TO TRANSACTION - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -112,22 +113,22 @@ export function LinkToTransaction({
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden animate-scale-in">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden animate-scale-in">
+        <div className="p-6 border-b border-ctp-surface1">
           <h2 className="text-xl font-bold">Lier à une transaction</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-ctp-subtext0 mt-1">
             Associez "{document.filename}" à une transaction
           </p>
         </div>
 
         {/* Search */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-4 border-b border-ctp-surface1">
           <input
             type="text"
             placeholder="Rechercher une transaction..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="input"
+            className="w-full px-4 py-2 rounded-lg bg-ctp-surface0 border border-ctp-surface1 text-ctp-text placeholder-ctp-overlay0 focus:border-ctp-blue focus:ring-2 focus:ring-ctp-blue/20 outline-none transition-colors"
             autoFocus
           />
         </div>
@@ -136,19 +137,19 @@ export function LinkToTransaction({
         <div className="max-h-96 overflow-y-auto">
           {isLoading ? (
             <div className="p-6 text-center">
-              <div className="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full mx-auto mb-2" />
-              <p className="text-gray-500 dark:text-gray-400">Chargement...</p>
+              <div className="animate-spin w-8 h-8 border-4 border-ctp-blue border-t-transparent rounded-full mx-auto mb-2" />
+              <p className="text-ctp-subtext0">Chargement...</p>
             </div>
           ) : transactions.length > 0 ? (
-            <div className="divide-y divide-gray-100 dark:divide-gray-700">
+            <div className="divide-y divide-ctp-surface1">
               {transactions.map((txn) => (
                 <button
                   key={txn.id}
                   onClick={() => setSelectedTransaction(txn)}
                   className={clsx(
-                    'w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors',
+                    'w-full p-4 text-left hover:bg-ctp-surface0 transition-colors',
                     selectedTransaction?.id === txn.id &&
-                      'bg-primary-50 dark:bg-primary-900/20 ring-2 ring-primary-500'
+                      'bg-ctp-blue/10 ring-2 ring-ctp-blue'
                   )}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -159,14 +160,14 @@ export function LinkToTransaction({
                         )}
                         <p className="font-medium truncate">{txn.description}</p>
                       </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-ctp-subtext0">
                         {formatDate(txn.date)} • {txn.account.name}
                       </p>
                     </div>
                     <p
                       className={clsx(
                         'font-bold whitespace-nowrap',
-                        txn.amount >= 0 ? 'text-success-600' : ''
+                        txn.amount >= 0 ? 'text-ctp-green' : ''
                       )}
                     >
                       {formatCurrency(txn.amount)}
@@ -177,7 +178,7 @@ export function LinkToTransaction({
             </div>
           ) : (
             <div className="p-6 text-center">
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-ctp-subtext0">
                 {searchQuery ? 'Aucun résultat' : 'Aucune transaction récente'}
               </p>
             </div>
@@ -185,7 +186,7 @@ export function LinkToTransaction({
         </div>
 
         {/* Actions */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+        <div className="p-4 border-t border-ctp-surface1 flex gap-3">
           <button onClick={onClose} className="btn-secondary flex-1">
             Annuler
           </button>

@@ -1,5 +1,6 @@
 // ============================================================================
 // BUDGET ALERTS - Finance Hub Dashboard
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useQuery } from '@tanstack/react-query';
@@ -58,20 +59,20 @@ function getAlertStyles(level: 'warning' | 'danger' | 'over'): {
   switch (level) {
     case 'over':
       return {
-        bg: 'bg-danger-50 dark:bg-danger-900/20',
-        text: 'text-danger-700 dark:text-danger-300',
+        bg: 'bg-ctp-red/10',
+        text: 'text-ctp-red',
         icon: AlertCircle,
       };
     case 'danger':
       return {
-        bg: 'bg-danger-50 dark:bg-danger-900/20',
-        text: 'text-danger-700 dark:text-danger-300',
+        bg: 'bg-ctp-red/10',
+        text: 'text-ctp-red',
         icon: AlertTriangle,
       };
     case 'warning':
       return {
-        bg: 'bg-warning-50 dark:bg-warning-900/20',
-        text: 'text-warning-700 dark:text-warning-300',
+        bg: 'bg-ctp-peach/10',
+        text: 'text-ctp-peach',
         icon: Zap,
       };
   }
@@ -102,35 +103,48 @@ export function BudgetAlerts({ workspaceId }: BudgetAlertsProps) {
   }
 
   return (
-    <div className="card">
+    <div className="bg-ctp-surface0 rounded-xl p-5 border border-ctp-surface1">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
-          <Wallet className="w-5 h-5" />
+        <h2 className="text-lg font-semibold text-ctp-text flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-ctp-mauve/20">
+            <Wallet className="w-5 h-5 text-ctp-mauve" />
+          </div>
           Budgets
         </h2>
-        <Link to="/budgets" className="text-sm text-primary-600 hover:underline">
-          Voir tout →
+        <Link to="/budgets" className="text-sm text-ctp-blue hover:text-ctp-sapphire hover:underline transition-colors">
+          Voir tout
         </Link>
       </div>
 
       {/* Summary Bar */}
-      <div className="mb-4">
+      <div className="mb-4 p-3 bg-ctp-mantle rounded-lg">
         <div className="flex justify-between text-sm mb-2">
-          <span className="text-gray-600 dark:text-gray-400">
+          <span className="text-ctp-subtext0">
             {formatCurrency(summary.totalSpent)} / {formatCurrency(summary.totalBudgeted)}
           </span>
-          <span className="font-medium">{summary.overallPercent}%</span>
+          <span
+            className={clsx(
+              'font-semibold',
+              summary.overallPercent >= 100
+                ? 'text-ctp-red'
+                : summary.overallPercent >= 80
+                  ? 'text-ctp-peach'
+                  : 'text-ctp-green'
+            )}
+          >
+            {summary.overallPercent}%
+          </span>
         </div>
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="h-3 bg-ctp-surface1 rounded-full overflow-hidden">
           <div
             className={clsx(
-              'h-full rounded-full transition-all',
+              'h-full rounded-full transition-all duration-500',
               summary.overallPercent >= 100
-                ? 'bg-danger-500'
+                ? 'bg-ctp-red'
                 : summary.overallPercent >= 80
-                  ? 'bg-warning-500'
-                  : 'bg-success-500'
+                  ? 'bg-ctp-peach'
+                  : 'bg-ctp-green'
             )}
             style={{ width: `${Math.min(summary.overallPercent, 100)}%` }}
           />
@@ -138,20 +152,23 @@ export function BudgetAlerts({ workspaceId }: BudgetAlertsProps) {
       </div>
 
       {/* Status Pills */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         {summary.budgetsOnTrack > 0 && (
-          <span className="px-2 py-1 text-xs rounded-full bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-300">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-ctp-green/20 text-ctp-green border border-ctp-green/30">
+            <CheckCircle className="w-3 h-3" />
             {summary.budgetsOnTrack} OK
           </span>
         )}
         {summary.budgetsAtRisk > 0 && (
-          <span className="px-2 py-1 text-xs rounded-full bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-300">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-ctp-peach/20 text-ctp-peach border border-ctp-peach/30">
+            <Zap className="w-3 h-3" />
             {summary.budgetsAtRisk} attention
           </span>
         )}
         {summary.budgetsOverspent > 0 && (
-          <span className="px-2 py-1 text-xs rounded-full bg-danger-100 text-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
-            {summary.budgetsOverspent} dépassé{summary.budgetsOverspent > 1 ? 's' : ''}
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-ctp-red/20 text-ctp-red border border-ctp-red/30">
+            <AlertCircle className="w-3 h-3" />
+            {summary.budgetsOverspent} depasse{summary.budgetsOverspent > 1 ? 's' : ''}
           </span>
         )}
       </div>
@@ -165,24 +182,39 @@ export function BudgetAlerts({ workspaceId }: BudgetAlertsProps) {
             return (
               <div
                 key={alert.budgetId}
-                className={clsx('p-3 rounded-lg', styles.bg)}
+                className={clsx(
+                  'p-3 rounded-lg border transition-all hover:shadow-sm',
+                  styles.bg,
+                  alert.level === 'over' || alert.level === 'danger'
+                    ? 'border-ctp-red/20'
+                    : 'border-ctp-peach/20'
+                )}
               >
-                <div className="flex items-center gap-2">
-                  {alert.categoryIcon ? (
-                    <span className="text-lg">{alert.categoryIcon}</span>
-                  ) : (
-                    <styles.icon className="w-5 h-5" />
-                  )}
+                <div className="flex items-center gap-3">
+                  <div
+                    className={clsx(
+                      'w-8 h-8 rounded-lg flex items-center justify-center',
+                      alert.level === 'over' || alert.level === 'danger'
+                        ? 'bg-ctp-red/20'
+                        : 'bg-ctp-peach/20'
+                    )}
+                  >
+                    {alert.categoryIcon ? (
+                      <span className="text-base">{alert.categoryIcon}</span>
+                    ) : (
+                      <styles.icon className={clsx('w-4 h-4', styles.text)} />
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className={clsx('font-medium text-sm', styles.text)}>
                       {alert.budgetName}
                     </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                    <p className="text-xs text-ctp-subtext0 truncate">
                       {alert.message}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className={clsx('font-bold text-sm', styles.text)}>
+                    <p className={clsx('font-bold text-base', styles.text)}>
                       {alert.percentUsed}%
                     </p>
                   </div>
@@ -194,7 +226,7 @@ export function BudgetAlerts({ workspaceId }: BudgetAlertsProps) {
           {alerts.length > 3 && (
             <Link
               to="/budgets"
-              className="block text-center text-sm text-primary-600 hover:underline py-2"
+              className="block text-center text-sm text-ctp-blue hover:text-ctp-sapphire hover:underline py-2 transition-colors"
             >
               + {alerts.length - 3} autre{alerts.length - 3 > 1 ? 's' : ''} alerte{alerts.length - 3 > 1 ? 's' : ''}
             </Link>
@@ -204,10 +236,15 @@ export function BudgetAlerts({ workspaceId }: BudgetAlertsProps) {
 
       {/* No Alerts - All Good */}
       {(!alerts || alerts.length === 0) && (
-        <div className="text-center py-4">
-          <CheckCircle className="w-8 h-8 mx-auto text-success-500" />
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            Tous vos budgets sont sous contrôle
+        <div className="text-center py-6 bg-ctp-green/5 rounded-lg border border-ctp-green/20">
+          <div className="w-12 h-12 mx-auto bg-ctp-green/20 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-ctp-green" />
+          </div>
+          <p className="text-sm font-medium text-ctp-green mt-3">
+            Tous vos budgets sont sous controle
+          </p>
+          <p className="text-xs text-ctp-subtext0 mt-1">
+            Continuez ainsi !
           </p>
         </div>
       )}

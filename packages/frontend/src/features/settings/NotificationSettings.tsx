@@ -1,6 +1,7 @@
 // ============================================================================
 // NOTIFICATION SETTINGS - Finance Hub
 // Notification preferences management
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState, useEffect } from 'react';
@@ -98,7 +99,7 @@ export function NotificationSettings() {
   if (isLoading || !formData) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-ctp-blue" />
       </div>
     );
   }
@@ -106,16 +107,16 @@ export function NotificationSettings() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Email Notifications */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-ctp-mantle rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-ctp-surface1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+              <Mail className="h-5 w-5 text-ctp-yellow" />
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-lg font-semibold text-ctp-text">
                   Notifications par email
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-ctp-subtext0">
                   Recevez des notifications par email
                 </p>
               </div>
@@ -127,7 +128,7 @@ export function NotificationSettings() {
                 onChange={(e) => handleEmailChange('enabled', e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-800 after:border-gray-300 dark:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+              <div className="w-11 h-6 bg-ctp-surface1 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-ctp-blue/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-ctp-surface2 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ctp-blue"></div>
             </label>
           </div>
         </div>
@@ -137,10 +138,10 @@ export function NotificationSettings() {
             {/* Budget Alerts */}
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium text-ctp-subtext1">
                   Alertes budget
                 </span>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-ctp-subtext0">
                   Soyez prevenu quand vous approchez ou depassez un budget
                 </p>
               </div>
@@ -148,17 +149,17 @@ export function NotificationSettings() {
                 type="checkbox"
                 checked={formData.email.budgetAlerts}
                 onChange={(e) => handleEmailChange('budgetAlerts', e.target.checked)}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
               />
             </label>
 
             {/* Import Complete */}
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium text-ctp-subtext1">
                   Import termine
                 </span>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-ctp-subtext0">
                   Notification quand un import de transactions est termine
                 </p>
               </div>
@@ -166,17 +167,17 @@ export function NotificationSettings() {
                 type="checkbox"
                 checked={formData.email.importComplete}
                 onChange={(e) => handleEmailChange('importComplete', e.target.checked)}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
               />
             </label>
 
             {/* Security Alerts */}
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium text-ctp-subtext1">
                   Alertes securite
                 </span>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-ctp-subtext0">
                   Connexions suspectes, nouveaux appareils, etc.
                 </p>
               </div>
@@ -184,17 +185,17 @@ export function NotificationSettings() {
                 type="checkbox"
                 checked={formData.email.securityAlerts}
                 onChange={(e) => handleEmailChange('securityAlerts', e.target.checked)}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
               />
             </label>
 
             {/* Weekly Digest */}
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium text-ctp-subtext1">
                   Resume hebdomadaire
                 </span>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-ctp-subtext0">
                   Recevez un resume de votre activite chaque semaine
                 </p>
               </div>
@@ -202,7 +203,7 @@ export function NotificationSettings() {
                 type="checkbox"
                 checked={formData.email.weeklyDigest}
                 onChange={(e) => handleEmailChange('weeklyDigest', e.target.checked)}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
               />
             </label>
           </div>
@@ -210,16 +211,16 @@ export function NotificationSettings() {
       </div>
 
       {/* Push Notifications */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-ctp-mantle rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-ctp-surface1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Smartphone className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+              <Smartphone className="h-5 w-5 text-ctp-yellow" />
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-lg font-semibold text-ctp-text">
                   Notifications push
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-ctp-subtext0">
                   Recevez des notifications sur votre appareil
                 </p>
               </div>
@@ -231,7 +232,7 @@ export function NotificationSettings() {
                 onChange={(e) => handlePushChange('enabled', e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-800 after:border-gray-300 dark:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+              <div className="w-11 h-6 bg-ctp-surface1 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-ctp-blue/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-ctp-surface2 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ctp-blue"></div>
             </label>
           </div>
         </div>
@@ -241,10 +242,10 @@ export function NotificationSettings() {
             {/* Budget Alerts */}
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium text-ctp-subtext1">
                   Alertes budget
                 </span>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-ctp-subtext0">
                   Alertes instantanees sur les budgets
                 </p>
               </div>
@@ -252,17 +253,17 @@ export function NotificationSettings() {
                 type="checkbox"
                 checked={formData.push.budgetAlerts}
                 onChange={(e) => handlePushChange('budgetAlerts', e.target.checked)}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
               />
             </label>
 
             {/* Price Alerts */}
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium text-ctp-subtext1">
                   Alertes prix
                 </span>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-ctp-subtext0">
                   Alertes sur les variations de prix (investissements)
                 </p>
               </div>
@@ -270,17 +271,17 @@ export function NotificationSettings() {
                 type="checkbox"
                 checked={formData.push.priceAlerts}
                 onChange={(e) => handlePushChange('priceAlerts', e.target.checked)}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
               />
             </label>
 
             {/* Bill Reminders */}
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium text-ctp-subtext1">
                   Rappels de factures
                 </span>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-ctp-subtext0">
                   Rappels pour les paiements a venir
                 </p>
               </div>
@@ -288,7 +289,7 @@ export function NotificationSettings() {
                 type="checkbox"
                 checked={formData.push.billReminders}
                 onChange={(e) => handlePushChange('billReminders', e.target.checked)}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
               />
             </label>
           </div>
@@ -296,20 +297,20 @@ export function NotificationSettings() {
       </div>
 
       {/* In-app notification settings link */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-ctp-mantle rounded-lg shadow p-6">
         <div className="flex items-center gap-3">
-          <Bell className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          <Bell className="h-5 w-5 text-ctp-yellow" />
           <div className="flex-1">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h3 className="text-sm font-medium text-ctp-text">
               Regles d'alertes personnalisees
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-ctp-subtext0">
               Configurez des alertes personnalisees (budget, solde, prix, etc.)
             </p>
           </div>
           <a
             href="/notifications/alerts"
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="text-sm text-ctp-blue hover:text-ctp-sapphire font-medium"
           >
             Configurer
           </a>
@@ -327,14 +328,14 @@ export function NotificationSettings() {
               }
               setIsEditing(false);
             }}
-            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-ctp-subtext1 hover:bg-ctp-surface0 rounded-lg transition-colors"
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={updateMutation.isPending}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-ctp-blue text-ctp-base text-sm font-medium rounded-lg hover:bg-ctp-sapphire disabled:opacity-50 transition-colors"
           >
             {updateMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

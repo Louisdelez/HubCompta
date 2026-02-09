@@ -1,5 +1,6 @@
 // ============================================================================
 // ADVANCED FILTERS - Finance Hub
+// Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
 import { useState } from 'react';
@@ -132,9 +133,9 @@ export function AdvancedFilters({
   };
 
   return (
-    <div className={clsx('bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700', className)}>
+    <div className={clsx('bg-ctp-surface0 rounded-lg border border-ctp-surface1', className)}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between p-4 border-b border-ctp-surface1">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center gap-2 text-sm font-medium"
@@ -157,7 +158,7 @@ export function AdvancedFilters({
           </svg>
           Filtres avancés
           {activeFilterCount > 0 && (
-            <span className="px-2 py-0.5 text-xs bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full">
+            <span className="px-2 py-0.5 text-xs bg-ctp-blue/20 text-ctp-blue rounded-full">
               {activeFilterCount}
             </span>
           )}
@@ -166,7 +167,7 @@ export function AdvancedFilters({
         {activeFilterCount > 0 && (
           <button
             onClick={onReset}
-            className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-300"
+            className="text-sm text-ctp-subtext0 hover:text-ctp-subtext1"
           >
             Réinitialiser
           </button>
@@ -184,7 +185,7 @@ export function AdvancedFilters({
               value={filters.query ?? ''}
               onChange={(e) => updateFilter('query', e.target.value || undefined)}
               placeholder="Rechercher dans les descriptions..."
-              className="input"
+              className="w-full px-4 py-2 rounded-lg bg-ctp-surface0 border border-ctp-surface1 text-ctp-text placeholder-ctp-overlay0 focus:border-ctp-blue focus:ring-2 focus:ring-ctp-blue/20 outline-none transition-colors"
             />
           </div>
 
@@ -253,8 +254,8 @@ export function AdvancedFilters({
                   className={clsx(
                     'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
                     filters.types?.includes(type.value)
-                      ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      ? 'bg-ctp-blue/20 text-ctp-blue'
+                      : 'bg-ctp-surface1 text-ctp-subtext0 hover:bg-ctp-surface2'
                   )}
                 >
                   <type.icon className="w-4 h-4 inline mr-1" /> {type.label}
@@ -274,8 +275,8 @@ export function AdvancedFilters({
                   className={clsx(
                     'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
                     filters.accountIds?.includes(account.id)
-                      ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      ? 'bg-ctp-blue/20 text-ctp-blue'
+                      : 'bg-ctp-surface1 text-ctp-subtext0 hover:bg-ctp-surface2'
                   )}
                   style={{
                     borderLeft: account.color ? `3px solid ${account.color}` : undefined,
@@ -298,8 +299,8 @@ export function AdvancedFilters({
                   className={clsx(
                     'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
                     filters.categoryIds?.includes(category.id)
-                      ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      ? 'bg-ctp-blue/20 text-ctp-blue'
+                      : 'bg-ctp-surface1 text-ctp-subtext0 hover:bg-ctp-surface2'
                   )}
                 >
                   {category.icon} {category.name}
@@ -320,8 +321,8 @@ export function AdvancedFilters({
                     className={clsx(
                       'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
                       filters.tagIds?.includes(tag.id)
-                        ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                        ? 'bg-ctp-blue/20 text-ctp-blue'
+                        : 'bg-ctp-surface1 text-ctp-subtext0 hover:bg-ctp-surface2'
                     )}
                     style={{
                       backgroundColor: tag.color ? `${tag.color}20` : undefined,
@@ -363,7 +364,7 @@ export function AdvancedFilters({
                 onChange={(e) =>
                   updateFilter('hasDocuments', e.target.checked ? true : undefined)
                 }
-                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                className="w-4 h-4 rounded border-ctp-surface1 text-ctp-blue focus:ring-ctp-blue"
               />
               <span className="text-sm">Avec justificatif</span>
             </label>
@@ -375,7 +376,7 @@ export function AdvancedFilters({
                 onChange={(e) =>
                   updateFilter('isRecurring', e.target.checked ? true : undefined)
                 }
-                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                className="w-4 h-4 rounded border-ctp-surface1 text-ctp-blue focus:ring-ctp-blue"
               />
               <span className="text-sm">Récurrente</span>
             </label>
