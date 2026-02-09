@@ -34,7 +34,7 @@ import {
   Monitor,
   type LucideIcon,
 } from 'lucide-react';
-import { useTheme, THEME_META, type CatppuccinFlavor } from '@/providers/ThemeProvider';
+import { useTheme, THEME_META, type CatppuccinFlavor, type Theme } from '@/providers/ThemeProvider';
 
 // ----------------------------------------------------------------------------
 // Navigation Items
@@ -208,6 +208,118 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
 }
 
 // ----------------------------------------------------------------------------
+// Theme Selector Component
+// ----------------------------------------------------------------------------
+
+const THEME_OPTIONS: { value: Theme; label: string; icon: LucideIcon }[] = [
+  { value: 'system', label: 'Système', icon: Monitor },
+  { value: 'latte', label: 'Latte', icon: Sun },
+  { value: 'frappe', label: 'Frappé', icon: Moon },
+  { value: 'macchiato', label: 'Macchiato', icon: Moon },
+  { value: 'mocha', label: 'Mocha', icon: Moon },
+];
+
+function ThemeSelector() {
+  const { theme, setTheme, isDark } = useTheme();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const currentOption = THEME_OPTIONS.find((opt) => opt.value === theme) ?? THEME_OPTIONS[0];
+  const CurrentIcon = currentOption.icon;
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="p-2 rounded-lg text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text transition-colors"
+        aria-label={`Thème: ${currentOption.label}`}
+        title={`Thème: ${currentOption.label}`}
+      >
+        <CurrentIcon className="w-5 h-5" />
+      </button>
+
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Dropdown */}
+          <div className="absolute right-0 top-full mt-2 w-56 bg-ctp-base border border-ctp-surface1 rounded-xl shadow-lg z-50 overflow-hidden">
+            <div className="p-2">
+              <p className="px-3 py-1.5 text-xs font-medium text-ctp-subtext0 uppercase tracking-wide">
+                Thème Catppuccin
+              </p>
+              {THEME_OPTIONS.map((option) => {
+                const isSelected = theme === option.value;
+                const meta = option.value !== 'system' ? THEME_META[option.value as CatppuccinFlavor] : null;
+                const OptionIcon = option.icon;
+
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setTheme(option.value);
+                      setIsOpen(false);
+                    }}
+                    className={clsx(
+                      'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
+                      isSelected
+                        ? 'bg-ctp-blue/20 text-ctp-blue'
+                        : 'text-ctp-text hover:bg-ctp-surface0'
+                    )}
+                  >
+                    <OptionIcon className="w-4 h-4 flex-shrink-0" />
+                    <span className="flex-1 text-left font-medium">{option.label}</span>
+
+                    {/* Color preview dots */}
+                    {meta && (
+                      <div className="flex gap-1">
+                        <span
+                          className="w-3 h-3 rounded-full border border-ctp-surface1"
+                          style={{ backgroundColor: meta.colors.base }}
+                          title="Base"
+                        />
+                        <span
+                          className="w-3 h-3 rounded-full border border-ctp-surface1"
+                          style={{ backgroundColor: meta.colors.blue }}
+                          title="Blue"
+                        />
+                        <span
+                          className="w-3 h-3 rounded-full border border-ctp-surface1"
+                          style={{ backgroundColor: meta.colors.green }}
+                          title="Green"
+                        />
+                        <span
+                          className="w-3 h-3 rounded-full border border-ctp-surface1"
+                          style={{ backgroundColor: meta.colors.red }}
+                          title="Red"
+                        />
+                      </div>
+                    )}
+
+                    {option.value === 'system' && (
+                      <span className="text-xs text-ctp-subtext0">Auto</span>
+                    )}
+
+                    {isSelected && (
+                      <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ----------------------------------------------------------------------------
 // Header Component
 // ----------------------------------------------------------------------------
 
@@ -218,21 +330,6 @@ interface HeaderProps {
 
 function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
   const { currentWorkspace, switchWorkspace } = useWorkspace();
-  const { theme, cycleTheme, isDark } = useTheme();
-
-  const getThemeIcon = () => {
-    if (theme === 'system') return Monitor;
-    if (isDark) return Moon;
-    return Sun;
-  };
-
-  const getThemeLabel = () => {
-    if (theme === 'system') return 'Thème: Système';
-    const meta = THEME_META[theme as CatppuccinFlavor];
-    return `Thème: ${meta?.label ?? theme}`;
-  };
-
-  const ThemeIcon = getThemeIcon();
 
   return (
     <header className="sticky top-0 z-30 bg-ctp-base border-b border-ctp-surface1 safe-area-inset-top">
@@ -274,15 +371,8 @@ function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* Theme Toggle */}
-          <button
-            onClick={cycleTheme}
-            className="p-2 rounded-lg text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text transition-colors"
-            aria-label={getThemeLabel()}
-            title={getThemeLabel()}
-          >
-            <ThemeIcon className="w-5 h-5" />
-          </button>
+          {/* Theme Selector */}
+          <ThemeSelector />
 
           {/* Notifications */}
           <NotificationBell />
