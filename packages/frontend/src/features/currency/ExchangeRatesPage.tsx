@@ -72,6 +72,28 @@ export function ExchangeRatesPage() {
     },
   });
 
+  // Fetch FRED rates mutation
+  const fetchFREDMutation = useMutation({
+    mutationFn: () => api.post('/currencies/rates/fetch-fred', {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
+    },
+  });
+
+  // Fetch all rates mutation
+  const fetchAllMutation = useMutation({
+    mutationFn: () => api.post('/currencies/rates/fetch-all', {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
+    },
+  });
+
+  // Fetch available sources
+  const { data: sourcesData } = useQuery({
+    queryKey: ['exchange-rate-sources'],
+    queryFn: () => api.get<Array<{ id: string; name: string; baseCurrency: string; currencies: number; available: boolean }>>('/currencies/sources'),
+  });
+
   // Initialize currencies mutation
   const initializeMutation = useMutation({
     mutationFn: () => api.post('/currencies/initialize', {}),
@@ -79,6 +101,9 @@ export function ExchangeRatesPage() {
       queryClient.invalidateQueries({ queryKey: ['currencies'] });
     },
   });
+
+  const sources = sourcesData ?? [];
+  const fredAvailable = sources.find(s => s.id === 'fred')?.available ?? false;
 
   const rates = ratesData?.rates ?? [];
   const history = historyData?.rates ?? [];
@@ -109,11 +134,11 @@ export function ExchangeRatesPage() {
             Definir un taux
           </button>
           <button
-            onClick={() => fetchECBMutation.mutate()}
-            disabled={fetchECBMutation.isPending}
+            onClick={() => fetchAllMutation.mutate()}
+            disabled={fetchAllMutation.isPending}
             className="btn-primary"
           >
-            {fetchECBMutation.isPending ? 'Chargement...' : 'Actualiser (BCE)'}
+            {fetchAllMutation.isPending ? 'Chargement...' : 'Actualiser tous'}
           </button>
         </div>
       </div>
@@ -193,7 +218,11 @@ export function ExchangeRatesPage() {
                               'text-xs px-2 py-1 rounded-full',
                               rate.source === 'ecb'
                                 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                                : rate.source === 'fred'
+                                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                                  : rate.source === 'manual'
+                                    ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+                                    : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
                             )}
                           >
                             {rate.source.toUpperCase()}
@@ -343,21 +372,47 @@ export function ExchangeRatesPage() {
           {/* Currency Converter */}
           <CurrencyConverter defaultFrom={baseCurrency} />
 
-          {/* Info */}
+          {/* Sources Info */}
           <div className="card">
-            <h3 className="font-semibold mb-3">A propos des taux</h3>
-            <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-              <p>
-                Les taux de change sont recuperes quotidiennement depuis la Banque
-                Centrale Europeenne (BCE).
-              </p>
-              <p>
-                Les taux BCE sont publies vers 16h00 CET chaque jour ouvrable.
-              </p>
-              <p>
-                Les conversions utilisent le taux le plus recent disponible pour
-                la date de la transaction.
-              </p>
+            <h3 className="font-semibold mb-3">Sources de taux</h3>
+            <div className="space-y-3">
+              {/* ECB */}
+              <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-300 text-xs font-bold">
+                  BCE
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm">Banque Centrale Europeenne</p>
+                  <p className="text-xs text-gray-500">29 devises - Base EUR</p>
+                  <p className="text-xs text-gray-400 mt-1">Publie a 16h CET</p>
+                </div>
+              </div>
+
+              {/* FRED */}
+              <div className={clsx(
+                'flex items-start gap-3 p-3 rounded-lg',
+                fredAvailable
+                  ? 'bg-green-50 dark:bg-green-900/20'
+                  : 'bg-gray-50 dark:bg-gray-700/50 opacity-60'
+              )}>
+                <div className={clsx(
+                  'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold',
+                  fredAvailable
+                    ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300'
+                    : 'bg-gray-200 dark:bg-gray-600 text-gray-500'
+                )}>
+                  FED
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm">Federal Reserve (FRED)</p>
+                  <p className="text-xs text-gray-500">21 devises - Base USD</p>
+                  {!fredAvailable && (
+                    <p className="text-xs text-orange-500 mt-1">
+                      Cle API requise (FRED_API_KEY)
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -370,16 +425,32 @@ export function ExchangeRatesPage() {
                 disabled={fetchECBMutation.isPending}
                 className="btn-secondary w-full"
               >
-                Mettre a jour les taux BCE
+                {fetchECBMutation.isPending ? 'Chargement...' : 'Importer BCE'}
+              </button>
+              {fredAvailable && (
+                <button
+                  onClick={() => fetchFREDMutation.mutate()}
+                  disabled={fetchFREDMutation.isPending}
+                  className="btn-secondary w-full"
+                >
+                  {fetchFREDMutation.isPending ? 'Chargement...' : 'Importer FRED'}
+                </button>
+              )}
+              <button
+                onClick={() => fetchAllMutation.mutate()}
+                disabled={fetchAllMutation.isPending}
+                className="btn-primary w-full"
+              >
+                {fetchAllMutation.isPending ? 'Chargement...' : 'Importer toutes les sources'}
               </button>
             </div>
 
-            {fetchECBMutation.isSuccess && (
+            {(fetchECBMutation.isSuccess || fetchFREDMutation.isSuccess || fetchAllMutation.isSuccess) && (
               <p className="text-sm text-success-600 mt-2">
                 Taux mis a jour avec succes
               </p>
             )}
-            {fetchECBMutation.isError && (
+            {(fetchECBMutation.isError || fetchFREDMutation.isError || fetchAllMutation.isError) && (
               <p className="text-sm text-danger-600 mt-2">
                 Erreur lors de la mise a jour
               </p>

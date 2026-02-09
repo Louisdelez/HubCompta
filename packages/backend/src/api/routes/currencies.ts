@@ -299,6 +299,122 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // ==========================================================================
+  // Fetch FRED Rates
+  // ==========================================================================
+
+  /**
+   * POST /currencies/rates/fetch-fred
+   * Fetch latest rates from FRED (Federal Reserve)
+   * Requires FRED_API_KEY environment variable
+   */
+  fastify.post('/rates/fetch-fred', { preHandler: [authGuard] }, async (request, reply) => {
+    const userId = request.user?.sub;
+    if (!userId) {
+      return reply.status(401).send({ error: 'Non authentifie' });
+    }
+
+    if (!process.env.FRED_API_KEY) {
+      return reply.status(400).send({
+        error: 'FRED API non configuree',
+        message: 'La variable FRED_API_KEY doit etre definie',
+      });
+    }
+
+    try {
+      const result = await currencyService.fetchFREDRates();
+
+      await auditService.log({
+        userId,
+        action: 'exchange_rate.fetch_fred',
+        changes: { imported: result.imported, date: result.date, currencies: result.currencies },
+        ipAddress: request.ip,
+      });
+
+      return {
+        success: true,
+        data: result,
+        message: `${result.imported} taux importes depuis FRED (${result.currencies.join(', ')})`,
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        error: 'Erreur lors de la recuperation des taux FRED',
+        message: error instanceof Error ? error.message : 'Erreur inconnue',
+      });
+    }
+  });
+
+  // ==========================================================================
+  // Fetch All Rates
+  // ==========================================================================
+
+  /**
+   * POST /currencies/rates/fetch-all
+   * Fetch rates from all available sources (ECB + FRED if configured)
+   */
+  fastify.post('/rates/fetch-all', { preHandler: [authGuard] }, async (request, reply) => {
+    const userId = request.user?.sub;
+    if (!userId) {
+      return reply.status(401).send({ error: 'Non authentifie' });
+    }
+
+    try {
+      const result = await currencyService.fetchAllRates();
+
+      await auditService.log({
+        userId,
+        action: 'exchange_rate.fetch_all',
+        changes: {
+          ecb: { imported: result.ecb.imported },
+          fred: result.fred ? { imported: result.fred.imported } : null,
+        },
+        ipAddress: request.ip,
+      });
+
+      const totalImported = result.ecb.imported + (result.fred?.imported ?? 0);
+
+      return {
+        success: true,
+        data: result,
+        message: `${totalImported} taux importes (BCE: ${result.ecb.imported}, FRED: ${result.fred?.imported ?? 0})`,
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        error: 'Erreur lors de la recuperation des taux',
+        message: error instanceof Error ? error.message : 'Erreur inconnue',
+      });
+    }
+  });
+
+  // ==========================================================================
+  // Get Available Sources
+  // ==========================================================================
+
+  /**
+   * GET /currencies/sources
+   * Get available exchange rate sources
+   */
+  fastify.get('/sources', async () => {
+    const sources = [
+      {
+        id: 'ecb',
+        name: 'European Central Bank',
+        baseCurrency: 'EUR',
+        currencies: 29,
+        available: true,
+      },
+      {
+        id: 'fred',
+        name: 'Federal Reserve Economic Data',
+        baseCurrency: 'USD',
+        currencies: 21,
+        available: !!process.env.FRED_API_KEY,
+      },
+    ];
+
+    return { success: true, data: sources };
+  });
+
+  // ==========================================================================
   // Initialize Currencies
   // ==========================================================================
 

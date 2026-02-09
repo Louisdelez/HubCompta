@@ -28,6 +28,32 @@ export interface ExchangeRateData {
   source?: string;
 }
 
+// FRED (Federal Reserve) series IDs for USD-based exchange rates
+// Format: { currency: seriesId, direction: 'to_usd' | 'from_usd' }
+const FRED_SERIES: Record<string, { seriesId: string; direction: 'to_usd' | 'from_usd' }> = {
+  EUR: { seriesId: 'DEXUSEU', direction: 'from_usd' }, // USD per EUR
+  GBP: { seriesId: 'DEXUSUK', direction: 'from_usd' }, // USD per GBP
+  CHF: { seriesId: 'DEXSZUS', direction: 'to_usd' },   // CHF per USD
+  JPY: { seriesId: 'DEXJPUS', direction: 'to_usd' },   // JPY per USD
+  CAD: { seriesId: 'DEXCAUS', direction: 'to_usd' },   // CAD per USD
+  AUD: { seriesId: 'DEXUSAL', direction: 'from_usd' }, // USD per AUD
+  NZD: { seriesId: 'DEXUSNZ', direction: 'from_usd' }, // USD per NZD
+  CNY: { seriesId: 'DEXCHUS', direction: 'to_usd' },   // CNY per USD
+  KRW: { seriesId: 'DEXKOUS', direction: 'to_usd' },   // KRW per USD
+  INR: { seriesId: 'DEXINUS', direction: 'to_usd' },   // INR per USD
+  BRL: { seriesId: 'DEXBZUS', direction: 'to_usd' },   // BRL per USD
+  MXN: { seriesId: 'DEXMXUS', direction: 'to_usd' },   // MXN per USD
+  THB: { seriesId: 'DEXTHUS', direction: 'to_usd' },   // THB per USD
+  MYR: { seriesId: 'DEXMAUS', direction: 'to_usd' },   // MYR per USD
+  ZAR: { seriesId: 'DEXSFUS', direction: 'to_usd' },   // ZAR per USD
+  SGD: { seriesId: 'DEXSIUS', direction: 'to_usd' },   // SGD per USD
+  HKD: { seriesId: 'DEXHKUS', direction: 'to_usd' },   // HKD per USD
+  SEK: { seriesId: 'DEXSDUS', direction: 'to_usd' },   // SEK per USD
+  NOK: { seriesId: 'DEXNOUS', direction: 'to_usd' },   // NOK per USD
+  DKK: { seriesId: 'DEXDNUS', direction: 'to_usd' },   // DKK per USD
+  TWD: { seriesId: 'DEXTAUS', direction: 'to_usd' },   // TWD per USD
+};
+
 // Common currencies with their metadata
 const COMMON_CURRENCIES = [
   { code: 'EUR', name: 'Euro', symbol: '\u20AC', decimals: 2 },
@@ -218,6 +244,40 @@ export const currencyService = {
         return {
           rate: crossRate,
           source: 'ecb (cross-rate via EUR)',
+          date: olderDate,
+        };
+      }
+    }
+
+    // Try triangular conversion via USD (for FRED rates)
+    if (!exchangeRate && base !== 'USD' && target !== 'USD') {
+      // Get base → USD rate (inverse of USD → base)
+      const baseToUsd = await prisma.exchangeRate.findFirst({
+        where: {
+          baseCurrency: 'USD',
+          targetCurrency: base,
+          date: { lte: normalizedDate },
+        },
+        orderBy: { date: 'desc' },
+      });
+
+      // Get USD → target rate
+      const usdToTarget = await prisma.exchangeRate.findFirst({
+        where: {
+          baseCurrency: 'USD',
+          targetCurrency: target,
+          date: { lte: normalizedDate },
+        },
+        orderBy: { date: 'desc' },
+      });
+
+      if (baseToUsd && usdToTarget) {
+        // base → USD → target = (1 / USD→base) × (USD→target)
+        const crossRate = (1 / Number(baseToUsd.rate)) * Number(usdToTarget.rate);
+        const olderDate = baseToUsd.date < usdToTarget.date ? baseToUsd.date : usdToTarget.date;
+        return {
+          rate: crossRate,
+          source: 'fred (cross-rate via USD)',
           date: olderDate,
         };
       }
@@ -436,6 +496,121 @@ export const currencyService = {
       console.error('Failed to fetch ECB rates:', error);
       throw error;
     }
+  },
+
+  /**
+   * Fetch rates from FRED (Federal Reserve Economic Data)
+   * Note: FRED provides rates with USD as base currency
+   * Requires FRED_API_KEY environment variable
+   */
+  async fetchFREDRates(): Promise<{ imported: number; date: Date | null; currencies: string[] }> {
+    const apiKey = process.env.FRED_API_KEY;
+    if (!apiKey) {
+      throw new Error('FRED_API_KEY environment variable is not set');
+    }
+
+    const rates: ExchangeRateData[] = [];
+    const currencies: string[] = [];
+    let latestDate: Date | null = null;
+
+    // Fetch each currency series
+    for (const [currency, { seriesId, direction }] of Object.entries(FRED_SERIES)) {
+      try {
+        // Get the most recent observation
+        const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${apiKey}&file_type=json&sort_order=desc&limit=1`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          console.error(`FRED API error for ${seriesId}: ${response.status}`);
+          continue;
+        }
+
+        const data = await response.json() as {
+          observations: Array<{ date: string; value: string }>;
+        };
+
+        if (!data.observations || data.observations.length === 0) {
+          continue;
+        }
+
+        const obs = data.observations[0];
+        if (!obs || obs.value === '.') {
+          // FRED uses '.' for missing data
+          continue;
+        }
+
+        const rateValue = parseFloat(obs.value);
+        const date = new Date(obs.date);
+
+        if (!latestDate || date > latestDate) {
+          latestDate = date;
+        }
+
+        // Convert to USD-based rates (USD → currency)
+        if (direction === 'from_usd') {
+          // FRED gives USD per foreign currency, we want USD → foreign
+          // So we need the inverse: 1 USD = 1/rate foreign currency
+          rates.push({
+            baseCurrency: 'USD',
+            targetCurrency: currency,
+            rate: 1 / rateValue,
+            date,
+            source: 'fred',
+          });
+        } else {
+          // FRED gives foreign currency per USD, which is what we want
+          rates.push({
+            baseCurrency: 'USD',
+            targetCurrency: currency,
+            rate: rateValue,
+            date,
+            source: 'fred',
+          });
+        }
+
+        currencies.push(currency);
+      } catch (error) {
+        console.error(`Failed to fetch FRED rate for ${currency}:`, error);
+      }
+    }
+
+    if (rates.length === 0) {
+      return { imported: 0, date: null, currencies: [] };
+    }
+
+    const result = await this.importRates(rates);
+
+    return {
+      imported: result.imported,
+      date: latestDate,
+      currencies,
+    };
+  },
+
+  /**
+   * Fetch rates from all available sources
+   */
+  async fetchAllRates(): Promise<{
+    ecb: { imported: number; date: Date | null };
+    fred: { imported: number; date: Date | null; currencies: string[] } | null;
+  }> {
+    // Always fetch ECB rates
+    const ecbResult = await this.fetchECBRates();
+
+    // Try to fetch FRED rates if API key is available
+    let fredResult: { imported: number; date: Date | null; currencies: string[] } | null = null;
+    if (process.env.FRED_API_KEY) {
+      try {
+        fredResult = await this.fetchFREDRates();
+      } catch (error) {
+        console.error('Failed to fetch FRED rates:', error);
+      }
+    }
+
+    return {
+      ecb: ecbResult,
+      fred: fredResult,
+    };
   },
 
   /**
