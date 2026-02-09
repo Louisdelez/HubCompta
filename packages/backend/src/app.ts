@@ -17,6 +17,7 @@ import { initStorage } from './core/storage/s3.js';
 import { prisma } from './core/database/client.js';
 import { redisClient } from './core/database/redis.js';
 import { setupScheduledJobs, closeQueues } from './core/queue/index.js';
+import { initializeWorkers, shutdownWorkers } from './core/queue/workers.js';
 
 // ----------------------------------------------------------------------------
 // Application Factory
@@ -159,6 +160,9 @@ export async function startServer(): Promise<void> {
     // Setup scheduled jobs (BullMQ repeatable jobs)
     await setupScheduledJobs();
 
+    // Initialize queue workers
+    initializeWorkers();
+
     // Build application
     const app = await buildApp();
 
@@ -185,6 +189,7 @@ async function shutdown(): Promise<void> {
   console.info('Shutting down gracefully...');
 
   try {
+    await shutdownWorkers();
     await closeQueues();
     await prisma.$disconnect();
     await redisClient.quit();

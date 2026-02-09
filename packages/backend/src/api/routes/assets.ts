@@ -90,21 +90,35 @@ export async function assetRoutes(app: FastifyInstance): Promise<void> {
     ) => {
       const { symbol } = request.params;
 
+      // Try to get asset from database first
       const asset = await assetService.getBySymbol(symbol);
 
-      if (!asset) {
-        return reply.status(404).send({
-          success: false,
-          error: 'Asset non trouvé',
+      if (asset) {
+        // Asset exists in DB, get quote
+        const quote = await assetService.getQuote(asset.id);
+        return reply.send({
+          success: true,
+          data: {
+            asset,
+            quote,
+          },
         });
       }
 
-      const quote = await assetService.getQuote(asset.id);
+      // Asset doesn't exist in DB, fetch quote directly from provider
+      const quote = await assetService.getQuoteBySymbol(symbol);
+
+      if (!quote) {
+        return reply.status(404).send({
+          success: false,
+          error: 'Prix non disponible pour cet actif',
+        });
+      }
 
       return reply.send({
         success: true,
         data: {
-          asset,
+          asset: null,
           quote,
         },
       });

@@ -3,13 +3,34 @@
 // Modal for adding buy/sell/dividend transactions to a position
 // ============================================================================
 
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { X, Loader2, Plus, Minus, TrendingUp } from 'lucide-react';
+import { X, Loader2, Plus, Minus, TrendingUp, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { cn } from '@/lib/utils';
+
+// ----------------------------------------------------------------------------
+// Types for quote
+// ----------------------------------------------------------------------------
+
+interface MarketQuote {
+  price: number;
+  currency: string;
+  change: number;
+  changePercent: number;
+}
+
+interface AssetWithPrice {
+  id: string;
+  symbol: string;
+  name: string;
+  type: string;
+  currency: string;
+  lastPrice: number | null;
+  lastPriceAt: string | null;
+}
 
 // ----------------------------------------------------------------------------
 // Types
@@ -47,6 +68,30 @@ export function AddPositionTransaction({
   const [fees, setFees] = useState('');
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [notes, setNotes] = useState('');
+
+  // Fetch current quote for asset with auto-refresh
+  const { data: quoteData, isLoading: isLoadingQuote, refetch: refetchQuote } = useQuery({
+    queryKey: ['asset-quote', assetSymbol],
+    queryFn: async () => {
+      const response = await api.get<{ asset: AssetWithPrice | null; quote: MarketQuote | null }>(
+        `/assets/${assetSymbol}/quote`
+      );
+      return response;
+    },
+    enabled: isOpen && !!assetSymbol,
+    staleTime: 10000,
+    refetchInterval: 15000, // Refresh every 15 seconds
+  });
+
+  // Get the current price from quote
+  const currentPrice = quoteData?.quote?.price ?? quoteData?.asset?.lastPrice ?? null;
+
+  // Auto-fill price when quote is loaded and price is empty
+  useEffect(() => {
+    if (currentPrice && !price && isOpen) {
+      setPrice(currentPrice.toString());
+    }
+  }, [currentPrice, isOpen]);
 
   const resetForm = () => {
     setType('buy');
@@ -192,17 +237,51 @@ export function AddPositionTransaction({
               <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
                 Prix unitaire ({assetCurrency})
               </label>
-              <input
-                id="price"
-                type="number"
-                step="any"
-                min="0"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Prix par titre"
-                required
-              />
+              <div className="relative">
+                <input
+                  id="price"
+                  type="number"
+                  step="any"
+                  min="0"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="w-full px-3 py-2 pr-20 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Prix par titre"
+                  required
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (currentPrice) {
+                        setPrice(currentPrice.toString());
+                      } else {
+                        refetchQuote();
+                      }
+                    }}
+                    disabled={isLoadingQuote}
+                    className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded"
+                    title="Utiliser le prix actuel"
+                  >
+                    <RefreshCw className={cn('h-4 w-4', isLoadingQuote && 'animate-spin')} />
+                  </button>
+                  <span className="text-gray-400 text-sm">{assetCurrency}</span>
+                </div>
+              </div>
+              {currentPrice !== null && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Prix actuel : {currentPrice.toFixed(2)} {assetCurrency}
+                  {quoteData?.quote && (
+                    <span className={cn(
+                      'ml-2',
+                      quoteData.quote.changePercent >= 0 ? 'text-green-600' : 'text-red-600'
+                    )}>
+                      {quoteData.quote.changePercent >= 0 ? '+' : ''}
+                      {quoteData.quote.changePercent.toFixed(2)}%
+                    </span>
+                  )}
+                </p>
+              )}
             </div>
           )}
 

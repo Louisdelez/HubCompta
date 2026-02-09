@@ -180,6 +180,7 @@ export default function App() {
         </Route>
 
         {/* Investment Routes */}
+        <Route path="portfolio" element={<PortfolioPage />} />
         <Route path="workspaces/:workspaceId/portfolio" element={<PortfolioPage />} />
 
         {/* Recurrences Routes */}

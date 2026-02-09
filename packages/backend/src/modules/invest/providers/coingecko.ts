@@ -51,11 +51,20 @@ export class CoinGeckoProvider implements MarketDataProvider {
   private rateLimit: number;
   private lastRequest: number = 0;
   private coinList: Map<string, { id: string; symbol: string; name: string }> | null = null;
+  private defaultCurrency: string;
 
   constructor(config: ProviderConfig = {}) {
     this.baseUrl = config.baseUrl || DEFAULT_BASE_URL;
     this.apiKey = config.apiKey;
     this.rateLimit = config.rateLimit || 10; // CoinGecko free tier: 10-50 requests/minute
+    this.defaultCurrency = 'usd'; // Use USD as default for consistency with Yahoo
+  }
+
+  /**
+   * Set the default currency for price fetching
+   */
+  setDefaultCurrency(currency: string): void {
+    this.defaultCurrency = currency.toLowerCase();
   }
 
   /**
@@ -84,14 +93,30 @@ export class CoinGeckoProvider implements MarketDataProvider {
   }
 
   /**
+   * Normalize symbol by removing currency suffix (e.g., BTC-USD -> BTC)
+   */
+  private normalizeSymbol(symbol: string): string {
+    const upperSymbol = symbol.toUpperCase();
+    // Remove common currency suffixes
+    const suffixes = ['-USD', '-EUR', '-GBP', '-JPY', '-CAD', '-AUD'];
+    for (const suffix of suffixes) {
+      if (upperSymbol.endsWith(suffix)) {
+        return upperSymbol.slice(0, -suffix.length);
+      }
+    }
+    return upperSymbol;
+  }
+
+  /**
    * Convert symbol to CoinGecko ID
    */
   private async symbolToId(symbol: string): Promise<string | null> {
-    const upperSymbol = symbol.toUpperCase();
+    // Normalize symbol first (remove -USD suffix etc.)
+    const normalizedSymbol = this.normalizeSymbol(symbol);
 
     // Check mapping first
-    if (SYMBOL_TO_ID[upperSymbol]) {
-      return SYMBOL_TO_ID[upperSymbol];
+    if (SYMBOL_TO_ID[normalizedSymbol]) {
+      return SYMBOL_TO_ID[normalizedSymbol];
     }
 
     // Load coin list if needed
@@ -101,7 +126,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
 
     // Find by symbol
     for (const coin of this.coinList?.values() || []) {
-      if (coin.symbol.toUpperCase() === upperSymbol) {
+      if (coin.symbol.toUpperCase() === normalizedSymbol) {
         return coin.id;
       }
     }
@@ -143,7 +168,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
   /**
    * Get current quote for a symbol
    */
-  async getQuote(symbol: string): Promise<MarketQuote | null> {
+  async getQuote(symbol: string, currency?: string): Promise<MarketQuote | null> {
     try {
       const coinId = await this.symbolToId(symbol);
       if (!coinId) {
@@ -153,6 +178,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
 
       await this.throttle();
 
+      const targetCurrency = (currency || this.defaultCurrency).toLowerCase();
       const url = `${this.baseUrl}/coins/${coinId}?localization=false&tickers=false&community_data=false&developer_data=false`;
       const response = await fetch(url, {
         headers: this.getHeaders(),
@@ -172,14 +198,14 @@ export class CoinGeckoProvider implements MarketDataProvider {
 
       return {
         symbol: data.symbol.toUpperCase(),
-        price: marketData.current_price?.eur || 0,
-        currency: 'EUR',
-        change: marketData.price_change_24h_in_currency?.eur || 0,
+        price: marketData.current_price?.[targetCurrency] || marketData.current_price?.usd || 0,
+        currency: targetCurrency.toUpperCase(),
+        change: marketData.price_change_24h_in_currency?.[targetCurrency] || marketData.price_change_24h_in_currency?.usd || 0,
         changePercent: marketData.price_change_percentage_24h || 0,
-        volume: marketData.total_volume?.eur,
-        marketCap: marketData.market_cap?.eur,
-        high: marketData.high_24h?.eur,
-        low: marketData.low_24h?.eur,
+        volume: marketData.total_volume?.[targetCurrency] || marketData.total_volume?.usd,
+        marketCap: marketData.market_cap?.[targetCurrency] || marketData.market_cap?.usd,
+        high: marketData.high_24h?.[targetCurrency] || marketData.high_24h?.usd,
+        low: marketData.low_24h?.[targetCurrency] || marketData.low_24h?.usd,
         timestamp: new Date(),
       };
     } catch (error) {
@@ -191,7 +217,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
   /**
    * Get quotes for multiple symbols
    */
-  async getQuotes(symbols: string[]): Promise<Map<string, MarketQuote>> {
+  async getQuotes(symbols: string[], currency?: string): Promise<Map<string, MarketQuote>> {
     const quotes = new Map<string, MarketQuote>();
 
     if (symbols.length === 0) {
@@ -214,8 +240,9 @@ export class CoinGeckoProvider implements MarketDataProvider {
 
       await this.throttle();
 
+      const targetCurrency = (currency || this.defaultCurrency).toLowerCase();
       const ids = Array.from(idToSymbol.keys()).join(',');
-      const url = `${this.baseUrl}/coins/markets?vs_currency=eur&ids=${ids}&price_change_percentage=24h`;
+      const url = `${this.baseUrl}/coins/markets?vs_currency=${targetCurrency}&ids=${ids}&price_change_percentage=24h`;
       const response = await fetch(url, {
         headers: this.getHeaders(),
       });
@@ -233,7 +260,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
           quotes.set(symbol, {
             symbol: coin.symbol.toUpperCase(),
             price: coin.current_price || 0,
-            currency: 'EUR',
+            currency: targetCurrency.toUpperCase(),
             change: coin.price_change_24h || 0,
             changePercent: coin.price_change_percentage_24h || 0,
             volume: coin.total_volume,
@@ -311,7 +338,7 @@ export class CoinGeckoProvider implements MarketDataProvider {
         symbol: data.symbol.toUpperCase(),
         name: data.name,
         type: 'crypto',
-        currency: 'EUR',
+        currency: this.defaultCurrency.toUpperCase(),
       };
     } catch (error) {
       console.error(`Error fetching asset info for ${symbol}:`, error);
@@ -326,7 +353,8 @@ export class CoinGeckoProvider implements MarketDataProvider {
     symbol: string,
     startDate: Date,
     endDate: Date,
-    _interval: 'daily' | 'weekly' | 'monthly' = 'daily'
+    _interval: 'daily' | 'weekly' | 'monthly' = 'daily',
+    currency?: string
   ): Promise<HistoricalPrice[]> {
     try {
       const coinId = await this.symbolToId(symbol);
@@ -336,10 +364,11 @@ export class CoinGeckoProvider implements MarketDataProvider {
 
       await this.throttle();
 
+      const targetCurrency = (currency || this.defaultCurrency).toLowerCase();
       const from = Math.floor(startDate.getTime() / 1000);
       const to = Math.floor(endDate.getTime() / 1000);
 
-      const url = `${this.baseUrl}/coins/${coinId}/market_chart/range?vs_currency=eur&from=${from}&to=${to}`;
+      const url = `${this.baseUrl}/coins/${coinId}/market_chart/range?vs_currency=${targetCurrency}&from=${from}&to=${to}`;
       const response = await fetch(url, {
         headers: this.getHeaders(),
       });

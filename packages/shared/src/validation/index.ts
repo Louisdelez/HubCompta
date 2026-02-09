@@ -397,12 +397,17 @@ export const assetSearchSchema = z.object({
 
 export const positionCreateSchema = z.object({
   accountId: uuidSchema,
-  assetId: uuidSchema,
+  assetId: uuidSchema.optional(),
+  assetSymbol: z.string().min(1).max(20).optional(),
+  assetType: assetTypeSchema.optional(),
   quantity: z.number().positive(),
   price: z.number().positive(),
   fees: z.number().min(0).default(0),
   date: z.coerce.date(),
-});
+}).refine(
+  (data) => data.assetId || data.assetSymbol,
+  { message: 'Either assetId or assetSymbol is required' }
+);
 
 export const investTransactionCreateSchema = z.object({
   type: investTransactionTypeSchema,

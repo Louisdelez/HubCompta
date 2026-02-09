@@ -77,8 +77,14 @@ export async function positionRoutes(app: FastifyInstance): Promise<void> {
       const { workspaceId } = request.params;
       const input = positionCreateSchema.parse(request.body);
 
-      // Get or create asset
-      const asset = await assetService.getOrCreate(input.assetId);
+      // Get or create asset (by ID or symbol)
+      let asset;
+      if (input.assetId) {
+        asset = await assetService.getById(input.assetId);
+      } else if (input.assetSymbol) {
+        asset = await assetService.getOrCreate(input.assetSymbol, input.assetType);
+      }
+
       if (!asset) {
         return reply.status(404).send({
           success: false,

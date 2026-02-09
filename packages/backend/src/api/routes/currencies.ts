@@ -53,7 +53,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
   }>('/', async (request) => {
     const activeOnly = request.query.activeOnly !== 'false';
     const currencies = await currencyService.listCurrencies(activeOnly);
-    return { data: currencies };
+    return { success: true, data: currencies };
   });
 
   // ==========================================================================
@@ -92,7 +92,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
       });
     }
 
-    return { data: result };
+    return { success: true, data: result };
   });
 
   // ==========================================================================
@@ -112,7 +112,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.status(404).send({ error: 'Devise non trouvee' });
     }
 
-    return { data: currency };
+    return { success: true, data: currency };
   });
 
   // ==========================================================================
@@ -140,6 +140,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
     }
 
     return {
+      success: true,
       data: {
         baseCurrency: base.toUpperCase(),
         targetCurrency: target.toUpperCase(),
@@ -161,6 +162,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
   }>('/rates/:base', async (request) => {
     const rates = await currencyService.getLatestRates(request.params.base);
     return {
+      success: true,
       data: {
         baseCurrency: request.params.base.toUpperCase(),
         rates,
@@ -196,6 +198,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
     const rates = await currencyService.getHistoricalRates(base, target, start, end);
 
     return {
+      success: true,
       data: {
         baseCurrency: base.toUpperCase(),
         targetCurrency: target.toUpperCase(),
@@ -282,6 +285,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
       });
 
       return {
+        success: true,
         data: result,
         message: `${result.imported} taux importes depuis la BCE`,
       };
@@ -318,7 +322,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
       });
     }
 
-    return { data: result };
+    return { success: true, data: result };
   });
 };
 

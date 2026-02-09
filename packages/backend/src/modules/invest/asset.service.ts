@@ -100,7 +100,7 @@ class AssetService {
   /**
    * Get or create an asset
    */
-  async getOrCreate(symbol: string, type?: AssetType): Promise<AssetWithPrice | null> {
+  async getOrCreate(symbol: string, type?: AssetType, name?: string, currency?: string): Promise<AssetWithPrice | null> {
     const upperSymbol = symbol.toUpperCase();
 
     // Check if exists in database
@@ -117,21 +117,18 @@ class AssetService {
     const provider = getProviderForType(assetType);
 
     const info = await provider.getAssetInfo(upperSymbol);
-    if (!info) {
-      return null;
-    }
 
     // Get current price
     const quote = await provider.getQuote(upperSymbol);
 
-    // Create in database
+    // Create in database - use provider info or fallback to provided/default values
     asset = await prisma.asset.create({
       data: {
-        symbol: info.symbol.toUpperCase(),
-        name: info.name,
-        type: info.type,
-        currency: info.currency,
-        exchange: info.exchange,
+        symbol: info?.symbol?.toUpperCase() || upperSymbol,
+        name: info?.name || name || upperSymbol,
+        type: info?.type || assetType,
+        currency: info?.currency || currency || 'USD',
+        exchange: info?.exchange || null,
         lastPrice: quote?.price ?? null,
         lastPriceAt: quote ? new Date() : null,
       },
@@ -270,6 +267,15 @@ class AssetService {
 
     const provider = getProviderForType(asset.type);
     return provider.getQuote(asset.symbol);
+  }
+
+  /**
+   * Get current quote by symbol (without requiring asset in DB)
+   */
+  async getQuoteBySymbol(symbol: string, type?: AssetType): Promise<MarketQuote | null> {
+    const assetType = type || (await this.detectAssetType(symbol));
+    const provider = getProviderForType(assetType);
+    return provider.getQuote(symbol);
   }
 
   /**

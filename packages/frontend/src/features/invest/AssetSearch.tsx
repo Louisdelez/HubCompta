@@ -62,10 +62,10 @@ export function AssetSearch({
     queryKey: ['asset-search', debouncedQuery],
     queryFn: async () => {
       if (!debouncedQuery || debouncedQuery.length < 2) return [];
-      const response = await api.get<{ data: SearchResult[] }>(
-        `/assets/search?q=${encodeURIComponent(debouncedQuery)}`
+      const response = await api.get<SearchResult[]>(
+        `/assets/search?query=${encodeURIComponent(debouncedQuery)}`
       );
-      return response.data;
+      return response;
     },
     enabled: debouncedQuery.length >= 2,
     staleTime: 60000,

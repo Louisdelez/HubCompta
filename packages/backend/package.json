@@ -39,6 +39,7 @@
     "papaparse": "^5.5.3",
     "pino": "^8.18.0",
     "uuid": "^9.0.0",
+    "yahoo-finance2": "^3.13.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {

@@ -3,9 +3,9 @@
 // Form to add a new investment position
 // ============================================================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { X, Loader2, TrendingUp, Bitcoin, Building2, AlertCircle } from 'lucide-react';
+import { X, Loader2, TrendingUp, Bitcoin, Building2, AlertCircle, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { AssetSearch } from './AssetSearch';
@@ -27,6 +27,19 @@ interface Account {
   id: string;
   name: string;
   type: string;
+}
+
+interface MarketQuote {
+  price: number;
+  currency: string;
+  change: number;
+  changePercent: number;
+}
+
+interface AssetWithPrice extends Asset {
+  id: string;
+  lastPrice: number | null;
+  lastPriceAt: string | null;
 }
 
 interface AddPositionProps {
@@ -65,13 +78,41 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
   const { data: accounts } = useQuery({
     queryKey: ['accounts', currentWorkspace?.id, 'investment'],
     queryFn: async () => {
-      const response = await api.get<{ data: Account[] }>(
+      const response = await api.get<Account[]>(
         `/workspaces/${currentWorkspace?.id}/accounts?type=investment`
       );
-      return response.data;
+      return response;
     },
     enabled: !!currentWorkspace?.id,
   });
+
+  // Fetch current quote for selected asset with auto-refresh
+  const { data: quoteData, isLoading: isLoadingQuote, refetch: refetchQuote } = useQuery({
+    queryKey: ['asset-quote', selectedAsset?.symbol],
+    queryFn: async () => {
+      const response = await api.get<{ asset: AssetWithPrice | null; quote: MarketQuote | null }>(
+        `/assets/${selectedAsset?.symbol}/quote`
+      );
+      return response;
+    },
+    enabled: !!selectedAsset?.symbol,
+    staleTime: 10000, // Cache for 10 seconds
+    refetchInterval: 15000, // Refresh every 15 seconds for real-time price
+    refetchOnWindowFocus: true,
+  });
+
+  // Get the current price from quote or asset's lastPrice
+  const currentPrice = quoteData?.quote?.price ?? quoteData?.asset?.lastPrice ?? null;
+
+  // Auto-fill price when quote is loaded
+  useEffect(() => {
+    if (currentPrice && !formData.price) {
+      setFormData((prev) => ({
+        ...prev,
+        price: currentPrice.toString(),
+      }));
+    }
+  }, [currentPrice]);
 
   // Create position mutation
   const createMutation = useMutation({
@@ -305,13 +346,46 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
                   value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   placeholder="150.00"
-                  className="w-full px-3 py-2 pr-8 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 pr-20 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                  {selectedAsset?.currency || '€'}
-                </span>
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  {selectedAsset && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (currentPrice) {
+                          setFormData({ ...formData, price: currentPrice.toString() });
+                        } else {
+                          refetchQuote();
+                        }
+                      }}
+                      disabled={isLoadingQuote}
+                      className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded"
+                      title="Récupérer le prix actuel"
+                    >
+                      <RefreshCw className={cn('h-4 w-4', isLoadingQuote && 'animate-spin')} />
+                    </button>
+                  )}
+                  <span className="text-gray-400 text-sm">
+                    {selectedAsset?.currency || '€'}
+                  </span>
+                </div>
               </div>
+              {currentPrice !== null && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Prix actuel : {currentPrice.toFixed(2)} {quoteData?.asset?.currency || selectedAsset?.currency || 'USD'}
+                  {quoteData?.quote && (
+                    <span className={cn(
+                      'ml-2',
+                      quoteData.quote.changePercent >= 0 ? 'text-green-600' : 'text-red-600'
+                    )}>
+                      {quoteData.quote.changePercent >= 0 ? '+' : ''}
+                      {quoteData.quote.changePercent.toFixed(2)}%
+                    </span>
+                  )}
+                </p>
+              )}
             </div>
           </div>
 

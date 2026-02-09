@@ -43,10 +43,10 @@ interface Position {
   averageCost: number;
   currentValue: number;
   totalCost: number;
-  unrealizedPnL: number;
-  unrealizedPnLPercent: number;
-  realizedPnL: number;
-  openedAt: string;
+  unrealizedGain: number;
+  unrealizedGainPercent: number;
+  realizedGain: number;
+  createdAt: string;
 }
 
 interface PositionListProps {
@@ -54,6 +54,9 @@ interface PositionListProps {
   onPositionClick?: (position: Position) => void;
   onAddTransaction?: (position: Position) => void;
 }
+
+// Refresh interval in milliseconds (30 seconds)
+const REFRESH_INTERVAL = 30000;
 
 // ----------------------------------------------------------------------------
 // Component
@@ -68,18 +71,20 @@ export function PositionList({
   const queryClient = useQueryClient();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  // Fetch positions
+  // Fetch positions with auto-refresh every 30 seconds
   const { data: positions, isLoading } = useQuery({
     queryKey: ['positions', currentWorkspace?.id, accountId],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (accountId) params.append('accountId', accountId);
-      const response = await api.get<{ data: Position[] }>(
+      const response = await api.get<Position[]>(
         `/workspaces/${currentWorkspace?.id}/positions?${params}`
       );
-      return response.data;
+      return response;
     },
     enabled: !!currentWorkspace?.id,
+    refetchInterval: REFRESH_INTERVAL,
+    refetchIntervalInBackground: false,
   });
 
   // Delete position mutation
@@ -186,21 +191,21 @@ export function PositionList({
               </div>
 
               {/* P&L */}
-              <div className={cn('text-right px-3 py-2 rounded-lg', getPnLBgColor(position.unrealizedPnL))}>
+              <div className={cn('text-right px-3 py-2 rounded-lg', getPnLBgColor(position.unrealizedGain))}>
                 <div className="flex items-center gap-1 justify-end">
-                  {position.unrealizedPnL >= 0 ? (
+                  {position.unrealizedGain >= 0 ? (
                     <TrendingUp className="h-4 w-4 text-green-500" />
                   ) : (
                     <TrendingDown className="h-4 w-4 text-red-500" />
                   )}
-                  <span className={cn('font-medium', getPnLColor(position.unrealizedPnL))}>
-                    {position.unrealizedPnL >= 0 ? '+' : ''}
-                    {formatCurrency(position.unrealizedPnL, 'EUR')}
+                  <span className={cn('font-medium', getPnLColor(position.unrealizedGain))}>
+                    {position.unrealizedGain >= 0 ? '+' : ''}
+                    {formatCurrency(position.unrealizedGain, 'EUR')}
                   </span>
                 </div>
-                <p className={cn('text-xs', getPnLColor(position.unrealizedPnLPercent))}>
-                  {position.unrealizedPnLPercent >= 0 ? '+' : ''}
-                  {formatPercent(position.unrealizedPnLPercent)}
+                <p className={cn('text-xs', getPnLColor(position.unrealizedGainPercent))}>
+                  {position.unrealizedGainPercent >= 0 ? '+' : ''}
+                  {formatPercent(position.unrealizedGainPercent)}
                 </p>
               </div>
 

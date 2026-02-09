@@ -27,6 +27,7 @@ const mainNavItems: NavItem[] = [
   { name: 'Transactions', href: '/transactions', icon: '💳' },
   { name: 'Comptes', href: '/accounts', icon: '🏦' },
   { name: 'Budgets', href: '/budgets', icon: '📈' },
+  { name: 'Investissements', href: '/portfolio', icon: '💹' },
   { name: 'Documents', href: '/documents', icon: '📄' },
 ];
 

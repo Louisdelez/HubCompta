@@ -1,9 +1,10 @@
 // ============================================================================
 // YAHOO FINANCE PROVIDER - Finance Hub
-// Market data provider for stocks and ETFs
+// Market data provider for stocks and ETFs using yahoo-finance2
 // ============================================================================
 
 import type { AssetType } from '@prisma/client';
+import YahooFinance from 'yahoo-finance2';
 import type {
   MarketDataProvider,
   MarketQuote,
@@ -14,11 +15,49 @@ import type {
 } from './types.js';
 
 // ----------------------------------------------------------------------------
-// Constants
+// Types from yahoo-finance2
 // ----------------------------------------------------------------------------
 
-const DEFAULT_BASE_URL = 'https://query1.finance.yahoo.com';
-const SEARCH_URL = 'https://query2.finance.yahoo.com/v1/finance/search';
+interface YahooQuote {
+  symbol: string;
+  regularMarketPrice?: number;
+  currency?: string;
+  regularMarketChange?: number;
+  regularMarketChangePercent?: number;
+  regularMarketVolume?: number;
+  marketCap?: number;
+  regularMarketDayHigh?: number;
+  regularMarketDayLow?: number;
+  regularMarketOpen?: number;
+  regularMarketPreviousClose?: number;
+  regularMarketTime?: Date;
+  shortName?: string;
+  longName?: string;
+  quoteType?: string;
+  exchange?: string;
+}
+
+interface YahooSearchResult {
+  quotes: Array<{
+    symbol: string;
+    shortname?: string;
+    longname?: string;
+    quoteType?: string;
+    exchange?: string;
+  }>;
+}
+
+interface YahooChartResult {
+  quotes: Array<{
+    date: Date;
+    open: number | null;
+    high: number | null;
+    low: number | null;
+    close: number | null;
+    volume?: number;
+    adjclose?: number;
+  }>;
+}
 
 // ----------------------------------------------------------------------------
 // Provider Implementation
@@ -28,13 +67,13 @@ export class YahooFinanceProvider implements MarketDataProvider {
   readonly name = 'yahoo';
   readonly supportedTypes: AssetType[] = ['stock', 'etf', 'bond', 'other'];
 
-  private baseUrl: string;
   private rateLimit: number;
   private lastRequest: number = 0;
+  private yf: InstanceType<typeof YahooFinance>;
 
   constructor(config: ProviderConfig = {}) {
-    this.baseUrl = config.baseUrl || DEFAULT_BASE_URL;
     this.rateLimit = config.rateLimit || 60; // 60 requests per minute
+    this.yf = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
   }
 
   /**
@@ -56,28 +95,15 @@ export class YahooFinanceProvider implements MarketDataProvider {
     try {
       await this.throttle();
 
-      const url = `${this.baseUrl}/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`;
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; FinanceHub/1.0)',
-        },
-      });
+      const result = (await this.yf.quote(symbol)) as YahooQuote;
 
-      if (!response.ok) {
-        console.error(`Yahoo Finance API error: ${response.status}`);
-        return null;
-      }
-
-      const data = await response.json();
-      const result = data?.quoteResponse?.result?.[0];
-
-      if (!result) {
+      if (!result || !result.regularMarketPrice) {
         return null;
       }
 
       return {
         symbol: result.symbol,
-        price: result.regularMarketPrice || 0,
+        price: result.regularMarketPrice,
         currency: result.currency || 'USD',
         change: result.regularMarketChange || 0,
         changePercent: result.regularMarketChangePercent || 0,
@@ -87,7 +113,7 @@ export class YahooFinanceProvider implements MarketDataProvider {
         low: result.regularMarketDayLow,
         open: result.regularMarketOpen,
         previousClose: result.regularMarketPreviousClose,
-        timestamp: new Date(result.regularMarketTime * 1000),
+        timestamp: result.regularMarketTime ? new Date(result.regularMarketTime) : new Date(),
       };
     } catch (error) {
       console.error(`Error fetching quote for ${symbol}:`, error);
@@ -108,36 +134,28 @@ export class YahooFinanceProvider implements MarketDataProvider {
     try {
       await this.throttle();
 
-      const url = `${this.baseUrl}/v7/finance/quote?symbols=${symbols.map(encodeURIComponent).join(',')}`;
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; FinanceHub/1.0)',
-        },
-      });
+      const results = (await this.yf.quote(symbols)) as YahooQuote | YahooQuote[];
 
-      if (!response.ok) {
-        console.error(`Yahoo Finance API error: ${response.status}`);
-        return quotes;
-      }
+      // Handle single result vs array
+      const resultsArray = Array.isArray(results) ? results : [results];
 
-      const data = await response.json();
-      const results = data?.quoteResponse?.result || [];
-
-      for (const result of results) {
-        quotes.set(result.symbol, {
-          symbol: result.symbol,
-          price: result.regularMarketPrice || 0,
-          currency: result.currency || 'USD',
-          change: result.regularMarketChange || 0,
-          changePercent: result.regularMarketChangePercent || 0,
-          volume: result.regularMarketVolume,
-          marketCap: result.marketCap,
-          high: result.regularMarketDayHigh,
-          low: result.regularMarketDayLow,
-          open: result.regularMarketOpen,
-          previousClose: result.regularMarketPreviousClose,
-          timestamp: new Date(result.regularMarketTime * 1000),
-        });
+      for (const result of resultsArray) {
+        if (result && result.regularMarketPrice) {
+          quotes.set(result.symbol, {
+            symbol: result.symbol,
+            price: result.regularMarketPrice,
+            currency: result.currency || 'USD',
+            change: result.regularMarketChange || 0,
+            changePercent: result.regularMarketChangePercent || 0,
+            volume: result.regularMarketVolume,
+            marketCap: result.marketCap,
+            high: result.regularMarketDayHigh,
+            low: result.regularMarketDayLow,
+            open: result.regularMarketOpen,
+            previousClose: result.regularMarketPreviousClose,
+            timestamp: result.regularMarketTime ? new Date(result.regularMarketTime) : new Date(),
+          });
+        }
       }
     } catch (error) {
       console.error('Error fetching quotes:', error);
@@ -153,28 +171,24 @@ export class YahooFinanceProvider implements MarketDataProvider {
     try {
       await this.throttle();
 
-      const url = `${SEARCH_URL}?q=${encodeURIComponent(query)}&quotesCount=10&newsCount=0`;
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; FinanceHub/1.0)',
-        },
-      });
+      const result = (await this.yf.search(query, {
+        quotesCount: 10,
+        newsCount: 0,
+      })) as YahooSearchResult;
 
-      if (!response.ok) {
-        console.error(`Yahoo Finance search error: ${response.status}`);
+      if (!result.quotes) {
         return [];
       }
 
-      const data = await response.json();
-      const quotes = data?.quotes || [];
-
-      return quotes.map((quote: Record<string, unknown>) => ({
-        symbol: quote.symbol as string,
-        name: (quote.shortname || quote.longname || quote.symbol) as string,
-        type: this.mapQuoteType(quote.quoteType as string),
-        exchange: quote.exchange as string,
-        currency: (quote.currency || 'USD') as string,
-      }));
+      return result.quotes
+        .filter((quote) => quote.symbol)
+        .map((quote) => ({
+          symbol: quote.symbol,
+          name: quote.shortname || quote.longname || quote.symbol,
+          type: this.mapQuoteType(quote.quoteType || ''),
+          exchange: quote.exchange,
+          currency: 'USD', // Search doesn't return currency, default to USD
+        }));
     } catch (error) {
       console.error('Error searching:', error);
       return [];
@@ -188,19 +202,7 @@ export class YahooFinanceProvider implements MarketDataProvider {
     try {
       await this.throttle();
 
-      const url = `${this.baseUrl}/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`;
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; FinanceHub/1.0)',
-        },
-      });
-
-      if (!response.ok) {
-        return null;
-      }
-
-      const data = await response.json();
-      const result = data?.quoteResponse?.result?.[0];
+      const result = (await this.yf.quote(symbol)) as YahooQuote;
 
       if (!result) {
         return null;
@@ -209,7 +211,7 @@ export class YahooFinanceProvider implements MarketDataProvider {
       return {
         symbol: result.symbol,
         name: result.shortName || result.longName || result.symbol,
-        type: this.mapQuoteType(result.quoteType),
+        type: this.mapQuoteType(result.quoteType || ''),
         currency: result.currency || 'USD',
         exchange: result.exchange,
       };
@@ -231,53 +233,29 @@ export class YahooFinanceProvider implements MarketDataProvider {
     try {
       await this.throttle();
 
-      const intervalMap = { daily: '1d', weekly: '1wk', monthly: '1mo' };
-      const period1 = Math.floor(startDate.getTime() / 1000);
-      const period2 = Math.floor(endDate.getTime() / 1000);
+      const intervalMap = { daily: '1d', weekly: '1wk', monthly: '1mo' } as const;
 
-      const url = `${this.baseUrl}/v8/finance/chart/${encodeURIComponent(symbol)}?period1=${period1}&period2=${period2}&interval=${intervalMap[interval]}`;
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; FinanceHub/1.0)',
-        },
-      });
+      const result = (await this.yf.chart(symbol, {
+        period1: startDate,
+        period2: endDate,
+        interval: intervalMap[interval],
+      })) as YahooChartResult;
 
-      if (!response.ok) {
-        console.error(`Yahoo Finance history error: ${response.status}`);
+      if (!result.quotes || result.quotes.length === 0) {
         return [];
       }
 
-      const data = await response.json();
-      const chart = data?.chart?.result?.[0];
-
-      if (!chart?.timestamp) {
-        return [];
-      }
-
-      const { timestamp, indicators } = chart;
-      const quote = indicators?.quote?.[0];
-      const adjClose = indicators?.adjclose?.[0]?.adjclose;
-
-      if (!quote) {
-        return [];
-      }
-
-      const prices: HistoricalPrice[] = [];
-      for (let i = 0; i < timestamp.length; i++) {
-        if (quote.open[i] !== null) {
-          prices.push({
-            date: new Date(timestamp[i] * 1000),
-            open: quote.open[i],
-            high: quote.high[i],
-            low: quote.low[i],
-            close: quote.close[i],
-            volume: quote.volume?.[i],
-            adjustedClose: adjClose?.[i],
-          });
-        }
-      }
-
-      return prices;
+      return result.quotes
+        .filter((quote) => quote.open !== null)
+        .map((quote) => ({
+          date: new Date(quote.date),
+          open: quote.open ?? 0,
+          high: quote.high ?? 0,
+          low: quote.low ?? 0,
+          close: quote.close ?? 0,
+          volume: quote.volume,
+          adjustedClose: quote.adjclose,
+        }));
     } catch (error) {
       console.error(`Error fetching history for ${symbol}:`, error);
       return [];
