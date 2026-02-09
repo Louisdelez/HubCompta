@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
+import { User, Building2 } from 'lucide-react';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -145,7 +146,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
                     : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                 )}
               >
-                <span className="text-2xl block mb-1">👤</span>
+                <User className="w-6 h-6 mx-auto mb-1" />
                 <span className="font-medium">Client</span>
               </button>
               <button
@@ -158,7 +159,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
                     : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                 )}
               >
-                <span className="text-2xl block mb-1">🏢</span>
+                <Building2 className="w-6 h-6 mx-auto mb-1" />
                 <span className="font-medium">Fournisseur</span>
               </button>
             </div>

@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useQuery } from '@tanstack/react-query';
+import { ArrowLeftRight, CreditCard } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 import { Link } from 'react-router-dom';
@@ -116,7 +117,13 @@ export function RecentTransactions({ workspaceId, limit = 10 }: RecentTransactio
                     : 'bg-gray-100 dark:bg-gray-700'
                 )}
               >
-                {txn.category?.icon ?? (txn.type === 'transfer' ? '↔️' : '💳')}
+                {txn.category?.icon ? (
+                  txn.category.icon
+                ) : txn.type === 'transfer' ? (
+                  <ArrowLeftRight className="w-5 h-5" />
+                ) : (
+                  <CreditCard className="w-5 h-5" />
+                )}
               </div>
 
               {/* Details */}

@@ -5,12 +5,14 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { CreditCard, FileText, User, FileSpreadsheet, PenLine, Landmark, RefreshCw, ArrowUpFromLine, ArrowDownToLine } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { AdvancedFilters, TransactionFilters } from './AdvancedFilters';
 import { SavedFilters } from './SavedFilters';
 import { formatCurrency } from '@/features/currency';
+import type { LucideIcon } from 'lucide-react';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -63,14 +65,14 @@ interface Transaction {
 // Constants
 // ----------------------------------------------------------------------------
 
-const TYPE_CONFIG = {
-  transaction: { icon: '💳', label: 'Transactions', color: 'blue' },
-  document: { icon: '📄', label: 'Documents', color: 'green' },
-  contact: { icon: '👤', label: 'Contacts', color: 'purple' },
-  invoice: { icon: '📃', label: 'Factures', color: 'orange' },
-  quote: { icon: '📝', label: 'Devis', color: 'yellow' },
-  account: { icon: '🏦', label: 'Comptes', color: 'cyan' },
-  recurrence: { icon: '🔄', label: 'Récurrences', color: 'pink' },
+const TYPE_CONFIG: Record<string, { icon: LucideIcon; label: string; color: string }> = {
+  transaction: { icon: CreditCard, label: 'Transactions', color: 'blue' },
+  document: { icon: FileText, label: 'Documents', color: 'green' },
+  contact: { icon: User, label: 'Contacts', color: 'purple' },
+  invoice: { icon: FileSpreadsheet, label: 'Factures', color: 'orange' },
+  quote: { icon: PenLine, label: 'Devis', color: 'yellow' },
+  account: { icon: Landmark, label: 'Comptes', color: 'cyan' },
+  recurrence: { icon: RefreshCw, label: 'Récurrences', color: 'pink' },
 };
 
 const RESULT_TYPES = Object.keys(TYPE_CONFIG) as (keyof typeof TYPE_CONFIG)[];
@@ -278,7 +280,7 @@ export function SearchPage() {
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200'
                 )}
               >
-                {TYPE_CONFIG[type].icon} {TYPE_CONFIG[type].label}
+                {(() => { const config = TYPE_CONFIG[type]; if (!config) return null; const Icon = config.icon; return <Icon className="w-4 h-4 inline mr-1" />; })()} {TYPE_CONFIG[type]?.label}
               </button>
             ))}
           </div>
@@ -303,8 +305,8 @@ export function SearchPage() {
               {Object.entries(groupedResults).map(([type, results]) => (
                 <div key={type} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                   <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
-                    <h3 className="font-medium">
-                      {TYPE_CONFIG[type as keyof typeof TYPE_CONFIG]?.icon}{' '}
+                    <h3 className="font-medium inline-flex items-center gap-1">
+                      {(() => { const Icon = TYPE_CONFIG[type as keyof typeof TYPE_CONFIG]?.icon; return Icon ? <Icon className="w-4 h-4" /> : null; })()}
                       {TYPE_CONFIG[type as keyof typeof TYPE_CONFIG]?.label}
                       <span className="ml-2 text-sm text-gray-500">({results.length})</span>
                     </h3>
@@ -317,7 +319,7 @@ export function SearchPage() {
                         className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                       >
                         <span className="text-lg">
-                          {result.icon ?? TYPE_CONFIG[result.type as keyof typeof TYPE_CONFIG]?.icon}
+                          {result.icon ? <span>{result.icon}</span> : (() => { const Icon = TYPE_CONFIG[result.type as keyof typeof TYPE_CONFIG]?.icon; return Icon ? <Icon className="w-5 h-5" /> : null; })()}
                         </span>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium truncate">{result.title}</p>
@@ -425,7 +427,7 @@ export function SearchPage() {
                         className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
                         style={{ backgroundColor: transaction.account.color ? `${transaction.account.color}20` : '#f3f4f6' }}
                       >
-                        {transaction.category?.icon ?? (transaction.type === 'expense' ? '📤' : '📥')}
+                        {transaction.category?.icon ? <span>{transaction.category.icon}</span> : (transaction.type === 'expense' ? <ArrowUpFromLine className="w-5 h-5 text-danger-500" /> : <ArrowDownToLine className="w-5 h-5 text-success-500" />)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{transaction.description}</p>

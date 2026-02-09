@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { User, Users, Home, Building2 } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -32,25 +33,25 @@ const WORKSPACE_TYPES = [
   {
     value: 'personal',
     label: 'Personnel',
-    icon: '👤',
+    icon: User,
     description: 'Pour gérer vos finances personnelles',
   },
   {
     value: 'family',
     label: 'Famille',
-    icon: '👨‍👩‍👧‍👦',
+    icon: Users,
     description: 'Partagez avec votre famille (max 10 membres)',
   },
   {
     value: 'flatshare',
     label: 'Colocation',
-    icon: '🏠',
+    icon: Home,
     description: 'Gérez les dépenses communes (max 20 membres)',
   },
   {
     value: 'company',
     label: 'Entreprise',
-    icon: '🏢',
+    icon: Building2,
     description: 'Pour les auto-entrepreneurs et TPE (max 50 membres)',
   },
 ] as const;
@@ -150,7 +151,7 @@ export function CreateWorkspaceModal({
                       {...register('type')}
                       className="sr-only"
                     />
-                    <span className="text-2xl mb-1">{type.icon}</span>
+                    <type.icon className="w-6 h-6 mb-1" />
                     <span className="font-medium text-sm">{type.label}</span>
                     <span className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">
                       {type.description}

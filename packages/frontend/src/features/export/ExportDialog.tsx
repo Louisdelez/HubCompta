@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { CreditCard, Landmark, HardDrive, BarChart3 } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -172,10 +173,10 @@ export function ExportDialog({ workspaceId, isOpen, onClose, initialType = 'tran
             <label className="label">Type d'export</label>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { value: 'transactions', label: 'Transactions', icon: '💳' },
-                { value: 'accounts', label: 'Comptes', icon: '🏦' },
-                { value: 'backup', label: 'Sauvegarde complète', icon: '💾' },
-                { value: 'report', label: 'Rapport', icon: '📊' },
+                { value: 'transactions', label: 'Transactions', icon: CreditCard },
+                { value: 'accounts', label: 'Comptes', icon: Landmark },
+                { value: 'backup', label: 'Sauvegarde complète', icon: HardDrive },
+                { value: 'report', label: 'Rapport', icon: BarChart3 },
               ].map((type) => (
                 <button
                   key={type.value}
@@ -187,7 +188,7 @@ export function ExportDialog({ workspaceId, isOpen, onClose, initialType = 'tran
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                   )}
                 >
-                  <span className="text-lg mr-2">{type.icon}</span>
+                  <type.icon className="w-5 h-5 inline mr-2" />
                   <span className="font-medium">{type.label}</span>
                 </button>
               ))}

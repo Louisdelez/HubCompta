@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowUpCircle, ArrowDownCircle, RefreshCw, Settings, Cog, CheckCircle } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { RecurrenceCard } from './RecurrenceCard';
@@ -264,7 +265,7 @@ export function RecurrencesPage() {
           {incomeRecurrences.length > 0 && (filter === 'all' || filter === 'income' || filter === 'active' || filter === 'paused') && (
             <section>
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <span className="text-2xl">💰</span>
+                <ArrowUpCircle className="w-6 h-6 text-success-500" />
                 Revenus recurrents
                 <span className="text-sm font-normal text-gray-500">
                   ({incomeRecurrences.length})
@@ -288,7 +289,7 @@ export function RecurrencesPage() {
           {expenseRecurrences.length > 0 && (filter === 'all' || filter === 'expense' || filter === 'active' || filter === 'paused') && (
             <section>
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <span className="text-2xl">💸</span>
+                <ArrowDownCircle className="w-6 h-6 text-danger-500" />
                 Depenses recurrentes
                 <span className="text-sm font-normal text-gray-500">
                   ({expenseRecurrences.length})
@@ -317,7 +318,7 @@ export function RecurrencesPage() {
         </div>
       ) : (
         <div className="card text-center py-12">
-          <div className="text-5xl mb-4">🔄</div>
+          <RefreshCw className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucune transaction recurrente</h2>
           <p className="text-gray-500 mb-6">
             Creez des recurrences pour automatiser vos revenus et depenses regulieres
@@ -334,21 +335,21 @@ export function RecurrencesPage() {
       {recurrences.length === 0 && (
         <div className="mt-8 grid md:grid-cols-3 gap-6">
           <div className="card text-center">
-            <div className="text-3xl mb-2">1️⃣</div>
+            <Settings className="w-8 h-8 mx-auto mb-2 text-primary-500" />
             <h3 className="font-semibold mb-1">Configurez</h3>
             <p className="text-sm text-gray-500">
               Definissez le montant, la frequence et le compte
             </p>
           </div>
           <div className="card text-center">
-            <div className="text-3xl mb-2">2️⃣</div>
+            <Cog className="w-8 h-8 mx-auto mb-2 text-primary-500" />
             <h3 className="font-semibold mb-1">Automatisez</h3>
             <p className="text-sm text-gray-500">
               Les transactions sont creees automatiquement
             </p>
           </div>
           <div className="card text-center">
-            <div className="text-3xl mb-2">3️⃣</div>
+            <CheckCircle className="w-8 h-8 mx-auto mb-2 text-primary-500" />
             <h3 className="font-semibold mb-1">Controlez</h3>
             <p className="text-sm text-gray-500">
               Pausez, modifiez ou passez des occurrences

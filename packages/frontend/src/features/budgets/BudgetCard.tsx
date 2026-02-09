@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { BarChart3, Pencil, Trash2, Folder } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -116,7 +117,11 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">{budget.category.icon ?? '📁'}</span>
+          {budget.category.icon ? (
+            <span className="text-2xl">{budget.category.icon}</span>
+          ) : (
+            <Folder className="w-6 h-6 text-gray-500" />
+          )}
           <div>
             <h3 className="font-medium">{budget.name}</h3>
             <p className="text-sm text-gray-500">{budget.category.name}</p>
@@ -169,20 +174,20 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
       <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
         <button
           onClick={onViewHistory}
-          className="btn-ghost text-sm flex-1"
+          className="btn-ghost text-sm flex-1 flex items-center justify-center gap-1"
           title="Voir l'historique"
         >
-          📊 Historique
+          <BarChart3 className="w-4 h-4" /> Historique
         </button>
-        <button onClick={onEdit} className="btn-ghost text-sm flex-1">
-          ✏️ Modifier
+        <button onClick={onEdit} className="btn-ghost text-sm flex-1 flex items-center justify-center gap-1">
+          <Pencil className="w-4 h-4" /> Modifier
         </button>
         <button
           onClick={handleDelete}
           className="btn-ghost text-danger-600 text-sm"
           title="Supprimer"
         >
-          🗑️
+          <Trash2 className="w-4 h-4" />
         </button>
       </div>
 

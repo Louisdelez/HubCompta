@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Lightbulb, Folder, Tag, FileText, ClipboardList } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { RuleEditor } from './RuleEditor';
@@ -139,7 +140,7 @@ export function RulesPage() {
       {/* Info Box */}
       <div className="card bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 mb-6">
         <div className="flex gap-3">
-          <span className="text-2xl">💡</span>
+          <Lightbulb className="w-6 h-6 text-blue-600 flex-shrink-0" />
           <div>
             <p className="font-medium text-blue-800 dark:text-blue-200">
               Comment fonctionnent les règles ?
@@ -210,11 +211,11 @@ export function RulesPage() {
                     {rule.actions.map((action, i) => (
                       <span
                         key={i}
-                        className="text-xs px-2 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300"
+                        className="text-xs px-2 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 inline-flex items-center gap-1"
                       >
-                        {action.type === 'set_category' && '📁 Catégorie'}
-                        {action.type === 'add_tag' && '🏷️ Tag'}
-                        {action.type === 'set_notes' && '📝 Note'}
+                        {action.type === 'set_category' && <><Folder className="w-3 h-3" /> Catégorie</>}
+                        {action.type === 'add_tag' && <><Tag className="w-3 h-3" /> Tag</>}
+                        {action.type === 'set_notes' && <><FileText className="w-3 h-3" /> Note</>}
                       </span>
                     ))}
                   </div>
@@ -251,7 +252,7 @@ export function RulesPage() {
         </div>
       ) : (
         <div className="card text-center py-12">
-          <div className="text-5xl mb-4">📋</div>
+          <ClipboardList className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <p className="text-gray-500 mb-4">Aucune règle configurée</p>
           <button onClick={() => setShowEditor(true)} className="btn-primary">
             Créer votre première règle

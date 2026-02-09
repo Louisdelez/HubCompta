@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Image, FileText, X, EyeOff, Eye, Download, Inbox, Link2, Archive, Lock } from 'lucide-react';
 import { api } from '@/lib/api/client';
 
 // ----------------------------------------------------------------------------
@@ -106,7 +107,7 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               <span className="text-4xl">
-                {document.mimeType.startsWith('image/') ? '🖼️' : '📄'}
+                {document.mimeType.startsWith('image/') ? <Image className="w-10 h-10 text-gray-500" /> : <FileText className="w-10 h-10 text-gray-500" />}
               </span>
               <div>
                 <h2 className="text-xl font-bold break-all">{document.filename}</h2>
@@ -115,8 +116,8 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
                 </p>
               </div>
             </div>
-            <button onClick={onClose} className="btn-ghost text-xl">
-              ✕
+            <button onClick={onClose} className="btn-ghost">
+              <X className="w-5 h-5" />
             </button>
           </div>
 
@@ -127,7 +128,7 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
                 onClick={() => setShowPreview(!showPreview)}
                 className="btn-secondary w-full"
               >
-                {showPreview ? '🙈 Masquer l\'aperçu' : '👁️ Afficher l\'aperçu'}
+                {showPreview ? <><EyeOff className="w-4 h-4 inline mr-2" />Masquer l'aperçu</> : <><Eye className="w-4 h-4 inline mr-2" />Afficher l'aperçu</>}
               </button>
 
               {showPreview && (
@@ -164,16 +165,16 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
             </div>
             <div>
               <p className="text-sm text-gray-500">Statut</p>
-              <p className="font-medium">
-                {document.status === 'inbox' && '📥 À traiter'}
-                {document.status === 'linked' && '🔗 Lié'}
-                {document.status === 'archived' && '📦 Archivé'}
+              <p className="font-medium flex items-center gap-1">
+                {document.status === 'inbox' && <><Inbox className="w-4 h-4" /> À traiter</>}
+                {document.status === 'linked' && <><Link2 className="w-4 h-4" /> Lié</>}
+                {document.status === 'archived' && <><Archive className="w-4 h-4" /> Archivé</>}
               </p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Sécurité</p>
-              <p className="font-medium">
-                {document.isVault ? '🔐 Chiffré (Vault)' : '📄 Standard'}
+              <p className="font-medium flex items-center gap-1">
+                {document.isVault ? <><Lock className="w-4 h-4" /> Chiffré (Vault)</> : <><FileText className="w-4 h-4" /> Standard</>}
               </p>
             </div>
           </div>
@@ -230,7 +231,7 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
               disabled={isLoadingUrl}
               className="btn-primary flex-1"
             >
-              {isLoadingUrl ? 'Chargement...' : '⬇️ Télécharger'}
+              {isLoadingUrl ? 'Chargement...' : <><Download className="w-4 h-4 inline mr-2" />Télécharger</>}
             </button>
           </div>
         </div>

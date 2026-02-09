@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { CreditCard, Landmark, BarChart3, HardDrive } from 'lucide-react';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { ExportDialog } from './ExportDialog';
 import { BackupRestoreCard } from './BackupRestoreCard';
@@ -47,7 +48,7 @@ export function ExportPage() {
         >
           <div className="flex items-center gap-4">
             <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <span className="text-2xl">💳</span>
+              <CreditCard className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
               <h3 className="font-medium">Exporter les transactions</h3>
@@ -63,7 +64,7 @@ export function ExportPage() {
         >
           <div className="flex items-center gap-4">
             <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <span className="text-2xl">🏦</span>
+              <Landmark className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
             <div>
               <h3 className="font-medium">Exporter les comptes</h3>
@@ -79,7 +80,7 @@ export function ExportPage() {
         >
           <div className="flex items-center gap-4">
             <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-              <span className="text-2xl">📊</span>
+              <BarChart3 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
               <h3 className="font-medium">Générer un rapport</h3>
@@ -95,7 +96,7 @@ export function ExportPage() {
         >
           <div className="flex items-center gap-4">
             <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-              <span className="text-2xl">💾</span>
+              <HardDrive className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
               <h3 className="font-medium">Sauvegarde rapide</h3>

@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
+import { PenLine, Pencil, Trash2, Copy } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
@@ -200,7 +201,7 @@ export function QuotesPage() {
       {/* Empty State */}
       {!isLoading && quotes?.length === 0 && (
         <div className="card text-center py-12">
-          <div className="text-5xl mb-4">📝</div>
+          <PenLine className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucun devis</h2>
           <p className="text-gray-500 mb-4">
             Créez votre premier devis pour commencer
@@ -270,7 +271,7 @@ export function QuotesPage() {
                       className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                       title="Modifier"
                     >
-                      ✏️
+                      <Pencil className="w-4 h-4" />
                     </Link>
                     <button
                       onClick={() => {
@@ -281,7 +282,7 @@ export function QuotesPage() {
                       className="p-2 text-gray-400 hover:text-danger-600"
                       title="Supprimer"
                     >
-                      🗑️
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </>
                 )}
@@ -321,7 +322,7 @@ export function QuotesPage() {
                   className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   title="Dupliquer"
                 >
-                  📋
+                  <Copy className="w-4 h-4" />
                 </button>
               </div>
             </div>

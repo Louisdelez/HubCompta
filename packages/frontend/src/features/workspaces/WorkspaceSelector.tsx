@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { User, Users, Home, Building2, Folder, Plus } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -29,11 +30,11 @@ interface WorkspaceSelectorProps {
 // Helpers
 // ----------------------------------------------------------------------------
 
-const WORKSPACE_ICONS: Record<Workspace['type'], string> = {
-  personal: '👤',
-  family: '👨‍👩‍👧‍👦',
-  flatshare: '🏠',
-  company: '🏢',
+const WORKSPACE_ICONS: Record<Workspace['type'], typeof User> = {
+  personal: User,
+  family: Users,
+  flatshare: Home,
+  company: Building2,
 };
 
 const WORKSPACE_LABELS: Record<Workspace['type'], string> = {
@@ -67,9 +68,14 @@ export function WorkspaceSelector({
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 w-full"
       >
-        <span className="text-lg">
-          {currentWorkspace ? WORKSPACE_ICONS[currentWorkspace.type] : '📁'}
-        </span>
+        {currentWorkspace ? (
+          (() => {
+            const IconComponent = WORKSPACE_ICONS[currentWorkspace.type];
+            return <IconComponent className="w-5 h-5" />;
+          })()
+        ) : (
+          <Folder className="w-5 h-5" />
+        )}
         <span className="flex-1 text-left truncate">
           {isLoading
             ? 'Chargement...'
@@ -116,7 +122,10 @@ export function WorkspaceSelector({
                     'bg-primary-50 dark:bg-primary-900/20'
                 )}
               >
-                <span className="text-lg">{WORKSPACE_ICONS[workspace.type]}</span>
+                {(() => {
+                  const IconComponent = WORKSPACE_ICONS[workspace.type];
+                  return <IconComponent className="w-5 h-5" />;
+                })()}
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{workspace.name}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -148,7 +157,7 @@ export function WorkspaceSelector({
                 }}
                 className="w-full flex items-center gap-3 px-3 py-2 text-left text-primary-600 dark:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <span className="text-lg">➕</span>
+                <Plus className="w-5 h-5" />
                 <span>Créer un espace</span>
               </button>
             </div>

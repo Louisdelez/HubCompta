@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Landmark, PiggyBank, Banknote, CreditCard, FileText, TrendingUp } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 import { AccountForm } from './AccountForm';
@@ -33,13 +34,13 @@ interface AccountListProps {
 // Constants
 // ----------------------------------------------------------------------------
 
-const ACCOUNT_TYPE_ICONS: Record<Account['type'], string> = {
-  checking: '🏦',
-  savings: '🐷',
-  cash: '💵',
-  credit_card: '💳',
-  loan: '📋',
-  investment: '📈',
+const ACCOUNT_TYPE_ICONS: Record<Account['type'], typeof Landmark> = {
+  checking: Landmark,
+  savings: PiggyBank,
+  cash: Banknote,
+  credit_card: CreditCard,
+  loan: FileText,
+  investment: TrendingUp,
 };
 
 const ACCOUNT_TYPE_LABELS: Record<Account['type'], string> = {
@@ -121,9 +122,14 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
               className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
               <div className="flex items-center gap-2">
-                <span className="text-lg">
-                  {account.icon ?? ACCOUNT_TYPE_ICONS[account.type]}
-                </span>
+                {account.icon ? (
+                  <span className="text-lg">{account.icon}</span>
+                ) : (
+                  (() => {
+                    const IconComponent = ACCOUNT_TYPE_ICONS[account.type];
+                    return <IconComponent className="w-5 h-5" />;
+                  })()
+                )}
                 <span className="font-medium">{account.name}</span>
               </div>
               <span
@@ -175,10 +181,12 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
       </div>
 
       {/* Account Groups */}
-      {Object.entries(groupedAccounts).map(([type, typeAccounts]) => (
+      {Object.entries(groupedAccounts).map(([type, typeAccounts]) => {
+        const IconComponent = ACCOUNT_TYPE_ICONS[type as Account['type']];
+        return (
         <div key={type}>
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <span>{ACCOUNT_TYPE_ICONS[type as Account['type']]}</span>
+            <IconComponent className="w-5 h-5" />
             {ACCOUNT_TYPE_LABELS[type as Account['type']]}
           </h2>
           <div className="space-y-2">
@@ -190,10 +198,17 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
+                    className="w-10 h-10 rounded-full flex items-center justify-center"
                     style={{ backgroundColor: account.color ?? '#E5E7EB' }}
                   >
-                    {account.icon ?? ACCOUNT_TYPE_ICONS[account.type]}
+                    {account.icon ? (
+                      <span className="text-lg">{account.icon}</span>
+                    ) : (
+                      (() => {
+                        const AcctIcon = ACCOUNT_TYPE_ICONS[account.type];
+                        return <AcctIcon className="w-5 h-5" />;
+                      })()
+                    )}
                   </div>
                   <div>
                     <p className="font-medium">{account.name}</p>
@@ -217,7 +232,7 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
             ))}
           </div>
         </div>
-      ))}
+      );})}
 
       {/* Empty State */}
       {(accounts?.length ?? 0) === 0 && (

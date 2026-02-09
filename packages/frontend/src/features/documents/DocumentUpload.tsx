@@ -4,8 +4,10 @@
 
 import { useState, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { Image, BookOpen, Sheet, FileSpreadsheet, FileText, Folder, Clock, Check, X } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
+import type { LucideIcon } from 'lucide-react';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -44,12 +46,12 @@ function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
-function getFileIcon(mimeType: string): string {
-  if (mimeType.startsWith('image/')) return '🖼️';
-  if (mimeType === 'application/pdf') return '📕';
-  if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return '📊';
-  if (mimeType === 'text/csv') return '📋';
-  return '📄';
+function getFileIcon(mimeType: string): LucideIcon {
+  if (mimeType.startsWith('image/')) return Image;
+  if (mimeType === 'application/pdf') return BookOpen;
+  if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return Sheet;
+  if (mimeType === 'text/csv') return FileSpreadsheet;
+  return FileText;
 }
 
 async function calculateHash(file: File): Promise<string> {
@@ -208,7 +210,7 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
                 : 'border-gray-300 dark:border-gray-600 hover:border-primary-400'
             )}
           >
-            <div className="text-4xl mb-3">📁</div>
+            <Folder className="w-10 h-10 mx-auto mb-3 text-gray-400" />
             <p className="text-gray-600 dark:text-gray-400 mb-2">
               Glissez vos fichiers ici ou
             </p>
@@ -235,7 +237,7 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
                   key={index}
                   className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
                 >
-                  <span className="text-xl">{getFileIcon(upload.file.type)}</span>
+                  {(() => { const Icon = getFileIcon(upload.file.type); return <Icon className="w-5 h-5 text-gray-500" />; })()}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{upload.file.name}</p>
                     <p className="text-xs text-gray-500">
@@ -255,16 +257,16 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
                   </div>
                   <div>
                     {upload.status === 'pending' && (
-                      <span className="text-gray-400">⏳</span>
+                      <Clock className="w-4 h-4 text-gray-400" />
                     )}
                     {upload.status === 'uploading' && (
                       <span className="text-primary-500">{upload.progress}%</span>
                     )}
                     {upload.status === 'success' && (
-                      <span className="text-success-500">✓</span>
+                      <Check className="w-4 h-4 text-success-500" />
                     )}
                     {upload.status === 'error' && (
-                      <span className="text-danger-500">✕</span>
+                      <X className="w-4 h-4 text-danger-500" />
                     )}
                   </div>
                 </div>

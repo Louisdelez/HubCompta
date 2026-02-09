@@ -5,6 +5,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { CreditCard, FileText, User, FileSpreadsheet, PenLine, Landmark, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -36,13 +37,13 @@ interface SearchResponse {
 // ----------------------------------------------------------------------------
 
 const TYPE_CONFIG = {
-  transaction: { icon: '💳', label: 'Transaction', path: '/transactions' },
-  document: { icon: '📄', label: 'Document', path: '/documents' },
-  contact: { icon: '👤', label: 'Contact', path: '/contacts' },
-  invoice: { icon: '📃', label: 'Facture', path: '/invoices' },
-  quote: { icon: '📝', label: 'Devis', path: '/quotes' },
-  account: { icon: '🏦', label: 'Compte', path: '/accounts' },
-  recurrence: { icon: '🔄', label: 'Récurrence', path: '/recurrences' },
+  transaction: { icon: CreditCard, label: 'Transaction', path: '/transactions' },
+  document: { icon: FileText, label: 'Document', path: '/documents' },
+  contact: { icon: User, label: 'Contact', path: '/contacts' },
+  invoice: { icon: FileSpreadsheet, label: 'Facture', path: '/invoices' },
+  quote: { icon: PenLine, label: 'Devis', path: '/quotes' },
+  account: { icon: Landmark, label: 'Compte', path: '/accounts' },
+  recurrence: { icon: RefreshCw, label: 'Récurrence', path: '/recurrences' },
 };
 
 // ----------------------------------------------------------------------------
@@ -238,7 +239,11 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
                             : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
                         )}
                       >
-                        <span className="text-lg">{result.icon ?? config.icon}</span>
+                        {result.icon ? (
+                          <span className="text-lg">{result.icon}</span>
+                        ) : (
+                          <config.icon className="w-5 h-5" />
+                        )}
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{result.title}</p>
                           {result.subtitle && (

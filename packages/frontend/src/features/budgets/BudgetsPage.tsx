@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Calendar, CalendarDays, Wallet } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { BudgetCard } from './BudgetCard';
@@ -184,7 +185,7 @@ export function BudgetsPage() {
           {monthlyBudgets.length > 0 && (
             <section>
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <span className="text-xl">📅</span>
+                <Calendar className="w-5 h-5" />
                 Budgets mensuels
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -205,7 +206,7 @@ export function BudgetsPage() {
           {yearlyBudgets.length > 0 && (
             <section>
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <span className="text-xl">📆</span>
+                <CalendarDays className="w-5 h-5" />
                 Budgets annuels
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -224,7 +225,7 @@ export function BudgetsPage() {
         </div>
       ) : (
         <div className="card text-center py-12">
-          <div className="text-5xl mb-4">💰</div>
+          <Wallet className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucun budget configuré</h2>
           <p className="text-gray-500 mb-6">
             Créez des budgets pour suivre vos dépenses par catégorie

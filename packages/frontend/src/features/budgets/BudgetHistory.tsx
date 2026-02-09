@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useQuery } from '@tanstack/react-query';
+import { X, BarChart3, Folder } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -78,7 +79,11 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">{budget.category.icon ?? '📁'}</span>
+              {budget.category.icon ? (
+                <span className="text-3xl">{budget.category.icon}</span>
+              ) : (
+                <Folder className="w-8 h-8 text-gray-500" />
+              )}
               <div>
                 <h2 className="text-xl font-bold">{budget.name}</h2>
                 <p className="text-gray-500 text-sm">
@@ -86,8 +91,8 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
                 </p>
               </div>
             </div>
-            <button onClick={onClose} className="btn-ghost text-xl">
-              ✕
+            <button onClick={onClose} className="btn-ghost">
+              <X className="w-5 h-5" />
             </button>
           </div>
 
@@ -238,7 +243,7 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
             </>
           ) : (
             <div className="text-center py-12">
-              <div className="text-4xl mb-4">📊</div>
+              <BarChart3 className="w-10 h-10 mx-auto mb-4 text-gray-400" />
               <p className="text-gray-500">Pas encore d'historique disponible</p>
             </div>
           )}

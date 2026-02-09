@@ -2,6 +2,7 @@
 // BALANCE CHART - Finance Hub
 // ============================================================================
 
+import { Check, AlertTriangle } from 'lucide-react';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -170,9 +171,13 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
               <p className="text-gray-500">Équilibre</p>
               <p className="font-bold text-lg">
                 {Math.abs(balances.reduce((sum, b) => sum + b.balance, 0)) < 0.01 ? (
-                  <span className="text-success-600">✓ Équilibré</span>
+                  <span className="text-success-600 flex items-center justify-center gap-1">
+                    <Check className="w-4 h-4" /> Équilibré
+                  </span>
                 ) : (
-                  <span className="text-warning-600">⚠ Déséquilibre</span>
+                  <span className="text-warning-600 flex items-center justify-center gap-1">
+                    <AlertTriangle className="w-4 h-4" /> Déséquilibre
+                  </span>
                 )}
               </p>
             </div>

@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from './AuthProvider';
+import { Lock } from 'lucide-react';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -53,7 +54,7 @@ export function LockScreen() {
         <div className="card">
           <div className="text-center mb-6">
             <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">🔒</span>
+              <Lock className="w-8 h-8 text-primary-600 dark:text-primary-400" />
             </div>
             <h1 className="text-xl font-bold">Session verrouillée</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">

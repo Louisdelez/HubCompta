@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { ArrowLeftRight, CreditCard, Check } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 import { useWorkspace } from '@/hooks/useWorkspace';
@@ -198,7 +199,13 @@ export function TransactionList() {
                           : 'bg-gray-100 dark:bg-gray-700'
                       )}
                     >
-                      {txn.category?.icon ?? (txn.type === 'transfer' ? '↔️' : '💳')}
+                      {txn.category?.icon ? (
+                        txn.category.icon
+                      ) : txn.type === 'transfer' ? (
+                        <ArrowLeftRight className="w-5 h-5" />
+                      ) : (
+                        <CreditCard className="w-5 h-5" />
+                      )}
                     </div>
 
                     {/* Details */}
@@ -206,7 +213,7 @@ export function TransactionList() {
                       <div className="flex items-center gap-2">
                         <p className="font-medium truncate">{txn.description}</p>
                         {txn.isReconciled && (
-                          <span className="text-success-500" title="Rapproché">✓</span>
+                          <span title="Rapproché"><Check className="w-4 h-4 text-success-500" /></span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">

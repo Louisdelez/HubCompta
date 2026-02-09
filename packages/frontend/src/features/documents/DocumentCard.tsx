@@ -3,8 +3,10 @@
 // ============================================================================
 
 import { useMutation } from '@tanstack/react-query';
+import { Image, BookOpen, Sheet, FileSpreadsheet, FileText, Lock, Inbox, Link2, Archive, X, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
+import type { LucideIcon } from 'lucide-react';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -54,12 +56,12 @@ function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
-function getFileIcon(mimeType: string): string {
-  if (mimeType.startsWith('image/')) return '🖼️';
-  if (mimeType === 'application/pdf') return '📕';
-  if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return '📊';
-  if (mimeType === 'text/csv') return '📋';
-  return '📄';
+function getFileIcon(mimeType: string): LucideIcon {
+  if (mimeType.startsWith('image/')) return Image;
+  if (mimeType === 'application/pdf') return BookOpen;
+  if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return Sheet;
+  if (mimeType === 'text/csv') return FileSpreadsheet;
+  return FileText;
 }
 
 function formatDate(dateStr: string): string {
@@ -129,7 +131,7 @@ export function DocumentCard({
     >
       {/* Header */}
       <div className="flex items-start gap-3 mb-3">
-        <span className="text-3xl">{getFileIcon(document.mimeType)}</span>
+        {(() => { const Icon = getFileIcon(document.mimeType); return <Icon className="w-8 h-8 text-gray-500" />; })()}
         <div className="flex-1 min-w-0">
           <p className="font-medium truncate" title={document.filename}>
             {document.filename}
@@ -139,27 +141,25 @@ export function DocumentCard({
           </p>
         </div>
         {document.isVault && (
-          <span className="text-lg" title="Document chiffré">
-            🔐
-          </span>
+          <span title="Document chiffré"><Lock className="w-5 h-5 text-gray-500" /></span>
         )}
       </div>
 
       {/* Status Badge */}
       <div className="mb-3">
         {document.status === 'inbox' && (
-          <span className="px-2 py-1 text-xs rounded-full bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-300">
-            📥 À traiter
+          <span className="px-2 py-1 text-xs rounded-full bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-300 inline-flex items-center gap-1">
+            <Inbox className="w-3 h-3" /> À traiter
           </span>
         )}
         {document.status === 'linked' && (
-          <span className="px-2 py-1 text-xs rounded-full bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-300">
-            🔗 Lié ({document.links.length})
+          <span className="px-2 py-1 text-xs rounded-full bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-300 inline-flex items-center gap-1">
+            <Link2 className="w-3 h-3" /> Lié ({document.links.length})
           </span>
         )}
         {document.status === 'archived' && (
-          <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-            📦 Archivé
+          <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
+            <Archive className="w-3 h-3" /> Archivé
           </span>
         )}
       </div>
@@ -187,7 +187,7 @@ export function DocumentCard({
                 className="ml-2 text-gray-400 hover:text-danger-500"
                 title="Délier"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
           ))}
@@ -205,8 +205,8 @@ export function DocumentCard({
         onClick={(e) => e.stopPropagation()}
       >
         {document.status === 'inbox' && (
-          <button onClick={onLink} className="btn-primary text-sm flex-1">
-            🔗 Lier
+          <button onClick={onLink} className="btn-primary text-sm flex-1 inline-flex items-center justify-center gap-1">
+            <Link2 className="w-4 h-4" /> Lier
           </button>
         )}
         {document.status !== 'inbox' && (
@@ -220,7 +220,7 @@ export function DocumentCard({
             className="btn-ghost text-sm"
             title="Archiver"
           >
-            📦
+            <Archive className="w-4 h-4" />
           </button>
         )}
         <button
@@ -228,7 +228,7 @@ export function DocumentCard({
           className="btn-ghost text-danger-600 text-sm"
           title="Supprimer"
         >
-          🗑️
+          <Trash2 className="w-4 h-4" />
         </button>
       </div>
     </div>

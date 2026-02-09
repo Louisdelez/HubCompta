@@ -11,6 +11,26 @@ import { useWorkspace } from '@/hooks/useWorkspace';
 import { NotificationBell } from '@/features/notifications/NotificationBell';
 import { WorkspaceSelector } from '@/features/workspaces/WorkspaceSelector';
 import { CreateWorkspaceModal } from '@/features/workspaces/CreateWorkspaceModal';
+import {
+  LayoutDashboard,
+  CreditCard,
+  Landmark,
+  TrendingUp,
+  LineChart,
+  FileText,
+  RefreshCw,
+  Download,
+  Upload,
+  SlidersHorizontal,
+  ClipboardList,
+  BadgeDollarSign,
+  Search,
+  Shield,
+  Settings,
+  LogOut,
+  Wallet,
+  type LucideIcon,
+} from 'lucide-react';
 
 // ----------------------------------------------------------------------------
 // Navigation Items
@@ -19,26 +39,26 @@ import { CreateWorkspaceModal } from '@/features/workspaces/CreateWorkspaceModal
 interface NavItem {
   name: string;
   href: string;
-  icon: string;
+  icon: LucideIcon;
 }
 
 const mainNavItems: NavItem[] = [
-  { name: 'Tableau de bord', href: '/dashboard', icon: '📊' },
-  { name: 'Transactions', href: '/transactions', icon: '💳' },
-  { name: 'Comptes', href: '/accounts', icon: '🏦' },
-  { name: 'Budgets', href: '/budgets', icon: '📈' },
-  { name: 'Investissements', href: '/portfolio', icon: '💹' },
-  { name: 'Documents', href: '/documents', icon: '📄' },
+  { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Transactions', href: '/transactions', icon: CreditCard },
+  { name: 'Comptes', href: '/accounts', icon: Landmark },
+  { name: 'Budgets', href: '/budgets', icon: TrendingUp },
+  { name: 'Investissements', href: '/portfolio', icon: LineChart },
+  { name: 'Documents', href: '/documents', icon: FileText },
 ];
 
 const secondaryNavItems: NavItem[] = [
-  { name: 'Recurrences', href: '/recurrences', icon: '🔄' },
-  { name: 'Import', href: '/import', icon: '📥' },
-  { name: 'Export', href: '/export', icon: '📤' },
-  { name: 'Regles', href: '/rules', icon: '⚙️' },
-  { name: 'Rapports', href: '/reports', icon: '📋' },
-  { name: 'Devises', href: '/currencies', icon: '💱' },
-  { name: 'Recherche', href: '/search', icon: '🔍' },
+  { name: 'Recurrences', href: '/recurrences', icon: RefreshCw },
+  { name: 'Import', href: '/import', icon: Download },
+  { name: 'Export', href: '/export', icon: Upload },
+  { name: 'Regles', href: '/rules', icon: SlidersHorizontal },
+  { name: 'Rapports', href: '/reports', icon: ClipboardList },
+  { name: 'Devises', href: '/currencies', icon: BadgeDollarSign },
+  { name: 'Recherche', href: '/search', icon: Search },
 ];
 
 // ----------------------------------------------------------------------------
@@ -79,7 +99,9 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-2xl">💰</span>
+            <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
+              <Wallet className="w-5 h-5 text-white" />
+            </div>
             <span className="font-bold text-lg">Finance Hub</span>
           </div>
 
@@ -100,7 +122,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                   }
                   onClick={() => onClose()}
                 >
-                  <span>{item.icon}</span>
+                  <item.icon className="w-5 h-5" />
                   <span>{item.name}</span>
                 </NavLink>
               ))}
@@ -123,7 +145,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                   }
                   onClick={() => onClose()}
                 >
-                  <span>{item.icon}</span>
+                  <item.icon className="w-5 h-5" />
                   <span>{item.name}</span>
                 </NavLink>
               ))}
@@ -154,7 +176,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                   className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-purple-700 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20"
                   onClick={() => onClose()}
                 >
-                  <span>🛡️</span>
+                  <Shield className="w-5 h-5" />
                   <span>Administration</span>
                 </NavLink>
               )}
@@ -163,14 +185,14 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                 onClick={() => onClose()}
               >
-                <span>⚙️</span>
+                <Settings className="w-5 h-5" />
                 <span>Parametres</span>
               </NavLink>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-danger-600 hover:bg-danger-50 dark:text-danger-400 dark:hover:bg-danger-900/20 w-full"
               >
-                <span>🚪</span>
+                <LogOut className="w-5 h-5" />
                 <span>Deconnexion</span>
               </button>
             </div>

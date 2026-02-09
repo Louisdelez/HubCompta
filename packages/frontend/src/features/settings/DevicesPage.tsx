@@ -4,7 +4,9 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Smartphone, Laptop, Monitor, X, Pencil, Lock, Unlock, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api/client';
+import type { LucideIcon } from 'lucide-react';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -72,14 +74,14 @@ export function DevicesPage() {
     });
   };
 
-  const getDeviceIcon = (name: string) => {
+  const getDeviceIcon = (name: string): LucideIcon => {
     const lower = name.toLowerCase();
-    if (lower.includes('iphone') || lower.includes('android')) return '📱';
-    if (lower.includes('ipad') || lower.includes('tablet')) return '📱';
-    if (lower.includes('mac')) return '💻';
-    if (lower.includes('windows')) return '🖥️';
-    if (lower.includes('linux')) return '🐧';
-    return '🖥️';
+    if (lower.includes('iphone') || lower.includes('android')) return Smartphone;
+    if (lower.includes('ipad') || lower.includes('tablet')) return Smartphone;
+    if (lower.includes('mac')) return Laptop;
+    if (lower.includes('windows')) return Monitor;
+    if (lower.includes('linux')) return Monitor;
+    return Monitor;
   };
 
   if (isLoading) {
@@ -107,7 +109,7 @@ export function DevicesPage() {
             key={device.id}
             className="card flex items-start gap-4"
           >
-            <div className="text-2xl">{getDeviceIcon(device.name)}</div>
+            {(() => { const Icon = getDeviceIcon(device.name); return <Icon className="w-6 h-6 text-gray-500" />; })()}
 
             <div className="flex-1 min-w-0">
               {selectedDevice === device.id ? (
@@ -136,7 +138,7 @@ export function DevicesPage() {
                     }}
                     className="btn-secondary"
                   >
-                    ✕
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
@@ -163,7 +165,7 @@ export function DevicesPage() {
                   }}
                   className="btn-ghost text-sm"
                 >
-                  ✏️
+                  <Pencil className="w-4 h-4" />
                 </button>
 
                 <button
@@ -176,7 +178,7 @@ export function DevicesPage() {
                   className="btn-ghost text-sm"
                   title={device.isTrusted ? 'Retirer la confiance' : 'Marquer comme fiable'}
                 >
-                  {device.isTrusted ? '🔓' : '🔒'}
+                  {device.isTrusted ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                 </button>
 
                 <button
@@ -188,7 +190,7 @@ export function DevicesPage() {
                   className="btn-ghost text-sm text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20"
                   title="Révoquer l'accès"
                 >
-                  🗑️
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             )}

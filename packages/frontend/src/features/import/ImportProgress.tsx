@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { XCircle } from 'lucide-react';
 import { api } from '@/lib/api/client';
 
 // ----------------------------------------------------------------------------
@@ -124,7 +125,7 @@ export function ImportProgress({
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="text-5xl mb-4">❌</div>
+        <XCircle className="w-12 h-12 mx-auto mb-4 text-danger-500" />
         <h2 className="text-xl font-bold mb-2 text-danger-600">Erreur</h2>
         <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
         <button

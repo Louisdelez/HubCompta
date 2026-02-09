@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Folder } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -92,7 +93,7 @@ export function CategorySelector({
         >
           {selectedCategory ? (
             <>
-              <span className="text-lg">{selectedCategory.icon ?? '📁'}</span>
+              <span className="text-lg">{selectedCategory.icon ? <span>{selectedCategory.icon}</span> : <Folder className="w-5 h-5 text-gray-500" />}</span>
               <span>{selectedCategory.name}</span>
             </>
           ) : (
@@ -149,7 +150,7 @@ export function CategorySelector({
                       value === category.id && 'bg-primary-50 dark:bg-primary-900/20'
                     )}
                   >
-                    <span className="text-lg">{category.icon ?? '📁'}</span>
+                    <span className="text-lg">{category.icon ? <span>{category.icon}</span> : <Folder className="w-5 h-5 text-gray-500" />}</span>
                     <span className="flex-1">{category.name}</span>
                     {category.children.length > 0 && (
                       <svg
@@ -184,7 +185,7 @@ export function CategorySelector({
                             value === child.id && 'bg-primary-50 dark:bg-primary-900/20'
                           )}
                         >
-                          <span className="text-lg">{child.icon ?? '📁'}</span>
+                          <span className="text-lg">{child.icon ? <span>{child.icon}</span> : <Folder className="w-5 h-5 text-gray-500" />}</span>
                           <span>{child.name}</span>
                         </button>
                       ))}

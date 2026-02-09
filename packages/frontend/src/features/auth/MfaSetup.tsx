@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { api } from '@/lib/api/client';
+import { ShieldCheck, CheckCircle, AlertTriangle } from 'lucide-react';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -92,7 +93,9 @@ export function MfaSetup() {
   if (step === 'init') {
     return (
       <div className="w-full max-w-md text-center">
-        <div className="text-6xl mb-4">🔐</div>
+        <div className="w-16 h-16 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mx-auto mb-4">
+          <ShieldCheck className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+        </div>
         <h1 className="text-2xl font-bold">Configurer l'authentification MFA</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2 mb-6">
           L'authentification à deux facteurs est obligatoire pour sécuriser votre compte.
@@ -194,7 +197,9 @@ export function MfaSetup() {
     return (
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <div className="text-4xl mb-2">✅</div>
+          <div className="w-12 h-12 rounded-full bg-success-100 dark:bg-success-900/30 flex items-center justify-center mx-auto mb-2">
+            <CheckCircle className="w-6 h-6 text-success-600 dark:text-success-400" />
+          </div>
           <h1 className="text-2xl font-bold">MFA activé !</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             Sauvegardez vos codes de récupération
@@ -202,8 +207,9 @@ export function MfaSetup() {
         </div>
 
         <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg p-4 mb-6">
-          <p className="text-warning-700 dark:text-warning-300 text-sm">
-            ⚠️ Ces codes ne seront plus affichés. Conservez-les en lieu sûr.
+          <p className="text-warning-700 dark:text-warning-300 text-sm flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+            Ces codes ne seront plus affichés. Conservez-les en lieu sûr.
           </p>
         </div>
 

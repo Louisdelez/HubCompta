@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Users, Pencil, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
@@ -207,7 +208,7 @@ export function ContactsPage() {
       {/* Empty State */}
       {!isLoading && contacts?.length === 0 && (
         <div className="card text-center py-12">
-          <div className="text-5xl mb-4">👥</div>
+          <Users className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucun contact</h2>
           <p className="text-gray-500 mb-4">
             Ajoutez vos premiers clients ou fournisseurs
@@ -283,7 +284,7 @@ export function ContactsPage() {
                   className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   title="Modifier"
                 >
-                  ✏️
+                  <Pencil className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => handleDelete(contact)}
@@ -291,7 +292,7 @@ export function ContactsPage() {
                   title="Supprimer"
                   disabled={deleteMutation.isPending}
                 >
-                  🗑️
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>

@@ -5,6 +5,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { Check, Users, PenLine, FileText } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
@@ -233,7 +234,7 @@ export function ProDashboard() {
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <div className="text-3xl mb-2">✓</div>
+              <Check className="w-8 h-8 mx-auto mb-2" />
               <p>Aucune facture en attente</p>
             </div>
           )}
@@ -335,7 +336,7 @@ export function ProDashboard() {
           to={`/workspaces/${workspaceId}/pro/contacts`}
           className="card hover:border-primary-500 transition-colors"
         >
-          <div className="text-3xl mb-3">👥</div>
+          <Users className="w-8 h-8 mb-3 text-gray-500" />
           <h3 className="font-semibold mb-1">Contacts</h3>
           <p className="text-sm text-gray-500">
             Gérez vos clients et fournisseurs
@@ -346,7 +347,7 @@ export function ProDashboard() {
           to={`/workspaces/${workspaceId}/pro/quotes`}
           className="card hover:border-primary-500 transition-colors"
         >
-          <div className="text-3xl mb-3">📝</div>
+          <PenLine className="w-8 h-8 mb-3 text-gray-500" />
           <h3 className="font-semibold mb-1">Devis</h3>
           <p className="text-sm text-gray-500">
             Créez et suivez vos devis
@@ -357,7 +358,7 @@ export function ProDashboard() {
           to={`/workspaces/${workspaceId}/pro/invoices`}
           className="card hover:border-primary-500 transition-colors"
         >
-          <div className="text-3xl mb-3">📄</div>
+          <FileText className="w-8 h-8 mb-3 text-gray-500" />
           <h3 className="font-semibold mb-1">Factures</h3>
           <p className="text-sm text-gray-500">
             Facturez et suivez les paiements

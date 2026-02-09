@@ -4,7 +4,9 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Image, BookOpen, FileText, Download, X } from 'lucide-react';
 import { api } from '@/lib/api/client';
+import type { LucideIcon } from 'lucide-react';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -39,10 +41,10 @@ function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
-function getFileIcon(mimeType: string): string {
-  if (mimeType.startsWith('image/')) return '🖼️';
-  if (mimeType === 'application/pdf') return '📕';
-  return '📄';
+function getFileIcon(mimeType: string): LucideIcon {
+  if (mimeType.startsWith('image/')) return Image;
+  if (mimeType === 'application/pdf') return BookOpen;
+  return FileText;
 }
 
 // ----------------------------------------------------------------------------
@@ -124,7 +126,7 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
               key={doc.id}
               className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg"
             >
-              <span>{getFileIcon(doc.mimeType)}</span>
+              {(() => { const Icon = getFileIcon(doc.mimeType); return <Icon className="w-5 h-5 text-gray-500" />; })()}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{doc.filename}</p>
                 <p className="text-xs text-gray-500">{formatFileSize(doc.size)}</p>
@@ -134,14 +136,14 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
                 onClick={() => handleDownload(doc.id)}
                 className="text-primary-600 hover:text-primary-700 text-sm"
               >
-                ⬇️
+                <Download className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={() => unlinkMutation.mutate(doc.id)}
                 className="text-gray-400 hover:text-danger-500"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
           ))}
@@ -160,7 +162,7 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
               onClick={() => setShowPicker(false)}
               className="text-gray-400 hover:text-gray-600"
             >
-              ✕
+              <X className="w-4 h-4" />
             </button>
           </div>
 
@@ -174,7 +176,7 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
                   disabled={linkMutation.isPending}
                   className="w-full flex items-center gap-2 p-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
                 >
-                  <span>{getFileIcon(doc.mimeType)}</span>
+                  {(() => { const Icon = getFileIcon(doc.mimeType); return <Icon className="w-5 h-5 text-gray-500" />; })()}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm truncate">{doc.filename}</p>
                     <p className="text-xs text-gray-500">{formatFileSize(doc.size)}</p>

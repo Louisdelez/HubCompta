@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
 import { MfaVerify } from './MfaVerify';
+import { Wallet } from 'lucide-react';
 import type { MFAType } from '@finance-hub/shared';
 
 // ----------------------------------------------------------------------------
@@ -141,7 +142,9 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-md">
       <div className="text-center mb-8">
-        <span className="text-4xl">💰</span>
+        <div className="w-16 h-16 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto">
+          <Wallet className="w-8 h-8 text-white" />
+        </div>
         <h1 className="text-2xl font-bold mt-4">Finance Hub</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
           Connectez-vous à votre compte

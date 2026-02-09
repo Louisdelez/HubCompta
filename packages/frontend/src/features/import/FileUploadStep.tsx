@@ -4,6 +4,7 @@
 
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { FileText, Upload } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -197,7 +198,7 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
       >
         {selectedFile ? (
           <div>
-            <div className="text-4xl mb-2">📄</div>
+            <FileText className="w-10 h-10 mx-auto mb-2 text-primary-500" />
             <p className="font-medium">{selectedFile.name}</p>
             <p className="text-sm text-gray-500 mt-1">
               {(selectedFile.size / 1024).toFixed(1)} Ko
@@ -211,7 +212,7 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
           </div>
         ) : (
           <div>
-            <div className="text-4xl mb-2">📤</div>
+            <Upload className="w-10 h-10 mx-auto mb-2 text-gray-400" />
             <p className="font-medium mb-1">
               Glissez-déposez votre fichier CSV ici
             </p>

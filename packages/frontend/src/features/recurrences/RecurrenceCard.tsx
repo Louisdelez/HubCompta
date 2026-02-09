@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ArrowDownCircle, ArrowUpCircle, Pause, Play, Zap, SkipForward, Calendar, Pencil, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -223,7 +224,7 @@ export function RecurrenceCard({
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <span className="text-2xl">
-            {recurrence.template.category?.icon ?? (isExpense ? '💸' : '💰')}
+            {recurrence.template.category?.icon ? <span>{recurrence.template.category.icon}</span> : (isExpense ? <ArrowDownCircle className="w-6 h-6 text-danger-500" /> : <ArrowUpCircle className="w-6 h-6 text-success-500" />)}
           </span>
           <div>
             <h3 className="font-medium">{recurrence.name}</h3>
@@ -297,7 +298,7 @@ export function RecurrenceCard({
             recurrence.isActive ? 'text-warning-600' : 'text-success-600'
           )}
         >
-          {recurrence.isActive ? '⏸️ Pause' : '▶️ Reprendre'}
+          {recurrence.isActive ? <><Pause className="w-4 h-4 inline mr-1" />Pause</> : <><Play className="w-4 h-4 inline mr-1" />Reprendre</>}
         </button>
         {recurrence.isActive && (
           <>
@@ -306,29 +307,29 @@ export function RecurrenceCard({
               disabled={executeMutation.isPending}
               className="btn-ghost text-xs text-primary-600"
             >
-              ⚡ Executer
+              <Zap className="w-4 h-4 inline mr-1" />Executer
             </button>
             <button
               onClick={handleSkipNext}
               disabled={skipMutation.isPending}
               className="btn-ghost text-xs"
             >
-              ⏭️ Passer
+              <SkipForward className="w-4 h-4 inline mr-1" />Passer
             </button>
           </>
         )}
         <button onClick={onViewUpcoming} className="btn-ghost text-xs">
-          📅 Prochaines
+          <Calendar className="w-4 h-4 inline mr-1" />Prochaines
         </button>
         <button onClick={onEdit} className="btn-ghost text-xs">
-          ✏️ Modifier
+          <Pencil className="w-4 h-4 inline mr-1" />Modifier
         </button>
         <button
           onClick={handleDelete}
           disabled={deleteMutation.isPending}
           className="btn-ghost text-xs text-danger-600"
         >
-          🗑️
+          <Trash2 className="w-4 h-4" />
         </button>
       </div>
     </div>

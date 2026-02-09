@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Inbox, Link2, Archive, FileText } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { DocumentCard } from './DocumentCard';
@@ -115,7 +116,7 @@ export function DocumentsPage() {
       {inboxCount && inboxCount.count > 0 && (
         <div className="card bg-warning-50 dark:bg-warning-900/20 border-warning-200 dark:border-warning-800 mb-6">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">📥</span>
+            <Inbox className="w-6 h-6 text-warning-600" />
             <div className="flex-1">
               <p className="font-medium text-warning-800 dark:text-warning-200">
                 {inboxCount.count} document{inboxCount.count > 1 ? 's' : ''} à traiter
@@ -150,9 +151,9 @@ export function DocumentsPage() {
               )}
             >
               {status === 'all' && 'Tous'}
-              {status === 'inbox' && '📥 À traiter'}
-              {status === 'linked' && '🔗 Liés'}
-              {status === 'archived' && '📦 Archivés'}
+              {status === 'inbox' && <><Inbox className="w-4 h-4 inline mr-1" />À traiter</>}
+              {status === 'linked' && <><Link2 className="w-4 h-4 inline mr-1" />Liés</>}
+              {status === 'archived' && <><Archive className="w-4 h-4 inline mr-1" />Archivés</>}
             </button>
           ))}
         </div>
@@ -191,7 +192,7 @@ export function DocumentsPage() {
         </div>
       ) : (
         <div className="card text-center py-12">
-          <div className="text-5xl mb-4">📄</div>
+          <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucun document</h2>
           <p className="text-gray-500 mb-6">
             {filterStatus !== 'all'

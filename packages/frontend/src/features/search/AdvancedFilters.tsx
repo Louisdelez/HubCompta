@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { ArrowUpFromLine, ArrowDownToLine, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -61,9 +62,9 @@ interface AdvancedFiltersProps {
 // ----------------------------------------------------------------------------
 
 const TRANSACTION_TYPES = [
-  { value: 'expense', label: 'Dépense', icon: '📤' },
-  { value: 'income', label: 'Revenu', icon: '📥' },
-  { value: 'transfer', label: 'Virement', icon: '🔄' },
+  { value: 'expense', label: 'Dépense', icon: ArrowUpFromLine },
+  { value: 'income', label: 'Revenu', icon: ArrowDownToLine },
+  { value: 'transfer', label: 'Virement', icon: RefreshCw },
 ] as const;
 
 const STATUSES = [
@@ -256,7 +257,7 @@ export function AdvancedFilters({
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
                   )}
                 >
-                  {type.icon} {type.label}
+                  <type.icon className="w-4 h-4 inline mr-1" /> {type.label}
                 </button>
               ))}
             </div>

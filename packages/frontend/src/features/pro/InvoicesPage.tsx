@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
+import { FileText, Pencil, Trash2, X, Copy } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
@@ -178,7 +179,7 @@ export function InvoicesPage() {
       {/* Empty State */}
       {!isLoading && invoices?.length === 0 && (
         <div className="card text-center py-12">
-          <div className="text-5xl mb-4">📄</div>
+          <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucune facture</h2>
           <p className="text-gray-500 mb-4">
             Créez votre première facture pour commencer
@@ -253,7 +254,7 @@ export function InvoicesPage() {
                       className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                       title="Modifier"
                     >
-                      ✏️
+                      <Pencil className="w-4 h-4" />
                     </Link>
                     <button
                       onClick={() => {
@@ -264,7 +265,7 @@ export function InvoicesPage() {
                       className="p-2 text-gray-400 hover:text-danger-600"
                       title="Supprimer"
                     >
-                      🗑️
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </>
                 )}
@@ -285,7 +286,7 @@ export function InvoicesPage() {
                       className="p-2 text-gray-400 hover:text-danger-600"
                       title="Annuler"
                     >
-                      ✕
+                      <X className="w-4 h-4" />
                     </button>
                   </>
                 )}
@@ -294,7 +295,7 @@ export function InvoicesPage() {
                   className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   title="Dupliquer"
                 >
-                  📋
+                  <Copy className="w-4 h-4" />
                 </button>
               </div>
             </div>

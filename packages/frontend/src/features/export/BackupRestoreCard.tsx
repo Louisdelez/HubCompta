@@ -4,6 +4,7 @@
 
 import { useState, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { HardDrive, Download } from 'lucide-react';
 import { api } from '@/lib/api/client';
 
 // ----------------------------------------------------------------------------
@@ -152,7 +153,7 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
           <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
-                <span className="text-2xl">💾</span>
+                <HardDrive className="w-6 h-6 text-primary-600 dark:text-primary-400" />
               </div>
               <div className="flex-1">
                 <h4 className="font-medium">Créer une sauvegarde</h4>
@@ -171,7 +172,7 @@ export function BackupRestoreCard({ workspaceId }: BackupRestoreCardProps) {
           <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-warning-100 dark:bg-warning-900/30 rounded-lg">
-                <span className="text-2xl">📥</span>
+                <Download className="w-6 h-6 text-warning-600 dark:text-warning-400" />
               </div>
               <div className="flex-1">
                 <h4 className="font-medium">Restaurer depuis une sauvegarde</h4>

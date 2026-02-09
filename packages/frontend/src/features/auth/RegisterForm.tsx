@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api/client';
+import { Wallet, CheckCircle } from 'lucide-react';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -94,7 +95,9 @@ export function RegisterForm() {
   if (success) {
     return (
       <div className="w-full max-w-md text-center">
-        <div className="text-6xl mb-4">✅</div>
+        <div className="w-16 h-16 rounded-full bg-success-100 dark:bg-success-900/30 flex items-center justify-center mx-auto mb-4">
+          <CheckCircle className="w-8 h-8 text-success-600 dark:text-success-400" />
+        </div>
         <h1 className="text-2xl font-bold">Compte créé !</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
           Redirection vers la page de connexion...
@@ -106,7 +109,9 @@ export function RegisterForm() {
   return (
     <div className="w-full max-w-md">
       <div className="text-center mb-8">
-        <span className="text-4xl">💰</span>
+        <div className="w-16 h-16 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto">
+          <Wallet className="w-8 h-8 text-white" />
+        </div>
         <h1 className="text-2xl font-bold mt-4">Créer un compte</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
           Commencez à gérer vos finances

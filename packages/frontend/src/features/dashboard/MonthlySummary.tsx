@@ -2,6 +2,7 @@
 // MONTHLY SUMMARY - Finance Hub
 // ============================================================================
 
+import { Wallet, TrendingUp, TrendingDown, CheckCircle, AlertTriangle, Target, Trophy, BarChart3 } from 'lucide-react';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -60,21 +61,21 @@ export function MonthlySummary({ data }: MonthlySummaryProps) {
       value: formatCurrency(totalBalance),
       change: null,
       color: 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300',
-      icon: '💰',
+      icon: Wallet,
     },
     {
       label: 'Revenus',
       value: formatCurrency(flow.income),
       change: comparison.incomeChange,
       color: 'bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300',
-      icon: '📈',
+      icon: TrendingUp,
     },
     {
       label: 'Dépenses',
       value: formatCurrency(flow.expenses),
       change: comparison.expenseChange,
       color: 'bg-danger-50 dark:bg-danger-900/20 text-danger-700 dark:text-danger-300',
-      icon: '📉',
+      icon: TrendingDown,
     },
   ];
 
@@ -107,7 +108,7 @@ export function MonthlySummary({ data }: MonthlySummaryProps) {
                   </p>
                 )}
               </div>
-              <span className="text-2xl">{card.icon}</span>
+              <card.icon className="w-6 h-6" />
             </div>
           </div>
         ))}
@@ -128,7 +129,11 @@ export function MonthlySummary({ data }: MonthlySummaryProps) {
                 {formatCurrency(flow.net)}
               </p>
             </div>
-            <span className="text-2xl">{flow.net >= 0 ? '✅' : '⚠️'}</span>
+            {flow.net >= 0 ? (
+              <CheckCircle className="w-6 h-6 text-success-500" />
+            ) : (
+              <AlertTriangle className="w-6 h-6 text-warning-500" />
+            )}
           </div>
         </div>
 
@@ -146,9 +151,13 @@ export function MonthlySummary({ data }: MonthlySummaryProps) {
                 {flow.savingsRate.toFixed(1)}%
               </p>
             </div>
-            <span className="text-2xl">
-              {flow.savingsRate >= 20 ? '🏆' : flow.savingsRate >= 0 ? '🎯' : '📊'}
-            </span>
+            {flow.savingsRate >= 20 ? (
+              <Trophy className="w-6 h-6 text-success-500" />
+            ) : flow.savingsRate >= 0 ? (
+              <Target className="w-6 h-6 text-warning-500" />
+            ) : (
+              <BarChart3 className="w-6 h-6 text-danger-500" />
+            )}
           </div>
         </div>
       </div>

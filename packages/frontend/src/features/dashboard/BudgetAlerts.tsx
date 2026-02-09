@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useQuery } from '@tanstack/react-query';
+import { Wallet, AlertCircle, AlertTriangle, Zap, CheckCircle } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 import { Link } from 'react-router-dom';
@@ -52,26 +53,26 @@ function formatCurrency(amount: number): string {
 function getAlertStyles(level: 'warning' | 'danger' | 'over'): {
   bg: string;
   text: string;
-  icon: string;
+  icon: typeof AlertCircle;
 } {
   switch (level) {
     case 'over':
       return {
         bg: 'bg-danger-50 dark:bg-danger-900/20',
         text: 'text-danger-700 dark:text-danger-300',
-        icon: '🚨',
+        icon: AlertCircle,
       };
     case 'danger':
       return {
         bg: 'bg-danger-50 dark:bg-danger-900/20',
         text: 'text-danger-700 dark:text-danger-300',
-        icon: '⚠️',
+        icon: AlertTriangle,
       };
     case 'warning':
       return {
         bg: 'bg-warning-50 dark:bg-warning-900/20',
         text: 'text-warning-700 dark:text-warning-300',
-        icon: '⚡',
+        icon: Zap,
       };
   }
 }
@@ -105,7 +106,7 @@ export function BudgetAlerts({ workspaceId }: BudgetAlertsProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          <span>💰</span>
+          <Wallet className="w-5 h-5" />
           Budgets
         </h2>
         <Link to="/budgets" className="text-sm text-primary-600 hover:underline">
@@ -167,7 +168,11 @@ export function BudgetAlerts({ workspaceId }: BudgetAlertsProps) {
                 className={clsx('p-3 rounded-lg', styles.bg)}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">{alert.categoryIcon ?? styles.icon}</span>
+                  {alert.categoryIcon ? (
+                    <span className="text-lg">{alert.categoryIcon}</span>
+                  ) : (
+                    <styles.icon className="w-5 h-5" />
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className={clsx('font-medium text-sm', styles.text)}>
                       {alert.budgetName}
@@ -200,7 +205,7 @@ export function BudgetAlerts({ workspaceId }: BudgetAlertsProps) {
       {/* No Alerts - All Good */}
       {(!alerts || alerts.length === 0) && (
         <div className="text-center py-4">
-          <span className="text-3xl">✅</span>
+          <CheckCircle className="w-8 h-8 mx-auto text-success-500" />
           <p className="text-sm text-gray-500 mt-2">
             Tous vos budgets sont sous contrôle
           </p>

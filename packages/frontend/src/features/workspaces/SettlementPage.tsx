@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Calendar, Home } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { BalanceChart } from './BalanceChart';
@@ -225,7 +226,7 @@ export function SettlementPage() {
           {/* Period Info */}
           <div className="card bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 mb-6">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">📅</span>
+              <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               <p className="text-blue-800 dark:text-blue-200">
                 Période: {formatDate(settlement.period.startDate)} au{' '}
                 {formatDate(settlement.period.endDate)}
@@ -278,7 +279,7 @@ export function SettlementPage() {
         </>
       ) : activeTab === 'current' ? (
         <div className="card text-center py-12">
-          <div className="text-5xl mb-4">🏠</div>
+          <Home className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-bold mb-2">Aucune donnee</h2>
           <p className="text-gray-500">
             Ajoutez des depenses partagees pour voir l'equilibre

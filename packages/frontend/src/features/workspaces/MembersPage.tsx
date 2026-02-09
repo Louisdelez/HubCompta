@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { X } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { InviteMember } from './InviteMember';
 import { clsx } from 'clsx';
@@ -190,7 +191,7 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
                 className="btn-ghost text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20"
                 title="Retirer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>

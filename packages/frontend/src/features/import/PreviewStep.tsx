@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { XCircle } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -110,7 +111,7 @@ export function PreviewStep({
   if (error || !preview) {
     return (
       <div className="text-center py-12">
-        <div className="text-4xl mb-4">❌</div>
+        <XCircle className="w-10 h-10 mx-auto mb-4 text-danger-500" />
         <p className="text-danger-600 mb-4">
           {error instanceof Error ? error.message : 'Erreur lors de l\'analyse'}
         </p>

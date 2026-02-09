@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { Check } from 'lucide-react';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -112,8 +113,8 @@ export function ColumnMappingStep({
       <div>
         <h2 className="text-lg font-semibold mb-2">Mapper les colonnes</h2>
         {detectedFormat && (
-          <div className="p-3 rounded-lg bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300 text-sm">
-            ✓ Format détecté : {detectedFormat.bank}
+          <div className="p-3 rounded-lg bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300 text-sm flex items-center gap-2">
+            <Check className="w-4 h-4" /> Format détecté : {detectedFormat.bank}
           </div>
         )}
         {!detectedFormat && (

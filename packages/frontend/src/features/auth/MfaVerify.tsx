@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { ShieldCheck, Smartphone, Key } from 'lucide-react';
 import type { MFAType } from '@finance-hub/shared';
 
 // ----------------------------------------------------------------------------
@@ -49,7 +50,9 @@ export function MfaVerify({
   return (
     <div className="w-full max-w-md">
       <div className="text-center mb-8">
-        <span className="text-4xl">🔐</span>
+        <div className="w-16 h-16 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mx-auto">
+          <ShieldCheck className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+        </div>
         <h1 className="text-2xl font-bold mt-4">Vérification MFA</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
           Entrez le code de votre application d'authentification
@@ -75,7 +78,9 @@ export function MfaVerify({
                   : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
               }`}
             >
-              {method === 'totp' ? '📱 Authenticator' : '🔑 Security Key'}
+              <span className="flex items-center justify-center gap-2">
+                {method === 'totp' ? <><Smartphone className="w-4 h-4" /> Authenticator</> : <><Key className="w-4 h-4" /> Security Key</>}
+              </span>
             </button>
           ))}
         </div>

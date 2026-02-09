@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { Check, CheckCircle } from 'lucide-react';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { FileUploadStep } from './FileUploadStep';
 import { ColumnMappingStep } from './ColumnMappingStep';
@@ -109,7 +110,7 @@ export function ImportWizard() {
                     : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
                 )}
               >
-                {index < currentStepIndex ? '✓' : index + 1}
+                {index < currentStepIndex ? <Check className="w-4 h-4" /> : index + 1}
               </div>
               <span
                 className={clsx(
@@ -215,7 +216,7 @@ export function ImportWizard() {
 
         {step === 'complete' && (
           <div className="text-center py-8">
-            <div className="text-5xl mb-4">✅</div>
+            <CheckCircle className="w-12 h-12 mx-auto mb-4 text-success-500" />
             <h2 className="text-xl font-bold mb-2">Import terminé !</h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               {importState.result?.imported} transactions importées

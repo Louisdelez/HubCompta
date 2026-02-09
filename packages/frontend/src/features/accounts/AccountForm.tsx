@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Landmark, PiggyBank, Banknote, CreditCard, FileText, TrendingUp } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 import { CurrencySelector } from '@/features/currency';
@@ -42,12 +43,12 @@ interface AccountFormProps {
 // ----------------------------------------------------------------------------
 
 const ACCOUNT_TYPES = [
-  { value: 'checking', label: 'Compte courant', icon: '🏦' },
-  { value: 'savings', label: 'Épargne', icon: '🐷' },
-  { value: 'cash', label: 'Espèces', icon: '💵' },
-  { value: 'credit_card', label: 'Carte de crédit', icon: '💳' },
-  { value: 'loan', label: 'Prêt', icon: '📋' },
-  { value: 'investment', label: 'Investissement', icon: '📈' },
+  { value: 'checking', label: 'Compte courant', icon: Landmark },
+  { value: 'savings', label: 'Épargne', icon: PiggyBank },
+  { value: 'cash', label: 'Espèces', icon: Banknote },
+  { value: 'credit_card', label: 'Carte de crédit', icon: CreditCard },
+  { value: 'loan', label: 'Prêt', icon: FileText },
+  { value: 'investment', label: 'Investissement', icon: TrendingUp },
 ] as const;
 
 const COLORS = [
@@ -178,7 +179,7 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
                         {...register('type')}
                         className="sr-only"
                       />
-                      <span className="text-xl">{type.icon}</span>
+                      <type.icon className="w-5 h-5" />
                       <span className="text-xs mt-1 text-center">{type.label}</span>
                     </label>
                   ))}

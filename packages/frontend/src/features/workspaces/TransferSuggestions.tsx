@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { CheckCircle, Check, Lightbulb } from 'lucide-react';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -76,7 +77,7 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
   if (transfers.length === 0) {
     return (
       <div className="card text-center py-8">
-        <div className="text-4xl mb-3">✅</div>
+        <CheckCircle className="w-10 h-10 mx-auto mb-3 text-success-500" />
         <h3 className="text-lg font-semibold text-success-600">Tout est équilibré !</h3>
         <p className="text-gray-500 mt-1">
           Personne ne doit d'argent à personne
@@ -169,7 +170,7 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
                     : 'border-gray-300 dark:border-gray-600'
                 )}
               >
-                {isCompleted && <span className="text-sm">✓</span>}
+                {isCompleted && <Check className="w-4 h-4" />}
               </div>
             </div>
           );
@@ -178,8 +179,9 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
 
       {/* Instructions */}
       <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <p className="text-sm text-blue-700 dark:text-blue-300">
-          💡 Cliquez sur un transfert pour le marquer comme effectué. Ces transferts minimisent le nombre d'échanges nécessaires.
+        <p className="text-sm text-blue-700 dark:text-blue-300 flex items-start gap-2">
+          <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <span>Cliquez sur un transfert pour le marquer comme effectué. Ces transferts minimisent le nombre d'échanges nécessaires.</span>
         </p>
       </div>
 
