@@ -230,7 +230,8 @@ export async function startServer(): Promise<void> {
     logger.info({ host, port }, `Server running at http://${host}:${port}`);
     logger.info({ host, port }, `API docs available at http://${host}:${port}/docs`);
   } catch (error) {
-    logger.error({ error }, 'Failed to start server');
+    console.error('Failed to start server:', error);
+    logger.error({ error, message: (error as Error).message, stack: (error as Error).stack }, 'Failed to start server');
     process.exit(1);
   }
 }
