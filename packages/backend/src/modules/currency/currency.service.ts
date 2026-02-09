@@ -189,6 +189,40 @@ export const currencyService = {
       }
     }
 
+    // Try triangular conversion via EUR (for BCE rates)
+    if (!exchangeRate && base !== 'EUR' && target !== 'EUR') {
+      // Get base → EUR rate (inverse of EUR → base)
+      const baseToEur = await prisma.exchangeRate.findFirst({
+        where: {
+          baseCurrency: 'EUR',
+          targetCurrency: base,
+          date: { lte: normalizedDate },
+        },
+        orderBy: { date: 'desc' },
+      });
+
+      // Get EUR → target rate
+      const eurToTarget = await prisma.exchangeRate.findFirst({
+        where: {
+          baseCurrency: 'EUR',
+          targetCurrency: target,
+          date: { lte: normalizedDate },
+        },
+        orderBy: { date: 'desc' },
+      });
+
+      if (baseToEur && eurToTarget) {
+        // base → EUR → target = (1 / EUR→base) × (EUR→target)
+        const crossRate = (1 / Number(baseToEur.rate)) * Number(eurToTarget.rate);
+        const olderDate = baseToEur.date < eurToTarget.date ? baseToEur.date : eurToTarget.date;
+        return {
+          rate: crossRate,
+          source: 'ecb (cross-rate via EUR)',
+          date: olderDate,
+        };
+      }
+    }
+
     if (!exchangeRate) {
       return null;
     }
