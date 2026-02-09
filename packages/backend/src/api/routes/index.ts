@@ -32,6 +32,9 @@ import { portfolioRoutes } from './portfolio.js';
 // Notification routes
 import { notificationRoutes } from './notifications.js';
 
+// Alert routes
+import { alertRoutes } from './alerts.js';
+
 // Settings routes
 import settingsRoutes from './settings.js';
 
@@ -136,6 +139,9 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
 
   // Portfolio routes (workspace scoped)
   await app.register(portfolioRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/portfolio` });
+
+  // Alert routes (workspace scoped)
+  await app.register(alertRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/alerts/price` });
 
   // ----------------------------------------------------------------------------
   // Notification Routes (user scoped)

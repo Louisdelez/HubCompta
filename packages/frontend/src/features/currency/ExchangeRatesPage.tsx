@@ -5,9 +5,11 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Plus } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { CurrencySelector } from './CurrencySelector';
 import { CurrencyConverter } from './CurrencyConverter';
+import { ManualRateModal } from './ManualRateModal';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -36,6 +38,7 @@ export function ExchangeRatesPage() {
   const [baseCurrency, setBaseCurrency] = useState('EUR');
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [showManualRateModal, setShowManualRateModal] = useState(false);
 
   // Fetch latest rates
   const { data: ratesData, isLoading: loadingRates } = useQuery({
@@ -97,6 +100,13 @@ export function ExchangeRatesPage() {
             className="btn-secondary"
           >
             Initialiser devises
+          </button>
+          <button
+            onClick={() => setShowManualRateModal(true)}
+            className="btn-secondary flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Definir un taux
           </button>
           <button
             onClick={() => fetchECBMutation.mutate()}
@@ -377,6 +387,13 @@ export function ExchangeRatesPage() {
           </div>
         </div>
       </div>
+
+      {/* Manual Rate Modal */}
+      <ManualRateModal
+        isOpen={showManualRateModal}
+        onClose={() => setShowManualRateModal(false)}
+        defaultBaseCurrency={baseCurrency}
+      />
     </div>
   );
 }

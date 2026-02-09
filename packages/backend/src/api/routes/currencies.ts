@@ -6,6 +6,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { currencyService } from '@/modules/currency/index.js';
 import { auditService } from '@/modules/audit/audit.service.js';
+import { authGuard } from '@/core/auth/authGuard.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -219,7 +220,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
    */
   fastify.post<{
     Body: SetRateBody;
-  }>('/rates', async (request, reply) => {
+  }>('/rates', { preHandler: [authGuard] }, async (request, reply) => {
     const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });
@@ -257,7 +258,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
       ipAddress: request.ip,
     });
 
-    return reply.status(201).send({ data: exchangeRate });
+    return reply.status(201).send({ success: true, data: exchangeRate });
   });
 
   // ==========================================================================
@@ -268,7 +269,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
    * POST /currencies/rates/fetch-ecb
    * Fetch latest rates from ECB
    */
-  fastify.post('/rates/fetch-ecb', async (request, reply) => {
+  fastify.post('/rates/fetch-ecb', { preHandler: [authGuard] }, async (request, reply) => {
     const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });
@@ -305,7 +306,7 @@ const currencyRoutes: FastifyPluginAsync = async (fastify) => {
    * POST /currencies/initialize
    * Initialize default currencies (admin only)
    */
-  fastify.post('/initialize', async (request, reply) => {
+  fastify.post('/initialize', { preHandler: [authGuard] }, async (request, reply) => {
     const userId = request.user?.sub;
     if (!userId) {
       return reply.status(401).send({ error: 'Non authentifie' });

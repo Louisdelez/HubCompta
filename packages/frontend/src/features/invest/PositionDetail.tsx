@@ -19,7 +19,9 @@ import {
   Loader2,
   Calendar,
   ExternalLink,
+  Bell,
 } from 'lucide-react';
+import { PriceAlertModal } from './PriceAlertModal';
 import { api } from '@/lib/api';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { cn, formatCurrency, formatNumber, formatPercent } from '@/lib/utils';
@@ -61,7 +63,23 @@ interface Position {
   unrealizedPnLPercent: number;
   realizedPnL: number;
   openedAt: string;
-  transactions: Transaction[];
+  transactions?: Transaction[];
+}
+
+// API response uses different property names
+interface PositionApiResponse {
+  id: string;
+  asset: Asset;
+  accountId: string;
+  quantity: number;
+  averageCost: number;
+  currentValue: number;
+  totalCost: number;
+  unrealizedGain: number;
+  unrealizedGainPercent: number;
+  realizedGain: number;
+  createdAt: string;
+  transactions?: Transaction[];
 }
 
 interface PositionDetailProps {
@@ -80,15 +98,24 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
   // Note: These state variables are prepared for future transaction modal implementation
   const [_showAddTransaction, _setShowAddTransaction] = useState(false);
   const [_transactionType, _setTransactionType] = useState<'buy' | 'sell'>('buy');
+  const [showPriceAlertModal, setShowPriceAlertModal] = useState(false);
 
   // Fetch position details
   const { data: position, isLoading } = useQuery({
     queryKey: ['position', currentWorkspace?.id, positionId],
     queryFn: async () => {
-      const response = await api.get<{ data: Position }>(
+      const apiData = await api.get<PositionApiResponse>(
         `/workspaces/${currentWorkspace?.id}/positions/${positionId}`
       );
-      return response.data;
+      // Map API response to Position interface
+      return {
+        ...apiData,
+        unrealizedPnL: apiData.unrealizedGain,
+        unrealizedPnLPercent: apiData.unrealizedGainPercent,
+        realizedPnL: apiData.realizedGain,
+        openedAt: apiData.createdAt,
+        transactions: apiData.transactions ?? [],
+      } as Position;
     },
     enabled: !!currentWorkspace?.id && !!positionId,
   });
@@ -192,6 +219,13 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
           >
             <RefreshCw className={cn('h-4 w-4', refreshMutation.isPending && 'animate-spin')} />
             Actualiser
+          </button>
+          <button
+            onClick={() => setShowPriceAlertModal(true)}
+            className="px-3 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center gap-2"
+          >
+            <Bell className="h-4 w-4" />
+            Alerte
           </button>
           <button
             onClick={onAddTransaction}
@@ -357,6 +391,21 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
           )}
         </div>
       </div>
+
+      {/* Price Alert Modal */}
+      {position && position.asset.lastPrice !== undefined && (
+        <PriceAlertModal
+          isOpen={showPriceAlertModal}
+          onClose={() => setShowPriceAlertModal(false)}
+          asset={{
+            id: position.asset.id,
+            symbol: position.asset.symbol,
+            name: position.asset.name,
+            lastPrice: position.asset.lastPrice,
+            currency: position.asset.currency,
+          }}
+        />
+      )}
     </div>
   );
 }

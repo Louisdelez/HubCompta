@@ -10,3 +10,6 @@ export { AddPositionTransaction } from './AddPositionTransaction';
 export { AssetSearch } from './AssetSearch';
 export { AllocationChart, AllocationLegend } from './AllocationChart';
 export { PerformanceChart } from './PerformanceChart';
+export { PriceAlertModal } from './PriceAlertModal';
+export { PriceAlertList } from './PriceAlertList';
+export { PriceAlertBadge } from './PriceAlertBadge';

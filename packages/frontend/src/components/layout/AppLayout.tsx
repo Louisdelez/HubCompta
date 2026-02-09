@@ -148,20 +148,30 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               </div>
             </div>
             <div className="mt-2 space-y-1">
+              {user?.isInstanceAdmin && (
+                <NavLink
+                  to="/admin"
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-purple-700 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20"
+                  onClick={() => onClose()}
+                >
+                  <span>🛡️</span>
+                  <span>Administration</span>
+                </NavLink>
+              )}
               <NavLink
                 to="/settings"
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                 onClick={() => onClose()}
               >
                 <span>⚙️</span>
-                <span>Paramètres</span>
+                <span>Parametres</span>
               </NavLink>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-danger-600 hover:bg-danger-50 dark:text-danger-400 dark:hover:bg-danger-900/20 w-full"
               >
                 <span>🚪</span>
-                <span>Déconnexion</span>
+                <span>Deconnexion</span>
               </button>
             </div>
           </div>

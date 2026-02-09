@@ -91,10 +91,13 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
     });
 
     return {
-      message: 'Backup job queued',
-      jobId: job.id,
-      type,
-      workspaceId,
+      success: true,
+      data: {
+        message: 'Backup job queued',
+        jobId: job.id,
+        type,
+        workspaceId,
+      },
     };
   });
 
@@ -115,15 +118,18 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
     const progress = job.progress;
 
     return {
-      id: job.id,
-      state,
-      progress,
-      data: job.data,
-      result: job.returnvalue,
-      failedReason: job.failedReason,
-      createdAt: new Date(job.timestamp).toISOString(),
-      processedAt: job.processedOn ? new Date(job.processedOn).toISOString() : null,
-      finishedAt: job.finishedOn ? new Date(job.finishedOn).toISOString() : null,
+      success: true,
+      data: {
+        id: job.id,
+        state,
+        progress,
+        jobData: job.data,
+        result: job.returnvalue,
+        failedReason: job.failedReason,
+        createdAt: new Date(job.timestamp).toISOString(),
+        processedAt: job.processedOn ? new Date(job.processedOn).toISOString() : null,
+        finishedAt: job.finishedOn ? new Date(job.finishedOn).toISOString() : null,
+      },
     };
   });
 
@@ -142,7 +148,7 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
       // Check if bucket exists
       const bucketExists = await storageClient.bucketExists(BACKUP_BUCKET);
       if (!bucketExists) {
-        return { backups: [], total: 0 };
+        return { success: true, data: { backups: [], total: 0 } };
       }
 
       const backups: Array<{
@@ -172,8 +178,11 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
       backups.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
 
       return {
-        backups,
-        total: backups.length,
+        success: true,
+        data: {
+          backups,
+          total: backups.length,
+        },
       };
     } catch (error) {
       console.error('Error listing backups:', error);
@@ -202,9 +211,12 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
       const metadata = JSON.parse(Buffer.concat(chunks).toString('utf-8'));
 
       return {
-        valid: true,
-        metadata,
-        warning: 'Restore will overwrite existing data. This action cannot be undone.',
+        success: true,
+        data: {
+          valid: true,
+          metadata,
+          warning: 'Restore will overwrite existing data. This action cannot be undone.',
+        },
       };
     } catch (error) {
       console.error('Error previewing backup:', error);
@@ -240,23 +252,26 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
     const memoryMatch = redisInfo.match(/used_memory_human:(\S+)/);
 
     return {
-      database: {
-        users: userCount,
-        workspaces: workspaceCount,
-        transactions: transactionCount,
-        documents: documentCount,
-      },
-      redis: {
-        memoryUsed: memoryMatch ? memoryMatch[1] : 'unknown',
-        connected: true,
-      },
-      system: {
-        nodeVersion: process.version,
-        uptime: process.uptime(),
-        memory: {
-          heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-          heapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
-          rss: Math.round(process.memoryUsage().rss / 1024 / 1024),
+      success: true,
+      data: {
+        database: {
+          users: userCount,
+          workspaces: workspaceCount,
+          transactions: transactionCount,
+          documents: documentCount,
+        },
+        redis: {
+          memoryUsed: memoryMatch ? memoryMatch[1] : 'unknown',
+          connected: true,
+        },
+        system: {
+          nodeVersion: process.version,
+          uptime: process.uptime(),
+          memory: {
+            heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+            heapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+            rss: Math.round(process.memoryUsage().rss / 1024 / 1024),
+          },
         },
       },
     };
@@ -307,12 +322,15 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
     ]);
 
     return {
-      users,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+      success: true,
+      data: {
+        users,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       },
     };
   });
@@ -356,7 +374,7 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
       },
     });
 
-    return user;
+    return { success: true, data: user };
   });
 
   // --------------------------------------------------------------------------
@@ -411,12 +429,15 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
     ]);
 
     return {
-      logs,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+      success: true,
+      data: {
+        logs,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       },
     };
   });
@@ -438,7 +459,7 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
         if (keys.length > 0) {
           await redisClient.del(...keys);
         }
-        return { cleared: keys.length, pattern };
+        return { success: true, data: { cleared: keys.length, pattern } };
       } else {
         // Clear all cache keys (not session data)
         const cacheKeys = await redisClient.keys('cache:*');
@@ -449,7 +470,7 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
           await redisClient.del(...allKeys);
         }
 
-        return { cleared: allKeys.length };
+        return { success: true, data: { cleared: allKeys.length } };
       }
     } catch (error) {
       console.error('Error clearing cache:', error);

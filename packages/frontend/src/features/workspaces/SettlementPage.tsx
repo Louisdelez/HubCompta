@@ -8,6 +8,7 @@ import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { BalanceChart } from './BalanceChart';
 import { TransferSuggestions } from './TransferSuggestions';
+import { SettlementHistory } from './SettlementHistory';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -72,8 +73,11 @@ function formatDate(dateStr: string): string {
 // Component
 // ----------------------------------------------------------------------------
 
+type TabType = 'current' | 'history';
+
 export function SettlementPage() {
   const { currentWorkspaceId: workspaceId } = useWorkspace();
+  const [activeTab, setActiveTab] = useState<TabType>('current');
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -144,27 +148,59 @@ export function SettlementPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Équilibre des comptes</h1>
+          <h1 className="text-2xl font-bold">Equilibre des comptes</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Qui doit quoi à qui ?
+            Qui doit quoi a qui ?
           </p>
         </div>
 
-        {/* Month Selector */}
-        <select
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(e.target.value)}
-          className="input w-auto"
-        >
-          {monthOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        {/* Month Selector - only show for current tab */}
+        {activeTab === 'current' && (
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="input w-auto"
+          >
+            {monthOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
-      {settlement ? (
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg w-fit">
+        <button
+          onClick={() => setActiveTab('current')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'current'
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          Periode actuelle
+        </button>
+        <button
+          onClick={() => setActiveTab('history')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'history'
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          Historique
+        </button>
+      </div>
+
+      {/* History Tab */}
+      {activeTab === 'history' && (
+        <SettlementHistory currency={settlement?.currency ?? 'EUR'} />
+      )}
+
+      {/* Current Period Tab */}
+      {activeTab === 'current' && settlement ? (
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -240,15 +276,15 @@ export function SettlementPage() {
             currency={settlement.currency}
           />
         </>
-      ) : (
+      ) : activeTab === 'current' ? (
         <div className="card text-center py-12">
           <div className="text-5xl mb-4">🏠</div>
-          <h2 className="text-xl font-bold mb-2">Aucune donnée</h2>
+          <h2 className="text-xl font-bold mb-2">Aucune donnee</h2>
           <p className="text-gray-500">
-            Ajoutez des dépenses partagées pour voir l'équilibre
+            Ajoutez des depenses partagees pour voir l'equilibre
           </p>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

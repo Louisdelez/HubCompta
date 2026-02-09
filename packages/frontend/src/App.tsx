@@ -51,11 +51,25 @@ import { RulesPage } from './features/rules';
 // Settings imports
 import { SettingsPage, WorkspaceSettingsPage } from './features/settings';
 
+// Workspaces imports
+import { SettlementPage } from './features/workspaces/SettlementPage';
+
 // Notifications imports
 import { AlertSettings } from './features/notifications';
 
 // Dashboard imports
 import { DashboardPage } from './features/dashboard/DashboardPage';
+
+// Admin imports
+import {
+  AdminRoute,
+  AdminLayout,
+  AdminDashboard,
+  AdminUsers,
+  AdminAuditLogs,
+  AdminBackups,
+  AdminSystem,
+} from './features/admin';
 
 // Lazy load pages for better code splitting
 // import { lazy, Suspense } from 'react';
@@ -203,7 +217,25 @@ export default function App() {
         <Route path="workspaces/:workspaceId/settings" element={<WorkspaceSettingsPage />} />
         <Route path="notifications/alerts" element={<AlertSettings />} />
 
-        {/* More routes will be added as features are implemented */}
+        {/* Settlement Routes */}
+        <Route path="settlement" element={<SettlementPage />} />
+        <Route path="workspaces/:workspaceId/settlement" element={<SettlementPage />} />
+
+        {/* Admin Routes */}
+        <Route
+          path="admin"
+          element={
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="audit-logs" element={<AdminAuditLogs />} />
+          <Route path="backups" element={<AdminBackups />} />
+          <Route path="system" element={<AdminSystem />} />
+        </Route>
       </Route>
 
       {/* 404 */}
