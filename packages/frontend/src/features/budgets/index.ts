@@ -7,3 +7,4 @@ export { BudgetsPage } from './BudgetsPage';
 export { BudgetCard } from './BudgetCard';
 export { BudgetForm } from './BudgetForm';
 export { BudgetHistory } from './BudgetHistory';
+export { EnvelopeOverview } from './EnvelopeOverview';

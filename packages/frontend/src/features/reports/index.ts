@@ -8,3 +8,6 @@ export { DateRangePicker } from './DateRangePicker';
 export type { DateRange } from './DateRangePicker';
 export { ExportDialog } from './ExportDialog';
 export type { ExportType } from './ExportDialog';
+export { NetWorthReport } from './NetWorthReport';
+export { YearComparisonReport } from './YearComparisonReport';
+export { CategoryTrendsReport } from './CategoryTrendsReport';

@@ -44,6 +44,9 @@ model User {
   reportTemplates         ReportTemplate[]
   notificationPreferences NotificationPreferences?
   dashboardLayouts        DashboardLayout[]
+  bankConnections         BankConnection[]
+  userAchievements        UserAchievement[]
+  userStats               UserStats?
 
   @@map("users")
 }
@@ -178,6 +181,8 @@ model Workspace {
   taxYears              TaxYear[]
   dashboardLayouts      DashboardLayout[]
   categoryPatterns      CategoryPattern[]
+  bankConnections       BankConnection[]
+  categoryPredictions   CategoryPrediction[]
 
   @@index([ownerId])
   @@index([deletedAt])
@@ -192,12 +197,16 @@ enum WorkspaceType {
 }
 
 model Membership {
-  id          String         @id @default(uuid()) @db.Uuid
-  workspaceId String         @map("workspace_id") @db.Uuid
-  userId      String         @map("user_id") @db.Uuid
-  role        MembershipRole
-  createdAt   DateTime       @default(now()) @map("created_at")
-  updatedAt   DateTime       @updatedAt @map("updated_at")
+  id                String         @id @default(uuid()) @db.Uuid
+  workspaceId       String         @map("workspace_id") @db.Uuid
+  userId            String         @map("user_id") @db.Uuid
+  role              MembershipRole
+  // Family sharing fields
+  spendingLimit     Decimal?       @map("spending_limit") @db.Decimal(19, 4)
+  approvalRequired  Boolean        @default(false) @map("approval_required")
+  visibleCategories String[]       @map("visible_categories")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
 
   // Relations
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -241,6 +250,7 @@ model Account {
   positions             Position[]
   scheduledTransactions ScheduledTransaction[]
   savingsGoals          SavingsGoal[]
+  linkedBankAccounts    BankAccount[]
 
   @@index([workspaceId])
   @@index([workspaceId, isArchived])
@@ -292,6 +302,7 @@ model Transaction {
   linkedInvoices        Invoice[]
   scheduledTransactions ScheduledTransaction[]
   linkedBills           Bill[]
+  categoryPrediction    CategoryPrediction?
 
   @@unique([workspaceId, importHash])
   @@index([workspaceId, date])
@@ -353,6 +364,7 @@ model Category {
   budgetForecasts       BudgetForecast[]
   bills                 Bill[]
   patterns              CategoryPattern[]
+  predictions           CategoryPrediction[]
 
   @@unique([workspaceId, name, type])
   @@index([workspaceId, type])
@@ -387,17 +399,21 @@ model Tag {
 // ============================================================================
 
 model Budget {
-  id             String       @id @default(uuid()) @db.Uuid
-  workspaceId    String       @map("workspace_id") @db.Uuid
-  categoryId     String       @map("category_id") @db.Uuid
-  name           String       @db.VarChar(100)
-  amount         Decimal      @db.Decimal(19, 4)
-  period         BudgetPeriod
-  alertThreshold Int          @default(80) @map("alert_threshold")
-  startDate      DateTime     @map("start_date") @db.Date
-  endDate        DateTime?    @map("end_date") @db.Date
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
+  id              String       @id @default(uuid()) @db.Uuid
+  workspaceId     String       @map("workspace_id") @db.Uuid
+  categoryId      String       @map("category_id") @db.Uuid
+  name            String       @db.VarChar(100)
+  amount          Decimal      @db.Decimal(19, 4)
+  period          BudgetPeriod
+  alertThreshold  Int          @default(80) @map("alert_threshold")
+  startDate       DateTime     @map("start_date") @db.Date
+  endDate         DateTime?    @map("end_date") @db.Date
+  // Envelope mode fields
+  envelopeMode    Boolean      @default(false) @map("envelope_mode")
+  rolloverEnabled Boolean      @default(true) @map("rollover_enabled")
+  rolloverAmount  Decimal      @default(0) @map("rollover_amount") @db.Decimal(19, 4)
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
 
   // Relations
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -921,6 +937,15 @@ enum NotificationType {
   quote_expiring // Quote about to expire
   price_alert // Investment price alert
   system // System notification
+  // Smart notifications
+  savings_milestone // 25%, 50%, 75%, 100% reached
+  savings_off_track // Behind on savings goal
+  unusual_spending // Anomaly detected
+  weekly_summary // Weekly spending summary
+  monthly_report // Monthly financial report
+  low_balance_warning // Account balance below threshold
+  recurring_processed // Recurring transaction processed
+  goal_achieved // Savings goal completed
 }
 
 model AlertRule {
@@ -1390,6 +1415,168 @@ model SavingsContribution {
   @@index([savingsGoalId])
   @@index([savingsGoalId, date])
   @@map("savings_contributions")
+}
+
+// ============================================================================
+// AI CATEGORIZATION
+// ============================================================================
+
+model CategoryPrediction {
+  id                  String   @id @default(cuid())
+  workspaceId         String   @map("workspace_id") @db.Uuid
+  transactionId       String   @map("transaction_id") @db.Uuid
+  suggestedCategoryId String   @map("suggested_category_id") @db.Uuid
+  confidence          Decimal  @db.Decimal(3, 2) // 0.00 to 1.00
+  features            Json     // { merchant, amount, dayOfWeek, etc }
+  accepted            Boolean? // null = pending, true = accepted, false = rejected
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  // Relations
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  category    Category    @relation(fields: [suggestedCategoryId], references: [id], onDelete: Cascade)
+
+  @@unique([transactionId])
+  @@index([workspaceId])
+  @@index([suggestedCategoryId])
+  @@map("category_predictions")
+}
+
+// ============================================================================
+// BANK SYNCHRONIZATION (Open Banking)
+// ============================================================================
+
+model BankConnection {
+  id                   String               @id @default(cuid())
+  workspaceId          String               @map("workspace_id") @db.Uuid
+  userId               String               @map("user_id") @db.Uuid
+  provider             BankProvider
+  providerConnectionId String               @map("provider_connection_id") @db.VarChar(255)
+  institutionId        String               @map("institution_id") @db.VarChar(100)
+  institutionName      String               @map("institution_name") @db.VarChar(200)
+  institutionLogo      String?              @map("institution_logo") @db.Text
+  status               BankConnectionStatus @default(active)
+  lastSyncAt           DateTime?            @map("last_sync_at")
+  lastSyncError        String?              @map("last_sync_error") @db.Text
+  consentExpiresAt     DateTime?            @map("consent_expires_at")
+  accessToken          String?              @map("access_token") @db.Text // Encrypted
+  refreshToken         String?              @map("refresh_token") @db.Text // Encrypted
+  createdAt            DateTime             @default(now()) @map("created_at")
+  updatedAt            DateTime             @updatedAt @map("updated_at")
+
+  // Relations
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bankAccounts BankAccount[]
+
+  @@unique([workspaceId, providerConnectionId])
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([status])
+  @@map("bank_connections")
+}
+
+model BankAccount {
+  id                String   @id @default(cuid())
+  connectionId      String   @map("connection_id")
+  providerAccountId String   @map("provider_account_id") @db.VarChar(255)
+  linkedAccountId   String?  @map("linked_account_id") @db.Uuid
+  name              String   @db.VarChar(200)
+  iban              String?  @db.VarChar(34)
+  balance           Decimal  @db.Decimal(19, 4)
+  availableBalance  Decimal? @map("available_balance") @db.Decimal(19, 4)
+  currency          String   @db.VarChar(3)
+  type              String   @db.VarChar(50) // checking, savings, credit_card, etc
+  lastSyncAt        DateTime? @map("last_sync_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  connection    BankConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  linkedAccount Account?       @relation(fields: [linkedAccountId], references: [id], onDelete: SetNull)
+
+  @@unique([connectionId, providerAccountId])
+  @@index([connectionId])
+  @@index([linkedAccountId])
+  @@map("bank_accounts")
+}
+
+enum BankProvider {
+  nordigen // GoCardless (free for EU)
+  tink // Alternative EU provider
+  plaid // USA/Canada
+  truelayer // UK/EU
+}
+
+enum BankConnectionStatus {
+  active
+  expired
+  error
+  disconnected
+  pending_auth
+}
+
+// ============================================================================
+// GAMIFICATION
+// ============================================================================
+
+model Achievement {
+  id          String @id @default(cuid())
+  code        String @unique @db.VarChar(50)
+  name        String @db.VarChar(100)
+  description String @db.Text
+  icon        String @db.VarChar(10)
+  category    String @db.VarChar(50) // savings, budgeting, tracking, streaks, milestones
+  threshold   Int // Value to reach
+  xpReward    Int    @map("xp_reward")
+  isSecret    Boolean @default(false) @map("is_secret")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  userAchievements UserAchievement[]
+
+  @@index([category])
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id") @db.Uuid
+  achievementId String   @map("achievement_id")
+  progress      Int      @default(0) // Current progress towards threshold
+  unlockedAt    DateTime? @map("unlocked_at") // null if not yet unlocked
+  notifiedAt    DateTime? @map("notified_at") // When user was notified
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@map("user_achievements")
+}
+
+model UserStats {
+  id               String   @id @default(cuid())
+  userId           String   @unique @map("user_id") @db.Uuid
+  totalXp          Int      @default(0) @map("total_xp")
+  level            Int      @default(1)
+  currentStreak    Int      @default(0) @map("current_streak")
+  longestStreak    Int      @default(0) @map("longest_streak")
+  lastActivityDate DateTime? @map("last_activity_date") @db.Date
+  transactionCount Int      @default(0) @map("transaction_count")
+  budgetsOnTrack   Int      @default(0) @map("budgets_on_track")
+  goalsCompleted   Int      @default(0) @map("goals_completed")
+  totalSaved       Decimal  @default(0) @map("total_saved") @db.Decimal(19, 4)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_stats")
 }
 
 // ============================================================================

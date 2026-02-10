@@ -80,6 +80,15 @@ import { dashboardRoutes } from './dashboard.js';
 // Activity routes
 import { workspaceActivityRoutes, userActivityRoutes } from './activity.js';
 
+// AI Categorization routes
+import { categorizationRoutes } from './categorization.js';
+
+// Banking routes (Open Banking)
+import { bankingRoutes } from './banking.js';
+
+// Gamification routes
+import { gamificationRoutes } from './gamification.js';
+
 // ----------------------------------------------------------------------------
 // Route Registration
 // ----------------------------------------------------------------------------
@@ -194,6 +203,12 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   // Activity routes (workspace scoped)
   await app.register(workspaceActivityRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/activity` });
 
+  // AI Categorization routes (workspace scoped)
+  await app.register(categorizationRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/categorization` });
+
+  // Banking routes (workspace scoped)
+  await app.register(bankingRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/banking` });
+
   // ----------------------------------------------------------------------------
   // Dashboard Routes (user scoped)
   // ----------------------------------------------------------------------------
@@ -214,6 +229,12 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   // ----------------------------------------------------------------------------
 
   await app.register(settingsRoutes, { prefix: `${apiPrefix}/settings` });
+
+  // ----------------------------------------------------------------------------
+  // Gamification Routes (user scoped)
+  // ----------------------------------------------------------------------------
+
+  await app.register(gamificationRoutes, { prefix: `${apiPrefix}/gamification` });
 
   // ----------------------------------------------------------------------------
   // Admin Routes

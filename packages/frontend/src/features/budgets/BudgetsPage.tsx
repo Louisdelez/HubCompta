@@ -5,12 +5,14 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Calendar, CalendarDays, Wallet } from 'lucide-react';
+import { Calendar, CalendarDays, Wallet, LayoutGrid, List } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
+import { clsx } from 'clsx';
 import { BudgetCard } from './BudgetCard';
 import { BudgetForm } from './BudgetForm';
 import { BudgetHistory } from './BudgetHistory';
+import { EnvelopeOverview } from './EnvelopeOverview';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -66,6 +68,7 @@ export function BudgetsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingBudget, setEditingBudget] = useState<BudgetWithProgress | null>(null);
   const [selectedBudget, setSelectedBudget] = useState<BudgetWithProgress | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'envelopes'>('list');
 
   // Fetch budgets
   const { data: budgets, isLoading } = useQuery({
@@ -134,12 +137,41 @@ export function BudgetsPage() {
         <div>
           <h1 className="text-2xl font-bold">Budgets</h1>
           <p className="text-ctp-subtext0">
-            Suivez vos dépenses par catégorie
+            Suivez vos depenses par categorie
           </p>
         </div>
-        <button onClick={() => setShowForm(true)} className="btn-primary">
-          + Nouveau budget
-        </button>
+        <div className="flex items-center gap-3">
+          {/* View Mode Toggle */}
+          <div className="flex bg-ctp-surface0 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('list')}
+              className={clsx(
+                'p-2 rounded-md transition-colors',
+                viewMode === 'list'
+                  ? 'bg-ctp-surface1 text-ctp-text'
+                  : 'text-ctp-subtext0 hover:text-ctp-text'
+              )}
+              title="Vue liste"
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('envelopes')}
+              className={clsx(
+                'p-2 rounded-md transition-colors',
+                viewMode === 'envelopes'
+                  ? 'bg-ctp-surface1 text-ctp-text'
+                  : 'text-ctp-subtext0 hover:text-ctp-text'
+              )}
+              title="Vue enveloppes"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+          </div>
+          <button onClick={() => setShowForm(true)} className="btn-primary">
+            + Nouveau budget
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -181,49 +213,53 @@ export function BudgetsPage() {
       )}
 
       {budgets && budgets.length > 0 ? (
-        <div className="space-y-8">
-          {/* Monthly Budgets */}
-          {monthlyBudgets.length > 0 && (
-            <section>
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                Budgets mensuels
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {monthlyBudgets.map((budget) => (
-                  <BudgetCard
-                    key={budget.id}
-                    budget={budget}
-                    onEdit={() => handleEdit(budget)}
-                    onViewHistory={() => handleViewHistory(budget)}
-                    workspaceId={workspaceId}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
+        viewMode === 'envelopes' ? (
+          <EnvelopeOverview workspaceId={workspaceId} />
+        ) : (
+          <div className="space-y-8">
+            {/* Monthly Budgets */}
+            {monthlyBudgets.length > 0 && (
+              <section>
+                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Budgets mensuels
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {monthlyBudgets.map((budget) => (
+                    <BudgetCard
+                      key={budget.id}
+                      budget={budget}
+                      onEdit={() => handleEdit(budget)}
+                      onViewHistory={() => handleViewHistory(budget)}
+                      workspaceId={workspaceId}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
 
-          {/* Yearly Budgets */}
-          {yearlyBudgets.length > 0 && (
-            <section>
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <CalendarDays className="w-5 h-5" />
-                Budgets annuels
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {yearlyBudgets.map((budget) => (
-                  <BudgetCard
-                    key={budget.id}
-                    budget={budget}
-                    onEdit={() => handleEdit(budget)}
-                    onViewHistory={() => handleViewHistory(budget)}
-                    workspaceId={workspaceId}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
+            {/* Yearly Budgets */}
+            {yearlyBudgets.length > 0 && (
+              <section>
+                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <CalendarDays className="w-5 h-5" />
+                  Budgets annuels
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {yearlyBudgets.map((budget) => (
+                    <BudgetCard
+                      key={budget.id}
+                      budget={budget}
+                      onEdit={() => handleEdit(budget)}
+                      onViewHistory={() => handleViewHistory(budget)}
+                      workspaceId={workspaceId}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        )
       ) : (
         <div className="card text-center py-12">
           <Wallet className="w-12 h-12 mx-auto mb-4 text-ctp-overlay1" />

@@ -9,3 +9,4 @@ export { SavingsGoalModal } from './SavingsGoalModal';
 export { ContributionModal } from './ContributionModal';
 export { SavingsProgress } from './SavingsProgress';
 export { SavingsWidget } from './SavingsWidget';
+export { GoalCelebration } from './GoalCelebration';

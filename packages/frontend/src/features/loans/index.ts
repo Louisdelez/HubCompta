@@ -10,3 +10,6 @@ export { LoanModal } from './LoanModal';
 export { LoanDetail } from './LoanDetail';
 export { LoanPaymentModal } from './LoanPaymentModal';
 export { LoanSummary } from './LoanSummary';
+export { LoanSimulator } from './LoanSimulator';
+export { AmortizationTable } from './AmortizationTable';
+export { LoanProgressChart } from './LoanProgressChart';

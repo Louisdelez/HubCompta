@@ -18,6 +18,8 @@ export interface BudgetCreateInput {
   alertThreshold?: number;
   startDate: Date;
   endDate?: Date;
+  envelopeMode?: boolean;
+  rolloverEnabled?: boolean;
 }
 
 export interface BudgetUpdateInput {
@@ -25,6 +27,8 @@ export interface BudgetUpdateInput {
   amount?: number;
   alertThreshold?: number;
   endDate?: Date | null;
+  envelopeMode?: boolean;
+  rolloverEnabled?: boolean;
 }
 
 export interface BudgetWithProgress extends Budget {
@@ -39,6 +43,9 @@ export interface BudgetWithProgress extends Budget {
   percentUsed: number;
   isOverBudget: boolean;
   isAlertTriggered: boolean;
+  // Envelope mode fields
+  availableAmount: number; // amount + rollover - spent
+  rolloverFromPrevious: number;
 }
 
 export interface BudgetPeriodDates {
@@ -207,6 +214,11 @@ export const budgetService = {
     const remaining = Math.max(0, budgetAmount - spent);
     const percentUsed = budgetAmount > 0 ? Math.round((spent / budgetAmount) * 100) : 0;
 
+    const rolloverAmount = budget.rolloverAmount?.toNumber() ?? 0;
+    const availableAmount = budget.envelopeMode
+      ? budgetAmount + rolloverAmount - spent
+      : remaining;
+
     return {
       ...budget,
       spent,
@@ -214,6 +226,8 @@ export const budgetService = {
       percentUsed,
       isOverBudget: spent > budgetAmount,
       isAlertTriggered: percentUsed >= budget.alertThreshold,
+      availableAmount,
+      rolloverFromPrevious: rolloverAmount,
     };
   },
 
@@ -252,6 +266,11 @@ export const budgetService = {
       const remaining = Math.max(0, budgetAmount - spent);
       const percentUsed = budgetAmount > 0 ? Math.round((spent / budgetAmount) * 100) : 0;
 
+      const rolloverAmount = budget.rolloverAmount?.toNumber() ?? 0;
+      const availableAmount = budget.envelopeMode
+        ? budgetAmount + rolloverAmount - spent
+        : remaining;
+
       budgetsWithProgress.push({
         ...budget,
         spent,
@@ -259,6 +278,8 @@ export const budgetService = {
         percentUsed,
         isOverBudget: spent > budgetAmount,
         isAlertTriggered: percentUsed >= budget.alertThreshold,
+        availableAmount,
+        rolloverFromPrevious: rolloverAmount,
       });
     }
 
@@ -389,6 +410,154 @@ export const budgetService = {
       overBudgetCount: budgets.filter((b) => b.isOverBudget).length,
       alertCount: budgets.filter((b) => b.isAlertTriggered && !b.isOverBudget).length,
     };
+  },
+
+  /**
+   * Calculate rollover amount for a budget based on previous month's remaining balance
+   */
+  async calculateRollover(
+    workspaceId: string,
+    budgetId: string
+  ): Promise<{ rolloverAmount: number; previousSpent: number; previousBudget: number }> {
+    const budget = await prisma.budget.findFirst({
+      where: { id: budgetId, workspaceId },
+    });
+
+    if (!budget) {
+      throw new NotFoundError('Budget', budgetId);
+    }
+
+    if (budget.period !== 'monthly') {
+      return { rolloverAmount: 0, previousSpent: 0, previousBudget: budget.amount.toNumber() };
+    }
+
+    const now = new Date();
+    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+    const previousSpent = await calculateCategorySpending(
+      workspaceId,
+      budget.categoryId,
+      previousMonthStart,
+      previousMonthEnd
+    );
+
+    const budgetAmount = budget.amount.toNumber();
+    const rolloverAmount = Math.max(0, budgetAmount - previousSpent);
+
+    return { rolloverAmount, previousSpent, previousBudget: budgetAmount };
+  },
+
+  /**
+   * Process month-end rollover for all envelope budgets in workspace
+   */
+  async processMonthEndRollover(workspaceId: string): Promise<{ processed: number; updated: number }> {
+    const budgets = await prisma.budget.findMany({
+      where: {
+        workspaceId,
+        envelopeMode: true,
+        rolloverEnabled: true,
+        OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+      },
+    });
+
+    let updated = 0;
+
+    for (const budget of budgets) {
+      const { rolloverAmount } = await this.calculateRollover(workspaceId, budget.id);
+
+      if (rolloverAmount > 0) {
+        await prisma.budget.update({
+          where: { id: budget.id },
+          data: { rolloverAmount },
+        });
+        updated++;
+      }
+    }
+
+    return { processed: budgets.length, updated };
+  },
+
+  /**
+   * Get envelope status summary for all envelope budgets
+   */
+  async getEnvelopeStatus(workspaceId: string): Promise<{
+    totalEnvelopes: number;
+    totalAvailable: number;
+    totalSpent: number;
+    envelopes: Array<{
+      id: string;
+      name: string;
+      categoryName: string;
+      budgetAmount: number;
+      rolloverAmount: number;
+      spent: number;
+      available: number;
+    }>;
+  }> {
+    const budgets = await this.list(workspaceId);
+    const envelopeBudgets = budgets.filter((b) => b.envelopeMode);
+
+    const envelopes = envelopeBudgets.map((b) => ({
+      id: b.id,
+      name: b.name,
+      categoryName: b.category.name,
+      budgetAmount: b.amount.toNumber(),
+      rolloverAmount: b.rolloverFromPrevious,
+      spent: b.spent,
+      available: b.availableAmount,
+    }));
+
+    return {
+      totalEnvelopes: envelopes.length,
+      totalAvailable: envelopes.reduce((sum, e) => sum + e.available, 0),
+      totalSpent: envelopes.reduce((sum, e) => sum + e.spent, 0),
+      envelopes,
+    };
+  },
+
+  /**
+   * Reallocate funds between envelope budgets
+   */
+  async reallocateEnvelope(
+    workspaceId: string,
+    fromBudgetId: string,
+    toBudgetId: string,
+    amount: number
+  ): Promise<{ from: BudgetWithProgress; to: BudgetWithProgress }> {
+    const fromBudget = await prisma.budget.findFirst({
+      where: { id: fromBudgetId, workspaceId, envelopeMode: true },
+    });
+
+    const toBudget = await prisma.budget.findFirst({
+      where: { id: toBudgetId, workspaceId, envelopeMode: true },
+    });
+
+    if (!fromBudget) {
+      throw new NotFoundError('Budget', fromBudgetId);
+    }
+    if (!toBudget) {
+      throw new NotFoundError('Budget', toBudgetId);
+    }
+
+    // Update both budgets
+    await prisma.$transaction([
+      prisma.budget.update({
+        where: { id: fromBudgetId },
+        data: { rolloverAmount: { decrement: amount } },
+      }),
+      prisma.budget.update({
+        where: { id: toBudgetId },
+        data: { rolloverAmount: { increment: amount } },
+      }),
+    ]);
+
+    const [from, to] = await Promise.all([
+      this.getById(workspaceId, fromBudgetId),
+      this.getById(workspaceId, toBudgetId),
+    ]);
+
+    return { from: from!, to: to! };
   },
 };
 
