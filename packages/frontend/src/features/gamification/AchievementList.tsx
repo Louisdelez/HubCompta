@@ -123,7 +123,7 @@ export function AchievementList() {
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-ctp-green">
-              {Math.round((unlockedCount / totalAchievements) * 100)}%
+              {totalAchievements > 0 ? Math.round((unlockedCount / totalAchievements) * 100) : 0}%
             </p>
             <p className="text-sm text-ctp-subtext0">Complete</p>
           </div>
