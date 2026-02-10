@@ -59,15 +59,25 @@ export function ShortcutHelp() {
     return getShortcutsByCategory(filteredShortcuts);
   }, [filteredShortcuts, selectedCategory]);
 
-  // Focus search input when modal opens
+  // Reset state and focus search input when modal opens
+  const prevIsHelpOpenRef = useRef(isHelpOpen);
+
+  // Reset and focus on modal open (move ref access to effect)
   useEffect(() => {
-    if (isHelpOpen) {
+    const wasClosedNowOpen = !prevIsHelpOpenRef.current && isHelpOpen;
+    prevIsHelpOpenRef.current = isHelpOpen;
+
+    if (wasClosedNowOpen) {
+      // Reset state on open
       setSearchQuery('');
       setSelectedCategory('all');
-      setTimeout(() => {
+      // Focus search input
+      const timer = setTimeout(() => {
         searchInputRef.current?.focus();
       }, 100);
+      return () => clearTimeout(timer);
     }
+    return undefined;
   }, [isHelpOpen]);
 
   // Handle escape key

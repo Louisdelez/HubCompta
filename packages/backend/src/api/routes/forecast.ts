@@ -62,7 +62,7 @@ export function forecastRoutes(app: FastifyInstance): void {
 
       // If no forecasts exist, generate them
       if (forecasts.length === 0) {
-        const generated = await forecastService.generateForecast(workspaceId, query.months);
+        await forecastService.generateForecast(workspaceId, query.months);
 
         // Return the generated forecasts with category info
         const forecastsWithCategories = await forecastService.getForecast(

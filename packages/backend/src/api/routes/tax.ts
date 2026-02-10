@@ -247,7 +247,7 @@ export function taxRoutes(app: FastifyInstance): void {
       await checkPermission(userId, params.workspaceId, 'budget', 'update');
 
       const taxYear = await taxService.getOrCreateYear(params.workspaceId, params.year);
-      const updated = await taxService.recalculate(taxYear.id, params.workspaceId);
+      await taxService.recalculate(taxYear.id, params.workspaceId);
 
       // Audit log
       await auditService.log({

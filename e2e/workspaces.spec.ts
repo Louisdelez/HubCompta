@@ -15,15 +15,6 @@ class WorkspacePage {
     : never) {}
 
   async openWorkspaceSelector() {
-    // Click on the workspace selector in the header or sidebar
-    const selectorButton = this.page.locator('[data-testid="workspace-selector"]').or(
-      this.page.locator('button:has-text("Sélectionner un espace")').or(
-        this.page.locator('button:has(.w-5.h-5):has-text("Personnel")').or(
-          this.page.locator('.w-5.h-5').first().locator('..')
-        )
-      )
-    );
-
     // Try to find and click the workspace selector
     const workspaceButton = this.page.locator('button').filter({
       has: this.page.locator('svg.w-5.h-5'),
@@ -380,9 +371,6 @@ test.describe('Workspace Selection', () => {
 
     // Wait for initial load
     await page.waitForTimeout(1000);
-
-    // Get current workspace indicator
-    const initialState = await page.locator('body').textContent();
 
     // Reload page
     await page.reload();

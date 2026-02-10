@@ -57,20 +57,6 @@ const THEME_OPTIONS: ThemeOption[] = [
 ];
 
 // ----------------------------------------------------------------------------
-// Helper to get icon for current theme state
-// ----------------------------------------------------------------------------
-
-function getThemeIcon(theme: Theme, isDark: boolean): LucideIcon {
-  if (theme === 'system') {
-    return isDark ? Moon : Sun;
-  }
-  if (theme === 'latte') {
-    return Sun;
-  }
-  return Moon;
-}
-
-// ----------------------------------------------------------------------------
 // Theme Toggle Dropdown Component
 // ----------------------------------------------------------------------------
 
@@ -121,7 +107,6 @@ export function ThemeToggle({
   }, [isOpen]);
 
   const currentOption = THEME_OPTIONS.find((opt) => opt.value === theme) ?? THEME_OPTIONS[0]!;
-  const CurrentIcon = getThemeIcon(theme, isDark);
 
   const sizeClasses = {
     sm: 'p-1.5',
@@ -133,6 +118,18 @@ export function ThemeToggle({
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
     lg: 'w-6 h-6',
+  };
+
+  // Render the appropriate icon based on theme
+  const renderThemeIcon = () => {
+    const iconClass = iconSizeClasses[size];
+    if (theme === 'system') {
+      return isDark ? <Moon className={iconClass} /> : <Sun className={iconClass} />;
+    }
+    if (theme === 'latte') {
+      return <Sun className={iconClass} />;
+    }
+    return <Moon className={iconClass} />;
   };
 
   return (
@@ -152,7 +149,7 @@ export function ThemeToggle({
         aria-expanded={isOpen}
         title={`Theme: ${currentOption.label}`}
       >
-        <CurrentIcon className={iconSizeClasses[size]} />
+        {renderThemeIcon()}
         {variant === 'button' && (
           <span className="text-sm font-medium">{currentOption.label}</span>
         )}
@@ -293,8 +290,6 @@ export function ThemeQuickToggle({
 }: ThemeQuickToggleProps) {
   const { theme, cycleTheme, isDark } = useTheme();
 
-  const CurrentIcon = getThemeIcon(theme, isDark);
-
   const sizeClasses = {
     sm: 'p-1.5',
     md: 'p-2',
@@ -308,6 +303,18 @@ export function ThemeQuickToggle({
   };
 
   const currentOption = THEME_OPTIONS.find((opt) => opt.value === theme);
+
+  // Render the appropriate icon based on theme
+  const renderThemeIcon = () => {
+    const iconClass = clsx(iconSizeClasses[size], 'transition-transform duration-200');
+    if (theme === 'system') {
+      return isDark ? <Moon className={iconClass} /> : <Sun className={iconClass} />;
+    }
+    if (theme === 'latte') {
+      return <Sun className={iconClass} />;
+    }
+    return <Moon className={iconClass} />;
+  };
 
   return (
     <button
@@ -323,12 +330,7 @@ export function ThemeQuickToggle({
       aria-label={`Theme: ${currentOption?.label ?? 'Unknown'}. Cliquez pour changer.`}
       title={`Theme: ${currentOption?.label ?? 'Unknown'}`}
     >
-      <CurrentIcon
-        className={clsx(
-          iconSizeClasses[size],
-          'transition-transform duration-200'
-        )}
-      />
+      {renderThemeIcon()}
     </button>
   );
 }

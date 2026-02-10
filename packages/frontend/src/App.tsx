@@ -55,14 +55,14 @@ export function prefetchCommonRoutes() {
   const schedule = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 100));
 
   schedule(() => {
-    prefetchRoute.dashboard();
-    prefetchRoute.transactions();
+    void prefetchRoute.dashboard();
+    void prefetchRoute.transactions();
   });
 
   // Prefetch secondary routes with a slight delay
   schedule(() => {
-    prefetchRoute.accounts();
-    prefetchRoute.budgets();
+    void prefetchRoute.accounts();
+    void prefetchRoute.budgets();
   });
 }
 

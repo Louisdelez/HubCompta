@@ -125,14 +125,17 @@ export interface ExportedReport {
 function escapeCSV(value: unknown): string {
   if (value === null || value === undefined) return '';
   let str: string;
-  if (Array.isArray(value)) {
+  if (typeof value === 'string') {
+    str = value;
+  } else if (typeof value === 'number' || typeof value === 'boolean') {
+    str = String(value);
+  } else if (Array.isArray(value)) {
     str = value.join('; ');
   } else if (typeof value === 'object') {
     str = JSON.stringify(value);
-  } else if (typeof value === 'string') {
-    str = value;
   } else {
-    str = String(value);
+    // For other primitive types (symbol, bigint, etc.)
+    str = String(value as string | number | boolean);
   }
   if (str.includes(',') || str.includes('"') || str.includes('\n')) {
     return `"${str.replace(/"/g, '""')}"`;
@@ -482,52 +485,42 @@ export const reportBuilderService = {
 
       for (const row of rows) {
         let groupKey: string;
-        let groupLabel: string;
 
         switch (groupBy) {
           case 'category':
             groupKey = (row._rawCategoryId as string) || 'uncategorized';
-            groupLabel = (row.category as string) || 'Non categorise';
             break;
           case 'account':
             groupKey = row._rawAccountId as string;
-            groupLabel = row.account as string;
             break;
           case 'month': {
             const monthDate = new Date(row._rawDate as string);
             groupKey = format(monthDate, 'yyyy-MM');
-            groupLabel = format(monthDate, 'MMMM yyyy', { locale: fr });
             break;
           }
           case 'week': {
             const weekDate = new Date(row._rawDate as string);
             groupKey = getWeekNumber(weekDate);
-            groupLabel = `Semaine ${groupKey.split('-S')[1]} - ${groupKey.split('-S')[0]}`;
             break;
           }
           case 'day': {
             const rawDate = row._rawDate as string;
             groupKey = rawDate.split('T')[0] ?? '';
-            groupLabel = formatDate(rawDate);
             break;
           }
           case 'year': {
             const yearDate = new Date(row._rawDate as string);
             groupKey = yearDate.getFullYear().toString();
-            groupLabel = groupKey;
             break;
           }
           case 'type':
             groupKey = row._rawType as string;
-            groupLabel = groupKey === 'expense' ? 'Depenses' : groupKey === 'income' ? 'Revenus' : 'Transferts';
             break;
           case 'status':
             groupKey = row._rawStatus as string;
-            groupLabel = groupKey === 'pending' ? 'En attente' : groupKey === 'cleared' ? 'Rapproche' : 'Valide';
             break;
           default:
             groupKey = 'all';
-            groupLabel = 'Tous';
         }
 
         if (!groups.has(groupKey)) {

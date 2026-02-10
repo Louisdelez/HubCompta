@@ -3,7 +3,7 @@
 // Tests for authentication flows: registration, login, logout, session
 // ============================================================================
 
-import { test, expect, LoginPage, RegisterPage, DashboardPage, defaultTestUser } from './fixtures/auth.fixture';
+import { test, expect, LoginPage, RegisterPage, defaultTestUser } from './fixtures/auth.fixture';
 
 // ----------------------------------------------------------------------------
 // Registration Tests
@@ -146,7 +146,7 @@ test.describe('Login Flow', () => {
     await page.waitForTimeout(1000);
 
     // Should show error message or stay on login page
-    const isOnLoginPage = await loginPage.isOnLoginPage();
+    const isOnLoginPage = loginPage.isOnLoginPage();
     expect(isOnLoginPage).toBe(true);
   });
 
@@ -181,7 +181,6 @@ test.describe('Login Flow', () => {
     await loginPage.submit();
 
     // Loading state should be visible briefly
-    const loadingText = page.locator('text=Connexion...');
     // Note: This might be too fast to catch, so we just verify the form works
     await page.waitForTimeout(500);
   });

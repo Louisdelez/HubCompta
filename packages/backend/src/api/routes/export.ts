@@ -82,7 +82,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
     preHandler: [authGuard],
   }, async (request, reply) => {
     const { workspaceId } = request.params;
-    const { entityTypes, format, dateFrom, dateTo, accountIds, categoryIds, includeArchived, includeAttachments } = request.body;
+    const { entityTypes, format, dateFrom, dateTo, accountIds, categoryIds, includeArchived } = request.body;
 
     // Create export job
     const jobId = randomUUID();
@@ -98,7 +98,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
     exportJobs.set(jobId, job);
 
     // Process export asynchronously
-    setImmediate(async () => {
+    void (async () => {
       try {
         const currentJob = exportJobs.get(jobId);
         if (!currentJob) return;

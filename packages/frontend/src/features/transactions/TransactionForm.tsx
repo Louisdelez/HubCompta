@@ -157,7 +157,7 @@ export function TransactionForm({
 
   // Debounce suggestion fetching
   useEffect(() => {
-    const timer = setTimeout(fetchSuggestions, 300);
+    const timer = setTimeout(() => void fetchSuggestions(), 300);
     return () => clearTimeout(timer);
   }, [fetchSuggestions]);
 

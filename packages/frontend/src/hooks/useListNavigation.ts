@@ -78,11 +78,14 @@ export function useListNavigation<T>({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Clamp selected index when items change
-  useEffect(() => {
-    if (selectedIndex >= items.length) {
-      setSelectedIndex(items.length > 0 ? items.length - 1 : -1);
-    }
-  }, [items.length, selectedIndex]);
+  // We need to check if the index is out of bounds and adjust it
+  const needsClamp = selectedIndex >= items.length && items.length > 0;
+  const needsReset = selectedIndex >= items.length && items.length === 0;
+  if (needsClamp && selectedIndex !== items.length - 1) {
+    setSelectedIndex(items.length - 1);
+  } else if (needsReset && selectedIndex !== -1) {
+    setSelectedIndex(-1);
+  }
 
   // Select next item
   const selectNext = useCallback(() => {

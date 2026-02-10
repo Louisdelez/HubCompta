@@ -4,8 +4,7 @@
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
-import { NotFoundError } from '@/core/middleware/errorHandler.js';
-import type { BudgetForecast, Category } from '@prisma/client';
+import type { BudgetForecast } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
 // ----------------------------------------------------------------------------

@@ -457,7 +457,7 @@ export const ruleService = {
     pattern = pattern.replace(/^(carte|cb|virement|prlv|prelevement|cheque|chq)\s+/i, '');
 
     // Remove dates (various formats)
-    pattern = pattern.replace(/\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]?\d{0,4}/g, '');
+    pattern = pattern.replace(/\d{1,2}[/\-.]\d{1,2}[/\-.]?\d{0,4}/g, '');
 
     // Remove times
     pattern = pattern.replace(/\d{1,2}:\d{2}(:\d{2})?/g, '');
@@ -595,11 +595,11 @@ export const ruleService = {
       const similarity = this.calculateSimilarity(pattern, txnPattern);
 
       if (similarity >= 0.6) {
-        const existing = categoryMatches.get(txn.categoryId!);
+        const existing = categoryMatches.get(txn.categoryId);
         if (existing) {
           existing.count++;
         } else {
-          categoryMatches.set(txn.categoryId!, { count: 1, category: txn.category });
+          categoryMatches.set(txn.categoryId, { count: 1, category: txn.category });
         }
       }
     }
@@ -850,11 +850,11 @@ export const ruleService = {
         const similarity = this.calculateSimilarity(pattern, txnPattern);
 
         if (similarity >= 0.7) {
-          const existing = categoryVotes.get(txn.categoryId!);
+          const existing = categoryVotes.get(txn.categoryId);
           if (existing) {
             existing.votes++;
           } else {
-            categoryVotes.set(txn.categoryId!, { name: txn.category.name, votes: 1 });
+            categoryVotes.set(txn.categoryId, { name: txn.category.name, votes: 1 });
           }
         }
       }

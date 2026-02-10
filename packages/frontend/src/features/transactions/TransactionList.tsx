@@ -135,7 +135,7 @@ export function TransactionList() {
     enabled: !!workspaceId,
   });
 
-  const transactions = data?.transactions ?? [];
+  const transactions = useMemo(() => data?.transactions ?? [], [data?.transactions]);
   const groupedTransactions = groupByDate(transactions);
   const meta = data?.meta;
 

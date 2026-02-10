@@ -307,7 +307,7 @@ export function userRoutes(app: FastifyInstance): void {
     const result = await handleStepUpVerify(
       request.user!.sub,
       password,
-      action as any // Will be validated in handler
+      action as Parameters<typeof handleStepUpVerify>[2]
     );
 
     await auditService.logSensitiveAction(
@@ -365,7 +365,7 @@ export function userRoutes(app: FastifyInstance): void {
       await auditService.log({
         userId,
         action: 'user.notification_preferences.updated',
-        changes: input as unknown as Record<string, unknown>,
+        changes: input as Record<string, unknown>,
         ipAddress: request.ip,
       });
 

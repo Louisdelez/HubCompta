@@ -33,10 +33,10 @@ export function CustomizableDashboard() {
   const queryClient = useQueryClient();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [widgets, setWidgets] = useState<WidgetConfig[]>([]);
+  // Track local edits separately from server data
+  const [localWidgets, setLocalWidgets] = useState<WidgetConfig[] | null>(null);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [containerWidth, setContainerWidth] = useState(1200);
 
   // Measure container width for grid
@@ -62,13 +62,10 @@ export function CustomizableDashboard() {
     enabled: true,
   });
 
-  // Update widgets when layout data changes
-  useEffect(() => {
-    if (layoutData?.widgets) {
-      setWidgets(layoutData.widgets);
-      setHasUnsavedChanges(false);
-    }
-  }, [layoutData]);
+  // Derive widgets: use local edits if present, otherwise use server data
+  const serverWidgets = layoutData?.widgets ?? [];
+  const widgets = localWidgets ?? serverWidgets;
+  const hasUnsavedChanges = localWidgets !== null;
 
   // Save layout mutation
   const saveMutation = useMutation({
@@ -78,7 +75,7 @@ export function CustomizableDashboard() {
         { widgets: newWidgets }
       ),
     onSuccess: () => {
-      setHasUnsavedChanges(false);
+      setLocalWidgets(null);
       void queryClient.invalidateQueries({ queryKey: ['dashboard-layout'] });
     },
   });
@@ -89,33 +86,27 @@ export function CustomizableDashboard() {
       api.delete<DashboardLayoutResponse>(
         `/dashboard/layout${workspaceId ? `?workspaceId=${workspaceId}` : ''}`
       ),
-    onSuccess: (data) => {
-      if (data?.widgets) {
-        setWidgets(data.widgets);
-      }
-      setHasUnsavedChanges(false);
+    onSuccess: () => {
+      setLocalWidgets(null);
       void queryClient.invalidateQueries({ queryKey: ['dashboard-layout'] });
     },
   });
 
-  // Handle layout changes
+  // Handle layout changes - use setLocalWidgets directly for stability
   const handleLayoutChange = useCallback((newWidgets: WidgetConfig[]) => {
-    setWidgets(newWidgets);
-    setHasUnsavedChanges(true);
+    setLocalWidgets(newWidgets);
   }, []);
 
   // Handle adding widget
   const handleAddWidget = useCallback((widget: WidgetConfig) => {
-    setWidgets((prev) => [...prev, widget]);
-    setHasUnsavedChanges(true);
+    setLocalWidgets((prev) => [...(prev ?? serverWidgets), widget]);
     setIsPickerOpen(false);
-  }, []);
+  }, [serverWidgets]);
 
   // Handle removing widget
   const handleRemoveWidget = useCallback((widgetId: string) => {
-    setWidgets((prev) => prev.filter((w) => w.id !== widgetId));
-    setHasUnsavedChanges(true);
-  }, []);
+    setLocalWidgets((prev) => (prev ?? serverWidgets).filter((w) => w.id !== widgetId));
+  }, [serverWidgets]);
 
   // Handle save
   const handleSave = useCallback(() => {

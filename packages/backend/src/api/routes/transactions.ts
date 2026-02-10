@@ -4,7 +4,7 @@
 
 import type { FastifyInstance } from 'fastify';
 import { transactionService, BATCH_MAX_SIZE } from '@/modules/transactions/transaction.service.js';
-import type { TransactionCreateInput, TransactionUpdateInput, BatchUpdateItem } from '@/modules/transactions/transaction.service.js';
+import type { TransactionCreateInput, BatchUpdateItem } from '@/modules/transactions/transaction.service.js';
 import { transferService } from '@/modules/transactions/transfer.service.js';
 import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';

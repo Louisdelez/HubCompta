@@ -3,7 +3,7 @@
 // Creates authenticated state that can be reused across tests
 // ============================================================================
 
-import { test as setup, expect } from '@playwright/test';
+import { test as setup } from '@playwright/test';
 import path from 'path';
 
 // Path to store authenticated state

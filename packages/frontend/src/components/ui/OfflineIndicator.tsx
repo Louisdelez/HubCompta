@@ -9,6 +9,21 @@ import { WifiOff, CloudOff, RefreshCw, Check, AlertCircle, X } from 'lucide-reac
 import { useOfflineStatus } from '@/hooks/useOnlineStatus';
 
 // ----------------------------------------------------------------------------
+// Helper
+// ----------------------------------------------------------------------------
+
+function formatTimestamp(timestamp: number | null, now: number): string {
+  if (!timestamp) return 'Jamais';
+
+  const diff = now - timestamp;
+
+  if (diff < 60000) return 'Il y a quelques secondes';
+  if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
+  if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)} h`;
+  return new Date(timestamp).toLocaleDateString('fr-FR');
+}
+
+// ----------------------------------------------------------------------------
 // Types
 // ----------------------------------------------------------------------------
 
@@ -26,29 +41,25 @@ interface OfflineIndicatorProps {
 export function OfflineIndicator({ className, compact = false }: OfflineIndicatorProps) {
   const { isOnline, isSyncing, pendingCount, lastSyncAt, lastError, sync } = useOfflineStatus();
   const [showDetails, setShowDetails] = useState(false);
+  // Store current time snapshot to avoid impure Date.now() during render
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+
+  const handleSync = async () => {
+    if (isOnline && !isSyncing) {
+      await sync();
+      setCurrentTime(Date.now());
+    }
+  };
+
+  // Compute formatted time with stored current time snapshot
+  const formatLastSync = (timestamp: number | null): string => {
+    return formatTimestamp(timestamp, currentTime);
+  };
 
   // Don't render anything if online and no pending mutations
   if (isOnline && pendingCount === 0 && !isSyncing) {
     return null;
   }
-
-  const handleSync = async () => {
-    if (isOnline && !isSyncing) {
-      await sync();
-    }
-  };
-
-  const formatLastSync = (timestamp: number | null): string => {
-    if (!timestamp) return 'Jamais';
-
-    const now = Date.now();
-    const diff = now - timestamp;
-
-    if (diff < 60000) return 'Il y a quelques secondes';
-    if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
-    if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)} h`;
-    return new Date(timestamp).toLocaleDateString('fr-FR');
-  };
 
   // Compact version (icon only)
   if (compact) {

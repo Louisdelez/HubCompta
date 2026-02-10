@@ -6,7 +6,8 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { WebSocket } from '@fastify/websocket';
 import { randomUUID } from 'crypto';
-import { verifyAccessToken, type AccessTokenPayload } from '@/core/crypto/jwt.js';
+import { verifyAccessToken } from '@/core/crypto/jwt.js';
+import type { TokenPayload } from '@finance-hub/shared';
 import { membershipService } from '@/modules/workspaces/membership.service.js';
 import { handleMessage, sendConnectionAck, sendError, sendMessage } from './handlers.js';
 import type {
@@ -116,7 +117,7 @@ function unsubscribeFromWorkspace(socket: WebSocket, workspaceId: string): void 
 // Authentication Helper
 // ----------------------------------------------------------------------------
 
-function authenticateConnection(request: FastifyRequest): AccessTokenPayload | null {
+function authenticateConnection(request: FastifyRequest): TokenPayload | null {
   // Try to get token from query parameter first (WebSocket connections)
   const url = new URL(request.url, `http://${request.headers.host}`);
   const tokenFromQuery = url.searchParams.get('token');
@@ -134,7 +135,7 @@ function authenticateConnection(request: FastifyRequest): AccessTokenPayload | n
   }
 
   try {
-    return verifyAccessToken(token) as AccessTokenPayload;
+    return verifyAccessToken(token);
   } catch {
     return null;
   }

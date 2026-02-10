@@ -5,7 +5,7 @@
 
 import { prisma } from '@/core/database/client.js';
 import type { TransactionType, Prisma, ScheduledTransaction } from '@prisma/client';
-import { startOfDay, isAfter, isBefore, addDays } from 'date-fns';
+import { startOfDay, isBefore, addDays } from 'date-fns';
 
 // ----------------------------------------------------------------------------
 // Types

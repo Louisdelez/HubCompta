@@ -4,7 +4,7 @@
 // Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { X, Download, FileText, FileJson, FileSpreadsheet, Paperclip, Loader2, type LucideIcon } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -49,16 +49,29 @@ export function ExportModal({ workspaceId, isOpen, onClose, entityType }: Export
   const [includeArchived, setIncludeArchived] = useState(false);
   const [includeAttachments, setIncludeAttachments] = useState(false);
 
-  // Reset state when modal opens
+  // Track previous isOpen state to detect when modal opens
+  const prevIsOpenRef = useRef(isOpen);
+  const prevEntityTypeRef = useRef(entityType);
+
+  // Reset state when modal opens (using refs to avoid effect with synchronous setState)
   useEffect(() => {
-    if (isOpen) {
-      setFormat('csv');
-      setDateFrom('');
-      setDateTo('');
-      setSelectedAccounts([]);
-      setSelectedCategories([]);
-      setIncludeArchived(false);
-      setIncludeAttachments(false);
+    const wasClosedAndNowOpen = !prevIsOpenRef.current && isOpen;
+    const entityTypeChanged = prevEntityTypeRef.current !== entityType;
+
+    prevIsOpenRef.current = isOpen;
+    prevEntityTypeRef.current = entityType;
+
+    if (wasClosedAndNowOpen || (isOpen && entityTypeChanged)) {
+      // Schedule reset for next frame to avoid synchronous setState warning
+      requestAnimationFrame(() => {
+        setFormat('csv');
+        setDateFrom('');
+        setDateTo('');
+        setSelectedAccounts([]);
+        setSelectedCategories([]);
+        setIncludeArchived(false);
+        setIncludeAttachments(false);
+      });
     }
   }, [isOpen, entityType]);
 

@@ -113,13 +113,8 @@ export function useNetworkQuality(): NetworkQuality {
   const [quality, setQuality] = useState<NetworkQuality>('good');
 
   useEffect(() => {
-    if (!isOnline) {
-      setQuality('offline');
-      return;
-    }
-
     // Check if Network Information API is available
-    const connection = (navigator as Navigator & {
+    const connection = (navigator as {
       connection?: {
         effectiveType: string;
         addEventListener: (type: string, listener: () => void) => void;
@@ -127,12 +122,17 @@ export function useNetworkQuality(): NetworkQuality {
       };
     }).connection;
 
-    if (!connection) {
-      setQuality('good');
-      return;
-    }
-
     const updateQuality = () => {
+      if (!isOnline) {
+        setQuality('offline');
+        return;
+      }
+
+      if (!connection) {
+        setQuality('good');
+        return;
+      }
+
       const effectiveType = connection.effectiveType;
 
       if (effectiveType === '4g') {
@@ -145,11 +145,14 @@ export function useNetworkQuality(): NetworkQuality {
     };
 
     updateQuality();
-    connection.addEventListener('change', updateQuality);
 
-    return () => {
-      connection.removeEventListener('change', updateQuality);
-    };
+    if (connection) {
+      connection.addEventListener('change', updateQuality);
+      return () => {
+        connection.removeEventListener('change', updateQuality);
+      };
+    }
+    return undefined;
   }, [isOnline]);
 
   return quality;

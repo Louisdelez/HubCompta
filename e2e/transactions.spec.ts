@@ -116,7 +116,7 @@ class TransactionsPage {
     return Promise.all(transactions.map(t => t.textContent()));
   }
 
-  async isTransactionVisible(description: string) {
+  isTransactionVisible(description: string) {
     return this.page.locator(`text=${description}`).isVisible();
   }
 }

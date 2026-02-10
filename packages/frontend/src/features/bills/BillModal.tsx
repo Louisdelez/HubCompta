@@ -3,7 +3,7 @@
 // Create/edit bill modal
 // ============================================================================
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X, Loader2, Calendar, RefreshCw, Bell } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -48,24 +48,10 @@ export function BillModal({ workspaceId, bill, onClose, onSave }: BillModalProps
   const queryClient = useQueryClient();
   const isEdit = !!bill;
 
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    vendor: '',
-    amount: '',
-    currency: 'EUR',
-    dueDate: new Date().toISOString().split('T')[0] ?? '',
-    frequency: 'monthly',
-    categoryId: '',
-    reminderDays: '3',
-    notes: '',
-  });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Load bill data when editing
-  useEffect(() => {
+  // Initialize form data from bill prop (if editing) or defaults (if creating)
+  const [formData, setFormData] = useState<FormData>(() => {
     if (bill) {
-      setFormData({
+      return {
         name: bill.name,
         vendor: bill.vendor ?? '',
         amount: bill.amount.toString(),
@@ -75,9 +61,22 @@ export function BillModal({ workspaceId, bill, onClose, onSave }: BillModalProps
         categoryId: bill.categoryId ?? '',
         reminderDays: bill.reminderDays.toString(),
         notes: bill.notes ?? '',
-      });
+      };
     }
-  }, [bill]);
+    return {
+      name: '',
+      vendor: '',
+      amount: '',
+      currency: 'EUR',
+      dueDate: new Date().toISOString().split('T')[0] ?? '',
+      frequency: 'monthly',
+      categoryId: '',
+      reminderDays: '3',
+      notes: '',
+    };
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Fetch categories
   const { data: categories } = useQuery({

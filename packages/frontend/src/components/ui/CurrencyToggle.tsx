@@ -55,12 +55,11 @@ export function CurrencyToggle({ workspaceId, className = '' }: CurrencyTogglePr
     staleTime: 1000 * 60 * 5,
   });
 
-  // Update default currency when workspace loads
-  useEffect(() => {
-    if (summary?.defaultCurrency && !localStorage.getItem('displayCurrency')) {
-      setDisplayCurrencyState(summary.defaultCurrency);
-    }
-  }, [summary?.defaultCurrency]);
+  // Derived display currency: use API default if localStorage is empty, without needing effect
+  const effectiveDisplayCurrency =
+    localStorage.getItem('displayCurrency')
+      ? displayCurrency
+      : (summary?.defaultCurrency ?? displayCurrency);
 
   // Close on click outside
   useEffect(() => {
@@ -94,8 +93,8 @@ export function CurrencyToggle({ workspaceId, className = '' }: CurrencyTogglePr
   const workspaceCurrencies = summary?.currencies ?? [];
   const hasMultipleCurrencies = workspaceCurrencies.length > 1;
 
-  // Get current currency symbol
-  const currentSymbol = workspaceCurrencies.find(c => c.currency === displayCurrency)?.symbol ?? displayCurrency;
+  // Get current currency symbol (use effective currency that accounts for API default)
+  const currentSymbol = workspaceCurrencies.find(c => c.currency === effectiveDisplayCurrency)?.symbol ?? effectiveDisplayCurrency;
 
   return (
     <div ref={containerRef} className={clsx('relative', className)}>
@@ -107,7 +106,7 @@ export function CurrencyToggle({ workspaceId, className = '' }: CurrencyTogglePr
           isOpen && 'bg-ctp-surface0 text-ctp-text',
           displayMode === 'converted' && 'text-ctp-blue'
         )}
-        title={`Affichage: ${displayMode === 'original' ? 'Devises originales' : `Tout en ${displayCurrency}`}`}
+        title={`Affichage: ${displayMode === 'original' ? 'Devises originales' : `Tout en ${effectiveDisplayCurrency}`}`}
       >
         <Coins className="w-5 h-5" />
         {displayMode === 'converted' && (
@@ -162,7 +161,7 @@ export function CurrencyToggle({ workspaceId, className = '' }: CurrencyTogglePr
               <div>
                 <p className="font-medium">Tout convertir</p>
                 <p className="text-xs text-ctp-subtext0">
-                  Afficher tout en {currentSymbol} {displayCurrency}
+                  Afficher tout en {currentSymbol} {effectiveDisplayCurrency}
                 </p>
               </div>
               {displayMode === 'converted' && <Check className="w-4 h-4" />}
@@ -183,7 +182,7 @@ export function CurrencyToggle({ workspaceId, className = '' }: CurrencyTogglePr
                     onClick={() => setDisplayCurrency(curr.currency)}
                     className={clsx(
                       'w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors',
-                      displayCurrency === curr.currency
+                      effectiveDisplayCurrency === curr.currency
                         ? 'bg-ctp-green/10 text-ctp-green'
                         : 'hover:bg-ctp-surface1'
                     )}
@@ -192,7 +191,7 @@ export function CurrencyToggle({ workspaceId, className = '' }: CurrencyTogglePr
                       <span className="text-lg">{curr.symbol}</span>
                       <span>{curr.currency}</span>
                     </div>
-                    {displayCurrency === curr.currency && <Check className="w-4 h-4" />}
+                    {effectiveDisplayCurrency === curr.currency && <Check className="w-4 h-4" />}
                   </button>
                 ))}
 
@@ -208,13 +207,13 @@ export function CurrencyToggle({ workspaceId, className = '' }: CurrencyTogglePr
                         onClick={() => setDisplayCurrency(code)}
                         className={clsx(
                           'w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors',
-                          displayCurrency === code
+                          effectiveDisplayCurrency === code
                             ? 'bg-ctp-green/10 text-ctp-green'
                             : 'hover:bg-ctp-surface1'
                         )}
                       >
                         <span>{code}</span>
-                        {displayCurrency === code && <Check className="w-4 h-4" />}
+                        {effectiveDisplayCurrency === code && <Check className="w-4 h-4" />}
                       </button>
                     ))}
                 </div>

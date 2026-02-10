@@ -6,7 +6,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import GridLayout, { type Layout, type LayoutItem, verticalCompactor } from 'react-grid-layout';
 import { WidgetWrapper } from './WidgetWrapper';
-import { WIDGET_REGISTRY, type WidgetConfig, type WidgetType } from './widgets';
+import { WIDGET_REGISTRY, type WidgetConfig } from './widgets';
 import 'react-grid-layout/css/styles.css';
 
 // ----------------------------------------------------------------------------
@@ -48,7 +48,7 @@ export function WidgetGrid({
   // Convert widgets to react-grid-layout format
   const layout: Layout = useMemo(() => {
     return widgets.map((widget) => {
-      const widgetDef = WIDGET_REGISTRY[widget.type as WidgetType];
+      const widgetDef = WIDGET_REGISTRY[widget.type];
       const defaultSize = widgetDef?.defaultSize ?? { w: 2, h: 2, minW: 1, minH: 1, maxW: 6, maxH: 6 };
 
       return {

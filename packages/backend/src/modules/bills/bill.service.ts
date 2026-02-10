@@ -5,7 +5,7 @@
 
 import { prisma } from '@/core/database/client.js';
 import type { Bill, BillFrequency, Prisma } from '@prisma/client';
-import { startOfDay, addDays, addWeeks, addMonths, addYears, isBefore, isAfter, differenceInDays } from 'date-fns';
+import { startOfDay, addDays, addWeeks, addMonths, addYears, isBefore, differenceInDays } from 'date-fns';
 
 // ----------------------------------------------------------------------------
 // Types

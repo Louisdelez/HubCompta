@@ -46,7 +46,11 @@ export function useShortcut(
 
   // Store handler in ref to avoid re-registering on every render
   const handlerRef = useRef(handler);
-  handlerRef.current = handler;
+
+  // Update ref in effect to avoid updating during render
+  useEffect(() => {
+    handlerRef.current = handler;
+  });
 
   // Stable handler wrapper
   const stableHandler = useCallback(() => {
@@ -85,7 +89,14 @@ export function useShortcutMap(
 
   // Store handlers in ref
   const handlersRef = useRef(shortcuts);
-  handlersRef.current = shortcuts;
+
+  // Update ref in effect to avoid updating during render
+  useEffect(() => {
+    handlersRef.current = shortcuts;
+  });
+
+  // Memoize shortcut keys
+  const shortcutKeys = Object.keys(shortcuts).join(',');
 
   useEffect(() => {
     if (!enabled) return;
@@ -106,7 +117,8 @@ export function useShortcutMap(
         unregister();
       }
     };
-  }, [enabled, priority, registerShortcut, Object.keys(shortcuts).join(',')]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, priority, registerShortcut, shortcutKeys]);
 }
 
 export default useShortcut;

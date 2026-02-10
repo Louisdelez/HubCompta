@@ -58,7 +58,8 @@ export function ImportProgress({
   dateFormat,
   onComplete,
 }: ImportProgressProps) {
-  const [status, setStatus] = useState<'idle' | 'executing' | 'polling' | 'completed' | 'error'>('idle');
+  // Initialize as 'executing' since we start the import immediately on mount
+  const [status, setStatus] = useState<'idle' | 'executing' | 'polling' | 'completed' | 'error'>('executing');
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -125,9 +126,8 @@ export function ImportProgress({
   // Expose for potential future use
   void startPolling;
 
-  // Start import on mount
+  // Start import on mount (status is already 'executing' from initialization)
   useEffect(() => {
-    setStatus('executing');
     executeMutation.mutate();
 
     return () => {
@@ -135,6 +135,7 @@ export function ImportProgress({
         clearInterval(pollIntervalRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Simulate progress for synchronous imports

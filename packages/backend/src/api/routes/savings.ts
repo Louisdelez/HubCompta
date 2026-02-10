@@ -4,7 +4,7 @@
 
 import type { FastifyInstance } from 'fastify';
 import { savingsService } from '@/modules/savings/savings.service.js';
-import { auditService, AUDIT_ACTIONS } from '@/modules/audit/audit.service.js';
+import { auditService } from '@/modules/audit/audit.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
 import { workspaceContextMiddleware, requirePermission } from '@/core/middleware/workspaceContext.js';
 import {

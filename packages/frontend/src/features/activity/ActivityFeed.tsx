@@ -162,7 +162,7 @@ export function ActivityFeed({
   const allActivities = useMemo(() => {
     if (!data?.pages) return [];
     return data.pages.flatMap((page) => page.data);
-  }, [data?.pages]);
+  }, [data]);
 
   // Group activities by date
   const groupedActivities = useMemo(

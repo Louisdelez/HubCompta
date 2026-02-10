@@ -130,21 +130,21 @@ async function logout(page: Page): Promise<void> {
 
 export const test = base.extend<AuthFixtures>({
   // Generate a unique test user for each test
-  testUser: async ({}, use) => {
+  testUser: async (_, use) => {
     const user = generateTestUser();
     await use(user);
   },
 
   // Provide helper functions
-  login: async ({}, use) => {
+  login: async (_, use) => {
     await use(login);
   },
 
-  register: async ({}, use) => {
+  register: async (_, use) => {
     await use(register);
   },
 
-  logout: async ({}, use) => {
+  logout: async (_, use) => {
     await use(logout);
   },
 
@@ -200,7 +200,7 @@ export class LoginPage {
     return null;
   }
 
-  async isOnLoginPage() {
+  isOnLoginPage(): boolean {
     return this.page.url().includes('/login');
   }
 
@@ -284,7 +284,7 @@ export class DashboardPage {
     await this.page.waitForSelector('h1', { timeout: 10000 });
   }
 
-  async isOnDashboard() {
+  isOnDashboard(): boolean {
     return this.page.url().includes('/dashboard');
   }
 
