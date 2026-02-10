@@ -37,6 +37,15 @@ import {
   Settings,
   LogOut,
   Wallet,
+  Target,
+  Coins,
+  Scale,
+  Building2,
+  CalendarClock,
+  Receipt,
+  Users,
+  Trophy,
+  Activity,
   type LucideIcon,
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -58,18 +67,27 @@ const mainNavItems: NavItem[] = [
   { name: 'Transactions', href: '/transactions', icon: CreditCard },
   { name: 'Comptes', href: '/accounts', icon: Landmark },
   { name: 'Budgets', href: '/budgets', icon: TrendingUp },
+  { name: 'Epargne', href: '/savings', icon: Target },
+  { name: 'Prets', href: '/loans', icon: Coins },
   { name: 'Investissements', href: '/portfolio', icon: LineChart },
+  { name: 'Patrimoine', href: '/networth', icon: Scale },
   { name: 'Documents', href: '/documents', icon: FileText },
 ];
 
 const secondaryNavItems: NavItem[] = [
+  { name: 'Banque', href: '/banking', icon: Building2 },
   { name: 'Recurrences', href: '/recurrences', icon: RefreshCw },
+  { name: 'Programmees', href: '/scheduled', icon: CalendarClock },
+  { name: 'Factures', href: '/bills', icon: Receipt },
+  { name: 'Equilibre', href: '/settlement', icon: Users },
   { name: 'Import', href: '/import', icon: Download },
   { name: 'Export', href: '/export', icon: Upload },
   { name: 'Regles', href: '/rules', icon: SlidersHorizontal },
   { name: 'Rapports', href: '/reports', icon: ClipboardList },
   { name: 'Devises', href: '/currencies', icon: BadgeDollarSign },
   { name: 'Recherche', href: '/search', icon: Search },
+  { name: 'Succes', href: '/achievements', icon: Trophy },
+  { name: 'Activite', href: '/activity', icon: Activity },
 ];
 
 // ----------------------------------------------------------------------------
