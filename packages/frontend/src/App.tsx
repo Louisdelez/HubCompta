@@ -44,6 +44,9 @@ export const prefetchRoute = {
   bills: () => import('./features/bills'),
   activity: () => import('./features/activity'),
   datamanagement: () => import('./features/datamanagement'),
+  banking: () => import('./features/banking'),
+  workspaceMembers: () => import('./features/workspaces'),
+  gamification: () => import('./features/gamification'),
 };
 
 /**
@@ -217,6 +220,21 @@ const ActivityPage = lazy(() =>
 // Data Management
 const DataManagementPage = lazy(() =>
   import(/* webpackChunkName: "datamanagement" */ './features/datamanagement').then(m => ({ default: m.DataManagementPage }))
+);
+
+// Banking
+const BankConnectionsPage = lazy(() =>
+  import(/* webpackChunkName: "banking" */ './features/banking').then(m => ({ default: m.BankConnectionsPage }))
+);
+
+// Workspace Members
+const MembersPage = lazy(() =>
+  import(/* webpackChunkName: "workspaces" */ './features/workspaces').then(m => ({ default: m.MembersPage }))
+);
+
+// Gamification
+const GamificationPage = lazy(() =>
+  import(/* webpackChunkName: "gamification" */ './features/gamification').then(m => ({ default: m.GamificationPage }))
 );
 
 // Admin - grouped in same chunk since they're admin-only
@@ -459,6 +477,16 @@ export default function App() {
           {/* Data Management Routes */}
           <Route path="data" element={<DataManagementPage />} />
           <Route path="workspaces/:workspaceId/data" element={<DataManagementPage />} />
+
+          {/* Banking Routes */}
+          <Route path="banking" element={<BankConnectionsPage />} />
+          <Route path="workspaces/:workspaceId/banking" element={<BankConnectionsPage />} />
+
+          {/* Workspace Members Routes */}
+          <Route path="workspaces/:workspaceId/members" element={<MembersPage />} />
+
+          {/* Gamification Routes */}
+          <Route path="achievements" element={<GamificationPage />} />
 
           {/* Admin Routes */}
           <Route
