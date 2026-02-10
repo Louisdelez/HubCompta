@@ -189,7 +189,14 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               {user?.isInstanceAdmin && (
                 <NavLink
                   to="/admin"
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-ctp-mauve hover:bg-ctp-mauve/10"
+                  className={({ isActive }) =>
+                    clsx(
+                      'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+                      isActive
+                        ? 'bg-ctp-mauve/20 text-ctp-mauve'
+                        : 'text-ctp-mauve hover:bg-ctp-mauve/10'
+                    )
+                  }
                   onClick={() => onClose()}
                   onMouseEnter={() => prefetchOnHover('/admin')}
                   onFocus={() => prefetchOnHover('/admin')}
@@ -200,7 +207,14 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               )}
               <NavLink
                 to="/settings"
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-ctp-subtext1 hover:bg-ctp-surface1 hover:text-ctp-text"
+                className={({ isActive }) =>
+                  clsx(
+                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+                    isActive
+                      ? 'bg-ctp-blue/20 text-ctp-blue'
+                      : 'text-ctp-subtext1 hover:bg-ctp-surface1 hover:text-ctp-text'
+                  )
+                }
                 onClick={() => onClose()}
                 onMouseEnter={() => prefetchOnHover('/settings')}
                 onFocus={() => prefetchOnHover('/settings')}
