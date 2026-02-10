@@ -82,9 +82,9 @@ export function InvoicesPage() {
     queryFn: () => {
       const params = new URLSearchParams();
       if (statusFilter !== 'all') params.set('status', statusFilter);
-      return api.get<{ data: Invoice[] }>(
+      return api.get<Invoice[]>(
         `/workspaces/${workspaceId}/invoices?${params.toString()}`
-      ).then((res) => res.data);
+      );
     },
     enabled: !!workspaceId,
   });
@@ -115,10 +115,10 @@ export function InvoicesPage() {
 
   const duplicateMutation = useMutation({
     mutationFn: (id: string) =>
-      api.post<{ data: Invoice }>(`/workspaces/${workspaceId}/invoices/${id}/duplicate`),
+      api.post<Invoice>(`/workspaces/${workspaceId}/invoices/${id}/duplicate`),
     onSuccess: (response) => {
       void queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
-      navigate(`/workspaces/${workspaceId}/pro/invoices/${response.data.id}`);
+      navigate(`/workspaces/${workspaceId}/pro/invoices/${response.id}`);
     },
   });
 

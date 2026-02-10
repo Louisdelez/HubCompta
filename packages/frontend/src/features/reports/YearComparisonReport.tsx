@@ -117,16 +117,14 @@ export function YearComparisonReport() {
   const currentYear = new Date().getFullYear();
   const [compareYear, setCompareYear] = useState(currentYear - 1);
 
-  const { data: comparisonResponse, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['reports', workspaceId, 'year-comparison', compareYear],
     queryFn: () =>
-      api.get<{ data: YearComparisonResponse }>(
+      api.get<YearComparisonResponse>(
         `/workspaces/${workspaceId}/reports/year-comparison?year=${compareYear}`
       ),
     enabled: !!workspaceId,
   });
-
-  const data = comparisonResponse?.data;
 
   const chartData = data?.monthly.map((m) => ({
     name: format(new Date(currentYear, m.month - 1), 'MMM', { locale: fr }),

@@ -51,14 +51,14 @@ export function AchievementList() {
   const { data, isLoading } = useQuery({
     queryKey: ['gamification', workspaceId, 'achievements'],
     queryFn: () =>
-      api.get<{ data: AchievementsResponse }>(
+      api.get<AchievementsResponse>(
         `/workspaces/${workspaceId}/gamification/achievements`
       ),
     enabled: !!workspaceId,
   });
 
-  const achievements = data?.data.achievements ?? [];
-  const userAchievements = data?.data.userAchievements ?? [];
+  const achievements = data?.achievements ?? [];
+  const userAchievements = data?.userAchievements ?? [];
 
   // Create a map of user achievements
   const userAchievementMap = new Map(

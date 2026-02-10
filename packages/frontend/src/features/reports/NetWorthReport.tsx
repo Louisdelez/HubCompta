@@ -91,16 +91,14 @@ export function NetWorthReport() {
 
   const months = period === '6m' ? 6 : period === '1y' ? 12 : period === '2y' ? 24 : 60;
 
-  const { data: netWorthResponse, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['reports', workspaceId, 'net-worth', period],
     queryFn: () =>
-      api.get<{ data: NetWorthResponse }>(
+      api.get<NetWorthResponse>(
         `/workspaces/${workspaceId}/reports/net-worth?months=${months}`
       ),
     enabled: !!workspaceId,
   });
-
-  const data = netWorthResponse?.data;
 
   const chartData = data?.history.map((point) => ({
     date: format(new Date(point.date), 'MMM yy', { locale: fr }),

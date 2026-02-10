@@ -112,8 +112,7 @@ export function QuoteForm() {
   const { data: contacts } = useQuery({
     queryKey: ['contacts', workspaceId, 'client'],
     queryFn: () =>
-      api.get<{ data: Contact[] }>(`/workspaces/${workspaceId}/contacts?type=client`)
-        .then((res) => res.data),
+      api.get<Contact[]>(`/workspaces/${workspaceId}/contacts?type=client`),
     enabled: !!workspaceId,
   });
 
@@ -121,8 +120,7 @@ export function QuoteForm() {
   const { data: quote } = useQuery({
     queryKey: ['quote', workspaceId, quoteId],
     queryFn: () =>
-      api.get<{ data: Quote }>(`/workspaces/${workspaceId}/quotes/${quoteId}`)
-        .then((res) => res.data),
+      api.get<Quote>(`/workspaces/${workspaceId}/quotes/${quoteId}`),
     enabled: !!workspaceId && isEditing,
   });
 
@@ -151,10 +149,10 @@ export function QuoteForm() {
 
   const createMutation = useMutation({
     mutationFn: (data: CreateQuotePayload) =>
-      api.post<{ data: Quote }>(`/workspaces/${workspaceId}/quotes`, data),
+      api.post<Quote>(`/workspaces/${workspaceId}/quotes`, data),
     onSuccess: (response) => {
       void queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
-      navigate(`/workspaces/${workspaceId}/pro/quotes/${response.data.id}`);
+      navigate(`/workspaces/${workspaceId}/pro/quotes/${response.id}`);
     },
     onError: (error: Error) => {
       setErrors({ submit: error.message });
@@ -163,7 +161,7 @@ export function QuoteForm() {
 
   const updateMutation = useMutation({
     mutationFn: (data: { lines: QuoteLine[] }) =>
-      api.patch<{ data: Quote }>(`/workspaces/${workspaceId}/quotes/${quoteId}/lines`, data),
+      api.patch<Quote>(`/workspaces/${workspaceId}/quotes/${quoteId}/lines`, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
       navigate(`/workspaces/${workspaceId}/pro/quotes/${quoteId}`);

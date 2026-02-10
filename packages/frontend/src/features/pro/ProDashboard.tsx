@@ -73,17 +73,13 @@ export function ProDashboard() {
 
   const { data: contactStats, isLoading: loadingContacts } = useQuery({
     queryKey: ['contacts', 'stats', workspaceId],
-    queryFn: () =>
-      api.get<{ data: ContactStats }>(`/workspaces/${workspaceId}/contacts/stats`)
-        .then((res) => res.data),
+    queryFn: () => api.get<ContactStats>(`/workspaces/${workspaceId}/contacts/stats`),
     enabled: !!workspaceId,
   });
 
   const { data: invoiceStats, isLoading: loadingInvoices } = useQuery({
     queryKey: ['invoices', 'stats', workspaceId],
-    queryFn: () =>
-      api.get<{ data: InvoiceStats }>(`/workspaces/${workspaceId}/invoices/stats`)
-        .then((res) => res.data),
+    queryFn: () => api.get<InvoiceStats>(`/workspaces/${workspaceId}/invoices/stats`),
     enabled: !!workspaceId,
   });
 

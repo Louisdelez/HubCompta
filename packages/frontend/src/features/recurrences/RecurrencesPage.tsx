@@ -99,17 +99,17 @@ export function RecurrencesPage() {
   const [forecastMonth] = useState(new Date());
 
   // Fetch recurrences
-  const { data: recurrencesData, isLoading } = useQuery({
+  const { data: recurrences = [], isLoading } = useQuery({
     queryKey: ['recurrences', workspaceId],
     queryFn: () =>
-      api.get<{ data: Recurrence[]; meta: { total: number } }>(
+      api.get<Recurrence[]>(
         `/workspaces/${workspaceId}/recurrences`
       ),
     enabled: !!workspaceId,
   });
 
   // Fetch monthly forecast
-  const { data: forecastData } = useQuery({
+  const { data: forecast } = useQuery({
     queryKey: ['recurrences', workspaceId, 'forecast', forecastMonth.toISOString()],
     queryFn: () =>
       api.get<RecurrenceForecast>(
@@ -117,9 +117,6 @@ export function RecurrencesPage() {
       ),
     enabled: !!workspaceId,
   });
-
-  const recurrences = recurrencesData?.data ?? [];
-  const forecast = forecastData;
 
   // Filter recurrences
   const filteredRecurrences = recurrences.filter((r) => {

@@ -129,13 +129,12 @@ export function ReportsPage() {
   // Fetch summary data
   const { data: summary, isLoading: summaryLoading } = useQuery({
     queryKey: ['reports', 'summary', currentWorkspace?.id, dateRange],
-    queryFn: async () => {
+    queryFn: () => {
       const month = dateRange.from.getMonth() + 1;
       const year = dateRange.from.getFullYear();
-      const response = await api.get<{ data: SummaryData }>(
+      return api.get<SummaryData>(
         `/workspaces/${currentWorkspace?.id}/reports/summary?year=${year}&month=${month}`
       );
-      return response.data;
     },
     enabled: !!currentWorkspace?.id,
   });
@@ -143,36 +142,30 @@ export function ReportsPage() {
   // Fetch spending trends
   const { data: trends } = useQuery({
     queryKey: ['reports', 'spending-trend', currentWorkspace?.id],
-    queryFn: async () => {
-      const response = await api.get<{ data: { trends: SpendingTrend[]; averages: { income: number; expenses: number; net: number } } }>(
+    queryFn: () =>
+      api.get<{ trends: SpendingTrend[]; averages: { income: number; expenses: number; net: number } }>(
         `/workspaces/${currentWorkspace?.id}/reports/spending-trend?months=6`
-      );
-      return response.data;
-    },
+      ),
     enabled: !!currentWorkspace?.id,
   });
 
   // Fetch budget comparison
   const { data: budgetData } = useQuery({
     queryKey: ['reports', 'budget-comparison', currentWorkspace?.id, dateRange],
-    queryFn: async () => {
-      const response = await api.get<{ data: { categories: BudgetComparison[]; totalBudget: number; totalActual: number } }>(
+    queryFn: () =>
+      api.get<{ categories: BudgetComparison[]; totalBudget: number; totalActual: number }>(
         `/workspaces/${currentWorkspace?.id}/reports/budget-comparison?from=${format(dateRange.from, 'yyyy-MM-dd')}&to=${format(dateRange.to, 'yyyy-MM-dd')}`
-      );
-      return response.data;
-    },
+      ),
     enabled: !!currentWorkspace?.id,
   });
 
   // Fetch cash flow
   const { data: cashFlow } = useQuery({
     queryKey: ['reports', 'cash-flow', currentWorkspace?.id, dateRange],
-    queryFn: async () => {
-      const response = await api.get<{ data: CashFlowData }>(
+    queryFn: () =>
+      api.get<CashFlowData>(
         `/workspaces/${currentWorkspace?.id}/reports/cash-flow?from=${format(dateRange.from, 'yyyy-MM-dd')}&to=${format(dateRange.to, 'yyyy-MM-dd')}`
-      );
-      return response.data;
-    },
+      ),
     enabled: !!currentWorkspace?.id,
   });
 

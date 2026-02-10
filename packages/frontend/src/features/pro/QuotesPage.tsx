@@ -80,9 +80,9 @@ export function QuotesPage() {
     queryFn: () => {
       const params = new URLSearchParams();
       if (statusFilter !== 'all') params.set('status', statusFilter);
-      return api.get<{ data: Quote[] }>(
+      return api.get<Quote[]>(
         `/workspaces/${workspaceId}/quotes?${params.toString()}`
-      ).then((res) => res.data);
+      );
     },
     enabled: !!workspaceId,
   });
@@ -121,10 +121,10 @@ export function QuotesPage() {
 
   const duplicateMutation = useMutation({
     mutationFn: (id: string) =>
-      api.post<{ data: Quote }>(`/workspaces/${workspaceId}/quotes/${id}/duplicate`),
+      api.post<Quote>(`/workspaces/${workspaceId}/quotes/${id}/duplicate`),
     onSuccess: (response) => {
       void queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
-      navigate(`/workspaces/${workspaceId}/pro/quotes/${response.data.id}`);
+      navigate(`/workspaces/${workspaceId}/pro/quotes/${response.id}`);
     },
   });
 
@@ -132,7 +132,7 @@ export function QuotesPage() {
     mutationFn: (quoteId: string) => {
       const dueDate = new Date();
       dueDate.setDate(dueDate.getDate() + 30);
-      return api.post<{ data: { id: string } }>(
+      return api.post<{ id: string }>(
         `/workspaces/${workspaceId}/invoices/from-quote/${quoteId}`,
         { dueDate }
       );
@@ -140,7 +140,7 @@ export function QuotesPage() {
     onSuccess: (response) => {
       void queryClient.invalidateQueries({ queryKey: ['quotes', workspaceId] });
       void queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
-      navigate(`/workspaces/${workspaceId}/pro/invoices/${response.data.id}`);
+      navigate(`/workspaces/${workspaceId}/pro/invoices/${response.id}`);
     },
   });
 

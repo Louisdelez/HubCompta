@@ -33,24 +33,21 @@ interface LeaderboardEntry {
 export function GamificationPage() {
   const { currentWorkspaceId: workspaceId } = useWorkspace();
 
-  const { data: statsResponse, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['gamification', workspaceId, 'stats'],
     queryFn: () =>
-      api.get<{ data: UserStats }>(`/workspaces/${workspaceId}/gamification/stats`),
+      api.get<UserStats>(`/workspaces/${workspaceId}/gamification/stats`),
     enabled: !!workspaceId,
   });
 
-  const { data: leaderboardResponse, isLoading: leaderboardLoading } = useQuery({
+  const { data: leaderboard = [], isLoading: leaderboardLoading } = useQuery({
     queryKey: ['gamification', workspaceId, 'leaderboard'],
     queryFn: () =>
-      api.get<{ data: LeaderboardEntry[] }>(
+      api.get<LeaderboardEntry[]>(
         `/workspaces/${workspaceId}/gamification/leaderboard`
       ),
     enabled: !!workspaceId,
   });
-
-  const stats = statsResponse?.data;
-  const leaderboard = leaderboardResponse?.data ?? [];
 
   if (!workspaceId) {
     return (

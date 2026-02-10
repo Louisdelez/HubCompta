@@ -96,9 +96,9 @@ export function SettlementPage() {
   const { data: settlement, isLoading } = useQuery({
     queryKey: ['settlement', workspaceId, selectedMonth],
     queryFn: () =>
-      api.get<{ data: SettlementData }>(
+      api.get<SettlementData>(
         `/workspaces/${workspaceId}/settlement?startDate=${startDate}&endDate=${endDate}`
-      ).then((res) => res.data),
+      ),
     enabled: !!workspaceId,
   });
 
@@ -106,9 +106,9 @@ export function SettlementPage() {
   const { data: breakdown } = useQuery({
     queryKey: ['settlement-breakdown', workspaceId, selectedMonth],
     queryFn: () =>
-      api.get<{ data: ExpenseBreakdown[] }>(
+      api.get<ExpenseBreakdown[]>(
         `/workspaces/${workspaceId}/settlement/breakdown?startDate=${startDate}&endDate=${endDate}`
-      ).then((res) => res.data),
+      ),
     enabled: !!workspaceId,
   });
 

@@ -274,16 +274,14 @@ export function BankConnectionsPage() {
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const { data: connectionsResponse, isLoading } = useQuery({
+  const { data: connections = [], isLoading } = useQuery({
     queryKey: ['banking', workspaceId, 'connections'],
     queryFn: () =>
-      api.get<{ data: BankConnection[] }>(
+      api.get<BankConnection[]>(
         `/workspaces/${workspaceId}/banking/connections`
       ),
     enabled: !!workspaceId,
   });
-
-  const connections = connectionsResponse?.data ?? [];
 
   if (!workspaceId) {
     return (

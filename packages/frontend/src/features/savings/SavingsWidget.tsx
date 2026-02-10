@@ -60,16 +60,14 @@ export function SavingsWidget() {
 
   const { data: summary } = useQuery({
     queryKey: ['savings', workspaceId, 'summary'],
-    queryFn: () => api.get<{ data: SavingsSummary }>(`/workspaces/${workspaceId}/savings/summary`),
+    queryFn: () => api.get<SavingsSummary>(`/workspaces/${workspaceId}/savings/summary`),
     enabled: !!workspaceId,
-    select: (res) => res.data,
   });
 
   const { data: goals } = useQuery({
     queryKey: ['savings', workspaceId, 'list'],
-    queryFn: () => api.get<{ data: SavingsGoalWithProgress[] }>(`/workspaces/${workspaceId}/savings`),
+    queryFn: () => api.get<SavingsGoalWithProgress[]>(`/workspaces/${workspaceId}/savings`),
     enabled: !!workspaceId,
-    select: (res) => res.data,
   });
 
   if (!workspaceId) return null;

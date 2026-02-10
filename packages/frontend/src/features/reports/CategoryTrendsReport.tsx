@@ -75,16 +75,14 @@ export function CategoryTrendsReport() {
 
   const months = period === '6m' ? 6 : 12;
 
-  const { data: trendsResponse, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['reports', workspaceId, 'category-trends', period],
     queryFn: () =>
-      api.get<{ data: CategoryTrendsResponse }>(
+      api.get<CategoryTrendsResponse>(
         `/workspaces/${workspaceId}/reports/category-trends?months=${months}`
       ),
     enabled: !!workspaceId,
   });
-
-  const data = trendsResponse?.data;
 
   // Build chart data
   const chartData = data?.months.map((m) => {

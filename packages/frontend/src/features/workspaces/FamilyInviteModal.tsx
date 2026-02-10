@@ -48,10 +48,10 @@ export function FamilyInviteModal({ workspaceId, onClose }: FamilyInviteModalPro
   const [showCategoryRestriction, setShowCategoryRestriction] = useState(false);
 
   // Fetch categories
-  const { data: categories } = useQuery({
+  const { data: categories = [] } = useQuery({
     queryKey: ['categories', workspaceId],
     queryFn: () =>
-      api.get<{ data: Category[] }>(`/workspaces/${workspaceId}/categories`),
+      api.get<Category[]>(`/workspaces/${workspaceId}/categories`),
     enabled: showCategoryRestriction,
   });
 
@@ -297,13 +297,13 @@ export function FamilyInviteModal({ workspaceId, onClose }: FamilyInviteModalPro
               </button>
             </div>
 
-            {showCategoryRestriction && categories?.data && (
+            {showCategoryRestriction && categories.length > 0 && (
               <div className="max-h-40 overflow-y-auto bg-ctp-surface0 rounded-lg p-2">
                 <p className="text-xs text-ctp-subtext0 mb-2">
                   Selectionnez les categories visibles
                 </p>
                 <div className="grid grid-cols-2 gap-1">
-                  {categories.data.map((category) => (
+                  {categories.map((category) => (
                     <button
                       key={category.id}
                       type="button"

@@ -51,10 +51,10 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
   const [targetEnvelope, setTargetEnvelope] = useState<string | null>(null);
   const [reallocateAmount, setReallocateAmount] = useState('');
 
-  const { data: envelopesResponse, isLoading } = useQuery({
+  const { data: envelopes = [], isLoading } = useQuery({
     queryKey: ['budgets', workspaceId, 'envelopes'],
     queryFn: () =>
-      api.get<{ data: EnvelopeBudget[] }>(
+      api.get<EnvelopeBudget[]>(
         `/workspaces/${workspaceId}/budgets/envelopes`
       ),
     enabled: !!workspaceId,
@@ -75,8 +75,6 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
       setReallocateAmount('');
     },
   });
-
-  const envelopes = envelopesResponse?.data ?? [];
 
   // Calculate totals
   const totalBudgeted = envelopes.reduce((sum, e) => sum + e.amount, 0);

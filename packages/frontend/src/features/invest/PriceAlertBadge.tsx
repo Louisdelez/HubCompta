@@ -48,8 +48,7 @@ export function PriceAlertBadge({
       if (symbol) params.set('symbol', symbol);
       const queryString = params.toString();
       const url = `/workspaces/${currentWorkspace?.id}/alerts/price${queryString ? `?${queryString}` : ''}`;
-      const response = await api.get<{ data: PriceAlert[] }>(url);
-      return response.data;
+      return api.get<PriceAlert[]>(url);
     },
     enabled: !!currentWorkspace?.id && !!(positionId || symbol),
   });

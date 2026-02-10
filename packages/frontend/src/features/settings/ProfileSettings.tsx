@@ -40,10 +40,7 @@ export function ProfileSettings() {
   // Fetch profile
   const { data: profile, isLoading } = useQuery({
     queryKey: ['user-profile'],
-    queryFn: async () => {
-      const response = await api.get<{ data: UserProfile }>('/settings/profile');
-      return response.data;
-    },
+    queryFn: () => api.get<UserProfile>('/settings/profile'),
   });
 
   // Update form data when profile loads
@@ -60,10 +57,7 @@ export function ProfileSettings() {
 
   // Update profile mutation
   const updateMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      const response = await api.patch<{ data: UserProfile }>('/settings/profile', data);
-      return response.data;
-    },
+    mutationFn: (data: typeof formData) => api.patch<UserProfile>('/settings/profile', data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       setIsEditing(false);

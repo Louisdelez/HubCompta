@@ -127,10 +127,10 @@ export function NotificationPreferences() {
   const queryClient = useQueryClient();
   const [updatingType, setUpdatingType] = useState<string | null>(null);
 
-  const { data: preferencesResponse, isLoading } = useQuery({
+  const { data: preferencesData, isLoading } = useQuery({
     queryKey: ['notifications', workspaceId, 'preferences'],
     queryFn: () =>
-      api.get<{ data: NotificationPreferencesResponse }>(
+      api.get<NotificationPreferencesResponse>(
         `/workspaces/${workspaceId}/notifications/preferences`
       ),
     enabled: !!workspaceId,
@@ -156,7 +156,7 @@ export function NotificationPreferences() {
     },
   });
 
-  const preferences = preferencesResponse?.data.preferences ?? [];
+  const preferences = preferencesData?.preferences ?? [];
 
   // Group preferences by category
   const preferencesByCategory = categoryOrder.reduce((acc, category) => {

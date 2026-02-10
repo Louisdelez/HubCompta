@@ -68,10 +68,9 @@ export function PriceAlertList({ positionId, compact = false }: PriceAlertListPr
     queryKey: ['price-alerts', currentWorkspace?.id, positionId],
     queryFn: async () => {
       const queryParams = positionId ? `?positionId=${positionId}` : '';
-      const response = await api.get<{ data: PriceAlert[] }>(
+      return api.get<PriceAlert[]>(
         `/workspaces/${currentWorkspace?.id}/alerts/price${queryParams}`
       );
-      return response.data;
     },
     enabled: !!currentWorkspace?.id,
   });

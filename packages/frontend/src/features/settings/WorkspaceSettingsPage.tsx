@@ -93,24 +93,14 @@ export function WorkspaceSettingsPage() {
   // Fetch workspace details
   const { data: workspace, isLoading: workspaceLoading } = useQuery({
     queryKey: ['workspace-details', workspaceId],
-    queryFn: async () => {
-      const response = await api.get<{ data: WorkspaceDetails }>(
-        `/settings/workspaces/${workspaceId}`
-      );
-      return response.data;
-    },
+    queryFn: () => api.get<WorkspaceDetails>(`/settings/workspaces/${workspaceId}`),
     enabled: !!workspaceId,
   });
 
   // Fetch workspace settings
   const { data: settings, isLoading: settingsLoading } = useQuery({
     queryKey: ['workspace-settings', workspaceId],
-    queryFn: async () => {
-      const response = await api.get<{ data: WorkspaceSettings }>(
-        `/settings/workspaces/${workspaceId}/settings`
-      );
-      return response.data;
-    },
+    queryFn: () => api.get<WorkspaceSettings>(`/settings/workspaces/${workspaceId}/settings`),
     enabled: !!workspaceId,
   });
 
@@ -130,13 +120,8 @@ export function WorkspaceSettingsPage() {
 
   // Update workspace info mutation
   const updateWorkspaceMutation = useMutation({
-    mutationFn: async (data: { name?: string; currency?: string }) => {
-      const response = await api.patch<{ data: WorkspaceDetails }>(
-        `/settings/workspaces/${workspaceId}`,
-        data
-      );
-      return response.data;
-    },
+    mutationFn: (data: { name?: string; currency?: string }) =>
+      api.patch<WorkspaceDetails>(`/settings/workspaces/${workspaceId}`, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['workspace-details', workspaceId] });
     },
@@ -144,13 +129,8 @@ export function WorkspaceSettingsPage() {
 
   // Update settings mutation
   const updateSettingsMutation = useMutation({
-    mutationFn: async (data: Partial<WorkspaceSettings>) => {
-      const response = await api.patch<{ data: WorkspaceSettings }>(
-        `/settings/workspaces/${workspaceId}/settings`,
-        data
-      );
-      return response.data;
-    },
+    mutationFn: (data: Partial<WorkspaceSettings>) =>
+      api.patch<WorkspaceSettings>(`/settings/workspaces/${workspaceId}/settings`, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['workspace-settings', workspaceId] });
       setIsEditing(false);
@@ -159,12 +139,8 @@ export function WorkspaceSettingsPage() {
 
   // Reset settings mutation
   const resetSettingsMutation = useMutation({
-    mutationFn: async () => {
-      const response = await api.post<{ data: WorkspaceSettings }>(
-        `/settings/workspaces/${workspaceId}/settings/reset`
-      );
-      return response.data;
-    },
+    mutationFn: () =>
+      api.post<WorkspaceSettings>(`/settings/workspaces/${workspaceId}/settings/reset`),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['workspace-settings', workspaceId] });
       setIsEditing(false);

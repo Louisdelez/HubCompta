@@ -52,10 +52,7 @@ export function DataManagement() {
   // Fetch data summary
   const { data: summary, isLoading } = useQuery({
     queryKey: ['data-summary'],
-    queryFn: async () => {
-      const response = await api.get<{ data: DataSummary }>('/settings/data/summary');
-      return response.data;
-    },
+    queryFn: () => api.get<DataSummary>('/settings/data/summary'),
   });
 
   // Export data mutation

@@ -97,24 +97,20 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
   // Fetch budgets for budget alert
   const { data: budgets } = useQuery({
     queryKey: ['budgets', currentWorkspace?.id],
-    queryFn: async () => {
-      const response = await api.get<{ data: { id: string; name: string; category: { name: string } }[] }>(
+    queryFn: () =>
+      api.get<{ id: string; name: string; category: { name: string } }[]>(
         `/workspaces/${currentWorkspace?.id}/budgets`
-      );
-      return response.data;
-    },
+      ),
     enabled: !!currentWorkspace?.id && alertType === 'budget_threshold',
   });
 
   // Fetch accounts for low balance alert
   const { data: accounts } = useQuery({
     queryKey: ['accounts', currentWorkspace?.id],
-    queryFn: async () => {
-      const response = await api.get<{ data: { id: string; name: string }[] }>(
+    queryFn: () =>
+      api.get<{ id: string; name: string }[]>(
         `/workspaces/${currentWorkspace?.id}/accounts`
-      );
-      return response.data;
-    },
+      ),
     enabled: !!currentWorkspace?.id && alertType === 'low_balance',
   });
 
@@ -353,10 +349,7 @@ export function AlertSettings() {
   // Fetch alert rules
   const { data: alertRules, isLoading } = useQuery({
     queryKey: ['alert-rules'],
-    queryFn: async () => {
-      const response = await api.get<{ data: AlertRule[] }>('/notifications/alerts');
-      return response.data;
-    },
+    queryFn: () => api.get<AlertRule[]>('/notifications/alerts'),
   });
 
   // Toggle alert mutation

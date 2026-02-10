@@ -46,16 +46,14 @@ export function BulkCategorize({ onComplete }: BulkCategorizeProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Fetch pending predictions
-  const { data: pendingResponse, isLoading } = useQuery({
+  const { data: pending = [], isLoading } = useQuery({
     queryKey: ['categorization', workspaceId, 'pending'],
     queryFn: () =>
-      api.get<{ data: PendingPrediction[] }>(
+      api.get<PendingPrediction[]>(
         `/workspaces/${workspaceId}/categorization/pending`
       ),
     enabled: !!workspaceId,
   });
-
-  const pending = pendingResponse?.data ?? [];
   const currentItem = pending[currentIndex];
   const remainingCount = pending.length - Object.keys(decisions).length;
 

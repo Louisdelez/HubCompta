@@ -186,10 +186,7 @@ export function DisplaySettings() {
   // Fetch preferences
   const { data: preferences, isLoading } = useQuery({
     queryKey: ['user-preferences'],
-    queryFn: async () => {
-      const response = await api.get<{ data: UserPreferences }>('/settings/preferences');
-      return response.data;
-    },
+    queryFn: () => api.get<UserPreferences>('/settings/preferences'),
   });
 
   // Update form data when preferences load
@@ -205,10 +202,8 @@ export function DisplaySettings() {
 
   // Update preferences mutation
   const updateMutation = useMutation({
-    mutationFn: async (data: Partial<UserPreferences>) => {
-      const response = await api.patch<{ data: UserPreferences }>('/settings/preferences', data);
-      return response.data;
-    },
+    mutationFn: (data: Partial<UserPreferences>) =>
+      api.patch<UserPreferences>('/settings/preferences', data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['user-preferences'] });
       setIsEditing(false);
@@ -217,10 +212,7 @@ export function DisplaySettings() {
 
   // Reset preferences mutation
   const resetMutation = useMutation({
-    mutationFn: async () => {
-      const response = await api.post<{ data: UserPreferences }>('/settings/preferences/reset');
-      return response.data;
-    },
+    mutationFn: () => api.post<UserPreferences>('/settings/preferences/reset'),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['user-preferences'] });
       setIsEditing(false);

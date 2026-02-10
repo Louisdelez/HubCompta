@@ -96,26 +96,24 @@ export function ScheduledPage() {
   });
 
   // Fetch summary
-  const { data: summaryData } = useQuery({
+  const { data: summary } = useQuery({
     queryKey: ['scheduled', workspaceId, 'summary'],
     queryFn: () =>
-      api.get<{ data: ScheduledSummary }>(
+      api.get<ScheduledSummary>(
         `/workspaces/${workspaceId}/scheduled/summary?days=30`
       ),
     enabled: !!workspaceId,
   });
 
   // Fetch counts
-  const { data: countsData } = useQuery({
+  const { data: counts = { upcoming: 0, overdue: 0, executed: 0 } } = useQuery({
     queryKey: ['scheduled', workspaceId, 'counts'],
     queryFn: () =>
-      api.get<{ data: StatusCounts }>(`/workspaces/${workspaceId}/scheduled/counts`),
+      api.get<StatusCounts>(`/workspaces/${workspaceId}/scheduled/counts`),
     enabled: !!workspaceId,
   });
 
   const scheduled = scheduledData?.data ?? [];
-  const summary = summaryData?.data;
-  const counts = countsData?.data ?? { upcoming: 0, overdue: 0, executed: 0 };
 
   const handleEdit = (transaction: ScheduledTransaction) => {
     setEditingScheduled(transaction);

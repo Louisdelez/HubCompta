@@ -35,36 +35,45 @@ interface NotificationPreferences {
 // Component
 // ----------------------------------------------------------------------------
 
+// Default notification preferences
+const defaultNotifications: NotificationPreferences['notifications'] = {
+  email: {
+    enabled: true,
+    budgetAlerts: true,
+    importComplete: true,
+    securityAlerts: true,
+    weeklyDigest: false,
+  },
+  push: {
+    enabled: true,
+    budgetAlerts: true,
+    priceAlerts: true,
+    billReminders: true,
+  },
+};
+
 export function NotificationSettings() {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<NotificationPreferences['notifications'] | null>(null);
+  const [formData, setFormData] = useState<NotificationPreferences['notifications']>(defaultNotifications);
 
-  // Fetch preferences
+  // Fetch preferences - the API returns full preferences object with notifications property
   const { data: preferences, isLoading } = useQuery({
     queryKey: ['user-preferences'],
-    queryFn: async () => {
-      const response = await api.get<{ data: NotificationPreferences }>('/settings/preferences');
-      return response.data;
-    },
+    queryFn: () => api.get<{ notifications: NotificationPreferences['notifications'] }>('/settings/preferences'),
   });
 
   // Update form data when preferences load
   useEffect(() => {
-    if (preferences && !isEditing) {
+    if (preferences?.notifications && !isEditing) {
       setFormData({ ...preferences.notifications });
     }
   }, [preferences, isEditing]);
 
   // Update preferences mutation
   const updateMutation = useMutation({
-    mutationFn: async (notifications: NotificationPreferences['notifications']) => {
-      const response = await api.patch<{ data: NotificationPreferences }>(
-        '/settings/preferences',
-        { notifications }
-      );
-      return response.data;
-    },
+    mutationFn: (notifications: NotificationPreferences['notifications']) =>
+      api.patch<NotificationPreferences>('/settings/preferences', { notifications }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['user-preferences'] });
       setIsEditing(false);
@@ -96,7 +105,7 @@ export function NotificationSettings() {
     }
   };
 
-  if (isLoading || !formData) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-ctp-blue" />

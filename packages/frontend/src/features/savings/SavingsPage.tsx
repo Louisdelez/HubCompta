@@ -99,10 +99,9 @@ function HistoryModal({
   const { data: history, isLoading } = useQuery({
     queryKey: ['savings', workspaceId, goal.id, 'history'],
     queryFn: () =>
-      api.get<{ data: ContributionHistory[] }>(
+      api.get<ContributionHistory[]>(
         `/workspaces/${workspaceId}/savings/${goal.id}/history`
       ),
-    select: (res) => res.data,
   });
 
   return (
@@ -185,25 +184,21 @@ export function SavingsPage() {
   const [showCompleted, setShowCompleted] = useState(false);
 
   // Fetch goals
-  const { data: goalsResponse, isLoading } = useQuery({
+  const { data: goals = [], isLoading } = useQuery({
     queryKey: ['savings', workspaceId, showCompleted ? 'all' : 'active'],
     queryFn: () =>
-      api.get<{ data: SavingsGoalWithProgress[] }>(
+      api.get<SavingsGoalWithProgress[]>(
         `/workspaces/${workspaceId}/savings?includeCompleted=${showCompleted}`
       ),
     enabled: !!workspaceId,
   });
 
-  const goals = goalsResponse?.data ?? [];
-
   // Fetch summary
-  const { data: summaryResponse } = useQuery({
+  const { data: summary } = useQuery({
     queryKey: ['savings', workspaceId, 'summary'],
-    queryFn: () => api.get<{ data: SavingsSummary }>(`/workspaces/${workspaceId}/savings/summary`),
+    queryFn: () => api.get<SavingsSummary>(`/workspaces/${workspaceId}/savings/summary`),
     enabled: !!workspaceId,
   });
-
-  const summary = summaryResponse?.data;
 
   const handleEdit = (goal: SavingsGoalWithProgress) => {
     setEditingGoal(goal);

@@ -94,16 +94,14 @@ export function UpcomingWidget({
   showLink = true,
 }: UpcomingWidgetProps) {
   // Fetch upcoming scheduled transactions
-  const { data: scheduled, isLoading } = useQuery({
+  const { data: transactions = [], isLoading } = useQuery({
     queryKey: ['scheduled', workspaceId, 'upcoming', days, limit],
     queryFn: () =>
-      api.get<{ data: ScheduledTransaction[] }>(
+      api.get<ScheduledTransaction[]>(
         `/workspaces/${workspaceId}/scheduled/upcoming?days=${days}&limit=${limit}`
       ),
     enabled: !!workspaceId,
   });
-
-  const transactions = scheduled?.data ?? [];
 
   if (isLoading) {
     return (

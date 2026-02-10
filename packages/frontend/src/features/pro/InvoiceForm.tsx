@@ -112,8 +112,7 @@ export function InvoiceForm() {
   const { data: contacts } = useQuery({
     queryKey: ['contacts', workspaceId, 'client'],
     queryFn: () =>
-      api.get<{ data: Contact[] }>(`/workspaces/${workspaceId}/contacts?type=client`)
-        .then((res) => res.data),
+      api.get<Contact[]>(`/workspaces/${workspaceId}/contacts?type=client`),
     enabled: !!workspaceId,
   });
 
@@ -121,8 +120,7 @@ export function InvoiceForm() {
   const { data: invoice } = useQuery({
     queryKey: ['invoice', workspaceId, invoiceId],
     queryFn: () =>
-      api.get<{ data: Invoice }>(`/workspaces/${workspaceId}/invoices/${invoiceId}`)
-        .then((res) => res.data),
+      api.get<Invoice>(`/workspaces/${workspaceId}/invoices/${invoiceId}`),
     enabled: !!workspaceId && isEditing,
   });
 
@@ -151,10 +149,10 @@ export function InvoiceForm() {
 
   const createMutation = useMutation({
     mutationFn: (data: CreateInvoicePayload) =>
-      api.post<{ data: Invoice }>(`/workspaces/${workspaceId}/invoices`, data),
+      api.post<Invoice>(`/workspaces/${workspaceId}/invoices`, data),
     onSuccess: (response) => {
       void queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
-      navigate(`/workspaces/${workspaceId}/pro/invoices/${response.data.id}`);
+      navigate(`/workspaces/${workspaceId}/pro/invoices/${response.id}`);
     },
     onError: (error: Error) => {
       setErrors({ submit: error.message });
@@ -163,7 +161,7 @@ export function InvoiceForm() {
 
   const updateMutation = useMutation({
     mutationFn: (data: { lines: InvoiceLine[] }) =>
-      api.patch<{ data: Invoice }>(`/workspaces/${workspaceId}/invoices/${invoiceId}/lines`, data),
+      api.patch<Invoice>(`/workspaces/${workspaceId}/invoices/${invoiceId}/lines`, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['invoices', workspaceId] });
       navigate(`/workspaces/${workspaceId}/pro/invoices/${invoiceId}`);

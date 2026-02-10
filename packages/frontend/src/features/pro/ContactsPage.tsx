@@ -90,9 +90,9 @@ export function ContactsPage() {
       const params = new URLSearchParams();
       if (typeFilter !== 'all') params.set('type', typeFilter);
       if (search) params.set('search', search);
-      return api.get<{ data: Contact[] }>(
+      return api.get<Contact[]>(
         `/workspaces/${workspaceId}/contacts?${params.toString()}`
-      ).then((res) => res.data);
+      );
     },
     enabled: !!workspaceId,
   });

@@ -66,15 +66,15 @@ export function SmartInsightCard({ compact = false, limit = 5 }: SmartInsightCar
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
 
-  const { data: insightsResponse, isLoading } = useQuery({
+  const { data: insightsData = [], isLoading } = useQuery({
     queryKey: ['insights', workspaceId],
     queryFn: () =>
-      api.get<{ data: Insight[] }>(`/workspaces/${workspaceId}/insights`),
+      api.get<Insight[]>(`/workspaces/${workspaceId}/insights`),
     enabled: !!workspaceId,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const insights = (insightsResponse?.data ?? [])
+  const insights = insightsData
     .filter((insight) => !dismissedIds.has(insight.id))
     .slice(0, limit);
 

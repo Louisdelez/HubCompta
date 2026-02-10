@@ -27,15 +27,13 @@ export function AddBankModal({ workspaceId, onClose }: AddBankModalProps) {
   const [selectedInstitution, setSelectedInstitution] = useState<Institution | null>(null);
 
   // Fetch institutions
-  const { data: institutionsResponse, isLoading } = useQuery({
+  const { data: institutions = [], isLoading } = useQuery({
     queryKey: ['banking', 'institutions', selectedCountry],
     queryFn: () =>
-      api.get<{ data: Institution[] }>(
+      api.get<Institution[]>(
         `/workspaces/${workspaceId}/banking/institutions?country=${selectedCountry}`
       ),
   });
-
-  const institutions = institutionsResponse?.data ?? [];
 
   // Filter institutions by search query
   const filteredInstitutions = searchQuery.length >= 2
@@ -48,7 +46,7 @@ export function AddBankModal({ workspaceId, onClose }: AddBankModalProps) {
   // Initiate connection mutation
   const initiateConnection = useMutation({
     mutationFn: (institution: Institution) =>
-      api.post<{ data: { authUrl: string; connectionId: string } }>(
+      api.post<{ authUrl: string; connectionId: string }>(
         `/workspaces/${workspaceId}/banking/connections/initiate`,
         {
           institutionId: institution.id,
@@ -58,7 +56,7 @@ export function AddBankModal({ workspaceId, onClose }: AddBankModalProps) {
       ),
     onSuccess: (response) => {
       // Redirect to bank's auth page
-      window.location.href = response.data.authUrl;
+      window.location.href = response.authUrl;
     },
   });
 
