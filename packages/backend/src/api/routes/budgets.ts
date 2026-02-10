@@ -53,7 +53,7 @@ export function budgetRoutes(app: FastifyInstance): void {
 
       const budgets = await budgetService.list(workspaceId);
 
-      return reply.send(budgets);
+      return reply.send({ success: true, data: budgets });
     }
   );
 
@@ -71,7 +71,7 @@ export function budgetRoutes(app: FastifyInstance): void {
 
       const summary = await budgetService.getSummary(workspaceId);
 
-      return reply.send(summary);
+      return reply.send({ success: true, data: summary });
     }
   );
 
@@ -89,7 +89,7 @@ export function budgetRoutes(app: FastifyInstance): void {
 
       const alerts = await alertService.getActiveAlerts(workspaceId);
 
-      return reply.send(alerts);
+      return reply.send({ success: true, data: alerts });
     }
   );
 
@@ -107,7 +107,7 @@ export function budgetRoutes(app: FastifyInstance): void {
 
       const summary = await alertService.getDashboardSummary(workspaceId);
 
-      return reply.send(summary);
+      return reply.send({ success: true, data: summary });
     }
   );
 
@@ -146,7 +146,7 @@ export function budgetRoutes(app: FastifyInstance): void {
         userAgent: request.headers['user-agent'] ?? null,
       });
 
-      return reply.status(201).send(budget);
+      return reply.status(201).send({ success: true, data: budget });
     }
   );
 
@@ -168,10 +168,10 @@ export function budgetRoutes(app: FastifyInstance): void {
       const budget = await budgetService.getById(workspaceId, budgetId);
 
       if (!budget) {
-        return reply.status(404).send({ error: 'Budget not found' });
+        return reply.status(404).send({ success: false, error: { code: 'NOT_FOUND', message: 'Budget not found' } });
       }
 
-      return reply.send(budget);
+      return reply.send({ success: true, data: budget });
     }
   );
 
@@ -196,7 +196,7 @@ export function budgetRoutes(app: FastifyInstance): void {
 
       const history = await budgetService.getHistory(workspaceId, budgetId, months);
 
-      return reply.send(history);
+      return reply.send({ success: true, data: history });
     }
   );
 
@@ -239,7 +239,7 @@ export function budgetRoutes(app: FastifyInstance): void {
         userAgent: request.headers['user-agent'] ?? null,
       });
 
-      return reply.send(budget);
+      return reply.send({ success: true, data: budget });
     }
   );
 

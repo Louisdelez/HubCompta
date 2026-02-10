@@ -71,10 +71,10 @@ export function forecastRoutes(app: FastifyInstance): void {
           query.endMonth
         );
 
-        return reply.send(forecastsWithCategories);
+        return reply.send({ success: true, data: forecastsWithCategories });
       }
 
-      return reply.send(forecasts);
+      return reply.send({ success: true, data: forecasts });
     }
   );
 
@@ -99,7 +99,7 @@ export function forecastRoutes(app: FastifyInstance): void {
 
       const historicalData = await forecastService.getHistoricalData(workspaceId, months);
 
-      return reply.send(historicalData);
+      return reply.send({ success: true, data: historicalData });
     }
   );
 
@@ -141,7 +141,7 @@ export function forecastRoutes(app: FastifyInstance): void {
       // Return forecasts with category info
       const forecastsWithCategories = await forecastService.getForecast(workspaceId);
 
-      return reply.status(201).send(forecastsWithCategories);
+      return reply.status(201).send({ success: true, data: forecastsWithCategories });
     }
   );
 
@@ -162,7 +162,7 @@ export function forecastRoutes(app: FastifyInstance): void {
 
       const accuracy = await forecastService.getAccuracy(workspaceId);
 
-      return reply.send(accuracy);
+      return reply.send({ success: true, data: accuracy });
     }
   );
 
@@ -215,21 +215,24 @@ export function forecastRoutes(app: FastifyInstance): void {
       const accuracy = await forecastService.getAccuracy(workspaceId);
 
       return reply.send({
-        nextMonth: {
-          date: nextMonth,
-          totalPredicted: totalForecast?.predictedAmount.toNumber() ?? 0,
-          confidence: totalForecast?.confidence.toNumber() ?? 0,
-          method: totalForecast?.method ?? 'average',
+        success: true,
+        data: {
+          nextMonth: {
+            date: nextMonth,
+            totalPredicted: totalForecast?.predictedAmount.toNumber() ?? 0,
+            confidence: totalForecast?.confidence.toNumber() ?? 0,
+            method: totalForecast?.method ?? 'average',
+          },
+          topCategories: categoryForecasts.map((f) => ({
+            categoryId: f.categoryId,
+            categoryName: f.category?.name ?? 'Inconnue',
+            categoryIcon: f.category?.icon,
+            categoryColor: f.category?.color,
+            predictedAmount: f.predictedAmount.toNumber(),
+            confidence: f.confidence.toNumber(),
+          })),
+          accuracy: accuracy.overall,
         },
-        topCategories: categoryForecasts.map((f) => ({
-          categoryId: f.categoryId,
-          categoryName: f.category?.name ?? 'Inconnue',
-          categoryIcon: f.category?.icon,
-          categoryColor: f.category?.color,
-          predictedAmount: f.predictedAmount.toNumber(),
-          confidence: f.confidence.toNumber(),
-        })),
-        accuracy: accuracy.overall,
       });
     }
   );

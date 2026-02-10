@@ -75,7 +75,7 @@ export function documentRoutes(app: FastifyInstance): void {
 
       const session = await uploadService.createUploadSession(workspaceId, userId, input);
 
-      return reply.send(session);
+      return reply.send({ success: true, data: session });
     }
   );
 
@@ -115,7 +115,7 @@ export function documentRoutes(app: FastifyInstance): void {
         });
       }
 
-      return reply.send(result);
+      return reply.send({ success: true, data: result });
     }
   );
 
@@ -176,7 +176,7 @@ export function documentRoutes(app: FastifyInstance): void {
         }
       );
 
-      return reply.send({ documents, total, page: query.page, limit: query.limit });
+      return reply.send({ success: true, data: { documents, total, page: query.page, limit: query.limit } });
     }
   );
 
@@ -196,7 +196,7 @@ export function documentRoutes(app: FastifyInstance): void {
 
       const count = await documentService.getInboxCount(workspaceId);
 
-      return reply.send({ count });
+      return reply.send({ success: true, data: { count } });
     }
   );
 
@@ -217,10 +217,10 @@ export function documentRoutes(app: FastifyInstance): void {
       const document = await documentService.getById(workspaceId, documentId);
 
       if (!document) {
-        return reply.status(404).send({ error: 'Document not found' });
+        return reply.status(404).send({ success: false, error: { code: 'NOT_FOUND', message: 'Document not found' } });
       }
 
-      return reply.send(document);
+      return reply.send({ success: true, data: document });
     }
   );
 
@@ -240,7 +240,7 @@ export function documentRoutes(app: FastifyInstance): void {
 
       const { url, filename } = await documentService.getDownloadUrl(workspaceId, documentId);
 
-      return reply.send({ url, filename });
+      return reply.send({ success: true, data: { url, filename } });
     }
   );
 
@@ -331,7 +331,7 @@ export function documentRoutes(app: FastifyInstance): void {
 
       const document = await documentService.archive(workspaceId, documentId);
 
-      return reply.send(document);
+      return reply.send({ success: true, data: document });
     }
   );
 
@@ -390,15 +390,15 @@ export function documentRoutes(app: FastifyInstance): void {
 
       if (hash) {
         const result = await duplicateService.checkByHash(workspaceId, hash);
-        return reply.send(result);
+        return reply.send({ success: true, data: result });
       }
 
       if (filename) {
         const similar = await duplicateService.findSimilarByFilename(workspaceId, filename);
-        return reply.send({ similar });
+        return reply.send({ success: true, data: { similar } });
       }
 
-      return reply.status(400).send({ error: 'hash or filename required' });
+      return reply.status(400).send({ success: false, error: { code: 'BAD_REQUEST', message: 'hash or filename required' } });
     }
   );
 }

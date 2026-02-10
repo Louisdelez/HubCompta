@@ -58,7 +58,7 @@ export function taxRoutes(app: FastifyInstance): void {
 
       const taxYears = await taxService.list(workspaceId);
 
-      return reply.send(taxYears);
+      return reply.send({ success: true, data: taxYears });
     }
   );
 
@@ -75,7 +75,7 @@ export function taxRoutes(app: FastifyInstance): void {
 
       const brackets = taxService.getTaxBrackets();
 
-      return reply.send(brackets);
+      return reply.send({ success: true, data: brackets });
     }
   );
 
@@ -95,7 +95,7 @@ export function taxRoutes(app: FastifyInstance): void {
 
       const summary = await taxService.getSummary(params.workspaceId, params.year);
 
-      return reply.send(summary);
+      return reply.send({ success: true, data: summary });
     }
   );
 
@@ -135,7 +135,7 @@ export function taxRoutes(app: FastifyInstance): void {
         userAgent: request.headers['user-agent'] ?? null,
       });
 
-      return reply.send(updated);
+      return reply.send({ success: true, data: updated });
     }
   );
 
@@ -156,7 +156,7 @@ export function taxRoutes(app: FastifyInstance): void {
       const taxYear = await taxService.getOrCreateYear(params.workspaceId, params.year);
       const deductions = await taxService.listDeductions(params.workspaceId, taxYear.id);
 
-      return reply.send(deductions);
+      return reply.send({ success: true, data: deductions });
     }
   );
 
@@ -194,7 +194,7 @@ export function taxRoutes(app: FastifyInstance): void {
         userAgent: request.headers['user-agent'] ?? null,
       });
 
-      return reply.status(201).send(deduction);
+      return reply.status(201).send({ success: true, data: deduction });
     }
   );
 
@@ -263,7 +263,7 @@ export function taxRoutes(app: FastifyInstance): void {
       // Return updated summary
       const summary = await taxService.getSummary(params.workspaceId, params.year);
 
-      return reply.send(summary);
+      return reply.send({ success: true, data: summary });
     }
   );
 
@@ -300,7 +300,7 @@ export function taxRoutes(app: FastifyInstance): void {
         userAgent: request.headers['user-agent'] ?? null,
       });
 
-      return reply.send(filed);
+      return reply.send({ success: true, data: filed });
     }
   );
 }
