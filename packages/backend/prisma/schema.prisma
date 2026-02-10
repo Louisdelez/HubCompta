@@ -873,7 +873,7 @@ model AuditLog {
   workspaceId String?       @map("workspace_id") @db.Uuid
   action      String        @db.VarChar(100)
   entityType  String?       @map("entity_type") @db.VarChar(50)
-  entityId    String?       @map("entity_id") @db.Uuid
+  entityId    String?       @map("entity_id") @db.VarChar(50)
   changes     Json?
   ipAddress   String?       @map("ip_address") @db.VarChar(45)
   userAgent   String?       @map("user_agent") @db.VarChar(500)
