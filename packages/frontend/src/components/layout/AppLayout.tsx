@@ -104,7 +104,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={clsx(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-ctp-mantle border-r border-ctp-surface0 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static',
+          'fixed inset-y-0 left-0 z-50 w-64 bg-ctp-mantle border-r border-ctp-surface0 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:h-screen lg:sticky lg:top-0',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
