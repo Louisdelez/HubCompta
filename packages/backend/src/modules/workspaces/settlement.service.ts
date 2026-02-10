@@ -132,7 +132,14 @@ export const settlementService = {
     const endDate = options.endDate ?? new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
 
     // Build transaction query
-    const transactionWhere: any = {
+    const transactionWhere: {
+      workspaceId: string;
+      deletedAt: null;
+      date: { gte: Date; lte: Date };
+      amount: { lt: number };
+      transferPairId?: null;
+      categoryId?: { in: string[] };
+    } = {
       workspaceId,
       deletedAt: null,
       date: {

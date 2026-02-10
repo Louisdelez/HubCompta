@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Loader2, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { api } from '@/lib/api/client';
+import { logger } from '@/lib/logger';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -118,7 +119,7 @@ export function ImportProgress({
         }
       }).catch((err) => {
         // Continue polling on error
-        console.error('Error polling job status:', err);
+        logger.error('Error polling job status', err);
       });
     }, 2000);
   };

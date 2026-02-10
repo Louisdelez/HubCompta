@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { X, Download, FileText, FileJson, Loader2 } from 'lucide-react';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -110,7 +111,7 @@ export function ExportDialog({
 
       onClose();
     } catch (error) {
-      console.error('Export error:', error);
+      logger.error('Export error', error);
       alert("Erreur lors de l'export");
     } finally {
       setIsExporting(false);

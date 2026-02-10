@@ -26,6 +26,15 @@ interface ClearCacheResponse {
   pattern?: string;
 }
 
+interface RebuildSearchResponse {
+  message: string;
+  counts: {
+    transactions: number;
+    documents: number;
+    contacts: number;
+  };
+}
+
 // ----------------------------------------------------------------------------
 // Component
 // ----------------------------------------------------------------------------
@@ -40,6 +49,11 @@ export function AdminSystem() {
     onSuccess: () => {
       void queryClient.invalidateQueries();
     },
+  });
+
+  const rebuildSearchMutation = useMutation({
+    mutationFn: () =>
+      api.post<RebuildSearchResponse>('/admin/search/rebuild'),
   });
 
   return (
@@ -160,17 +174,44 @@ export function AdminSystem() {
           </p>
           <div className="space-y-2">
             <button
-              className="btn-secondary text-ctp-red border-ctp-red/30 hover:bg-ctp-red/20"
+              className="btn-secondary text-ctp-red border-ctp-red/30 hover:bg-ctp-red/20 flex items-center gap-2"
+              disabled={rebuildSearchMutation.isPending}
               onClick={() => {
                 if (window.confirm('Etes-vous sur de vouloir reconstruire les index de recherche?')) {
-                  // TODO: Implement rebuild search indexes
-                  alert('Non implemente');
+                  rebuildSearchMutation.mutate();
                 }
               }}
             >
+              {rebuildSearchMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
               Reconstruire les index de recherche
             </button>
           </div>
+
+          {/* Rebuild Result */}
+          {rebuildSearchMutation.isSuccess && (
+            <div className="flex items-start gap-2 text-ctp-green pt-3 mt-3 border-t border-ctp-red/20">
+              <CheckCircle className="h-4 w-4 mt-0.5" />
+              <div className="text-sm">
+                <p>Index reconstruits avec succes:</p>
+                <ul className="mt-1 text-xs text-ctp-subtext0">
+                  <li>{rebuildSearchMutation.data?.counts.transactions} transactions</li>
+                  <li>{rebuildSearchMutation.data?.counts.documents} documents</li>
+                  <li>{rebuildSearchMutation.data?.counts.contacts} contacts</li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {rebuildSearchMutation.isError && (
+            <div className="flex items-center gap-2 text-ctp-red pt-3 mt-3 border-t border-ctp-red/20">
+              <AlertCircle className="h-4 w-4" />
+              <span className="text-sm">Erreur lors de la reconstruction</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

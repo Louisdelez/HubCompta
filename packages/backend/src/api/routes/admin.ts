@@ -482,6 +482,76 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.status(500).send({ error: 'Failed to clear cache' });
     }
   });
+
+  // --------------------------------------------------------------------------
+  // Search Index Management
+  // --------------------------------------------------------------------------
+
+  /**
+   * POST /admin/search/rebuild - Rebuild full-text search indexes
+   */
+  fastify.post('/search/rebuild', async (_request, reply) => {
+    try {
+      // Rebuild transaction search vectors
+      await prisma.$executeRaw`
+        UPDATE transactions
+        SET search_vector = to_tsvector('french',
+          COALESCE(description, '') || ' ' ||
+          COALESCE(notes, '') || ' ' ||
+          COALESCE(payee, '') || ' ' ||
+          COALESCE(reference, '')
+        )
+        WHERE deleted_at IS NULL
+      `;
+
+      // Rebuild document search vectors
+      await prisma.$executeRaw`
+        UPDATE documents
+        SET search_vector = to_tsvector('french',
+          COALESCE(filename, '') || ' ' ||
+          COALESCE(description, '') || ' ' ||
+          COALESCE(extracted_text, '')
+        )
+        WHERE deleted_at IS NULL
+      `;
+
+      // Rebuild contact search vectors
+      await prisma.$executeRaw`
+        UPDATE contacts
+        SET search_vector = to_tsvector('french',
+          COALESCE(name, '') || ' ' ||
+          COALESCE(email, '') || ' ' ||
+          COALESCE(company, '') || ' ' ||
+          COALESCE(notes, '')
+        )
+        WHERE deleted_at IS NULL
+      `;
+
+      // Get counts
+      const [txnCount, docCount, contactCount] = await Promise.all([
+        prisma.transaction.count({ where: { deletedAt: null } }),
+        prisma.document.count({ where: { deletedAt: null } }),
+        prisma.contact.count({ where: { deletedAt: null } }),
+      ]);
+
+      logger.info({ txnCount, docCount, contactCount }, 'Search indexes rebuilt');
+
+      return {
+        success: true,
+        data: {
+          message: 'Search indexes rebuilt successfully',
+          counts: {
+            transactions: txnCount,
+            documents: docCount,
+            contacts: contactCount,
+          },
+        },
+      };
+    } catch (error) {
+      logger.error({ error }, 'Error rebuilding search indexes');
+      return reply.status(500).send({ error: 'Failed to rebuild search indexes' });
+    }
+  });
 };
 
 export default adminRoutes;

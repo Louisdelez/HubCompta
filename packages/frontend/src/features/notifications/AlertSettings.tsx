@@ -21,6 +21,7 @@ import {
 import { api } from '@/lib/api';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -155,7 +156,7 @@ function CreateAlertDialog({ isOpen, onClose, onSuccess }: CreateAlertDialogProp
       onSuccess?.();
       onClose();
     } catch (error) {
-      console.error('Error creating alert:', error);
+      logger.error('Error creating alert', error);
     } finally {
       setIsSubmitting(false);
     }

@@ -15,6 +15,7 @@ import {
 } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
+import { logger } from '@/lib/logger';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -212,7 +213,7 @@ export function CurrencyProvider({
         }
       }
     } catch (error) {
-      console.error('Failed to fetch exchange rates:', error);
+      logger.error('Failed to fetch exchange rates', error);
     } finally {
       setIsLoadingRates(false);
     }

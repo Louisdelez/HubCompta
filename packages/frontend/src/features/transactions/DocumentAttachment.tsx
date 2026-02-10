@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Image, BookOpen, FileText, Download, X } from 'lucide-react';
 import { api } from '@/lib/api/client';
+import { logger } from '@/lib/logger';
 import type { LucideIcon } from 'lucide-react';
 
 // ----------------------------------------------------------------------------
@@ -109,7 +110,7 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
       );
       window.open(url, '_blank');
     } catch (error) {
-      console.error('Failed to get download URL:', error);
+      logger.error('Failed to get download URL', error);
     }
   };
 
