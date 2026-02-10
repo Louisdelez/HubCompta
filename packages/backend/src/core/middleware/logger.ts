@@ -33,10 +33,10 @@ export const logger = pino(pinoOptions);
  * Request logging hook
  * Logs incoming requests with relevant metadata
  */
-export function requestLogger(
+export async function requestLogger(
   request: FastifyRequest,
   _reply: FastifyReply
-): void {
+): Promise<void> {
   // Skip logging for health checks and static assets
   if (
     request.url === '/health' ||

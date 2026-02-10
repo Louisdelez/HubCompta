@@ -27,10 +27,10 @@ declare module 'fastify' {
  * Authentication guard middleware
  * Verifies JWT token and attaches user to request
  */
-export function authGuard(
+export async function authGuard(
   request: FastifyRequest,
   _reply: FastifyReply
-): void {
+): Promise<void> {
   // Get token from Authorization header
   const authHeader = request.headers.authorization;
 
@@ -57,10 +57,10 @@ export function authGuard(
  * Checks if session is valid and not locked
  * Use after authGuard for endpoints that need session validation
  */
-export function sessionGuard(
+export async function sessionGuard(
   request: FastifyRequest,
   _reply: FastifyReply
-): void {
+): Promise<void> {
   if (!request.user) {
     throw new UnauthorizedError('Authentication required');
   }
@@ -73,12 +73,12 @@ export function sessionGuard(
 /**
  * Combined auth + session guard
  */
-export function authenticatedGuard(
+export async function authenticatedGuard(
   request: FastifyRequest,
   reply: FastifyReply
-): void {
-  authGuard(request, reply);
-  sessionGuard(request, reply);
+): Promise<void> {
+  await authGuard(request, reply);
+  await sessionGuard(request, reply);
 }
 
 // ----------------------------------------------------------------------------
@@ -89,10 +89,10 @@ export function authenticatedGuard(
  * Optional authentication - doesn't throw if no token
  * Useful for endpoints that work differently for authenticated vs anonymous users
  */
-export function optionalAuth(
+export async function optionalAuth(
   request: FastifyRequest,
   _reply: FastifyReply
-): void {
+): Promise<void> {
   const authHeader = request.headers.authorization;
 
   if (!authHeader?.startsWith('Bearer ')) {

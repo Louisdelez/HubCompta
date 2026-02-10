@@ -589,7 +589,7 @@ export const ruleService = {
     const categoryMatches = new Map<string, { count: number; category: NonNullable<typeof similarTransactions[0]['category']> }>();
 
     for (const txn of similarTransactions) {
-      if (!txn.category) continue;
+      if (!txn.category || !txn.categoryId) continue;
 
       const txnPattern = this.extractPattern(txn.description);
       const similarity = this.calculateSimilarity(pattern, txnPattern);
@@ -844,7 +844,7 @@ export const ruleService = {
       const categoryVotes = new Map<string, { name: string; votes: number }>();
 
       for (const txn of categorizedTxns) {
-        if (!txn.category) continue;
+        if (!txn.category || !txn.categoryId) continue;
 
         const txnPattern = this.extractPattern(txn.description);
         const similarity = this.calculateSimilarity(pattern, txnPattern);
