@@ -74,8 +74,8 @@ export function SecuritySettings() {
   const { data: devices = [], isLoading: devicesLoading } = useQuery({
     queryKey: ['user-devices'],
     queryFn: async () => {
-      const response = await api.get<{ data: Device[] }>('/user/devices');
-      return response.data;
+      const result = await api.get<Device[]>('/user/devices');
+      return result ?? [];
     },
   });
 
@@ -83,8 +83,8 @@ export function SecuritySettings() {
   const { data: sessions = [], isLoading: sessionsLoading } = useQuery({
     queryKey: ['user-sessions'],
     queryFn: async () => {
-      const response = await api.get<{ data: Session[] }>('/user/sessions');
-      return response.data;
+      const result = await api.get<Session[]>('/user/sessions');
+      return result ?? [];
     },
   });
 
@@ -92,8 +92,8 @@ export function SecuritySettings() {
   const { data: mfaMethods = [], isLoading: mfaLoading } = useQuery({
     queryKey: ['user-mfa'],
     queryFn: async () => {
-      const response = await api.get<{ data: MfaMethod[] }>('/user/mfa');
-      return response.data;
+      const result = await api.get<MfaMethod[]>('/user/mfa');
+      return result ?? [];
     },
   });
 
@@ -101,8 +101,8 @@ export function SecuritySettings() {
   const { data: securityEvents = [], isLoading: eventsLoading } = useQuery({
     queryKey: ['security-events'],
     queryFn: async () => {
-      const response = await api.get<{ data: SecurityEvent[] }>('/user/security-events');
-      return response.data;
+      const result = await api.get<SecurityEvent[]>('/user/security-events');
+      return result ?? [];
     },
   });
 

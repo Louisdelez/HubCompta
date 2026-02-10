@@ -37,19 +37,30 @@ export function CustomizableDashboard() {
   const [localWidgets, setLocalWidgets] = useState<WidgetConfig[] | null>(null);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [containerWidth, setContainerWidth] = useState(1200);
+  const [containerWidth, setContainerWidth] = useState<number | null>(null);
 
-  // Measure container width for grid
+  // Measure container width for grid using ResizeObserver
   useEffect(() => {
-    const updateWidth = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth);
-      }
-    };
+    const container = containerRef.current;
+    if (!container) return;
 
-    updateWidth();
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth);
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const width = entry.contentRect.width;
+        if (width > 0) {
+          setContainerWidth(width);
+        }
+      }
+    });
+
+    resizeObserver.observe(container);
+
+    // Initial measurement
+    if (container.offsetWidth > 0) {
+      setContainerWidth(container.offsetWidth);
+    }
+
+    return () => resizeObserver.disconnect();
   }, []);
 
   // Fetch layout
@@ -138,24 +149,22 @@ export function CustomizableDashboard() {
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="p-6 bg-ctp-base min-h-screen">
-        <div className="animate-pulse">
-          <div className="h-8 bg-ctp-surface0 rounded w-1/4 mb-6" />
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="h-32 bg-ctp-surface0 rounded-xl" />
-            <div className="h-32 bg-ctp-surface0 rounded-xl" />
-            <div className="h-32 bg-ctp-surface0 rounded-xl" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="h-64 bg-ctp-surface0 rounded-xl" />
-            <div className="h-64 bg-ctp-surface0 rounded-xl" />
-          </div>
-        </div>
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <div className="animate-pulse">
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="h-32 bg-ctp-surface0 rounded-xl" />
+        <div className="h-32 bg-ctp-surface0 rounded-xl" />
+        <div className="h-32 bg-ctp-surface0 rounded-xl" />
       </div>
-    );
-  }
+      <div className="grid grid-cols-2 gap-4">
+        <div className="h-64 bg-ctp-surface0 rounded-xl" />
+        <div className="h-64 bg-ctp-surface0 rounded-xl" />
+      </div>
+    </div>
+  );
+
+  const showLoading = isLoading || containerWidth === null;
 
   return (
     <div className="p-6 bg-ctp-base min-h-screen">
@@ -241,7 +250,9 @@ export function CustomizableDashboard() {
 
       {/* Widget Grid */}
       <div ref={containerRef}>
-        {widgets.length === 0 ? (
+        {showLoading ? (
+          <LoadingSkeleton />
+        ) : widgets.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 bg-ctp-surface0 rounded-xl border border-ctp-surface1">
             <div className="w-16 h-16 bg-ctp-mantle rounded-full flex items-center justify-center mb-4">
               <Plus className="w-8 h-8 text-ctp-overlay1" />
