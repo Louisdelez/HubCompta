@@ -193,6 +193,8 @@ export function GlobalSearchBar({ workspaceId, className }: GlobalSearchBarProps
         </svg>
         <input
           ref={inputRef}
+          id="global-search-input"
+          name="global-search"
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
