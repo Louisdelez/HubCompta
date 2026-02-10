@@ -46,6 +46,8 @@ import {
   Users,
   Trophy,
   Activity,
+  BarChart3,
+  Calculator,
   type LucideIcon,
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -80,6 +82,8 @@ const secondaryNavItems: NavItem[] = [
   { name: 'Programmees', href: '/scheduled', icon: CalendarClock },
   { name: 'Factures', href: '/bills', icon: Receipt },
   { name: 'Equilibre', href: '/settlement', icon: Users },
+  { name: 'Previsions', href: '/forecast', icon: BarChart3 },
+  { name: 'Fiscalite', href: '/tax', icon: Calculator },
   { name: 'Import', href: '/import', icon: Download },
   { name: 'Export', href: '/export', icon: Upload },
   { name: 'Regles', href: '/rules', icon: SlidersHorizontal },
