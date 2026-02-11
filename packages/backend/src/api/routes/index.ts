@@ -90,6 +90,12 @@ import { bankingRoutes } from './banking.js';
 // Gamification routes
 import { gamificationRoutes } from './gamification.js';
 
+// OCR routes (receipt scanning)
+import { ocrRoutes } from './ocr.js';
+
+// Audit routes
+import { auditRoutes } from './audit.js';
+
 // ----------------------------------------------------------------------------
 // Route Registration
 // ----------------------------------------------------------------------------
@@ -210,6 +216,9 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   // Banking routes (workspace scoped)
   await app.register(bankingRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/banking` });
 
+  // OCR routes (workspace scoped)
+  await app.register(ocrRoutes, { prefix: `${apiPrefix}/workspaces/:workspaceId/ocr` });
+
   // ----------------------------------------------------------------------------
   // Dashboard Routes (user scoped)
   // ----------------------------------------------------------------------------
@@ -239,6 +248,12 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   // ----------------------------------------------------------------------------
 
   await app.register(gamificationRoutes, { prefix: `${apiPrefix}/gamification` });
+
+  // ----------------------------------------------------------------------------
+  // Audit Routes (user scoped)
+  // ----------------------------------------------------------------------------
+
+  await app.register(auditRoutes, { prefix: apiPrefix });
 
   // ----------------------------------------------------------------------------
   // Admin Routes

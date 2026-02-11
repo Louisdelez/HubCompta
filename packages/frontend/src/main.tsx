@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './features/auth/AuthProvider';
+import { OnboardingProvider } from './features/onboarding';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { registerServiceWorker } from './lib/pwa/register';
 import { initSentry } from './lib/sentry';
@@ -42,7 +43,9 @@ ReactDOM.createRoot(rootElement).render(
         <QueryClientProvider client={queryClient}>
           <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <AuthProvider>
-              <App />
+              <OnboardingProvider>
+                <App />
+              </OnboardingProvider>
             </AuthProvider>
           </BrowserRouter>
         </QueryClientProvider>

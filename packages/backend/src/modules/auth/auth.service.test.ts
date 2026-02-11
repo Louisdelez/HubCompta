@@ -39,8 +39,10 @@ vi.mock('@/core/database/client.js', () => ({
     session: {
       create: vi.fn(),
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
       findMany: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn(),
       delete: vi.fn(),
       deleteMany: vi.fn(),
     },
@@ -293,11 +295,16 @@ describe('SessionService', () => {
         { id: 'session-1' },
         { id: 'session-2' },
       ] as any);
+      vi.mocked(prisma.session.updateMany).mockResolvedValue({ count: 2 });
 
       await expect(sessionService.refresh('reused-token')).rejects.toThrow('Token reuse detected');
 
-      expect(prisma.session.deleteMany).toHaveBeenCalledWith({
-        where: { userId: 'user-123' },
+      expect(prisma.session.updateMany).toHaveBeenCalledWith({
+        where: { userId: 'user-123', isRevoked: false },
+        data: {
+          isRevoked: true,
+          revokedAt: expect.any(Date),
+        },
       });
     });
 
@@ -323,7 +330,7 @@ describe('SessionService', () => {
       } as any);
 
       vi.mocked(hashToken).mockReturnValue('valid-hash');
-      vi.mocked(prisma.session.delete).mockResolvedValue({} as any);
+      vi.mocked(prisma.session.update).mockResolvedValue({} as any);
 
       await expect(sessionService.refresh('token')).rejects.toThrow('Session expired');
     });
@@ -415,12 +422,16 @@ describe('SessionService', () => {
     it('should revoke a session', async () => {
       const sessionId = 'session-123';
 
-      vi.mocked(prisma.session.delete).mockResolvedValue({} as any);
+      vi.mocked(prisma.session.update).mockResolvedValue({} as any);
 
       await sessionService.revoke(sessionId);
 
-      expect(prisma.session.delete).toHaveBeenCalledWith({
+      expect(prisma.session.update).toHaveBeenCalledWith({
         where: { id: sessionId },
+        data: {
+          isRevoked: true,
+          revokedAt: expect.any(Date),
+        },
       });
 
       expect(redisClient.del).toHaveBeenCalledWith(`session:${sessionId}`);
@@ -430,17 +441,21 @@ describe('SessionService', () => {
       const sessionId = 'session-123';
       const userId = 'user-456';
 
-      vi.mocked(prisma.session.delete).mockResolvedValue({} as any);
+      vi.mocked(prisma.session.update).mockResolvedValue({} as any);
 
       await sessionService.revoke(sessionId, userId);
 
-      expect(prisma.session.delete).toHaveBeenCalledWith({
+      expect(prisma.session.update).toHaveBeenCalledWith({
         where: { id: sessionId, userId },
+        data: {
+          isRevoked: true,
+          revokedAt: expect.any(Date),
+        },
       });
     });
 
     it('should not throw if session already deleted', async () => {
-      vi.mocked(prisma.session.delete).mockRejectedValue(new Error('Not found'));
+      vi.mocked(prisma.session.update).mockRejectedValue(new Error('Not found'));
 
       await expect(sessionService.revoke('nonexistent')).resolves.not.toThrow();
     });
@@ -455,11 +470,16 @@ describe('SessionService', () => {
         { id: 'session-2' },
         { id: 'session-3' },
       ] as any);
+      vi.mocked(prisma.session.updateMany).mockResolvedValue({ count: 3 });
 
       await sessionService.revokeAllUserSessions(userId);
 
-      expect(prisma.session.deleteMany).toHaveBeenCalledWith({
-        where: { userId },
+      expect(prisma.session.updateMany).toHaveBeenCalledWith({
+        where: { userId, isRevoked: false },
+        data: {
+          isRevoked: true,
+          revokedAt: expect.any(Date),
+        },
       });
 
       expect(redisClient.del).toHaveBeenCalledTimes(3);
@@ -478,21 +498,29 @@ describe('SessionService', () => {
         { id: 'session-1' },
         { id: 'session-2' },
       ] as any);
+      vi.mocked(prisma.session.updateMany).mockResolvedValue({ count: 2 });
 
-      await sessionService.revokeAllExcept(userId, currentSessionId);
+      const result = await sessionService.revokeAllExcept(userId, currentSessionId);
 
+      expect(result).toBe(2);
       expect(prisma.session.findMany).toHaveBeenCalledWith({
         where: {
           userId,
+          isRevoked: false,
           id: { not: currentSessionId },
         },
         select: { id: true },
       });
 
-      expect(prisma.session.deleteMany).toHaveBeenCalledWith({
+      expect(prisma.session.updateMany).toHaveBeenCalledWith({
         where: {
           userId,
+          isRevoked: false,
           id: { not: currentSessionId },
+        },
+        data: {
+          isRevoked: true,
+          revokedAt: expect.any(Date),
         },
       });
     });
@@ -608,16 +636,19 @@ describe('SessionService', () => {
     });
   });
 
-  describe('cleanupExpired', () => {
-    it('should delete expired sessions and return count', async () => {
+  describe('cleanupExpiredSessions', () => {
+    it('should delete expired and revoked sessions and return count', async () => {
       vi.mocked(prisma.session.deleteMany).mockResolvedValue({ count: 5 });
 
-      const result = await sessionService.cleanupExpired();
+      const result = await sessionService.cleanupExpiredSessions();
 
       expect(result).toBe(5);
       expect(prisma.session.deleteMany).toHaveBeenCalledWith({
         where: {
-          expiresAt: { lt: expect.any(Date) },
+          OR: [
+            { expiresAt: { lt: expect.any(Date) } },
+            { isRevoked: true, revokedAt: { lt: expect.any(Date) } },
+          ],
         },
       });
     });

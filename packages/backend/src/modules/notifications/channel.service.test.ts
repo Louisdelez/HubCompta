@@ -67,6 +67,8 @@ const createMockChannel = (overrides = {}): NotificationChannel => ({
   emailVerified: false,
   whatsappPhone: null,
   whatsappVerified: false,
+  smsPhone: null,
+  smsVerified: false,
   discordWebhookUrl: null,
   discordVerified: false,
   enabledTypes: ['budget_alert', 'budget_warning'],
@@ -215,6 +217,43 @@ describe('notificationChannelService', () => {
           channelType: 'whatsapp',
         })
       ).rejects.toThrow('Phone number is required');
+    });
+
+    it('should throw error if phone missing for sms channel', async () => {
+      vi.mocked(prisma.notificationChannel.findUnique).mockResolvedValue(null);
+
+      await expect(
+        notificationChannelService.addChannel({
+          userId: 'user-123',
+          channelType: 'sms',
+        })
+      ).rejects.toThrow('Phone number is required');
+    });
+
+    it('should create sms channel', async () => {
+      const mockChannel = createMockChannel({
+        channelType: 'sms',
+        smsPhone: '+33612345678',
+        email: null,
+      });
+      vi.mocked(prisma.notificationChannel.findUnique).mockResolvedValue(null);
+      vi.mocked(prisma.notificationChannel.create).mockResolvedValue(mockChannel);
+
+      const result = await notificationChannelService.addChannel({
+        userId: 'user-123',
+        channelType: 'sms',
+        smsPhone: '+33612345678',
+      });
+
+      expect(result).toEqual(mockChannel);
+      expect(prisma.notificationChannel.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          userId: 'user-123',
+          channelType: 'sms',
+          smsPhone: '+33612345678',
+          isActive: false,
+        }),
+      });
     });
 
     it('should throw error if webhook URL missing for discord channel', async () => {

@@ -22,7 +22,10 @@ export type PDFReportType =
   | 'tax-summary'
   | 'cash-flow'
   | 'profit-loss'
-  | 'budget';
+  | 'budget'
+  | 'transactions'
+  | 'monthly'
+  | 'annual';
 
 interface PDFExportButtonProps {
   reportType: PDFReportType;
@@ -67,15 +70,24 @@ export function PDFExportButton({
       const baseUrl = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? '/api/v1';
       const token = localStorage.getItem('accessToken');
 
-      // Build URL with query params
-      let url = `${baseUrl}/workspaces/${workspaceId}/reports/export-pdf/${reportType}`;
+      // Determine URL path based on report type
+      // New endpoints: transactions/pdf, budget/pdf, monthly/pdf, annual/pdf
+      // Legacy endpoints: export-pdf/:type
+      const newEndpoints = ['transactions', 'budget', 'monthly', 'annual'];
+      const isNewEndpoint = newEndpoints.includes(reportType);
+
+      let url = isNewEndpoint
+        ? `${baseUrl}/workspaces/${workspaceId}/reports/${reportType}/pdf`
+        : `${baseUrl}/workspaces/${workspaceId}/reports/export-pdf/${reportType}`;
+
       const queryParams = new URLSearchParams();
 
       if (params.year) {
         queryParams.append('year', params.year.toString());
       }
       if (params.months) {
-        queryParams.append('months', params.months.toString());
+        // For new endpoints, 'months' is actually 'month' (1-12)
+        queryParams.append(isNewEndpoint ? 'month' : 'months', params.months.toString());
       }
       if (params.from) {
         queryParams.append('from', format(params.from, 'yyyy-MM-dd'));
@@ -235,6 +247,40 @@ export function CashFlowPDFButton({ from, to, ...props }: Omit<PDFExportButtonPr
       reportType="cash-flow"
       params={params}
       label="Exporter PDF"
+      {...props}
+    />
+  );
+}
+
+export function BudgetPDFButton({ year, month, ...props }: Omit<PDFExportButtonProps, 'reportType'> & { year?: number; month?: number }) {
+  return (
+    <PDFExportButton
+      reportType="budget"
+      params={{ year: year ?? new Date().getFullYear(), months: month ?? new Date().getMonth() + 1 }}
+      label="Exporter PDF"
+      {...props}
+    />
+  );
+}
+
+export function MonthlyReportPDFButton({ year, month, ...props }: Omit<PDFExportButtonProps, 'reportType'> & { year?: number; month?: number }) {
+  return (
+    <PDFExportButton
+      reportType="monthly"
+      params={{ year: year ?? new Date().getFullYear(), months: month ?? new Date().getMonth() + 1 }}
+      label="Exporter PDF"
+      {...props}
+    />
+  );
+}
+
+export function AnnualReportPDFButton({ year, ...props }: Omit<PDFExportButtonProps, 'reportType'> & { year?: number }) {
+  return (
+    <PDFExportButton
+      reportType="annual"
+      params={{ year: year ?? new Date().getFullYear() }}
+      label="Exporter PDF"
+      variant="primary"
       {...props}
     />
   );

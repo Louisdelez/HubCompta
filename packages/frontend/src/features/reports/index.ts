@@ -19,5 +19,8 @@ export {
   CategoryTrendsPDFButton,
   TaxSummaryPDFButton,
   CashFlowPDFButton,
+  BudgetPDFButton,
+  MonthlyReportPDFButton,
+  AnnualReportPDFButton,
 } from './PDFExportButton';
 export type { PDFReportType } from './PDFExportButton';

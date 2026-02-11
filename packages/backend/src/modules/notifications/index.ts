@@ -11,6 +11,7 @@ export { insightsService } from './insights.service.js';
 // Multi-channel notification services
 export { notificationChannelService } from './channel.service.js';
 export { whatsappService } from './whatsapp.service.js';
+export { smsService } from './sms.service.js';
 export { discordService } from './discord.service.js';
 export { notificationDispatcherService } from './dispatcher.service.js';
 
@@ -51,6 +52,9 @@ export type {
   WhatsAppMessage,
   WhatsAppSendResult,
 } from './whatsapp.service.js';
+export type {
+  SMSSendResult,
+} from './sms.service.js';
 export type {
   DiscordEmbed,
   DiscordSendResult,

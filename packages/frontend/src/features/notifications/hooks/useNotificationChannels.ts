@@ -10,7 +10,7 @@ import { api } from '@/lib/api';
 // Types
 // ----------------------------------------------------------------------------
 
-export type ChannelType = 'email' | 'whatsapp' | 'discord';
+export type ChannelType = 'email' | 'whatsapp' | 'sms' | 'discord';
 
 export interface NotificationChannel {
   id: string;
@@ -19,6 +19,8 @@ export interface NotificationChannel {
   emailVerified: boolean;
   whatsappPhone?: string | null;
   whatsappVerified: boolean;
+  smsPhone?: string | null;
+  smsVerified: boolean;
   discordWebhookUrl?: string | null;
   discordVerified: boolean;
   enabledTypes: string[];
@@ -31,6 +33,7 @@ export interface CreateChannelInput {
   channelType: ChannelType;
   email?: string;
   whatsappPhone?: string;
+  smsPhone?: string;
   discordWebhookUrl?: string;
   enabledTypes?: string[];
 }
@@ -38,6 +41,7 @@ export interface CreateChannelInput {
 export interface UpdateChannelInput {
   email?: string;
   whatsappPhone?: string;
+  smsPhone?: string;
   discordWebhookUrl?: string;
   enabledTypes?: string[];
   isActive?: boolean;
@@ -238,6 +242,8 @@ export function getChannelIcon(type: ChannelType): string {
       return 'Mail';
     case 'whatsapp':
       return 'MessageCircle';
+    case 'sms':
+      return 'Smartphone';
     case 'discord':
       return 'Hash';
     default:
@@ -251,6 +257,8 @@ export function getChannelLabel(type: ChannelType): string {
       return 'Email';
     case 'whatsapp':
       return 'WhatsApp';
+    case 'sms':
+      return 'SMS';
     case 'discord':
       return 'Discord';
     default:
@@ -264,6 +272,8 @@ export function getChannelColor(type: ChannelType): string {
       return 'ctp-yellow';
     case 'whatsapp':
       return 'ctp-green';
+    case 'sms':
+      return 'ctp-teal';
     case 'discord':
       return 'ctp-lavender';
     default:
@@ -277,6 +287,8 @@ export function isChannelVerified(channel: NotificationChannel): boolean {
       return channel.emailVerified;
     case 'whatsapp':
       return channel.whatsappVerified;
+    case 'sms':
+      return channel.smsVerified;
     case 'discord':
       return channel.discordVerified;
     default:

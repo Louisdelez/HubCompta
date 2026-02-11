@@ -8,11 +8,13 @@ import { reportService } from '@/modules/reports/report.service.js';
 import { exportService } from '@/modules/reports/export.service.js';
 import { reportBuilderService, type ReportConfig } from '@/modules/reports/report-builder.service.js';
 import { pdfExportService, type PDFReportType } from '@/modules/reports/pdf-export.service.js';
+import { pdfService } from '@/modules/reports/pdf.service.js';
 import { transactionService } from '@/modules/transactions/transaction.service.js';
 import { balanceService } from '@/modules/accounts/balance.service.js';
 import { accountService } from '@/modules/accounts/account.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
 import { workspaceContextMiddleware, requirePermission } from '@/core/middleware/workspaceContext.js';
+import { pdfReportRateLimit, exportRateLimit } from '@/core/middleware/rateLimit.js';
 import { prisma } from '@/core/database/client.js';
 
 // ----------------------------------------------------------------------------
@@ -539,13 +541,14 @@ export function reportRoutes(app: FastifyInstance): void {
 
   // --------------------------------------------------------------------------
   // GET /reports/export-pdf/:type - Export report as PDF
+  // Rate limit: 5 requests per minute
   // --------------------------------------------------------------------------
   app.get<{
     Params: WorkspaceParams & { type: string };
     Querystring: DateRangeQuery & { year?: string; months?: string; country?: string };
   }>(
     '/export-pdf/:type',
-    { preHandler: requirePermission('transaction:read') },
+    { preHandler: [requirePermission('transaction:read'), pdfReportRateLimit] },
     async (request, reply) => {
       const { workspaceId, type } = request.params;
       const { from, to, year, months, country } = request.query;
@@ -643,6 +646,160 @@ export function reportRoutes(app: FastifyInstance): void {
       });
 
       reply.header('Content-Type', pdf.mimeType);
+      reply.header('Content-Disposition', `attachment; filename="${pdf.filename}"`);
+      reply.header('Content-Length', pdf.size);
+      return reply.send(pdf.content);
+    }
+  );
+
+  // ==========================================================================
+  // PDF EXPORTS - NEW DEDICATED ENDPOINTS
+  // ==========================================================================
+
+  // --------------------------------------------------------------------------
+  // GET /reports/transactions/pdf - Download transactions PDF
+  // Rate limit: 5 requests per minute
+  // --------------------------------------------------------------------------
+  app.get<{
+    Params: WorkspaceParams;
+    Querystring: DateRangeQuery & {
+      accountId?: string;
+      categoryId?: string;
+      type?: string;
+      search?: string;
+      minAmount?: string;
+      maxAmount?: string;
+    };
+  }>(
+    '/transactions/pdf',
+    { preHandler: [requirePermission('transaction:read'), pdfReportRateLimit] },
+    async (request, reply) => {
+      const userId = request.user?.sub;
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          error: { message: 'Utilisateur non authentifie' },
+        });
+      }
+
+      const { from, to, accountId, categoryId, type, search, minAmount, maxAmount } = request.query;
+      const dateRange = parseDateRange({ from, to });
+
+      const filters = {
+        accountId,
+        categoryId,
+        type: type as 'income' | 'expense' | 'transfer' | undefined,
+        search,
+        minAmount: minAmount ? parseFloat(minAmount) : undefined,
+        maxAmount: maxAmount ? parseFloat(maxAmount) : undefined,
+      };
+
+      const pdf = await pdfService.generateTransactionReport(userId, filters, dateRange);
+
+      reply.header('Content-Type', 'application/pdf');
+      reply.header('Content-Disposition', `attachment; filename="${pdf.filename}"`);
+      reply.header('Content-Length', pdf.size);
+      return reply.send(pdf.content);
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /reports/budget/pdf - Download budget PDF
+  // Rate limit: 5 requests per minute
+  // --------------------------------------------------------------------------
+  app.get<{
+    Params: WorkspaceParams;
+    Querystring: { year?: string; month?: string };
+  }>(
+    '/budget/pdf',
+    { preHandler: [requirePermission('transaction:read'), pdfReportRateLimit] },
+    async (request, reply) => {
+      const userId = request.user?.sub;
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          error: { message: 'Utilisateur non authentifie' },
+        });
+      }
+
+      const { year, month } = request.query;
+      const now = new Date();
+      const targetDate = new Date(
+        year ? parseInt(year) : now.getFullYear(),
+        month ? parseInt(month) - 1 : now.getMonth(),
+        1
+      );
+
+      const pdf = await pdfService.generateBudgetReport(userId, targetDate);
+
+      reply.header('Content-Type', 'application/pdf');
+      reply.header('Content-Disposition', `attachment; filename="${pdf.filename}"`);
+      reply.header('Content-Length', pdf.size);
+      return reply.send(pdf.content);
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /reports/monthly/pdf - Download monthly report PDF
+  // Rate limit: 5 requests per minute
+  // --------------------------------------------------------------------------
+  app.get<{
+    Params: WorkspaceParams;
+    Querystring: { year?: string; month?: string };
+  }>(
+    '/monthly/pdf',
+    { preHandler: [requirePermission('transaction:read'), pdfReportRateLimit] },
+    async (request, reply) => {
+      const userId = request.user?.sub;
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          error: { message: 'Utilisateur non authentifie' },
+        });
+      }
+
+      const { year, month } = request.query;
+      const now = new Date();
+      const targetDate = new Date(
+        year ? parseInt(year) : now.getFullYear(),
+        month ? parseInt(month) - 1 : now.getMonth(),
+        1
+      );
+
+      const pdf = await pdfService.generateMonthlyReport(userId, targetDate);
+
+      reply.header('Content-Type', 'application/pdf');
+      reply.header('Content-Disposition', `attachment; filename="${pdf.filename}"`);
+      reply.header('Content-Length', pdf.size);
+      return reply.send(pdf.content);
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /reports/annual/pdf - Download annual report PDF
+  // Rate limit: 5 requests per minute
+  // --------------------------------------------------------------------------
+  app.get<{
+    Params: WorkspaceParams;
+    Querystring: { year?: string };
+  }>(
+    '/annual/pdf',
+    { preHandler: [requirePermission('transaction:read'), pdfReportRateLimit] },
+    async (request, reply) => {
+      const userId = request.user?.sub;
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          error: { message: 'Utilisateur non authentifie' },
+        });
+      }
+
+      const { year } = request.query;
+      const targetYear = year ? parseInt(year) : new Date().getFullYear();
+
+      const pdf = await pdfService.generateAnnualReport(userId, targetYear);
+
+      reply.header('Content-Type', 'application/pdf');
       reply.header('Content-Disposition', `attachment; filename="${pdf.filename}"`);
       reply.header('Content-Length', pdf.size);
       return reply.send(pdf.content);

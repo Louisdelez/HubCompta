@@ -3,7 +3,8 @@
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
-import type { AuditSeverity } from '@prisma/client';
+import type { AuditSeverity, AuditStatus, AuditLog } from '@prisma/client';
+import type { FastifyRequest } from 'fastify';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -15,19 +16,32 @@ export interface AuditLogEntry {
   action: string;
   entityType?: string;
   entityId?: string;
+  resource?: string;
+  resourceId?: string;
   changes?: Record<string, unknown>;
+  details?: Record<string, unknown>;
   newValue?: Record<string, unknown> | null;
   oldValue?: Record<string, unknown> | null;
   ipAddress?: string | null;
   userAgent?: string | null;
   severity?: AuditSeverity;
+  status?: AuditStatus;
 }
 
-export interface AuditQueryParams {
-  userId?: string;
-  workspaceId?: string;
+export interface AuditLogParams {
+  userId: string;
+  action: AuditAction;
+  resource?: string;
+  resourceId?: string;
+  details?: object;
+  status: 'SUCCESS' | 'FAILURE';
+  request?: FastifyRequest;
+}
+
+export interface AuditFilters {
   action?: string;
-  entityType?: string;
+  resource?: string;
+  status?: AuditStatus;
   severity?: AuditSeverity;
   from?: Date;
   to?: Date;
@@ -35,21 +49,58 @@ export interface AuditQueryParams {
   pageSize?: number;
 }
 
+export interface AuditQueryParams {
+  userId?: string;
+  workspaceId?: string;
+  action?: string;
+  entityType?: string;
+  resource?: string;
+  severity?: AuditSeverity;
+  status?: AuditStatus;
+  from?: Date;
+  to?: Date;
+  page?: number;
+  pageSize?: number;
+}
+
+// Type for audit action values
+export type AuditAction = typeof AUDIT_ACTIONS[keyof typeof AUDIT_ACTIONS];
+
 // ----------------------------------------------------------------------------
 // Audit Actions
 // ----------------------------------------------------------------------------
 
 export const AUDIT_ACTIONS = {
   // Auth events
+  AUTH_LOGIN: 'auth.login',
   AUTH_LOGIN_SUCCESS: 'auth.login.succeeded',
   AUTH_LOGIN_FAILED: 'auth.login.failed',
   AUTH_LOGOUT: 'auth.logout',
+  AUTH_FAILED: 'auth.failed',
   AUTH_MFA_SETUP: 'auth.mfa.setup',
   AUTH_MFA_REMOVED: 'auth.mfa.removed',
   AUTH_SESSION_LOCKED: 'auth.session.locked',
   AUTH_SESSION_UNLOCKED: 'auth.session.unlocked',
   AUTH_DEVICE_REVOKED: 'auth.device.revoked',
   AUTH_PASSWORD_CHANGED: 'auth.password.changed',
+
+  // Password events
+  PASSWORD_CHANGE: 'password.change',
+  PASSWORD_RESET: 'password.reset',
+
+  // Two-factor events
+  TWO_FACTOR_ENABLE: 'two_factor.enable',
+  TWO_FACTOR_DISABLE: 'two_factor.disable',
+
+  // Data events
+  DATA_EXPORT: 'data.export',
+  DATA_IMPORT: 'data.import',
+
+  // Session events
+  SESSION_REVOKE: 'session.revoke',
+
+  // Settings events
+  SETTINGS_CHANGE: 'settings.change',
 
   // User events
   USER_CREATED: 'user.created',
@@ -69,6 +120,8 @@ export const AUDIT_ACTIONS = {
   ACCOUNT_UPDATED: 'account.updated',
   ACCOUNT_ARCHIVED: 'account.archived',
   ACCOUNT_DELETED: 'account.deleted',
+  ACCOUNT_CREATE: 'account.create',
+  ACCOUNT_DELETE: 'account.delete',
 
   // Transaction events
   TRANSACTION_CREATED: 'transaction.created',
@@ -163,21 +216,93 @@ export const AUDIT_ACTIONS = {
 
 export const auditService = {
   /**
-   * Log an audit event
+   * Log an audit event (extended version with request support)
    */
-  async log(entry: AuditLogEntry): Promise<void> {
-    await prisma.auditLog.create({
+  async log(entry: AuditLogEntry): Promise<AuditLog> {
+    return prisma.auditLog.create({
       data: {
         userId: entry.userId,
         workspaceId: entry.workspaceId,
         action: entry.action,
         entityType: entry.entityType,
         entityId: entry.entityId,
+        resource: entry.resource ?? entry.entityType,
+        resourceId: entry.resourceId ?? entry.entityId,
         changes: entry.changes as object | undefined,
+        details: entry.details as object | undefined,
         ipAddress: entry.ipAddress ?? undefined,
         userAgent: entry.userAgent ?? undefined,
         severity: entry.severity ?? 'info',
+        status: entry.status ?? 'success',
       },
+    });
+  },
+
+  /**
+   * Log an audit event with request context
+   */
+  async logWithRequest(params: AuditLogParams): Promise<AuditLog> {
+    const { userId, action, resource, resourceId, details, status, request } = params;
+
+    return this.log({
+      userId,
+      action,
+      resource,
+      resourceId,
+      details: details as Record<string, unknown>,
+      status: status === 'SUCCESS' ? 'success' : 'failure',
+      ipAddress: request?.ip,
+      userAgent: request?.headers['user-agent'],
+    });
+  },
+
+  /**
+   * Get audit logs for a specific user
+   */
+  async getLogsForUser(userId: string, filters?: AuditFilters): Promise<AuditLog[]> {
+    const {
+      action,
+      resource,
+      status,
+      severity,
+      from,
+      to,
+      page = 1,
+      pageSize = 50,
+    } = filters ?? {};
+
+    const where = {
+      userId,
+      ...(action && { action: { contains: action } }),
+      ...(resource && { resource }),
+      ...(status && { status }),
+      ...(severity && { severity }),
+      ...(from || to
+        ? {
+            createdAt: {
+              ...(from && { gte: from }),
+              ...(to && { lte: to }),
+            },
+          }
+        : {}),
+    };
+
+    return prisma.auditLog.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
+  },
+
+  /**
+   * Get recent activity for a user
+   */
+  async getRecentActivity(userId: string, limit = 20): Promise<AuditLog[]> {
+    return prisma.auditLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
     });
   },
 
@@ -195,10 +320,11 @@ export const auditService = {
     await this.log({
       userId,
       action: AUDIT_ACTIONS.AUTH_LOGIN_SUCCESS,
-      changes: { deviceId, deviceName, isNewDevice },
+      details: { deviceId, deviceName, isNewDevice },
       ipAddress,
       userAgent,
       severity: 'info',
+      status: 'success',
     });
   },
 
@@ -214,10 +340,11 @@ export const auditService = {
   ): Promise<void> {
     await this.log({
       action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
-      changes: { email, reason, attemptCount },
+      details: { email, reason, attemptCount },
       ipAddress,
       userAgent,
       severity: reason === 'account_locked' ? 'warning' : 'info',
+      status: 'failure',
     });
   },
 
@@ -233,9 +360,10 @@ export const auditService = {
     await this.log({
       userId,
       action: AUDIT_ACTIONS.AUTH_LOGOUT,
-      changes: { sessionId, reason },
+      details: { sessionId, reason },
       ipAddress,
       severity: 'info',
+      status: 'success',
     });
   },
 
@@ -254,9 +382,12 @@ export const auditService = {
       action: AUDIT_ACTIONS.AUTH_MFA_SETUP,
       entityType: 'mfa',
       entityId: mfaId,
-      changes: { type, name },
+      resource: 'mfa',
+      resourceId: mfaId,
+      details: { type, name },
       ipAddress,
       severity: 'info',
+      status: 'success',
     });
   },
 
@@ -275,9 +406,12 @@ export const auditService = {
       action: AUDIT_ACTIONS.AUTH_MFA_REMOVED,
       entityType: 'mfa',
       entityId: mfaId,
-      changes: { type, name },
+      resource: 'mfa',
+      resourceId: mfaId,
+      details: { type, name },
       ipAddress,
       severity: 'warning',
+      status: 'success',
     });
   },
 
@@ -293,9 +427,10 @@ export const auditService = {
     await this.log({
       userId,
       action: AUDIT_ACTIONS.AUTH_SESSION_LOCKED,
-      changes: { sessionId, reason },
+      details: { sessionId, reason },
       ipAddress,
       severity: 'info',
+      status: 'success',
     });
   },
 
@@ -310,9 +445,10 @@ export const auditService = {
     await this.log({
       userId,
       action: AUDIT_ACTIONS.AUTH_SESSION_UNLOCKED,
-      changes: { sessionId },
+      details: { sessionId },
       ipAddress,
       severity: 'info',
+      status: 'success',
     });
   },
 
@@ -330,9 +466,151 @@ export const auditService = {
       action: AUDIT_ACTIONS.AUTH_DEVICE_REVOKED,
       entityType: 'device',
       entityId: deviceId,
-      changes: { deviceName },
+      resource: 'device',
+      resourceId: deviceId,
+      details: { deviceName },
       ipAddress,
       severity: 'warning',
+      status: 'success',
+    });
+  },
+
+  /**
+   * Log password change
+   */
+  async logPasswordChanged(
+    userId: string,
+    ipAddress?: string,
+    userAgent?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      action: AUDIT_ACTIONS.PASSWORD_CHANGE,
+      resource: 'user',
+      resourceId: userId,
+      ipAddress,
+      userAgent,
+      severity: 'warning',
+      status: 'success',
+    });
+  },
+
+  /**
+   * Log 2FA enable
+   */
+  async logTwoFactorEnabled(
+    userId: string,
+    method: string,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      action: AUDIT_ACTIONS.TWO_FACTOR_ENABLE,
+      resource: 'mfa',
+      details: { method },
+      ipAddress,
+      severity: 'info',
+      status: 'success',
+    });
+  },
+
+  /**
+   * Log 2FA disable
+   */
+  async logTwoFactorDisabled(
+    userId: string,
+    method: string,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      action: AUDIT_ACTIONS.TWO_FACTOR_DISABLE,
+      resource: 'mfa',
+      details: { method },
+      ipAddress,
+      severity: 'warning',
+      status: 'success',
+    });
+  },
+
+  /**
+   * Log data export
+   */
+  async logDataExport(
+    userId: string,
+    exportType: string,
+    format: string,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      action: AUDIT_ACTIONS.DATA_EXPORT,
+      resource: 'export',
+      details: { exportType, format },
+      ipAddress,
+      severity: 'warning',
+      status: 'success',
+    });
+  },
+
+  /**
+   * Log data import
+   */
+  async logDataImport(
+    userId: string,
+    workspaceId: string,
+    importType: string,
+    rowCount: number,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      workspaceId,
+      action: AUDIT_ACTIONS.DATA_IMPORT,
+      resource: 'import',
+      details: { importType, rowCount },
+      ipAddress,
+      severity: 'info',
+      status: 'success',
+    });
+  },
+
+  /**
+   * Log session revoke
+   */
+  async logSessionRevoked(
+    userId: string,
+    targetSessionId: string,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      action: AUDIT_ACTIONS.SESSION_REVOKE,
+      resource: 'session',
+      resourceId: targetSessionId,
+      ipAddress,
+      severity: 'warning',
+      status: 'success',
+    });
+  },
+
+  /**
+   * Log settings change
+   */
+  async logSettingsChanged(
+    userId: string,
+    settingType: string,
+    changes: Record<string, unknown>,
+    ipAddress?: string
+  ): Promise<void> {
+    await this.log({
+      userId,
+      action: AUDIT_ACTIONS.SETTINGS_CHANGE,
+      resource: 'settings',
+      details: { settingType, ...changes },
+      ipAddress,
+      severity: 'info',
+      status: 'success',
     });
   },
 
@@ -348,9 +626,10 @@ export const auditService = {
     await this.log({
       userId,
       action: AUDIT_ACTIONS.SECURITY_STEP_UP,
-      changes: { sensitiveAction: action, verified },
+      details: { sensitiveAction: action, verified },
       ipAddress,
       severity: 'critical',
+      status: verified ? 'success' : 'failure',
     });
   },
 
@@ -366,14 +645,15 @@ export const auditService = {
     await this.log({
       userId,
       action: AUDIT_ACTIONS.SECURITY_SUSPICIOUS,
-      changes: { reason, ...details },
+      details: { reason, ...details },
       ipAddress,
       severity: 'critical',
+      status: 'failure',
     });
   },
 
   /**
-   * Query audit logs
+   * Query audit logs with pagination
    */
   async query(params: AuditQueryParams) {
     const {
@@ -381,7 +661,9 @@ export const auditService = {
       workspaceId,
       action,
       entityType,
+      resource,
       severity,
+      status,
       from,
       to,
       page = 1,
@@ -393,7 +675,9 @@ export const auditService = {
       ...(workspaceId && { workspaceId }),
       ...(action && { action: { contains: action } }),
       ...(entityType && { entityType }),
+      ...(resource && { resource }),
       ...(severity && { severity }),
+      ...(status && { status }),
       ...(from || to
         ? {
             createdAt: {
@@ -500,7 +784,11 @@ export const auditService = {
       actionLabel: this.getActionLabel(log.action),
       entityType: log.entityType,
       entityId: log.entityId,
+      resource: log.resource,
+      resourceId: log.resourceId,
       changes: log.changes as Record<string, unknown> | null,
+      details: log.details as Record<string, unknown> | null,
+      status: log.status,
       user: log.user
         ? {
             id: log.user.id,
@@ -584,7 +872,11 @@ export const auditService = {
       actionLabel: this.getActionLabel(log.action),
       entityType: log.entityType,
       entityId: log.entityId,
+      resource: log.resource,
+      resourceId: log.resourceId,
       changes: log.changes as Record<string, unknown> | null,
+      details: log.details as Record<string, unknown> | null,
+      status: log.status,
       user: log.user
         ? {
             id: log.user.id,
@@ -614,6 +906,40 @@ export const auditService = {
   },
 
   /**
+   * Export audit logs to CSV format
+   */
+  async exportToCsv(
+    userId: string,
+    filters?: AuditFilters
+  ): Promise<string> {
+    const logs = await this.getLogsForUser(userId, { ...filters, pageSize: 10000 });
+
+    const headers = ['Date', 'Action', 'Resource', 'Resource ID', 'Status', 'IP Address', 'User Agent', 'Details'];
+    const rows = logs.map((log) => [
+      log.createdAt.toISOString(),
+      log.action,
+      log.resource ?? log.entityType ?? '',
+      log.resourceId ?? log.entityId ?? '',
+      log.status,
+      log.ipAddress ?? '',
+      log.userAgent ?? '',
+      JSON.stringify(log.details ?? log.changes ?? {}),
+    ]);
+
+    const escapeCSV = (value: string): string => {
+      if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+        return `"${value.replace(/"/g, '""')}"`;
+      }
+      return value;
+    };
+
+    return [
+      headers.join(','),
+      ...rows.map((r) => r.map(escapeCSV).join(',')),
+    ].join('\n');
+  },
+
+  /**
    * Get the action type category from action string
    */
   getActionType(action: string): string {
@@ -626,101 +952,131 @@ export const auditService = {
    */
   getActionLabel(action: string): string {
     const labels: Record<string, string> = {
+      // Auth actions
+      'auth.login': 'Connexion',
+      'auth.login.succeeded': 'Connexion reussie',
+      'auth.login.failed': 'Tentative de connexion echouee',
+      'auth.logout': 'Deconnexion',
+      'auth.failed': 'Authentification echouee',
+      'auth.mfa.setup': 'MFA configure',
+      'auth.mfa.removed': 'MFA supprime',
+      'auth.session.locked': 'Session verrouillee',
+      'auth.session.unlocked': 'Session deverrouillee',
+      'auth.device.revoked': 'Appareil revoque',
+      'auth.password.changed': 'Mot de passe modifie',
+
+      // Password actions
+      'password.change': 'Changement de mot de passe',
+      'password.reset': 'Reinitialisation du mot de passe',
+
+      // Two-factor actions
+      'two_factor.enable': 'Activation 2FA',
+      'two_factor.disable': 'Desactivation 2FA',
+
+      // Data actions
+      'data.export': 'Export de donnees',
+      'data.import': 'Import de donnees',
+
+      // Session actions
+      'session.revoke': 'Session revoquee',
+
+      // Settings actions
+      'settings.change': 'Modification des parametres',
+
       // Transaction actions
-      'transaction.created': 'Created a transaction',
-      'transaction.updated': 'Updated a transaction',
-      'transaction.deleted': 'Deleted a transaction',
-      'transaction.bulk_deleted': 'Deleted multiple transactions',
-      'transfer.created': 'Created a transfer',
+      'transaction.created': 'Transaction creee',
+      'transaction.updated': 'Transaction modifiee',
+      'transaction.deleted': 'Transaction supprimee',
+      'transaction.bulk_deleted': 'Transactions supprimees',
+      'transfer.created': 'Transfert cree',
 
       // Account actions
-      'account.created': 'Created an account',
-      'account.updated': 'Updated an account',
-      'account.archived': 'Archived an account',
-      'account.deleted': 'Deleted an account',
+      'account.created': 'Compte cree',
+      'account.updated': 'Compte modifie',
+      'account.archived': 'Compte archive',
+      'account.deleted': 'Compte supprime',
+      'account.create': 'Creation de compte',
+      'account.delete': 'Suppression de compte',
 
       // Category actions
-      'category.created': 'Created a category',
-      'category.updated': 'Updated a category',
-      'category.deleted': 'Deleted a category',
-      'category.merged': 'Merged categories',
+      'category.created': 'Categorie creee',
+      'category.updated': 'Categorie modifiee',
+      'category.deleted': 'Categorie supprimee',
+      'category.merged': 'Categories fusionnees',
 
       // Budget actions
-      'budget.created': 'Created a budget',
-      'budget.updated': 'Updated a budget',
-      'budget.deleted': 'Deleted a budget',
+      'budget.created': 'Budget cree',
+      'budget.updated': 'Budget modifie',
+      'budget.deleted': 'Budget supprime',
 
       // Document actions
-      'document.uploaded': 'Uploaded a document',
-      'document.linked': 'Linked a document',
-      'document.unlinked': 'Unlinked a document',
-      'document.archived': 'Archived a document',
-      'document.deleted': 'Deleted a document',
+      'document.uploaded': 'Document televerse',
+      'document.linked': 'Document lie',
+      'document.unlinked': 'Document delie',
+      'document.archived': 'Document archive',
+      'document.deleted': 'Document supprime',
 
       // Workspace actions
-      'workspace.created': 'Created the workspace',
-      'workspace.updated': 'Updated workspace settings',
-      'workspace.deleted': 'Deleted the workspace',
-      'workspace.member.invited': 'Invited a member',
-      'workspace.member.joined': 'Joined the workspace',
-      'workspace.member.role.changed': 'Changed member role',
-      'workspace.member.removed': 'Removed a member',
+      'workspace.created': 'Workspace cree',
+      'workspace.updated': 'Workspace modifie',
+      'workspace.deleted': 'Workspace supprime',
+      'workspace.member.invited': 'Membre invite',
+      'workspace.member.joined': 'Membre a rejoint',
+      'workspace.member.role.changed': 'Role du membre modifie',
+      'workspace.member.removed': 'Membre supprime',
 
       // Import/Export actions
-      'import.started': 'Started an import',
-      'import.completed': 'Completed an import',
-      'import.failed': 'Import failed',
-      'export.requested': 'Requested an export',
-      'export.completed': 'Export completed',
+      'import.started': 'Import demarre',
+      'import.completed': 'Import termine',
+      'import.failed': 'Import echoue',
+      'export.requested': 'Export demande',
+      'export.completed': 'Export termine',
 
       // Tag actions
-      'tag.created': 'Created a tag',
-      'tag.updated': 'Updated a tag',
-      'tag.deleted': 'Deleted a tag',
-      'tag.merged': 'Merged tags',
+      'tag.created': 'Tag cree',
+      'tag.updated': 'Tag modifie',
+      'tag.deleted': 'Tag supprime',
+      'tag.merged': 'Tags fusionnes',
+
+      // Security actions
+      'security.sensitive_action': 'Action sensible',
+      'security.suspicious_activity': 'Activite suspecte',
 
       // Pro Mode actions
-      'pro.contact.created': 'Created a contact',
-      'pro.contact.updated': 'Updated a contact',
-      'pro.contact.deleted': 'Deleted a contact',
-      'pro.quote.created': 'Created a quote',
-      'pro.quote.updated': 'Updated a quote',
-      'pro.quote.sent': 'Sent a quote',
-      'pro.quote.accepted': 'Quote accepted',
-      'pro.quote.rejected': 'Quote rejected',
-      'pro.invoice.created': 'Created an invoice',
-      'pro.invoice.updated': 'Updated an invoice',
-      'pro.invoice.sent': 'Sent an invoice',
-      'pro.invoice.payment_recorded': 'Recorded invoice payment',
-      'pro.invoice.cancelled': 'Cancelled an invoice',
+      'pro.contact.created': 'Contact cree',
+      'pro.contact.updated': 'Contact modifie',
+      'pro.contact.deleted': 'Contact supprime',
+      'pro.quote.created': 'Devis cree',
+      'pro.quote.updated': 'Devis modifie',
+      'pro.quote.sent': 'Devis envoye',
+      'pro.quote.accepted': 'Devis accepte',
+      'pro.quote.rejected': 'Devis refuse',
+      'pro.invoice.created': 'Facture creee',
+      'pro.invoice.updated': 'Facture modifiee',
+      'pro.invoice.sent': 'Facture envoyee',
+      'pro.invoice.payment_recorded': 'Paiement enregistre',
+      'pro.invoice.cancelled': 'Facture annulee',
 
       // Investment actions
-      'invest.position.opened': 'Opened a position',
-      'invest.position.transaction': 'Made investment transaction',
-      'invest.position.deleted': 'Closed a position',
-      'invest.watchlist.created': 'Created a watchlist',
-      'invest.watchlist.updated': 'Updated a watchlist',
-      'invest.watchlist.deleted': 'Deleted a watchlist',
+      'invest.position.opened': 'Position ouverte',
+      'invest.position.transaction': 'Transaction investissement',
+      'invest.position.deleted': 'Position fermee',
+      'invest.watchlist.created': 'Liste de suivi creee',
+      'invest.watchlist.updated': 'Liste de suivi modifiee',
+      'invest.watchlist.deleted': 'Liste de suivi supprimee',
 
       // Loan actions
-      'loan.created': 'Created a loan',
-      'loan.updated': 'Updated a loan',
-      'loan.deleted': 'Deleted a loan',
-      'loan.payment.added': 'Added loan payment',
-      'loan.payment.deleted': 'Deleted loan payment',
+      'loan.created': 'Pret cree',
+      'loan.updated': 'Pret modifie',
+      'loan.deleted': 'Pret supprime',
+      'loan.payment.added': 'Paiement de pret ajoute',
+      'loan.payment.deleted': 'Paiement de pret supprime',
 
       // Alert actions
-      'notification.alert.created': 'Created an alert',
-      'notification.alert.updated': 'Updated an alert',
-      'notification.alert.deleted': 'Deleted an alert',
-      'notification.alert.triggered': 'Alert triggered',
-
-      // Auth actions
-      'auth.login.succeeded': 'Logged in',
-      'auth.logout': 'Logged out',
-      'auth.mfa.setup': 'Set up MFA',
-      'auth.mfa.removed': 'Removed MFA',
-      'auth.password.changed': 'Changed password',
+      'notification.alert.created': 'Alerte creee',
+      'notification.alert.updated': 'Alerte modifiee',
+      'notification.alert.deleted': 'Alerte supprimee',
+      'notification.alert.triggered': 'Alerte declenchee',
     };
 
     return labels[action] ?? action.replace(/\./g, ' ').replace(/_/g, ' ');

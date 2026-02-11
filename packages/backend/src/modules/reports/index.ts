@@ -41,3 +41,10 @@ export type {
   PDFExportOptions,
   PDFExportResult,
 } from './pdf-export.service.js';
+
+export { pdfService } from './pdf.service.js';
+export type {
+  TransactionFilters,
+  DateRange as PDFDateRange,
+  PDFResult,
+} from './pdf.service.js';

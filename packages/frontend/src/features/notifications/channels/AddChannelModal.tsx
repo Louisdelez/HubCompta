@@ -8,6 +8,7 @@ import {
   X,
   Mail,
   MessageCircle,
+  Smartphone,
   Hash,
   Loader2,
   ArrowRight,
@@ -40,6 +41,7 @@ export function AddChannelModal({ open, onClose, onSuccess, existingTypes }: Add
   const [selectedType, setSelectedType] = useState<ChannelType | null>(null);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [smsPhone, setSmsPhone] = useState('');
   const [webhookUrl, setWebhookUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -57,6 +59,12 @@ export function AddChannelModal({ open, onClose, onSuccess, existingTypes }: Add
       label: 'WhatsApp',
       description: 'Recevez vos notifications sur WhatsApp',
       icon: <MessageCircle className="h-6 w-6" />,
+    },
+    {
+      type: 'sms',
+      label: 'SMS',
+      description: 'Recevez vos notifications par SMS',
+      icon: <Smartphone className="h-6 w-6" />,
     },
     {
       type: 'discord',
@@ -107,6 +115,14 @@ export function AddChannelModal({ open, onClose, onSuccess, existingTypes }: Add
         input.whatsappPhone = phone;
         break;
 
+      case 'sms':
+        if (!smsPhone) {
+          setError('Veuillez entrer un numero de telephone');
+          return;
+        }
+        input.smsPhone = smsPhone;
+        break;
+
       case 'discord':
         if (!webhookUrl) {
           setError('Veuillez entrer l\'URL du webhook');
@@ -136,6 +152,7 @@ export function AddChannelModal({ open, onClose, onSuccess, existingTypes }: Add
     setSelectedType(null);
     setEmail('');
     setPhone('');
+    setSmsPhone('');
     setWebhookUrl('');
     setError(null);
   };
@@ -188,6 +205,8 @@ export function AddChannelModal({ open, onClose, onSuccess, existingTypes }: Add
                           ? 'bg-ctp-yellow/10 text-ctp-yellow'
                           : option.type === 'whatsapp'
                           ? 'bg-ctp-green/10 text-ctp-green'
+                          : option.type === 'sms'
+                          ? 'bg-ctp-teal/10 text-ctp-teal'
                           : 'bg-ctp-lavender/10 text-ctp-lavender'
                       }`}>
                         {option.icon}
@@ -248,6 +267,31 @@ export function AddChannelModal({ open, onClose, onSuccess, existingTypes }: Add
                   <p className="mt-2 text-xs text-ctp-subtext0">
                     Incluez l'indicatif pays (ex: +33 pour la France)
                   </p>
+                </div>
+              )}
+
+              {/* SMS Form */}
+              {selectedType === 'sms' && (
+                <div>
+                  <label className="block text-sm font-medium text-ctp-subtext1 mb-2">
+                    Numero de telephone
+                  </label>
+                  <input
+                    type="tel"
+                    value={smsPhone}
+                    onChange={(e) => setSmsPhone(e.target.value)}
+                    placeholder="+33 6 12 34 56 78"
+                    className="w-full px-4 py-2 bg-ctp-surface0 border border-ctp-surface1 rounded-lg text-ctp-text placeholder:text-ctp-subtext0 focus:outline-none focus:ring-2 focus:ring-ctp-teal"
+                    autoFocus
+                  />
+                  <p className="mt-2 text-xs text-ctp-subtext0">
+                    Incluez l'indicatif pays (ex: +33 pour la France)
+                  </p>
+                  <div className="mt-3 p-3 bg-ctp-surface0 rounded-lg">
+                    <p className="text-xs text-ctp-subtext1">
+                      Les SMS sont limites a 160 caracteres. Les notifications seront condensees pour tenir dans ce format.
+                    </p>
+                  </div>
                 </div>
               )}
 

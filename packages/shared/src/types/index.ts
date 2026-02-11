@@ -29,6 +29,15 @@ export interface User extends Timestamps {
   locale: string;
   timezone: string;
   isInstanceAdmin: boolean;
+  onboardingCompletedAt: Date | null;
+}
+
+export interface UserPreferences {
+  onboarding?: {
+    completedTours: string[];
+    skippedAt: string | null;
+    completedAt: string | null;
+  };
 }
 
 export type MFAType = 'totp' | 'webauthn';

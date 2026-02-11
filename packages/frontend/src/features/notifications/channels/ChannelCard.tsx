@@ -7,6 +7,7 @@ import { useState } from 'react';
 import {
   Mail,
   MessageCircle,
+  Smartphone,
   Hash,
   CheckCircle,
   AlertCircle,
@@ -55,6 +56,8 @@ export function ChannelCard({ channel, onVerify, onEditPreferences }: ChannelCar
         return channel.email;
       case 'whatsapp':
         return channel.whatsappPhone;
+      case 'sms':
+        return channel.smsPhone;
       case 'discord':
         return channel.discordWebhookUrl ? 'Webhook configure' : null;
       default:
@@ -69,6 +72,8 @@ export function ChannelCard({ channel, onVerify, onEditPreferences }: ChannelCar
         return <Mail className="h-6 w-6" />;
       case 'whatsapp':
         return <MessageCircle className="h-6 w-6" />;
+      case 'sms':
+        return <Smartphone className="h-6 w-6" />;
       case 'discord':
         return <Hash className="h-6 w-6" />;
       default:
@@ -83,6 +88,8 @@ export function ChannelCard({ channel, onVerify, onEditPreferences }: ChannelCar
         return 'text-ctp-yellow bg-ctp-yellow/10';
       case 'whatsapp':
         return 'text-ctp-green bg-ctp-green/10';
+      case 'sms':
+        return 'text-ctp-teal bg-ctp-teal/10';
       case 'discord':
         return 'text-ctp-lavender bg-ctp-lavender/10';
       default:

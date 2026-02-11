@@ -10,6 +10,7 @@ import { storageClient } from '../../core/storage/s3.js';
 import { getBackupQueue } from '../../core/queue/index.js';
 import { authGuard } from '../../core/auth/authGuard.js';
 import { logger } from '../../core/middleware/logger.js';
+import { cacheService, CACHE_KEYS } from '../../core/cache/index.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -452,21 +453,77 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
   // --------------------------------------------------------------------------
 
   /**
+   * GET /admin/cache/stats - Get cache statistics
+   */
+  fastify.get('/cache/stats', async () => {
+    const stats = cacheService.getStats();
+    return {
+      success: true,
+      data: {
+        ...stats,
+        hitRate: stats.hits + stats.misses > 0
+          ? ((stats.hits / (stats.hits + stats.misses)) * 100).toFixed(2) + '%'
+          : 'N/A',
+      },
+    };
+  });
+
+  /**
    * POST /admin/cache/clear - Clear Redis cache
    */
-  fastify.post<{ Body: { pattern?: string } }>('/cache/clear', async (request, reply) => {
-    const { pattern } = request.body ?? {};
+  fastify.post<{ Body: { pattern?: string; type?: string; userId?: string; workspaceId?: string } }>(
+    '/cache/clear',
+    async (request, reply) => {
+      const { pattern, type, userId, workspaceId } = request.body ?? {};
 
-    try {
-      if (pattern) {
-        // Clear keys matching pattern
-        const keys = await redisClient.keys(pattern);
-        if (keys.length > 0) {
-          await redisClient.del(...keys);
+      try {
+        let clearedCount = 0;
+
+        // Clear by type (predefined patterns)
+        if (type) {
+          switch (type) {
+            case 'user':
+              if (userId) {
+                await cacheService.invalidateUserCache(userId);
+                clearedCount = 1; // We don't know exact count
+              } else {
+                clearedCount = await cacheService.delPattern('user:*');
+              }
+              break;
+            case 'workspace':
+              if (workspaceId) {
+                await cacheService.invalidateWorkspaceCache(workspaceId);
+                clearedCount = 1;
+              } else {
+                clearedCount = await cacheService.delPattern('workspace:*');
+              }
+              break;
+            case 'exchange-rates':
+              await cacheService.invalidateExchangeRates();
+              clearedCount = 1;
+              break;
+            case 'all':
+              const userCleared = await cacheService.delPattern('user:*');
+              const workspaceCleared = await cacheService.delPattern('workspace:*');
+              const globalCleared = await cacheService.delPattern('global:*');
+              clearedCount = userCleared + workspaceCleared + globalCleared;
+              break;
+            default:
+              return reply.status(400).send({
+                error: 'Invalid cache type',
+                validTypes: ['user', 'workspace', 'exchange-rates', 'all'],
+              });
+          }
+          return { success: true, data: { cleared: clearedCount, type } };
         }
-        return { success: true, data: { cleared: keys.length, pattern } };
-      } else {
-        // Clear all cache keys (not session data)
+
+        // Clear by pattern (custom pattern)
+        if (pattern) {
+          clearedCount = await cacheService.delPattern(pattern);
+          return { success: true, data: { cleared: clearedCount, pattern } };
+        }
+
+        // Default: clear all cache keys (not session data)
         const cacheKeys = await redisClient.keys('cache:*');
         const rateLimitKeys = await redisClient.keys('ratelimit:*');
         const allKeys = [...cacheKeys, ...rateLimitKeys];
@@ -476,12 +533,12 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
         }
 
         return { success: true, data: { cleared: allKeys.length } };
+      } catch (error) {
+        logger.error({ error }, 'Error clearing cache');
+        return reply.status(500).send({ error: 'Failed to clear cache' });
       }
-    } catch (error) {
-      logger.error({ error }, 'Error clearing cache');
-      return reply.status(500).send({ error: 'Failed to clear cache' });
     }
-  });
+  );
 
   // --------------------------------------------------------------------------
   // Search Index Management

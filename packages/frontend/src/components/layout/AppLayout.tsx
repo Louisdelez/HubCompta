@@ -63,13 +63,14 @@ interface NavItem {
   name: string;
   href: string;
   icon: LucideIcon;
+  onboardingKey?: string;
 }
 
 const mainNavItems: NavItem[] = [
   { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Transactions', href: '/transactions', icon: CreditCard },
-  { name: 'Comptes', href: '/accounts', icon: Landmark },
-  { name: 'Budgets', href: '/budgets', icon: TrendingUp },
+  { name: 'Transactions', href: '/transactions', icon: CreditCard, onboardingKey: 'transactions' },
+  { name: 'Comptes', href: '/accounts', icon: Landmark, onboardingKey: 'accounts' },
+  { name: 'Budgets', href: '/budgets', icon: TrendingUp, onboardingKey: 'budgets' },
   { name: 'Epargne', href: '/savings', icon: Target },
   { name: 'Prets', href: '/loans', icon: Coins },
   { name: 'Investissements', href: '/portfolio', icon: LineChart },
@@ -127,6 +128,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Sidebar */}
       <aside
+        data-onboarding="sidebar"
         className={clsx(
           'fixed inset-y-0 left-0 z-50 w-64 bg-ctp-mantle border-r border-ctp-surface0 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:h-screen lg:sticky lg:top-0',
           isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -148,6 +150,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <NavLink
                   key={item.href}
                   to={item.href}
+                  data-onboarding={item.onboardingKey}
                   className={({ isActive }) =>
                     clsx(
                       'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
@@ -231,6 +234,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               )}
               <NavLink
                 to="/settings"
+                data-onboarding="settings"
                 className={({ isActive }) =>
                   clsx(
                     'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
@@ -299,7 +303,7 @@ function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
         </button>
 
         {/* Workspace selector */}
-        <div className="hidden sm:block min-w-[200px]">
+        <div className="hidden sm:block min-w-[200px]" data-onboarding="workspace-selector">
           <WorkspaceSelector
             currentWorkspaceId={currentWorkspace?.id}
             onSelect={(workspace) => switchWorkspace(workspace.id)}
@@ -327,7 +331,9 @@ function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
           <ThemeToggle />
 
           {/* Notifications */}
-          <NotificationBell />
+          <div data-onboarding="notifications">
+            <NotificationBell />
+          </div>
         </div>
       </div>
     </header>

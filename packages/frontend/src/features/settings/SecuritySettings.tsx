@@ -5,10 +5,13 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Shield,
   Smartphone,
+  Tablet,
+  Monitor,
   Key,
   Loader2,
   Trash2,
@@ -16,6 +19,9 @@ import {
   CheckCircle,
   Clock,
   MapPin,
+  Globe,
+  LogOut,
+  ExternalLink,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -38,10 +44,15 @@ interface Session {
   id: string;
   deviceId: string;
   deviceName: string;
-  ipAddress: string;
-  userAgent: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  browser: string | null;
+  os: string | null;
+  deviceType: string | null;
+  location: string | null;
   lastActiveAt: string;
   createdAt: string;
+  expiresAt: string;
   isCurrent: boolean;
 }
 
@@ -63,12 +74,50 @@ interface SecurityEvent {
 }
 
 // ----------------------------------------------------------------------------
+// Helpers
+// ----------------------------------------------------------------------------
+
+function getDeviceIcon(deviceType: string | null, os: string | null) {
+  const osLower = (os ?? '').toLowerCase();
+  const typeLower = (deviceType ?? '').toLowerCase();
+
+  if (typeLower === 'mobile' || osLower.includes('android') || osLower.includes('ios')) {
+    return Smartphone;
+  }
+  if (typeLower === 'tablet' || osLower.includes('ipad')) {
+    return Tablet;
+  }
+  return Monitor;
+}
+
+function formatRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'A l\'instant';
+  if (diffMins < 60) return `Il y a ${diffMins} min`;
+  if (diffHours < 24) return `Il y a ${diffHours}h`;
+  if (diffDays === 1) return 'Hier';
+  if (diffDays < 7) return `Il y a ${diffDays} jours`;
+
+  return date.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+  });
+}
+
+// ----------------------------------------------------------------------------
 // Component
 // ----------------------------------------------------------------------------
 
 export function SecuritySettings() {
   const queryClient = useQueryClient();
   const [showRevokeConfirm, setShowRevokeConfirm] = useState<string | null>(null);
+  const [showRevokeAllConfirm, setShowRevokeAllConfirm] = useState(false);
 
   // Fetch devices
   const { data: devices = [], isLoading: devicesLoading } = useQuery({
@@ -125,6 +174,7 @@ export function SecuritySettings() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
+      setShowRevokeConfirm(null);
     },
   });
 
@@ -135,6 +185,7 @@ export function SecuritySettings() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['user-sessions'] });
+      setShowRevokeAllConfirm(false);
     },
   });
 
@@ -157,6 +208,8 @@ export function SecuritySettings() {
       'auth.mfa.removed': 'MFA supprime',
       'auth.device.revoked': 'Appareil revoque',
       'auth.session.locked': 'Session verrouillee',
+      'auth.session.revoked': 'Session revoquee',
+      'auth.sessions.revoked_all': 'Toutes les sessions revoquees',
       'auth.password.changed': 'Mot de passe modifie',
     };
     return labels[action] || action;
@@ -171,6 +224,8 @@ export function SecuritySettings() {
       </div>
     );
   }
+
+  const otherSessions = sessions.filter((s) => !s.isCurrent);
 
   return (
     <div className="space-y-6">
@@ -316,7 +371,7 @@ export function SecuritySettings() {
                     </div>
                   </div>
 
-                  {showRevokeConfirm === device.id ? (
+                  {showRevokeConfirm === `device-${device.id}` ? (
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setShowRevokeConfirm(null)}
@@ -334,7 +389,7 @@ export function SecuritySettings() {
                     </div>
                   ) : (
                     <button
-                      onClick={() => setShowRevokeConfirm(device.id)}
+                      onClick={() => setShowRevokeConfirm(`device-${device.id}`)}
                       className="text-sm text-ctp-red hover:text-ctp-maroon"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -354,75 +409,150 @@ export function SecuritySettings() {
             <div className="flex items-center gap-3">
               <Shield className="h-5 w-5 text-ctp-red" />
               <div>
-                <h2 className="text-lg font-semibold text-ctp-text">
-                  Sessions actives
-                </h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-ctp-text">
+                    Sessions actives
+                  </h2>
+                  <Link
+                    to="/settings/sessions"
+                    className="text-ctp-blue hover:text-ctp-sapphire"
+                    title="Voir les details des sessions"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Link>
+                </div>
                 <p className="text-sm text-ctp-subtext0">
-                  Gerez vos sessions de connexion
+                  {sessions.length} session{sessions.length > 1 ? 's' : ''} active{sessions.length > 1 ? 's' : ''}
                 </p>
               </div>
             </div>
-            {sessions.filter((s) => !s.isCurrent).length > 0 && (
-              <button
-                onClick={() => revokeAllSessionsMutation.mutate()}
-                disabled={revokeAllSessionsMutation.isPending}
-                className="px-4 py-2 text-sm font-medium text-ctp-red hover:bg-ctp-surface0 rounded-lg transition-colors"
-              >
-                Deconnecter tout
-              </button>
+            {otherSessions.length > 0 && (
+              showRevokeAllConfirm ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowRevokeAllConfirm(false)}
+                    className="px-3 py-1 text-sm text-ctp-subtext0"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={() => revokeAllSessionsMutation.mutate()}
+                    disabled={revokeAllSessionsMutation.isPending}
+                    className="px-3 py-1 text-sm font-medium text-ctp-base bg-ctp-red rounded hover:bg-ctp-maroon"
+                  >
+                    {revokeAllSessionsMutation.isPending ? 'Deconnexion...' : 'Confirmer'}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowRevokeAllConfirm(true)}
+                  className="px-4 py-2 text-sm font-medium text-ctp-red hover:bg-ctp-surface0 rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Deconnecter tout ({otherSessions.length})
+                </button>
+              )
             )}
           </div>
         </div>
 
         <div className="divide-y divide-ctp-surface1">
-          {sessions.map((session) => (
-            <div key={session.id} className="px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                      session.isCurrent
-                        ? 'bg-ctp-blue/20'
-                        : 'bg-ctp-surface1'
-                    }`}
-                  >
-                    <Smartphone
-                      className={`h-5 w-5 ${
-                        session.isCurrent
-                          ? 'text-ctp-blue'
-                          : 'text-ctp-overlay1'
-                      }`}
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-ctp-text">
-                        {session.deviceName}
-                      </p>
-                      {session.isCurrent && (
-                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-ctp-blue/20 text-ctp-blue rounded-full">
-                          Session actuelle
-                        </span>
-                      )}
+          {sessions.length === 0 ? (
+            <div className="p-6 text-center text-ctp-subtext0">
+              Aucune session active
+            </div>
+          ) : (
+            sessions.map((session) => {
+              const DeviceIcon = getDeviceIcon(session.deviceType, session.os);
+              return (
+                <div key={session.id} className="px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                          session.isCurrent
+                            ? 'bg-ctp-green/20'
+                            : 'bg-ctp-surface1'
+                        }`}
+                      >
+                        <DeviceIcon
+                          className={`h-5 w-5 ${
+                            session.isCurrent
+                              ? 'text-ctp-green'
+                              : 'text-ctp-overlay1'
+                          }`}
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-medium text-ctp-text">
+                            {session.browser ?? session.deviceName}
+                          </p>
+                          {session.os && (
+                            <span className="text-xs text-ctp-subtext0">
+                              sur {session.os}
+                            </span>
+                          )}
+                          {session.isCurrent && (
+                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-ctp-green/20 text-ctp-green rounded-full">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Session actuelle
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-ctp-subtext0 mt-1 flex-wrap">
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3 flex-shrink-0" />
+                            {formatRelativeTime(session.lastActiveAt)}
+                          </span>
+                          {session.ipAddress && (
+                            <span className="flex items-center gap-1">
+                              <Globe className="h-3 w-3 flex-shrink-0" />
+                              {session.ipAddress}
+                            </span>
+                          )}
+                          {session.location && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3 flex-shrink-0" />
+                              {session.location}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-ctp-subtext0">
-                      {session.ipAddress} - Derniere activite: {formatDate(session.lastActiveAt)}
-                    </p>
+
+                    {!session.isCurrent && (
+                      showRevokeConfirm === `session-${session.id}` ? (
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <button
+                            onClick={() => setShowRevokeConfirm(null)}
+                            className="px-3 py-1 text-sm text-ctp-subtext0"
+                          >
+                            Annuler
+                          </button>
+                          <button
+                            onClick={() => revokeSessionMutation.mutate(session.id)}
+                            disabled={revokeSessionMutation.isPending}
+                            className="px-3 py-1 text-sm font-medium text-ctp-base bg-ctp-red rounded hover:bg-ctp-maroon"
+                          >
+                            {revokeSessionMutation.isPending ? 'Deconnexion...' : 'Confirmer'}
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setShowRevokeConfirm(`session-${session.id}`)}
+                          className="text-sm text-ctp-red hover:text-ctp-maroon flex-shrink-0"
+                          title="Deconnecter cette session"
+                        >
+                          <LogOut className="h-4 w-4" />
+                        </button>
+                      )
+                    )}
                   </div>
                 </div>
-
-                {!session.isCurrent && (
-                  <button
-                    onClick={() => revokeSessionMutation.mutate(session.id)}
-                    disabled={revokeSessionMutation.isPending}
-                    className="text-sm text-ctp-red hover:text-ctp-maroon"
-                  >
-                    Deconnecter
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -460,7 +590,7 @@ export function SecuritySettings() {
                     </p>
                   </div>
                   <div
-                    className={`h-2 w-2 rounded-full ${
+                    className={`h-2 w-2 rounded-full flex-shrink-0 ${
                       event.action.includes('failed') || event.action.includes('suspicious')
                         ? 'bg-ctp-red'
                         : event.action.includes('removed') || event.action.includes('revoked')

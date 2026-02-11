@@ -9,7 +9,7 @@ import { logger } from '@/core/middleware/logger.js';
 import crypto from 'crypto';
 
 // ChannelType enum - matches Prisma schema (will be available after migration)
-export type ChannelType = 'email' | 'whatsapp' | 'discord';
+export type ChannelType = 'email' | 'whatsapp' | 'discord' | 'sms';
 
 // NotificationChannel type for when Prisma client isn't regenerated
 export interface NotificationChannelRecord {
@@ -20,6 +20,8 @@ export interface NotificationChannelRecord {
   emailVerified: boolean;
   whatsappPhone: string | null;
   whatsappVerified: boolean;
+  smsPhone: string | null;
+  smsVerified: boolean;
   discordWebhookUrl: string | null;
   discordVerified: boolean;
   enabledTypes: string[];
@@ -39,6 +41,7 @@ export interface CreateChannelInput {
   channelType: ChannelType;
   email?: string;
   whatsappPhone?: string;
+  smsPhone?: string;
   discordWebhookUrl?: string;
   enabledTypes?: string[];
 }
@@ -46,6 +49,7 @@ export interface CreateChannelInput {
 export interface UpdateChannelInput {
   email?: string;
   whatsappPhone?: string;
+  smsPhone?: string;
   discordWebhookUrl?: string;
   enabledTypes?: string[];
   isActive?: boolean;
@@ -150,6 +154,9 @@ export const notificationChannelService = {
     if (channelType === 'whatsapp' && !whatsappPhone) {
       throw new Error('Phone number is required for WhatsApp channel');
     }
+    if (channelType === 'sms' && !input.smsPhone) {
+      throw new Error('Phone number is required for SMS channel');
+    }
     if (channelType === 'discord' && !discordWebhookUrl) {
       throw new Error('Webhook URL is required for Discord channel');
     }
@@ -161,6 +168,7 @@ export const notificationChannelService = {
         channelType,
         email: channelType === 'email' ? email : null,
         whatsappPhone: channelType === 'whatsapp' ? whatsappPhone : null,
+        smsPhone: channelType === 'sms' ? input.smsPhone : null,
         discordWebhookUrl: channelType === 'discord' ? discordWebhookUrl : null,
         enabledTypes: enabledTypes ?? DEFAULT_ENABLED_TYPES,
         isActive: false, // Inactive until verified
@@ -185,6 +193,7 @@ export const notificationChannelService = {
     const needsReverification =
       (updates.email && updates.email !== channel.email) ||
       (updates.whatsappPhone && updates.whatsappPhone !== channel.whatsappPhone) ||
+      (updates.smsPhone && updates.smsPhone !== channel.smsPhone) ||
       (updates.discordWebhookUrl && updates.discordWebhookUrl !== channel.discordWebhookUrl);
 
     const updatedChannel = await prisma.notificationChannel.update({
@@ -192,6 +201,7 @@ export const notificationChannelService = {
       data: {
         ...(updates.email !== undefined && { email: updates.email }),
         ...(updates.whatsappPhone !== undefined && { whatsappPhone: updates.whatsappPhone }),
+        ...(updates.smsPhone !== undefined && { smsPhone: updates.smsPhone }),
         ...(updates.discordWebhookUrl !== undefined && { discordWebhookUrl: updates.discordWebhookUrl }),
         ...(updates.enabledTypes !== undefined && { enabledTypes: updates.enabledTypes }),
         ...(updates.isActive !== undefined && { isActive: updates.isActive }),
@@ -199,6 +209,7 @@ export const notificationChannelService = {
         ...(needsReverification && {
           emailVerified: channel.channelType === 'email' ? false : channel.emailVerified,
           whatsappVerified: channel.channelType === 'whatsapp' ? false : channel.whatsappVerified,
+          smsVerified: channel.channelType === 'sms' ? false : channel.smsVerified,
           discordVerified: channel.channelType === 'discord' ? false : channel.discordVerified,
           isActive: false,
         }),
@@ -280,6 +291,8 @@ export const notificationChannelService = {
         ? 'emailVerified'
         : channel.channelType === 'whatsapp'
         ? 'whatsappVerified'
+        : channel.channelType === 'sms'
+        ? 'smsVerified'
         : 'discordVerified';
 
     await prisma.notificationChannel.update({
@@ -354,6 +367,8 @@ export const notificationChannelService = {
         return channel.emailVerified;
       case 'whatsapp':
         return channel.whatsappVerified;
+      case 'sms':
+        return channel.smsVerified;
       case 'discord':
         return channel.discordVerified;
       default:

@@ -6,10 +6,11 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Monitor, LayoutDashboard, Save, Loader2, RotateCcw, Palette, Check } from 'lucide-react';
+import { Monitor, LayoutDashboard, Save, Loader2, RotateCcw, Palette, Check, HelpCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useTheme, THEME_META, type CatppuccinFlavor } from '@/providers/ThemeProvider';
 import { cn } from '@/lib/utils';
+import { RestartTutorialButton } from '@/features/onboarding';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -529,6 +530,23 @@ export function DisplaySettings() {
               className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
             />
           </label>
+        </div>
+      </div>
+
+      {/* Help & Tutorial */}
+      <div className="bg-ctp-mantle rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-ctp-surface1">
+          <div className="flex items-center gap-3">
+            <HelpCircle className="h-5 w-5 text-ctp-mauve" />
+            <h2 className="text-lg font-semibold text-ctp-text">Aide et tutoriel</h2>
+          </div>
+          <p className="mt-1 text-sm text-ctp-subtext0">
+            Relancez la visite guidee pour decouvrir toutes les fonctionnalites
+          </p>
+        </div>
+
+        <div className="p-6">
+          <RestartTutorialButton variant="card" />
         </div>
       </div>
 

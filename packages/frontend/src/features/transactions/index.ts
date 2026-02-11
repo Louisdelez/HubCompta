@@ -8,3 +8,4 @@ export { TransactionForm } from './TransactionForm';
 export { CategorySelector } from './CategorySelector';
 export { TagInput } from './TagInput';
 export { DocumentAttachment } from './DocumentAttachment';
+export { ScanReceiptModal } from './ScanReceiptModal';

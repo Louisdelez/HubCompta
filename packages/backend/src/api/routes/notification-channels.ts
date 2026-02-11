@@ -9,6 +9,7 @@ import {
   notificationChannelService,
   notificationDispatcherService,
   whatsappService,
+  smsService,
   discordService,
 } from '@/modules/notifications/index.js';
 import {
@@ -22,12 +23,13 @@ import { logger } from '@/core/middleware/logger.js';
 // Schemas
 // ----------------------------------------------------------------------------
 
-const channelTypeSchema = z.enum(['email', 'whatsapp', 'discord']);
+const channelTypeSchema = z.enum(['email', 'whatsapp', 'sms', 'discord']);
 
 const createChannelSchema = z.object({
   channelType: channelTypeSchema,
   email: z.string().email().optional(),
   whatsappPhone: z.string().min(10).max(20).optional(),
+  smsPhone: z.string().min(10).max(20).optional(),
   discordWebhookUrl: z.string().url().optional(),
   enabledTypes: z.array(z.string()).optional(),
 });
@@ -35,6 +37,7 @@ const createChannelSchema = z.object({
 const updateChannelSchema = z.object({
   email: z.string().email().optional(),
   whatsappPhone: z.string().min(10).max(20).optional(),
+  smsPhone: z.string().min(10).max(20).optional(),
   discordWebhookUrl: z.string().url().optional(),
   enabledTypes: z.array(z.string()).optional(),
   isActive: z.boolean().optional(),
@@ -89,6 +92,8 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
       emailVerified: channel.emailVerified,
       whatsappPhone: channel.whatsappPhone ? maskPhone(channel.whatsappPhone) : null,
       whatsappVerified: channel.whatsappVerified,
+      smsPhone: channel.smsPhone ? maskPhone(channel.smsPhone) : null,
+      smsVerified: channel.smsVerified,
       discordWebhookUrl: channel.discordWebhookUrl ? '***configured***' : null,
       discordVerified: channel.discordVerified,
       enabledTypes: channel.enabledTypes,
@@ -167,6 +172,8 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
           emailVerified: channel.emailVerified,
           whatsappPhone: channel.whatsappPhone ? maskPhone(channel.whatsappPhone) : null,
           whatsappVerified: channel.whatsappVerified,
+          smsPhone: channel.smsPhone ? maskPhone(channel.smsPhone) : null,
+          smsVerified: channel.smsVerified,
           discordWebhookUrl: channel.discordWebhookUrl ? '***configured***' : null,
           discordVerified: channel.discordVerified,
           enabledTypes: channel.enabledTypes,
@@ -200,12 +207,20 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
       }
     }
 
+    // Validate SMS phone if provided
+    if (body.channelType === 'sms' && body.smsPhone) {
+      if (!smsService.isValidPhoneNumber(body.smsPhone)) {
+        return reply.status(400).send({ success: false, error: { message: 'Invalid phone number format' } });
+      }
+    }
+
     try {
       const channel = await notificationChannelService.addChannel({
         userId,
         channelType: body.channelType as ChannelType,
         email: body.email,
         whatsappPhone: body.whatsappPhone,
+        smsPhone: body.smsPhone,
         discordWebhookUrl: body.discordWebhookUrl,
         enabledTypes: body.enabledTypes,
       });
@@ -252,6 +267,13 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
         }
       }
 
+      // Validate SMS phone if provided
+      if (body.smsPhone) {
+        if (!smsService.isValidPhoneNumber(body.smsPhone)) {
+          return reply.status(400).send({ success: false, error: { message: 'Invalid phone number format' } });
+        }
+      }
+
       try {
         const channel = await notificationChannelService.updateChannel(channelId, userId, body);
 
@@ -263,6 +285,7 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
             isActive: channel.isActive,
             emailVerified: channel.emailVerified,
             whatsappVerified: channel.whatsappVerified,
+            smsVerified: channel.smsVerified,
             discordVerified: channel.discordVerified,
           },
         });
@@ -317,6 +340,9 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
           break;
         case 'whatsapp':
           target = channel.whatsappPhone!;
+          break;
+        case 'sms':
+          target = channel.smsPhone!;
           break;
         case 'discord':
           target = channel.discordWebhookUrl!;
@@ -450,6 +476,13 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
           result = await whatsappService.sendMessage(
             channel.whatsappPhone!,
             '🔔 *Test HubCompta*\n\nCeci est un message de test. Votre canal WhatsApp est correctement configure.'
+          );
+          break;
+
+        case 'sms':
+          result = await smsService.sendMessage(
+            channel.smsPhone!,
+            'HubCompta: Test reussi! Votre canal SMS est correctement configure.'
           );
           break;
 

@@ -8,6 +8,7 @@ import type { Notification, NotificationType, ChannelType } from '@prisma/client
 import { logger } from '@/core/middleware/logger.js';
 import { emailService, notificationPreferencesService } from '@/core/email/index.js';
 import { whatsappService } from './whatsapp.service.js';
+import { smsService } from './sms.service.js';
 import { discordService } from './discord.service.js';
 import { notificationChannelService } from './channel.service.js';
 
@@ -115,6 +116,7 @@ export const notificationDispatcherService = {
     channelConfig: {
       email?: string | null;
       whatsappPhone?: string | null;
+      smsPhone?: string | null;
       discordWebhookUrl?: string | null;
     }
   ): Promise<{ success: boolean; error?: string }> {
@@ -125,6 +127,9 @@ export const notificationDispatcherService = {
 
         case 'whatsapp':
           return await this.dispatchToWhatsApp(notification, channelConfig.whatsappPhone!);
+
+        case 'sms':
+          return await this.dispatchToSMS(notification, channelConfig.smsPhone!);
 
         case 'discord':
           return await this.dispatchToDiscord(notification, channelConfig.discordWebhookUrl!);
@@ -174,6 +179,20 @@ export const notificationDispatcherService = {
 
     const message = whatsappService.formatNotification(notification);
     const result = await whatsappService.sendMessage(phone, message);
+
+    return { success: result.success, error: result.error };
+  },
+
+  /**
+   * Dispatch to SMS channel
+   */
+  async dispatchToSMS(notification: Notification, phone: string): Promise<{ success: boolean; error?: string }> {
+    if (!smsService.isConfigured()) {
+      return { success: false, error: 'SMS service not configured' };
+    }
+
+    const message = smsService.formatNotification(notification);
+    const result = await smsService.sendMessage(phone, message);
 
     return { success: result.success, error: result.error };
   },
@@ -306,6 +325,13 @@ export const notificationDispatcherService = {
         }
         const whatsappResult = await whatsappService.sendVerificationCode(target, code);
         return { success: whatsappResult.success, error: whatsappResult.error };
+
+      case 'sms':
+        if (!smsService.isConfigured()) {
+          return { success: false, error: 'SMS service not configured' };
+        }
+        const smsResult = await smsService.sendVerificationCode(target, code);
+        return { success: smsResult.success, error: smsResult.error };
 
       case 'discord':
         const discordResult = await discordService.sendVerificationCode(target, code);

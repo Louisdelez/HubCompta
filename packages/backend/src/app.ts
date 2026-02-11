@@ -9,6 +9,7 @@ import fastifyCookie from '@fastify/cookie';
 import fastifyRateLimit from '@fastify/rate-limit';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
+import fastifyMultipart from '@fastify/multipart';
 
 import { errorHandler } from './core/middleware/errorHandler.js';
 import { requestLogger, logger } from './core/middleware/logger.js';
@@ -18,7 +19,7 @@ import { prisma } from './core/database/client.js';
 import { redisClient } from './core/database/redis.js';
 import { setupScheduledJobs, closeQueues } from './core/queue/index.js';
 import { initializeWorkers, shutdownWorkers } from './core/queue/workers.js';
-import { initSentry } from './core/monitoring/sentry.js';
+import { initSentry, registerSentryHooks, flushSentry } from './core/monitoring/sentry.js';
 import { registerWebSocket } from './core/websocket/index.js';
 
 // ----------------------------------------------------------------------------
@@ -140,14 +141,66 @@ export async function buildApp(): Promise<FastifyInstance> {
     },
   });
 
-  // Rate limiting
+  // Multipart support for file uploads (OCR, imports, etc.)
+  await app.register(fastifyMultipart, {
+    limits: {
+      fileSize: 15 * 1024 * 1024, // 15MB max file size
+      files: 1, // Only allow 1 file at a time
+    },
+  });
+
+  // Rate limiting - global configuration with custom error response
   await app.register(fastifyRateLimit, {
+    global: true,
     max: 100,
     timeWindow: '1 minute',
     redis: redisClient,
     keyGenerator: (request) => {
       // Use user ID if authenticated, otherwise IP
       return (request.user as { sub?: string })?.sub ?? request.ip;
+    },
+    errorResponseBuilder: (_request, context) => ({
+      success: false,
+      error: {
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: `Trop de requetes. Reessayez dans ${context.after}`,
+        retryAfter: context.after,
+      },
+    }),
+    addHeadersOnExceeding: {
+      'x-ratelimit-limit': true,
+      'x-ratelimit-remaining': true,
+      'x-ratelimit-reset': true,
+    },
+    addHeaders: {
+      'x-ratelimit-limit': true,
+      'x-ratelimit-remaining': true,
+      'x-ratelimit-reset': true,
+      'retry-after': true,
+    },
+    allowList: (request) => {
+      // Skip health checks, static files, and documentation
+      const url = request.url;
+      if (
+        url.startsWith('/health') ||
+        url.startsWith('/static') ||
+        url.startsWith('/public') ||
+        url.startsWith('/docs')
+      ) {
+        return true;
+      }
+      // Check for whitelisted IPs
+      const whitelistedIPs = (process.env.RATE_LIMIT_WHITELIST_IPS || '').split(',').filter(Boolean);
+      if (whitelistedIPs.includes(request.ip)) {
+        return true;
+      }
+      // Check for whitelisted API keys
+      const apiKey = request.headers['x-api-key'];
+      const whitelistedKeys = (process.env.RATE_LIMIT_WHITELIST_API_KEYS || '').split(',').filter(Boolean);
+      if (typeof apiKey === 'string' && whitelistedKeys.includes(apiKey)) {
+        return true;
+      }
+      return false;
     },
   });
 
@@ -188,6 +241,11 @@ export async function buildApp(): Promise<FastifyInstance> {
       },
     });
   }
+
+  // ----------------------------------------------------------------------------
+  // Sentry Performance Monitoring Hooks
+  // ----------------------------------------------------------------------------
+  registerSentryHooks(app);
 
   // ----------------------------------------------------------------------------
   // WebSocket Support
@@ -244,6 +302,9 @@ async function shutdown(): Promise<void> {
   logger.info('Shutting down gracefully...');
 
   try {
+    // Flush Sentry events before shutdown
+    await flushSentry();
+
     await shutdownWorkers();
     await closeQueues();
     await prisma.$disconnect();

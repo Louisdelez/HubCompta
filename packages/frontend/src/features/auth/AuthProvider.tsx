@@ -17,6 +17,7 @@ import {
   getAccessToken,
   api,
 } from '@/lib/api/client';
+import { setSentryUser, clearSentryUser, addBreadcrumb } from '@/lib/sentry';
 import type { User, MFAType } from '@finance-hub/shared';
 
 // ----------------------------------------------------------------------------
@@ -82,6 +83,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading: false,
         isLocked: false,
       });
+
+      // Set Sentry user context
+      setSentryUser({
+        id: user.id,
+        email: user.email,
+        username: user.displayName || undefined,
+      });
+
+      addBreadcrumb('User authenticated', 'auth', { userId: user.id });
     } catch {
       setState({
         user: null,
@@ -89,6 +99,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading: false,
         isLocked: false,
       });
+
+      // Clear Sentry user context
+      clearSentryUser();
     }
   }, []);
 
@@ -190,6 +203,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading: false,
       isLocked: false,
     });
+
+    // Clear Sentry user context
+    clearSentryUser();
+    addBreadcrumb('User logged out', 'auth');
   }, []);
 
   // Lock session

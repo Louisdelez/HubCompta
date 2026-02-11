@@ -5,8 +5,13 @@
 // ============================================================================
 
 import { Component, type ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import { Sentry } from '../lib/sentry';
+import { AlertTriangle, RefreshCw, Home, MessageSquare } from 'lucide-react';
+import {
+  captureException,
+  showReportDialog,
+  addBreadcrumb,
+  isSentryEnabled,
+} from '../lib/sentry';
 import { logger } from '../lib/logger';
 
 // ----------------------------------------------------------------------------
@@ -16,12 +21,14 @@ import { logger } from '../lib/logger';
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  showFeedbackButton?: boolean;
 }
 
 interface State {
   hasError: boolean;
   error: Error | null;
   errorInfo: { componentStack: string } | null;
+  eventId: string | undefined;
 }
 
 // ----------------------------------------------------------------------------
@@ -31,7 +38,7 @@ interface State {
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null, errorInfo: null };
+    this.state = { hasError: false, error: null, errorInfo: null, eventId: undefined };
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
@@ -46,12 +53,23 @@ export class ErrorBoundary extends Component<Props, State> {
       componentStack: errorInfo.componentStack,
     });
 
-    // Send error to Sentry
-    Sentry.captureException(error, {
+    // Add breadcrumb for context
+    addBreadcrumb(
+      'ErrorBoundary caught an error',
+      'error',
+      { errorMessage: error.message },
+      'error'
+    );
+
+    // Send error to Sentry and capture the event ID
+    const eventId = captureException(error, {
       extra: {
         componentStack: errorInfo.componentStack,
       },
+      level: 'error',
     });
+
+    this.setState({ eventId });
   }
 
   handleReload = () => {
@@ -63,7 +81,15 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   handleReset = () => {
-    this.setState({ hasError: false, error: null, errorInfo: null });
+    this.setState({ hasError: false, error: null, errorInfo: null, eventId: undefined });
+  };
+
+  handleReportFeedback = () => {
+    if (this.state.eventId) {
+      showReportDialog({ eventId: this.state.eventId });
+    } else {
+      showReportDialog();
+    }
   };
 
   override render() {
@@ -72,6 +98,8 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) {
         return this.props.fallback;
       }
+
+      const showFeedbackButton = this.props.showFeedbackButton !== false && isSentryEnabled;
 
       // Default fallback UI
       return (
@@ -89,7 +117,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
             {/* Description */}
             <p className="text-ctp-subtext0 mb-6">
-              Quelque chose s'est mal passé. Veuillez réessayer ou retourner à l'accueil.
+              Quelque chose s'est mal passe. Veuillez reessayer ou retourner a l'accueil.
             </p>
 
             {/* Error details in development */}
@@ -121,9 +149,22 @@ export class ErrorBoundary extends Component<Props, State> {
                 className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-ctp-surface0 text-ctp-text font-medium rounded-lg hover:bg-ctp-surface1 transition-colors"
               >
                 <Home className="w-4 h-4" />
-                Retour à l'accueil
+                Retour a l'accueil
               </button>
             </div>
+
+            {/* Feedback button */}
+            {showFeedbackButton && (
+              <div className="mt-4">
+                <button
+                  onClick={this.handleReportFeedback}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 text-ctp-subtext0 hover:text-ctp-text transition-colors text-sm"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Signaler un probleme
+                </button>
+              </div>
+            )}
           </div>
         </div>
       );

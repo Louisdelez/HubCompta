@@ -5,6 +5,7 @@
 import { prisma } from '@/core/database/client.js';
 import { hashPassword, verifyPassword, needsRehash } from '@/core/crypto/password.js';
 import { ConflictError, NotFoundError, ValidationError } from '@/core/middleware/errorHandler.js';
+import { cacheService, CACHE_KEYS, CACHE_TTL } from '@/core/cache/index.js';
 import type { User } from '@prisma/client';
 import type { RegisterInput, UserUpdateInput } from '@finance-hub/shared';
 
@@ -55,14 +56,19 @@ export const userService = {
   },
 
   /**
-   * Find user by ID
+   * Find user by ID (with caching)
    */
   async findById(id: string): Promise<SafeUser | null> {
-    const user = await prisma.user.findUnique({
-      where: { id },
-    });
-
-    return user ? toSafeUser(user) : null;
+    return cacheService.getOrSet(
+      CACHE_KEYS.userProfile(id),
+      async () => {
+        const user = await prisma.user.findUnique({
+          where: { id },
+        });
+        return user ? toSafeUser(user) : null;
+      },
+      CACHE_TTL.USER_PROFILE
+    );
   },
 
   /**
@@ -86,7 +92,7 @@ export const userService = {
   },
 
   /**
-   * Update user profile
+   * Update user profile (invalidates cache)
    */
   async update(id: string, input: UserUpdateInput): Promise<SafeUser> {
     const user = await prisma.user.update({
@@ -97,6 +103,9 @@ export const userService = {
         ...(input.timezone && { timezone: input.timezone }),
       },
     });
+
+    // Invalidate user cache on update
+    await cacheService.invalidateUserCache(id);
 
     return toSafeUser(user);
   },

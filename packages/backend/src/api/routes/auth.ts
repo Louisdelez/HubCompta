@@ -18,6 +18,12 @@ import {
   RateLimitError,
 } from '@/core/middleware/errorHandler.js';
 import {
+  loginRateLimit,
+  registerRateLimit,
+  forgotPasswordRateLimit,
+  sensitiveRateLimit,
+} from '@/core/middleware/rateLimit.js';
+import {
   registerSchema,
   loginSchema,
   mfaVerifySchema,
@@ -61,8 +67,11 @@ async function clearLoginAttempts(email: string): Promise<void> {
 export function authRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   // POST /auth/register - Create new user account
+  // Rate limit: 3 requests per minute per IP
   // --------------------------------------------------------------------------
-  app.post('/register', async (request: FastifyRequest, reply: FastifyReply) => {
+  app.post('/register', {
+    preHandler: [registerRateLimit],
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
     const input = registerSchema.parse(request.body);
 
     const user = await userService.create(input);
@@ -87,8 +96,11 @@ export function authRoutes(app: FastifyInstance): void {
 
   // --------------------------------------------------------------------------
   // POST /auth/login - Authenticate user
+  // Rate limit: 5 requests per minute per email/IP
   // --------------------------------------------------------------------------
-  app.post('/login', async (request: FastifyRequest, reply: FastifyReply) => {
+  app.post('/login', {
+    preHandler: [loginRateLimit],
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
     const input = loginSchema.parse(request.body);
     const { email, password, deviceFingerprint, deviceName } = input;
 
@@ -151,7 +163,11 @@ export function authRoutes(app: FastifyInstance): void {
       deviceName
     );
 
-    const tokens = await sessionService.create(user.id, device.id, user.email);
+    const tokens = await sessionService.create(user.id, device.id, user.email, {
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent'],
+      deviceName,
+    });
 
     await auditService.logLoginSuccess(
       user.id,
@@ -217,7 +233,12 @@ export function authRoutes(app: FastifyInstance): void {
     const tokens = await sessionService.create(
       tokenPayload.sub,
       device.id,
-      tokenPayload.email
+      tokenPayload.email,
+      {
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'],
+        deviceName: device.name,
+      }
     );
 
     await auditService.logLoginSuccess(
@@ -240,10 +261,11 @@ export function authRoutes(app: FastifyInstance): void {
 
   // --------------------------------------------------------------------------
   // POST /auth/mfa/setup - Initialize MFA setup
+  // Rate limit: 5 requests per minute (sensitive operation)
   // --------------------------------------------------------------------------
   app.post(
     '/mfa/setup',
-    { preHandler: [authGuard] },
+    { preHandler: [authGuard, sensitiveRateLimit] },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const input = mfaSetupSchema.parse(request.body);
       const userId = request.user!.sub;
@@ -306,7 +328,10 @@ export function authRoutes(app: FastifyInstance): void {
       throw new ValidationError('Refresh token required');
     }
 
-    const tokens = await sessionService.refresh(refreshToken);
+    const tokens = await sessionService.refresh(refreshToken, {
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent'],
+    });
 
     return reply.send({
       success: true,

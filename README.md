@@ -17,6 +17,8 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/Louisdelez/HubCompta/actions/workflows/ci.yml"><img src="https://github.com/Louisdelez/HubCompta/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://codecov.io/gh/Louisdelez/HubCompta"><img src="https://codecov.io/gh/Louisdelez/HubCompta/branch/main/graph/badge.svg" alt="codecov" /></a>
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
   <img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg" alt="Node.js" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-blue.svg" alt="TypeScript" />

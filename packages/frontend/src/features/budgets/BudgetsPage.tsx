@@ -5,7 +5,8 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Calendar, CalendarDays, Wallet, LayoutGrid, List } from 'lucide-react';
+import { Calendar, CalendarDays, Wallet, LayoutGrid, List, Download, Loader2 } from 'lucide-react';
+import { format } from 'date-fns';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
@@ -13,6 +14,7 @@ import { BudgetCard } from './BudgetCard';
 import { BudgetForm } from './BudgetForm';
 import { BudgetHistory } from './BudgetHistory';
 import { EnvelopeOverview } from './EnvelopeOverview';
+import { logger } from '@/lib/logger';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -75,6 +77,57 @@ export function BudgetsPage() {
   const [editingBudget, setEditingBudget] = useState<BudgetWithProgress | null>(null);
   const [selectedBudget, setSelectedBudget] = useState<BudgetWithProgress | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'envelopes'>('list');
+  const [isExporting, setIsExporting] = useState(false);
+
+  // PDF Export function
+  const handleExportPDF = async () => {
+    if (!workspaceId) return;
+
+    setIsExporting(true);
+    try {
+      const baseUrl = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? '/api/v1';
+      const token = localStorage.getItem('accessToken');
+
+      const now = new Date();
+      const url = `${baseUrl}/workspaces/${workspaceId}/reports/budget/pdf?year=${now.getFullYear()}&month=${now.getMonth() + 1}`;
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.status}`);
+      }
+
+      // Get filename from response
+      let filename = `budget_${format(now, 'yyyy_MM')}.pdf`;
+      const contentDisposition = response.headers.get('Content-Disposition');
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/);
+        if (match && match[1]) {
+          filename = match[1];
+        }
+      }
+
+      // Download the file
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      logger.error('PDF export error', error);
+      alert("Erreur lors de l'export PDF");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Fetch budgets
   const { data: budgets, isLoading } = useQuery({
@@ -174,6 +227,23 @@ export function BudgetsPage() {
               <LayoutGrid className="w-4 h-4" />
             </button>
           </div>
+          {/* PDF Export Button */}
+          <button
+            onClick={() => void handleExportPDF()}
+            disabled={isExporting}
+            className={clsx(
+              'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
+              'bg-ctp-red/10 text-ctp-red hover:bg-ctp-red/20',
+              'disabled:opacity-50 disabled:cursor-not-allowed'
+            )}
+          >
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            Export PDF
+          </button>
           <button onClick={() => setShowForm(true)} className="btn-primary">
             + Nouveau budget
           </button>

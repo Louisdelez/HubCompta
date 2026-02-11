@@ -5,6 +5,7 @@
 
 import { prisma } from '@/core/database/client.js';
 import { logger } from '@/core/middleware/logger.js';
+import { cacheService, CACHE_KEYS, CACHE_TTL } from '@/core/cache/index.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -121,15 +122,22 @@ const COMMON_CURRENCIES = [
 
 export const currencyService = {
   /**
-   * Get all available currencies
+   * Get all available currencies (with caching)
    */
   async listCurrencies(activeOnly = true) {
-    const currencies = await prisma.currency.findMany({
-      where: activeOnly ? { isActive: true } : undefined,
-      orderBy: { code: 'asc' },
-    });
+    const cacheKey = `${CACHE_KEYS.currencies()}:${activeOnly ? 'active' : 'all'}`;
 
-    return currencies;
+    return cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const currencies = await prisma.currency.findMany({
+          where: activeOnly ? { isActive: true } : undefined,
+          orderBy: { code: 'asc' },
+        });
+        return currencies;
+      },
+      CACHE_TTL.EXCHANGE_RATES
+    );
   },
 
   /**
@@ -377,7 +385,7 @@ export const currencyService = {
   },
 
   /**
-   * Bulk import exchange rates
+   * Bulk import exchange rates (invalidates cache)
    */
   async importRates(rates: ExchangeRateData[]) {
     const results = {
@@ -396,6 +404,11 @@ export const currencyService = {
           }`
         );
       }
+    }
+
+    // Invalidate exchange rates cache after bulk import
+    if (results.imported > 0) {
+      await cacheService.invalidateExchangeRates();
     }
 
     return results;
@@ -430,11 +443,24 @@ export const currencyService = {
   },
 
   /**
-   * Get latest rates for a base currency
+   * Get latest rates for a base currency (with caching)
    * Includes cross-rates from all sources (ECB, Fed, SNB, FRED)
    */
   async getLatestRates(baseCurrency: string) {
     const base = baseCurrency.toUpperCase();
+    const cacheKey = `${CACHE_KEYS.exchangeRates()}:${base}`;
+
+    return cacheService.getOrSet(
+      cacheKey,
+      async () => this._fetchLatestRates(base),
+      CACHE_TTL.EXCHANGE_RATES
+    );
+  },
+
+  /**
+   * Internal method to fetch latest rates (uncached)
+   */
+  async _fetchLatestRates(base: string) {
     const ratesMap = new Map<string, { rate: number; date: Date; source: string }>();
 
     // 1. Get direct rates from base currency

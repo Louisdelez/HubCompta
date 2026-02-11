@@ -12,6 +12,7 @@ import {
   Bell,
   Shield,
   Database,
+  FileText,
   ChevronRight,
   ArrowLeft,
 } from 'lucide-react';
@@ -20,12 +21,13 @@ import { DisplaySettings } from './DisplaySettings';
 import { NotificationSettings } from './NotificationSettings';
 import { SecuritySettings } from './SecuritySettings';
 import { DataManagement } from './DataManagement';
+import { AuditLogPage } from './AuditLogPage';
 
 // ----------------------------------------------------------------------------
 // Types
 // ----------------------------------------------------------------------------
 
-type SettingsSection = 'profile' | 'display' | 'notifications' | 'security' | 'data';
+type SettingsSection = 'profile' | 'display' | 'notifications' | 'security' | 'audit' | 'data';
 
 interface NavItem {
   id: SettingsSection;
@@ -44,6 +46,7 @@ const sectionColors: Record<SettingsSection, string> = {
   display: 'text-ctp-mauve',
   notifications: 'text-ctp-yellow',
   security: 'text-ctp-red',
+  audit: 'text-ctp-teal',
   data: 'text-ctp-peach',
 };
 
@@ -53,6 +56,7 @@ const sectionBgColors: Record<SettingsSection, string> = {
   display: 'bg-ctp-mauve/20',
   notifications: 'bg-ctp-yellow/20',
   security: 'bg-ctp-red/20',
+  audit: 'bg-ctp-teal/20',
   data: 'bg-ctp-peach/20',
 };
 
@@ -80,6 +84,12 @@ const navItems: NavItem[] = [
     label: 'Securite',
     description: 'MFA, appareils et sessions',
     icon: Shield,
+  },
+  {
+    id: 'audit',
+    label: 'Journal d\'audit',
+    description: 'Historique des actions sensibles',
+    icon: FileText,
   },
   {
     id: 'data',
@@ -115,6 +125,8 @@ export function SettingsPage() {
         return <NotificationSettings />;
       case 'security':
         return <SecuritySettings />;
+      case 'audit':
+        return <AuditLogPage />;
       case 'data':
         return <DataManagement />;
       default:

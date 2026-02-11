@@ -4,6 +4,7 @@
 
 import { prisma } from '@/core/database/client.js';
 import { NotFoundError, ConflictError } from '@/core/middleware/errorHandler.js';
+import { cacheService, CACHE_KEYS, CACHE_TTL } from '@/core/cache/index.js';
 import type { Account, AccountType, Prisma } from '@prisma/client';
 
 // ----------------------------------------------------------------------------
@@ -70,6 +71,9 @@ export const accountService = {
       },
     });
 
+    // Invalidate workspace accounts cache
+    await cacheService.invalidateWorkspaceCache(workspaceId);
+
     return account;
   },
 
@@ -120,51 +124,59 @@ export const accountService = {
   },
 
   /**
-   * List accounts for workspace
+   * List accounts for workspace (with caching)
    */
   async list(workspaceId: string, filters: AccountFilters = {}): Promise<AccountWithBalance[]> {
-    const where: Prisma.AccountWhereInput = {
-      workspaceId,
-      deletedAt: null,
-    };
+    const cacheKey = `${CACHE_KEYS.workspaceAccounts(workspaceId)}:${filters.type ?? 'all'}:${filters.includeArchived ? 'archived' : 'active'}`;
 
-    if (filters.type) {
-      where.type = filters.type;
-    }
-
-    if (!filters.includeArchived) {
-      where.isArchived = false;
-    }
-
-    const accounts = await prisma.account.findMany({
-      where,
-      orderBy: [
-        { type: 'asc' },
-        { name: 'asc' },
-      ],
-    });
-
-    // Get balances for all accounts
-    const accountsWithBalances: AccountWithBalance[] = [];
-
-    for (const account of accounts) {
-      const transactionSum = await prisma.transaction.aggregate({
-        where: {
-          accountId: account.id,
+    return cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const where: Prisma.AccountWhereInput = {
+          workspaceId,
           deletedAt: null,
-        },
-        _sum: { amount: true },
-        _count: true,
-      });
+        };
 
-      accountsWithBalances.push({
-        ...account,
-        balance: account.balance.toNumber() + (transactionSum._sum.amount?.toNumber() ?? 0),
-        transactionCount: transactionSum._count,
-      });
-    }
+        if (filters.type) {
+          where.type = filters.type;
+        }
 
-    return accountsWithBalances;
+        if (!filters.includeArchived) {
+          where.isArchived = false;
+        }
+
+        const accounts = await prisma.account.findMany({
+          where,
+          orderBy: [
+            { type: 'asc' },
+            { name: 'asc' },
+          ],
+        });
+
+        // Get balances for all accounts
+        const accountsWithBalances: AccountWithBalance[] = [];
+
+        for (const account of accounts) {
+          const transactionSum = await prisma.transaction.aggregate({
+            where: {
+              accountId: account.id,
+              deletedAt: null,
+            },
+            _sum: { amount: true },
+            _count: true,
+          });
+
+          accountsWithBalances.push({
+            ...account,
+            balance: account.balance.toNumber() + (transactionSum._sum.amount?.toNumber() ?? 0),
+            transactionCount: transactionSum._count,
+          });
+        }
+
+        return accountsWithBalances;
+      },
+      CACHE_TTL.ACCOUNTS
+    );
   },
 
   /**
@@ -203,10 +215,15 @@ export const accountService = {
       }
     }
 
-    return prisma.account.update({
+    const updatedAccount = await prisma.account.update({
       where: { id: accountId },
       data: input,
     });
+
+    // Invalidate workspace accounts cache
+    await cacheService.invalidateWorkspaceCache(workspaceId);
+
+    return updatedAccount;
   },
 
   /**
@@ -256,6 +273,9 @@ export const accountService = {
       where: { id: accountId },
       data: { deletedAt: new Date() },
     });
+
+    // Invalidate workspace accounts cache
+    await cacheService.invalidateWorkspaceCache(workspaceId);
   },
 
   /**

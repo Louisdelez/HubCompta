@@ -7,12 +7,15 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ArrowLeftRight, CreditCard, Check, ArrowRight } from 'lucide-react';
+import { ArrowLeftRight, CreditCard, Check, ArrowRight, Download, Loader2, Camera } from 'lucide-react';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { TransactionForm } from './TransactionForm';
+import { ScanReceiptModal } from './ScanReceiptModal';
 import { CurrencyDisplay } from '@/features/currency';
+import { logger } from '@/lib/logger';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -165,10 +168,77 @@ export function TransactionList() {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<TransactionFilters>({});
   const [showForm, setShowForm] = useState(false);
+  const [showScanModal, setShowScanModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
   const { mode, displayCurrency } = useCurrencyDisplayMode();
   const parentRef = useRef<HTMLDivElement>(null);
+
+  // PDF Export function
+  const handleExportPDF = async () => {
+    if (!workspaceId) return;
+
+    setIsExporting(true);
+    try {
+      const baseUrl = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? '/api/v1';
+      const token = localStorage.getItem('accessToken');
+
+      // Build URL with current filters
+      let url = `${baseUrl}/workspaces/${workspaceId}/reports/transactions/pdf`;
+      const params = new URLSearchParams();
+
+      // Default to current month
+      const now = new Date();
+      params.append('from', format(startOfMonth(now), 'yyyy-MM-dd'));
+      params.append('to', format(endOfMonth(now), 'yyyy-MM-dd'));
+
+      if (filters.accountId) params.append('accountId', filters.accountId);
+      if (filters.categoryId) params.append('categoryId', filters.categoryId);
+      if (filters.search) params.append('search', filters.search);
+
+      const queryString = params.toString();
+      if (queryString) {
+        url += `?${queryString}`;
+      }
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.status}`);
+      }
+
+      // Get filename from response
+      let filename = `transactions_${format(now, 'yyyyMMdd')}.pdf`;
+      const contentDisposition = response.headers.get('Content-Disposition');
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/);
+        if (match && match[1]) {
+          filename = match[1];
+        }
+      }
+
+      // Download the file
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      logger.error('PDF export error', error);
+      alert("Erreur lors de l'export PDF");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['transactions', workspaceId, page, filters],
@@ -315,9 +385,38 @@ export function TransactionList() {
             {data?.total ?? 0} transaction{(data?.total ?? 0) !== 1 ? 's' : ''}
           </p>
         </div>
-        <button onClick={() => setShowForm(true)} className="btn-primary">
-          + Nouvelle transaction
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowScanModal(true)}
+            className={clsx(
+              'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
+              'bg-ctp-mauve/10 text-ctp-mauve hover:bg-ctp-mauve/20'
+            )}
+            title="Scanner un ticket de caisse"
+          >
+            <Camera className="h-4 w-4" />
+            <span className="hidden sm:inline">Scanner</span>
+          </button>
+          <button
+            onClick={() => void handleExportPDF()}
+            disabled={isExporting}
+            className={clsx(
+              'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
+              'bg-ctp-red/10 text-ctp-red hover:bg-ctp-red/20',
+              'disabled:opacity-50 disabled:cursor-not-allowed'
+            )}
+          >
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">Export PDF</span>
+          </button>
+          <button onClick={() => setShowForm(true)} className="btn-primary">
+            + <span className="hidden sm:inline">Nouvelle transaction</span><span className="sm:hidden">Ajouter</span>
+          </button>
+        </div>
       </div>
 
       {/* Search & Filters */}
@@ -569,6 +668,18 @@ export function TransactionList() {
             void refetch();
             setShowForm(false);
             setEditingTransaction(null);
+          }}
+        />
+      )}
+
+      {/* Scan Receipt Modal */}
+      {showScanModal && (
+        <ScanReceiptModal
+          workspaceId={workspaceId}
+          onClose={() => setShowScanModal(false)}
+          onSuccess={() => {
+            void refetch();
+            setShowScanModal(false);
           }}
         />
       )}

@@ -4,6 +4,7 @@
 
 import { prisma } from '@/core/database/client.js';
 import { NotFoundError, ConflictError } from '@/core/middleware/errorHandler.js';
+import { cacheService, CACHE_KEYS, CACHE_TTL } from '@/core/cache/index.js';
 import type { Category, CategoryType } from '@prisma/client';
 
 // ----------------------------------------------------------------------------
@@ -36,7 +37,7 @@ export interface CategoryWithChildren extends Category {
 
 export const categoryService = {
   /**
-   * Create a new category
+   * Create a new category (invalidates cache)
    */
   async create(workspaceId: string, input: CategoryCreateInput): Promise<Category> {
     // Check for duplicate category name in workspace
@@ -71,7 +72,7 @@ export const categoryService = {
       }
     }
 
-    return prisma.category.create({
+    const category = await prisma.category.create({
       data: {
         workspaceId,
         name: input.name,
@@ -81,6 +82,11 @@ export const categoryService = {
         parentId: input.parentId,
       },
     });
+
+    // Invalidate workspace categories cache
+    await cacheService.invalidateWorkspaceCache(workspaceId);
+
+    return category;
   },
 
   /**
@@ -96,44 +102,52 @@ export const categoryService = {
   },
 
   /**
-   * List categories with hierarchy
+   * List categories with hierarchy (with caching)
    */
   async list(workspaceId: string, type?: CategoryType): Promise<CategoryWithChildren[]> {
-    const where: { workspaceId: string; type?: CategoryType } = { workspaceId };
-    if (type) where.type = type;
+    const cacheKey = `${CACHE_KEYS.workspaceCategories(workspaceId)}:${type ?? 'all'}`;
 
-    const categories = await prisma.category.findMany({
-      where,
-      orderBy: { name: 'asc' },
-    });
+    return cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const where: { workspaceId: string; type?: CategoryType } = { workspaceId };
+        if (type) where.type = type;
 
-    // Get transaction counts
-    const transactionCounts = await prisma.transaction.groupBy({
-      by: ['categoryId'],
-      where: {
-        workspaceId,
-        deletedAt: null,
-        categoryId: { not: null },
+        const categories = await prisma.category.findMany({
+          where,
+          orderBy: { name: 'asc' },
+        });
+
+        // Get transaction counts
+        const transactionCounts = await prisma.transaction.groupBy({
+          by: ['categoryId'],
+          where: {
+            workspaceId,
+            deletedAt: null,
+            categoryId: { not: null },
+          },
+          _count: true,
+        });
+
+        const countMap = new Map(
+          transactionCounts.map((tc) => [tc.categoryId, tc._count])
+        );
+
+        // Build hierarchy
+        const buildTree = (parentId: string | null): CategoryWithChildren[] => {
+          return categories
+            .filter((c) => c.parentId === parentId)
+            .map((c) => ({
+              ...c,
+              children: buildTree(c.id),
+              transactionCount: countMap.get(c.id) ?? 0,
+            }));
+        };
+
+        return buildTree(null);
       },
-      _count: true,
-    });
-
-    const countMap = new Map(
-      transactionCounts.map((tc) => [tc.categoryId, tc._count])
+      CACHE_TTL.CATEGORIES
     );
-
-    // Build hierarchy
-    const buildTree = (parentId: string | null): CategoryWithChildren[] => {
-      return categories
-        .filter((c) => c.parentId === parentId)
-        .map((c) => ({
-          ...c,
-          children: buildTree(c.id),
-          transactionCount: countMap.get(c.id) ?? 0,
-        }));
-    };
-
-    return buildTree(null);
   },
 
   /**
@@ -232,14 +246,19 @@ export const categoryService = {
       }
     }
 
-    return prisma.category.update({
+    const updatedCategory = await prisma.category.update({
       where: { id: categoryId },
       data: input,
     });
+
+    // Invalidate workspace categories cache
+    await cacheService.invalidateWorkspaceCache(workspaceId);
+
+    return updatedCategory;
   },
 
   /**
-   * Delete category
+   * Delete category (invalidates cache)
    */
   async delete(workspaceId: string, categoryId: string): Promise<void> {
     const category = await prisma.category.findFirst({
@@ -272,12 +291,14 @@ export const categoryService = {
           where: { id: categoryId },
         }),
       ]);
-      return;
+    } else {
+      await prisma.category.delete({
+        where: { id: categoryId },
+      });
     }
 
-    await prisma.category.delete({
-      where: { id: categoryId },
-    });
+    // Invalidate workspace categories cache
+    await cacheService.invalidateWorkspaceCache(workspaceId);
   },
 
   /**
@@ -341,6 +362,9 @@ export const categoryService = {
         where: { id: sourceCategoryId },
       }),
     ]);
+
+    // Invalidate workspace categories cache
+    await cacheService.invalidateWorkspaceCache(workspaceId);
   },
 };
 
