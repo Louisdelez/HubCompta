@@ -191,8 +191,8 @@ describe('AchievementService', () => {
       const result = await achievementService.getUserAchievements('user-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].isUnlocked).toBe(true);
-      expect(result[1].isUnlocked).toBe(false);
+      expect(result[0]!.isUnlocked).toBe(true);
+      expect(result[1]!.isUnlocked).toBe(false);
     });
 
     it('should hide secret achievement details if not unlocked', async () => {
@@ -205,9 +205,9 @@ describe('AchievementService', () => {
 
       const result = await achievementService.getUserAchievements('user-123');
 
-      expect(result[0].name).toBe('???');
-      expect(result[0].description).toBe('Achievement secret');
-      expect(result[0].icon).toBe('❓');
+      expect(result[0]!.name).toBe('???');
+      expect(result[0]!.description).toBe('Achievement secret');
+      expect(result[0]!.icon).toBe('❓');
     });
 
     it('should show secret achievement details if unlocked', async () => {
@@ -232,8 +232,8 @@ describe('AchievementService', () => {
 
       const result = await achievementService.getUserAchievements('user-123');
 
-      expect(result[0].name).toBe('Hibou Nocturne');
-      expect(result[0].isUnlocked).toBe(true);
+      expect(result[0]!.name).toBe('Hibou Nocturne');
+      expect(result[0]!.isUnlocked).toBe(true);
     });
 
     it('should order achievements by category and threshold', async () => {
@@ -682,8 +682,8 @@ describe('AchievementService', () => {
       const result = await achievementService.getLeaderboard(3);
 
       expect(result).toHaveLength(3);
-      expect(result[0].displayName).toBe('Alice');
-      expect(result[0].totalXp).toBe(1000);
+      expect(result[0]!.displayName).toBe('Alice');
+      expect(result[0]!.totalXp).toBe(1000);
     });
 
     it('should order by XP descending', async () => {
@@ -724,7 +724,7 @@ describe('AchievementService', () => {
 
       const result = await achievementService.getLeaderboard();
 
-      expect(result[0].currentStreak).toBe(15);
+      expect(result[0]!.currentStreak).toBe(15);
     });
   });
 });

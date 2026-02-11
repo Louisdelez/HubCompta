@@ -325,8 +325,8 @@ describe('BudgetService', () => {
       const result = await budgetService.list('workspace-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].spent).toBeDefined();
-      expect(result[0].percentUsed).toBeDefined();
+      expect(result[0]!.spent).toBeDefined();
+      expect(result[0]!.percentUsed).toBeDefined();
     });
 
     it('should exclude expired budgets', async () => {

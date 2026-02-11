@@ -327,8 +327,8 @@ describe('SavingsService', () => {
       const result = await savingsService.list('workspace-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].progress).toBeDefined();
-      expect(result[1].progress).toBeDefined();
+      expect(result[0]!.progress).toBeDefined();
+      expect(result[1]!.progress).toBeDefined();
     });
 
     it('should exclude completed goals by default', async () => {

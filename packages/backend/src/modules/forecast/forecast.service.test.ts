@@ -117,7 +117,7 @@ describe('ForecastService', () => {
 
       expect(result).toHaveLength(1);
       // Both transactions should be aggregated into January
-      expect(result[0].data[0].amount).toBe(150);
+      expect(result[0]!.data[0]!.amount).toBe(150);
     });
 
     it('should skip transactions without category', async () => {
@@ -433,7 +433,7 @@ describe('ForecastService', () => {
       const result = await forecastService.getForecast('workspace-123');
 
       expect(result).toHaveLength(1);
-      expect(result[0].category).toBeDefined();
+      expect(result[0]!.category).toBeDefined();
     });
 
     it('should filter by date range', async () => {
