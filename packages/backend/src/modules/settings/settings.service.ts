@@ -208,6 +208,7 @@ export const settingsService = {
         id: true,
         email: true,
         displayName: true,
+        country: true,
         locale: true,
         timezone: true,
         theme: true,
@@ -225,6 +226,7 @@ export const settingsService = {
     userId: string,
     data: {
       displayName?: string;
+      country?: string;
       locale?: string;
       timezone?: string;
       theme?: string;
@@ -237,6 +239,7 @@ export const settingsService = {
         id: true,
         email: true,
         displayName: true,
+        country: true,
         locale: true,
         timezone: true,
         theme: true,

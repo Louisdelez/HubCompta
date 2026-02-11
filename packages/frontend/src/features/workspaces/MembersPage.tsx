@@ -5,8 +5,10 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { X } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { X, Users, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api/client';
+import { useWorkspace } from '@/hooks/useWorkspace';
 import { InviteMember } from './InviteMember';
 import { clsx } from 'clsx';
 
@@ -23,17 +25,12 @@ interface Member {
   joinedAt: string;
 }
 
-interface MembersPageProps {
-  workspaceId: string;
-  currentUserRole: string;
-}
-
 // ----------------------------------------------------------------------------
 // Constants
 // ----------------------------------------------------------------------------
 
 const ROLE_LABELS: Record<Member['role'], string> = {
-  owner: 'Propriétaire',
+  owner: 'Proprietaire',
   admin: 'Administrateur',
   accountant: 'Comptable',
   member: 'Membre',
@@ -52,7 +49,12 @@ const ROLE_COLORS: Record<Member['role'], string> = {
 // Component
 // ----------------------------------------------------------------------------
 
-export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) {
+export function MembersPage() {
+  const { workspaceId: paramWorkspaceId } = useParams<{ workspaceId: string }>();
+  const { currentWorkspaceId, currentWorkspace } = useWorkspace();
+  const workspaceId = paramWorkspaceId || currentWorkspaceId;
+  const currentUserRole = currentWorkspace?.role || 'readonly';
+
   const queryClient = useQueryClient();
   const [showInvite, setShowInvite] = useState(false);
   const [editingMember, setEditingMember] = useState<string | null>(null);
@@ -65,6 +67,7 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
   const { data: members, isLoading } = useQuery({
     queryKey: ['workspace-members', workspaceId],
     queryFn: () => api.get<Member[]>(`/workspaces/${workspaceId}/members`),
+    enabled: !!workspaceId,
   });
 
   // Update role mutation
@@ -94,14 +97,18 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
     });
   };
 
+  if (!workspaceId) {
+    return (
+      <div className="p-6 text-center text-ctp-subtext0">
+        Selectionnez un espace de travail
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-ctp-surface1 rounded w-1/3" />
-          <div className="h-16 bg-ctp-surface1 rounded" />
-          <div className="h-16 bg-ctp-surface1 rounded" />
-        </div>
+      <div className="p-6 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-ctp-blue" />
       </div>
     );
   }
@@ -109,11 +116,16 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Membres</h1>
-          <p className="text-ctp-subtext0">
-            {members?.length ?? 0} membre{(members?.length ?? 0) > 1 ? 's' : ''}
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-ctp-blue/20">
+            <Users className="w-6 h-6 text-ctp-blue" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-ctp-text">Membres</h1>
+            <p className="text-ctp-subtext0">
+              {members?.length ?? 0} membre{(members?.length ?? 0) > 1 ? 's' : ''}
+            </p>
+          </div>
         </div>
         {canInvite && (
           <button
@@ -138,7 +150,7 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <p className="font-medium truncate">{member.displayName}</p>
+              <p className="font-medium truncate text-ctp-text">{member.displayName}</p>
               <p className="text-sm text-ctp-subtext0 truncate">
                 {member.email}
               </p>
@@ -200,7 +212,7 @@ export function MembersPage({ workspaceId, currentUserRole }: MembersPageProps) 
       </div>
 
       {/* Invite modal */}
-      {showInvite && (
+      {showInvite && workspaceId && (
         <InviteMember
           workspaceId={workspaceId}
           onClose={() => setShowInvite(false)}

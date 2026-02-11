@@ -1,18 +1,27 @@
 // ============================================================================
 // TAX SERVICE - Finance Hub
-// French tax system defaults (bareme progressif 2024)
+// Multi-country tax system support (France, Switzerland)
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
 import { NotFoundError, ConflictError } from '@/core/middleware/errorHandler.js';
 import type { TaxYear, TaxDeduction } from '@prisma/client';
+import {
+  type CountryCode,
+  type TaxBracket,
+  getCountryConfig,
+  getTaxBrackets,
+  getDeductionCategories,
+  calculateTax,
+  getMarginalRate,
+} from '@finance-hub/shared';
 
 // ----------------------------------------------------------------------------
 // Types
 // ----------------------------------------------------------------------------
 
 export interface TaxDeductionCreateInput {
-  category: 'professional' | 'medical' | 'charitable' | 'other';
+  category: string;
   description: string;
   amount: number;
   documentId?: string;
@@ -31,6 +40,7 @@ export interface TaxYearWithDeductions extends TaxYear {
 export interface TaxSummary {
   year: number;
   status: string;
+  country: CountryCode;
   totalIncome: number;
   totalDeductions: number;
   taxableIncome: number;
@@ -39,76 +49,47 @@ export interface TaxSummary {
   effectiveRate: number;
   marginalRate: number;
   deductionsByCategory: Record<string, number>;
+  currency: string;
 }
-
-export interface TaxBracket {
-  min: number;
-  max: number | null;
-  rate: number;
-}
-
-// ----------------------------------------------------------------------------
-// French Tax Brackets (2024 Bareme)
-// ----------------------------------------------------------------------------
-
-const FRENCH_TAX_BRACKETS: TaxBracket[] = [
-  { min: 0, max: 11294, rate: 0 },
-  { min: 11294, max: 28797, rate: 0.11 },
-  { min: 28797, max: 82341, rate: 0.30 },
-  { min: 82341, max: 177106, rate: 0.41 },
-  { min: 177106, max: null, rate: 0.45 },
-];
-
-// Standard deduction percentage for professional expenses (if no real expenses declared)
-const STANDARD_DEDUCTION_RATE = 0.10;
-const STANDARD_DEDUCTION_MIN = 495;
-const STANDARD_DEDUCTION_MAX = 14171;
 
 // ----------------------------------------------------------------------------
 // Helper Functions
 // ----------------------------------------------------------------------------
 
 /**
- * Calculate French income tax based on progressive brackets
+ * Get country code for a workspace (from owner's profile)
  */
-function calculateFrenchTax(taxableIncome: number, brackets: TaxBracket[]): number {
-  let tax = 0;
-  let remainingIncome = taxableIncome;
+async function getWorkspaceCountry(workspaceId: string): Promise<CountryCode> {
+  const workspace = await prisma.workspace.findUnique({
+    where: { id: workspaceId },
+    include: {
+      owner: {
+        select: { country: true },
+      },
+    },
+  });
 
-  for (const bracket of brackets) {
-    if (remainingIncome <= 0) break;
-
-    const bracketSize = bracket.max !== null
-      ? bracket.max - bracket.min
-      : remainingIncome;
-
-    const taxableInBracket = Math.min(remainingIncome, bracketSize);
-    tax += taxableInBracket * bracket.rate;
-    remainingIncome -= taxableInBracket;
-  }
-
-  return Math.round(tax * 100) / 100;
+  return (workspace?.owner?.country as CountryCode) ?? 'FR';
 }
 
 /**
- * Get marginal tax rate for a given income
+ * Calculate standard deduction based on country rules
  */
-function getMarginalRate(taxableIncome: number, brackets: TaxBracket[]): number {
-  for (let i = brackets.length - 1; i >= 0; i--) {
-    const bracket = brackets[i];
-    if (bracket && taxableIncome > bracket.min) {
-      return bracket.rate;
-    }
-  }
-  return 0;
-}
+function calculateStandardDeduction(
+  grossIncome: number,
+  countryCode: CountryCode
+): number {
+  const config = getCountryConfig(countryCode);
 
-/**
- * Calculate standard deduction (abattement forfaitaire)
- */
-function calculateStandardDeduction(grossIncome: number): number {
-  const deduction = grossIncome * STANDARD_DEDUCTION_RATE;
-  return Math.min(Math.max(deduction, STANDARD_DEDUCTION_MIN), STANDARD_DEDUCTION_MAX);
+  if (!config.standardDeduction) {
+    return 0; // No standard deduction (e.g., Switzerland)
+  }
+
+  const deduction = grossIncome * config.standardDeduction.rate;
+  return Math.min(
+    Math.max(deduction, config.standardDeduction.min),
+    config.standardDeduction.max
+  );
 }
 
 // ----------------------------------------------------------------------------
@@ -274,6 +255,15 @@ export const taxService = {
       throw new ConflictError('Cannot add deductions to a closed tax year');
     }
 
+    // Validate deduction category for the country
+    const countryCode = await getWorkspaceCountry(workspaceId);
+    const validCategories = getDeductionCategories(countryCode);
+    const isValidCategory = validCategories.some(c => c.code === input.category);
+
+    if (!isValidCategory) {
+      throw new ConflictError(`Invalid deduction category: ${input.category} for country ${countryCode}`);
+    }
+
     // Verify document belongs to workspace if provided
     if (input.documentId) {
       const doc = await prisma.document.findFirst({
@@ -349,6 +339,9 @@ export const taxService = {
       throw new NotFoundError('TaxYear', taxYearId);
     }
 
+    // Get country code for this workspace
+    const countryCode = await getWorkspaceCountry(workspaceId);
+
     // Calculate income for the year
     const totalIncome = await this.calculateIncome(workspaceId, taxYear.year);
 
@@ -358,21 +351,21 @@ export const taxService = {
       0
     );
 
-    // Apply standard deduction if no professional deductions
+    // Apply standard deduction if applicable (France only)
     const hasProfessionalDeductions = taxYear.deductions.some(
       d => d.category === 'professional'
     );
 
     let effectiveDeductions = totalDeductions;
     if (!hasProfessionalDeductions && totalIncome > 0) {
-      effectiveDeductions += calculateStandardDeduction(totalIncome);
+      effectiveDeductions += calculateStandardDeduction(totalIncome, countryCode);
     }
 
     // Calculate taxable income
     const taxableIncome = Math.max(0, totalIncome - effectiveDeductions);
 
-    // Calculate estimated tax using French brackets
-    const estimatedTax = calculateFrenchTax(taxableIncome, FRENCH_TAX_BRACKETS);
+    // Calculate estimated tax using country-specific brackets
+    const estimatedTax = calculateTax(taxableIncome, countryCode);
 
     return prisma.taxYear.update({
       where: { id: taxYearId },
@@ -412,6 +405,8 @@ export const taxService = {
    */
   async getSummary(workspaceId: string, year: number): Promise<TaxSummary> {
     const taxYear = await this.getOrCreateYear(workspaceId, year);
+    const countryCode = await getWorkspaceCountry(workspaceId);
+    const config = getCountryConfig(countryCode);
 
     const totalIncome = taxYear.totalIncome?.toNumber() ?? 0;
     const totalDeductions = taxYear.totalDeductions?.toNumber() ?? 0;
@@ -425,7 +420,7 @@ export const taxService = {
       : 0;
 
     // Get marginal rate
-    const marginalRate = getMarginalRate(taxableIncome, FRENCH_TAX_BRACKETS) * 100;
+    const marginalRate = getMarginalRate(taxableIncome, countryCode) * 100;
 
     // Group deductions by category
     const deductionsByCategory: Record<string, number> = {};
@@ -437,6 +432,7 @@ export const taxService = {
     return {
       year: taxYear.year,
       status: taxYear.status,
+      country: countryCode,
       totalIncome,
       totalDeductions,
       taxableIncome,
@@ -445,14 +441,33 @@ export const taxService = {
       effectiveRate: Math.round(effectiveRate * 100) / 100,
       marginalRate,
       deductionsByCategory,
+      currency: config.defaultCurrency,
     };
   },
 
   /**
-   * Get French tax brackets for display
+   * Get tax brackets for a workspace's country
    */
-  getTaxBrackets(): TaxBracket[] {
-    return FRENCH_TAX_BRACKETS;
+  async getTaxBrackets(workspaceId: string): Promise<TaxBracket[]> {
+    const countryCode = await getWorkspaceCountry(workspaceId);
+    return getTaxBrackets(countryCode);
+  },
+
+  /**
+   * Get deduction categories for a workspace's country
+   */
+  async getDeductionCategories(workspaceId: string) {
+    const countryCode = await getWorkspaceCountry(workspaceId);
+    return getDeductionCategories(countryCode);
+  },
+
+  /**
+   * Get VAT rates for a workspace's country
+   */
+  async getVATRates(workspaceId: string) {
+    const countryCode = await getWorkspaceCountry(workspaceId);
+    const config = getCountryConfig(countryCode);
+    return config.vatRates;
   },
 
   /**

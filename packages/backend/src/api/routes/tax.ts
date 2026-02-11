@@ -31,7 +31,7 @@ const updateTaxYearSchema = z.object({
 });
 
 const createDeductionSchema = z.object({
-  category: z.enum(['professional', 'medical', 'charitable', 'other']),
+  category: z.string().min(1).max(50), // Country-dependent categories
   description: z.string().min(1).max(500),
   amount: z.number().positive(),
   documentId: z.string().uuid().optional(),
@@ -63,7 +63,7 @@ export function taxRoutes(app: FastifyInstance): void {
   );
 
   // --------------------------------------------------------------------------
-  // GET /tax/brackets - Get tax brackets (French defaults)
+  // GET /tax/brackets - Get tax brackets (based on user's country)
   // --------------------------------------------------------------------------
   app.get(
     '/brackets',
@@ -73,9 +73,43 @@ export function taxRoutes(app: FastifyInstance): void {
 
       await checkPermission(userId, workspaceId, 'budget', 'read');
 
-      const brackets = taxService.getTaxBrackets();
+      const brackets = await taxService.getTaxBrackets(workspaceId);
 
       return reply.send({ success: true, data: brackets });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /tax/deduction-categories - Get available deduction categories
+  // --------------------------------------------------------------------------
+  app.get(
+    '/deduction-categories',
+    async (request: FastifyRequest<{ Params: { workspaceId: string } }>, reply: FastifyReply) => {
+      const { workspaceId } = request.params;
+      const userId = request.user!.sub;
+
+      await checkPermission(userId, workspaceId, 'budget', 'read');
+
+      const categories = await taxService.getDeductionCategories(workspaceId);
+
+      return reply.send({ success: true, data: categories });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /tax/vat-rates - Get VAT rates for user's country
+  // --------------------------------------------------------------------------
+  app.get(
+    '/vat-rates',
+    async (request: FastifyRequest<{ Params: { workspaceId: string } }>, reply: FastifyReply) => {
+      const { workspaceId } = request.params;
+      const userId = request.user!.sub;
+
+      await checkPermission(userId, workspaceId, 'budget', 'read');
+
+      const vatRates = await taxService.getVATRates(workspaceId);
+
+      return reply.send({ success: true, data: vatRates });
     }
   );
 

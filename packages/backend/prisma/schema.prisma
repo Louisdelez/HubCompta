@@ -20,6 +20,7 @@ model User {
   email           String   @unique @db.VarChar(255)
   displayName     String   @map("display_name") @db.VarChar(100)
   passwordHash    String   @map("password_hash") @db.VarChar(255)
+  country         String   @default("FR") @db.VarChar(2) // FR, CH
   locale          String   @default("fr-FR") @db.VarChar(10)
   timezone        String   @default("Europe/Paris") @db.VarChar(50)
   theme           String   @default("system") @db.VarChar(20) // light, dark, system
