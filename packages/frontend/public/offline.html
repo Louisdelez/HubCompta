@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1e1e2e">
+  <title>HubCompta - Hors ligne</title>
+  <style>
+    /* Catppuccin Mocha colors */
+    :root {
+      --ctp-base: #1e1e2e;
+      --ctp-surface0: #313244;
+      --ctp-surface1: #45475a;
+      --ctp-text: #cdd6f4;
+      --ctp-subtext0: #a6adc8;
+      --ctp-mauve: #cba6f7;
+      --ctp-blue: #89b4fa;
+      --ctp-overlay0: #6c7086;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--ctp-base);
+      color: var(--ctp-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 28rem;
+      width: 100%;
+    }
+
+    .icon-container {
+      margin-bottom: 2rem;
+    }
+
+    .offline-icon {
+      width: 6rem;
+      height: 6rem;
+      color: var(--ctp-mauve);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--ctp-text);
+    }
+
+    .subtitle {
+      font-size: 1.125rem;
+      color: var(--ctp-subtext0);
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background-color: var(--ctp-surface0);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--ctp-mauve);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .feature-list {
+      list-style: none;
+      text-align: left;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      color: var(--ctp-subtext0);
+      font-size: 0.9375rem;
+    }
+
+    .feature-list li svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: var(--ctp-blue);
+      flex-shrink: 0;
+    }
+
+    .retry-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background-color: var(--ctp-mauve);
+      color: var(--ctp-base);
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 0.875rem 1.75rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .retry-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .retry-btn:active {
+      transform: translateY(0);
+    }
+
+    .retry-btn svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .status {
+      margin-top: 2rem;
+      padding: 0.75rem 1rem;
+      background-color: var(--ctp-surface0);
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--ctp-subtext0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .status-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      background-color: var(--ctp-overlay0);
+      border-radius: 50%;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    .status.online .status-dot {
+      background-color: #a6e3a1;
+      animation: none;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .logo {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--ctp-mauve);
+      text-decoration: none;
+    }
+
+    @media (max-width: 640px) {
+      .offline-icon {
+        width: 5rem;
+        height: 5rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+      }
+
+      .card {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <span class="logo">HubCompta</span>
+
+  <div class="container">
+    <div class="icon-container">
+      <!-- Wifi Off Icon -->
+      <svg class="offline-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18" stroke-width="2" />
+      </svg>
+    </div>
+
+    <h1>Vous etes hors ligne</h1>
+    <p class="subtitle">
+      La connexion internet n'est pas disponible pour le moment.
+    </p>
+
+    <div class="card">
+      <h2 class="card-title">Fonctionnalites disponibles hors ligne</h2>
+      <ul class="feature-list">
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          Consulter les donnees en cache
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          Ajouter des transactions (sync auto)
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          Voir le tableau de bord recent
+        </li>
+      </ul>
+    </div>
+
+    <button class="retry-btn" onclick="window.location.reload()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      Reessayer
+    </button>
+
+    <div class="status" id="status">
+      <span class="status-dot"></span>
+      <span id="status-text">Verification de la connexion...</span>
+    </div>
+  </div>
+
+  <script>
+    // Check online status and update UI
+    function updateOnlineStatus() {
+      const statusEl = document.getElementById('status');
+      const statusText = document.getElementById('status-text');
+
+      if (navigator.onLine) {
+        statusEl.classList.add('online');
+        statusText.textContent = 'Connexion retablie - Rechargement...';
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        statusEl.classList.remove('online');
+        statusText.textContent = 'En attente de connexion...';
+      }
+    }
+
+    // Listen for online/offline events
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    // Initial check
+    updateOnlineStatus();
+
+    // Periodic check every 5 seconds
+    setInterval(() => {
+      if (navigator.onLine) {
+        updateOnlineStatus();
+      }
+    }, 5000);
+  </script>
+</body>
+</html>

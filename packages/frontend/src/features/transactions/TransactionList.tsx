@@ -1,10 +1,12 @@
 // ============================================================================
 // TRANSACTION LIST - Finance Hub
 // Uses Catppuccin colors that adapt to the current theme
+// Virtualized for performance with large datasets
 // ============================================================================
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowLeftRight, CreditCard, Check, ArrowRight } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
@@ -44,6 +46,20 @@ interface TransactionFilters {
   startDate?: string;
   endDate?: string;
   search?: string;
+}
+
+interface DateGroup {
+  date: string;
+  formattedDate: string;
+  transactions: Transaction[];
+}
+
+// Flattened item for virtualization
+interface FlatItem {
+  type: 'header' | 'transaction';
+  date?: string;
+  formattedDate?: string;
+  transaction?: Transaction;
 }
 
 // ----------------------------------------------------------------------------
@@ -88,14 +104,51 @@ function formatDate(date: string): string {
   });
 }
 
-function groupByDate(transactions: Transaction[]): Record<string, Transaction[]> {
-  return transactions.reduce<Record<string, Transaction[]>>((groups, txn) => {
+function groupByDate(transactions: Transaction[]): DateGroup[] {
+  const groups: Record<string, Transaction[]> = {};
+
+  transactions.forEach((txn) => {
     const date = txn.date.split('T')[0] ?? txn.date;
     if (!groups[date]) groups[date] = [];
     groups[date].push(txn);
-    return groups;
-  }, {});
+  });
+
+  return Object.entries(groups).map(([date, txns]) => ({
+    date,
+    formattedDate: formatDate(date),
+    transactions: txns,
+  }));
 }
+
+// Flatten groups into a single array for virtualization
+function flattenGroups(groups: DateGroup[]): FlatItem[] {
+  const items: FlatItem[] = [];
+
+  groups.forEach((group) => {
+    items.push({
+      type: 'header',
+      date: group.date,
+      formattedDate: group.formattedDate,
+    });
+
+    group.transactions.forEach((txn) => {
+      items.push({
+        type: 'transaction',
+        transaction: txn,
+      });
+    });
+  });
+
+  return items;
+}
+
+// ----------------------------------------------------------------------------
+// Constants
+// ----------------------------------------------------------------------------
+
+const HEADER_HEIGHT = 32;
+const TRANSACTION_HEIGHT_BASE = 72;
+const TRANSACTION_HEIGHT_WITH_TAGS = 96;
 
 // ----------------------------------------------------------------------------
 // Component
@@ -115,6 +168,7 @@ export function TransactionList() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const { mode, displayCurrency } = useCurrencyDisplayMode();
+  const parentRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['transactions', workspaceId, page, filters],
@@ -136,7 +190,8 @@ export function TransactionList() {
   });
 
   const transactions = useMemo(() => data?.transactions ?? [], [data?.transactions]);
-  const groupedTransactions = groupByDate(transactions);
+  const groupedTransactions = useMemo(() => groupByDate(transactions), [transactions]);
+  const flattenedItems = useMemo(() => flattenGroups(groupedTransactions), [groupedTransactions]);
   const meta = data?.meta;
 
   // Get unique currencies from transactions
@@ -161,12 +216,38 @@ export function TransactionList() {
   });
 
   // Helper to convert amount
-  const convertAmount = (amount: number, currency: string): number | null => {
+  const convertAmount = useCallback((amount: number, currency: string): number | null => {
     if (currency === displayCurrency) return amount;
     const rate = rates?.[`${currency}/${displayCurrency}`];
     if (!rate) return null;
     return amount * rate.rate;
-  };
+  }, [rates, displayCurrency]);
+
+  // Estimate size for each item
+  const estimateSize = useCallback((index: number): number => {
+    const item = flattenedItems[index] as FlatItem;
+    if (item.type === 'header') {
+      return HEADER_HEIGHT;
+    }
+    // Check if transaction has tags
+    const hasTags = item.transaction?.tags && item.transaction.tags.length > 0;
+    return hasTags ? TRANSACTION_HEIGHT_WITH_TAGS : TRANSACTION_HEIGHT_BASE;
+  }, [flattenedItems]);
+
+  // Setup virtualizer
+  const virtualizer = useVirtualizer({
+    count: flattenedItems.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize,
+    overscan: 5,
+    getItemKey: (index: number) => {
+      const item = flattenedItems[index] as FlatItem;
+      if (item.type === 'header') {
+        return `header-${item.date}`;
+      }
+      return `txn-${item.transaction?.id}`;
+    },
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,16 +255,58 @@ export function TransactionList() {
     setPage(1);
   };
 
+  const handleTransactionClick = useCallback((txn: Transaction) => {
+    setEditingTransaction(txn);
+    setShowForm(true);
+  }, []);
+
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    const container = parentRef.current;
+    if (!container) return;
+
+    const currentScrollTop = container.scrollTop;
+    const clientHeight = container.clientHeight;
+    const scrollStep = 72;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        container.scrollTop = currentScrollTop + scrollStep;
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        container.scrollTop = currentScrollTop - scrollStep;
+        break;
+      case 'PageDown':
+        e.preventDefault();
+        container.scrollTop = currentScrollTop + clientHeight;
+        break;
+      case 'PageUp':
+        e.preventDefault();
+        container.scrollTop = currentScrollTop - clientHeight;
+        break;
+      case 'Home':
+        e.preventDefault();
+        container.scrollTop = 0;
+        break;
+      case 'End':
+        e.preventDefault();
+        container.scrollTop = container.scrollHeight;
+        break;
+    }
+  }, []);
+
   if (!workspaceId) {
     return (
       <div className="p-6 text-center text-ctp-subtext0">
-        Sélectionnez un espace de travail
+        Selectionnez un espace de travail
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 bg-ctp-base min-h-full">
+    <div className="p-6 space-y-6 bg-ctp-base min-h-full flex flex-col">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -232,28 +355,83 @@ export function TransactionList() {
           </button>
         </div>
       ) : (
-        <div className="space-y-6">
-          {Object.entries(groupedTransactions).map(([date, dayTransactions]) => (
-            <div key={date}>
-              <h3 className="text-sm font-medium text-ctp-subtext0 mb-2">
-                {formatDate(date)}
-              </h3>
-              <div className="space-y-2">
-                {dayTransactions.map((txn) => (
+        <div
+          ref={parentRef}
+          className="flex-1 overflow-auto min-h-0"
+          style={{ height: 'calc(100vh - 320px)' }}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          role="list"
+          aria-label="Liste des transactions"
+        >
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const item = flattenedItems[virtualItem.index] as FlatItem;
+
+              if (item.type === 'header') {
+                return (
                   <div
-                    key={txn.id}
-                    onClick={() => {
-                      setEditingTransaction(txn);
-                      setShowForm(true);
+                    key={virtualItem.key}
+                    data-index={virtualItem.index}
+                    ref={virtualizer.measureElement}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      transform: `translateY(${virtualItem.start}px)`,
                     }}
+                  >
+                    <h3
+                      className="text-sm font-medium text-ctp-subtext0 py-2 bg-ctp-base sticky top-0"
+                      role="heading"
+                      aria-level={3}
+                    >
+                      {item.formattedDate}
+                    </h3>
+                  </div>
+                );
+              }
+
+              const txn = item.transaction as Transaction;
+              return (
+                <div
+                  key={virtualItem.key}
+                  data-index={virtualItem.index}
+                  ref={virtualizer.measureElement}
+                  role="listitem"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <div
+                    onClick={() => handleTransactionClick(txn)}
                     className={clsx(
-                      'card flex items-center gap-3 cursor-pointer hover:shadow-md transition-shadow border-l-4',
+                      'card flex items-center gap-3 cursor-pointer hover:shadow-md transition-shadow border-l-4 mb-2',
                       txn.type === 'income'
                         ? 'border-l-ctp-green'
                         : txn.type === 'transfer'
                         ? 'border-l-ctp-blue'
                         : 'border-l-ctp-red'
                     )}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleTransactionClick(txn);
+                      }
+                    }}
+                    aria-label={`${txn.description}, ${txn.type}, ${txn.amount} ${txn.account.currency}`}
                   >
                     {/* Icon */}
                     <div
@@ -280,14 +458,14 @@ export function TransactionList() {
                       <div className="flex items-center gap-2">
                         <p className="font-medium text-ctp-text truncate">{txn.description}</p>
                         {txn.isReconciled && (
-                          <span title="Rapproché"><Check className="w-4 h-4 text-ctp-green" /></span>
+                          <span title="Rapproche"><Check className="w-4 h-4 text-ctp-green" /></span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-ctp-subtext0">
                         <span className="truncate">
-                          {txn.category?.name ?? 'Non catégorisé'}
+                          {txn.category?.name ?? 'Non categorise'}
                         </span>
-                        <span>•</span>
+                        <span>-</span>
                         <span className="truncate">{txn.account.name}</span>
                       </div>
                       {txn.tags.length > 0 && (
@@ -337,22 +515,22 @@ export function TransactionList() {
                       )}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
       {/* Pagination */}
       {meta && meta.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2 pt-4 border-t border-ctp-surface1">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
             className="btn-secondary"
           >
-            Précédent
+            Precedent
           </button>
           <span className="text-sm text-ctp-subtext0">
             Page {meta.page} sur {meta.totalPages}

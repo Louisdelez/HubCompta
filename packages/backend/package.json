@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.1",
@@ -52,5 +53,8 @@
     "tsc-alias": "^1.8.0",
     "tsx": "^4.7.0",
     "vitest": "^1.2.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

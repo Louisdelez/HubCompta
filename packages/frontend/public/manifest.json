@@ -2,12 +2,14 @@
   "name": "HubCompta",
   "short_name": "HubCompta",
   "description": "Self-hosted financial management platform",
-  "theme_color": "#1e1e2e",
+  "theme_color": "#cba6f7",
   "background_color": "#1e1e2e",
   "display": "standalone",
   "orientation": "portrait-primary",
   "scope": "/",
   "start_url": "/",
+  "id": "hubcompta-pwa",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/pwa-192x192.png",
@@ -26,6 +28,36 @@
       "purpose": "maskable"
     }
   ],
-  "categories": ["finance", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Ajouter une transaction",
+      "short_name": "Transaction",
+      "description": "Ajouter une nouvelle transaction",
+      "url": "/transactions?action=new",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Tableau de bord",
+      "short_name": "Dashboard",
+      "description": "Voir le tableau de bord",
+      "url": "/dashboard",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Comptes",
+      "short_name": "Comptes",
+      "description": "Voir les comptes",
+      "url": "/accounts",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Budgets",
+      "short_name": "Budgets",
+      "description": "Gerer les budgets",
+      "url": "/budgets",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["finance", "productivity", "utilities"],
   "lang": "fr-FR"
 }

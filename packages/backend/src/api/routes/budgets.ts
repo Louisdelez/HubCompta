@@ -32,6 +32,78 @@ const updateBudgetSchema = z.object({
 });
 
 // ----------------------------------------------------------------------------
+// OpenAPI Schemas
+// ----------------------------------------------------------------------------
+
+const workspaceParamsSchema = {
+  type: 'object' as const,
+  required: ['workspaceId'],
+  properties: {
+    workspaceId: { type: 'string' as const, format: 'uuid', description: 'Workspace ID' },
+  },
+};
+
+const budgetParamsSchema = {
+  type: 'object' as const,
+  required: ['workspaceId', 'budgetId'],
+  properties: {
+    workspaceId: { type: 'string' as const, format: 'uuid', description: 'Workspace ID' },
+    budgetId: { type: 'string' as const, format: 'uuid', description: 'Budget ID' },
+  },
+};
+
+const budgetSchema = {
+  type: 'object' as const,
+  properties: {
+    id: { type: 'string' as const, format: 'uuid' },
+    workspaceId: { type: 'string' as const, format: 'uuid' },
+    categoryId: { type: 'string' as const, format: 'uuid' },
+    name: { type: 'string' as const },
+    amount: { type: 'number' as const },
+    spent: { type: 'number' as const },
+    remaining: { type: 'number' as const },
+    progress: { type: 'number' as const, description: 'Percentage of budget used (0-100+)' },
+    period: { type: 'string' as const, enum: ['monthly', 'yearly'] },
+    alertThreshold: { type: 'number' as const },
+    startDate: { type: 'string' as const, format: 'date-time' },
+    endDate: { type: 'string' as const, format: 'date-time', nullable: true },
+    createdAt: { type: 'string' as const, format: 'date-time' },
+    updatedAt: { type: 'string' as const, format: 'date-time' },
+    category: {
+      type: 'object' as const,
+      properties: {
+        id: { type: 'string' as const, format: 'uuid' },
+        name: { type: 'string' as const },
+        icon: { type: 'string' as const, nullable: true },
+        color: { type: 'string' as const, nullable: true },
+      },
+    },
+  },
+};
+
+const successResponseSchema = (dataSchema: object) => ({
+  type: 'object' as const,
+  properties: {
+    success: { type: 'boolean' as const, enum: [true] },
+    data: dataSchema,
+  },
+});
+
+const errorResponseSchema = {
+  type: 'object' as const,
+  properties: {
+    success: { type: 'boolean' as const, enum: [false] },
+    error: {
+      type: 'object' as const,
+      properties: {
+        message: { type: 'string' as const },
+        code: { type: 'string' as const },
+      },
+    },
+  },
+};
+
+// ----------------------------------------------------------------------------
 // Route Handlers
 // ----------------------------------------------------------------------------
 
@@ -44,6 +116,20 @@ export function budgetRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get(
     '/',
+    {
+      schema: {
+        summary: 'List all budgets',
+        description: 'Retrieve all budgets for a workspace with current spending progress.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        response: {
+          200: successResponseSchema({ type: 'array' as const, items: budgetSchema }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: { workspaceId: string } }>, reply: FastifyReply) => {
       const { workspaceId } = request.params;
       const userId = request.user!.sub;
@@ -62,6 +148,30 @@ export function budgetRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get(
     '/summary',
+    {
+      schema: {
+        summary: 'Get budget summary',
+        description: 'Get an overview of all budgets including total budgeted, spent, and remaining amounts.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              totalBudgets: { type: 'integer' as const },
+              totalBudgeted: { type: 'number' as const },
+              totalSpent: { type: 'number' as const },
+              totalRemaining: { type: 'number' as const },
+              overBudgetCount: { type: 'integer' as const, description: 'Number of budgets exceeding their limits' },
+              nearLimitCount: { type: 'integer' as const, description: 'Number of budgets near their alert threshold' },
+            },
+          }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: { workspaceId: string } }>, reply: FastifyReply) => {
       const { workspaceId } = request.params;
       const userId = request.user!.sub;
@@ -80,6 +190,34 @@ export function budgetRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get(
     '/alerts',
+    {
+      schema: {
+        summary: 'Get active budget alerts',
+        description: 'Retrieve all active alerts for budgets that have exceeded or are near their limits.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        response: {
+          200: successResponseSchema({
+            type: 'array' as const,
+            items: {
+              type: 'object' as const,
+              properties: {
+                id: { type: 'string' as const, format: 'uuid' },
+                budgetId: { type: 'string' as const, format: 'uuid' },
+                budgetName: { type: 'string' as const },
+                type: { type: 'string' as const, enum: ['warning', 'exceeded'] },
+                percentage: { type: 'number' as const },
+                message: { type: 'string' as const },
+                createdAt: { type: 'string' as const, format: 'date-time' },
+              },
+            },
+          }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: { workspaceId: string } }>, reply: FastifyReply) => {
       const { workspaceId } = request.params;
       const userId = request.user!.sub;
@@ -98,6 +236,44 @@ export function budgetRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get(
     '/dashboard',
+    {
+      schema: {
+        summary: 'Get dashboard summary',
+        description: 'Get a comprehensive dashboard view with budgets, alerts, and spending insights.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              budgets: { type: 'array' as const, items: budgetSchema },
+              alerts: {
+                type: 'array' as const,
+                items: {
+                  type: 'object' as const,
+                  properties: {
+                    budgetId: { type: 'string' as const, format: 'uuid' },
+                    type: { type: 'string' as const },
+                    message: { type: 'string' as const },
+                  },
+                },
+              },
+              summary: {
+                type: 'object' as const,
+                properties: {
+                  totalBudgeted: { type: 'number' as const },
+                  totalSpent: { type: 'number' as const },
+                  overallProgress: { type: 'number' as const },
+                },
+              },
+            },
+          }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request: FastifyRequest<{ Params: { workspaceId: string } }>, reply: FastifyReply) => {
       const { workspaceId } = request.params;
       const userId = request.user!.sub;
@@ -116,6 +292,34 @@ export function budgetRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.post(
     '/',
+    {
+      schema: {
+        summary: 'Create new budget',
+        description: 'Create a new budget for a category with specified amount and period.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        body: {
+          type: 'object' as const,
+          required: ['categoryId', 'name', 'amount', 'period', 'startDate'],
+          properties: {
+            categoryId: { type: 'string' as const, format: 'uuid', description: 'Category to budget for' },
+            name: { type: 'string' as const, minLength: 1, maxLength: 100, description: 'Budget name' },
+            amount: { type: 'number' as const, minimum: 0.01, description: 'Budget amount' },
+            period: { type: 'string' as const, enum: ['monthly', 'yearly'], description: 'Budget period' },
+            alertThreshold: { type: 'number' as const, minimum: 1, maximum: 100, default: 80, description: 'Alert threshold percentage' },
+            startDate: { type: 'string' as const, format: 'date-time', description: 'Budget start date' },
+            endDate: { type: 'string' as const, format: 'date-time', description: 'Optional end date' },
+          },
+        },
+        response: {
+          201: successResponseSchema(budgetSchema),
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (
       request: FastifyRequest<{
         Params: { workspaceId: string };
@@ -155,6 +359,21 @@ export function budgetRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get(
     '/:budgetId',
+    {
+      schema: {
+        summary: 'Get budget by ID',
+        description: 'Retrieve detailed information about a specific budget including current spending progress.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: budgetParamsSchema,
+        response: {
+          200: successResponseSchema(budgetSchema),
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (
       request: FastifyRequest<{ Params: { workspaceId: string; budgetId: string } }>,
       reply: FastifyReply
@@ -180,6 +399,38 @@ export function budgetRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get(
     '/:budgetId/history',
+    {
+      schema: {
+        summary: 'Get budget history',
+        description: 'Retrieve historical spending data for a budget over the specified number of months.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: budgetParamsSchema,
+        querystring: {
+          type: 'object' as const,
+          properties: {
+            months: { type: 'string' as const, pattern: '^[0-9]+$', default: '6', description: 'Number of months of history' },
+          },
+        },
+        response: {
+          200: successResponseSchema({
+            type: 'array' as const,
+            items: {
+              type: 'object' as const,
+              properties: {
+                month: { type: 'string' as const, format: 'date' },
+                budgeted: { type: 'number' as const },
+                spent: { type: 'number' as const },
+                remaining: { type: 'number' as const },
+              },
+            },
+          }),
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (
       request: FastifyRequest<{
         Params: { workspaceId: string; budgetId: string };
@@ -205,6 +456,31 @@ export function budgetRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.patch(
     '/:budgetId',
+    {
+      schema: {
+        summary: 'Update budget',
+        description: 'Update an existing budget. All fields are optional.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: budgetParamsSchema,
+        body: {
+          type: 'object' as const,
+          properties: {
+            name: { type: 'string' as const, minLength: 1, maxLength: 100, description: 'Budget name' },
+            amount: { type: 'number' as const, minimum: 0.01, description: 'Budget amount' },
+            alertThreshold: { type: 'number' as const, minimum: 1, maximum: 100, description: 'Alert threshold percentage' },
+            endDate: { type: 'string' as const, format: 'date-time', nullable: true, description: 'End date' },
+          },
+        },
+        response: {
+          200: successResponseSchema(budgetSchema),
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (
       request: FastifyRequest<{
         Params: { workspaceId: string; budgetId: string };
@@ -248,6 +524,21 @@ export function budgetRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.delete(
     '/:budgetId',
+    {
+      schema: {
+        summary: 'Delete budget',
+        description: 'Delete a budget. This action cannot be undone.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: budgetParamsSchema,
+        response: {
+          204: { type: 'null' as const, description: 'Budget deleted successfully' },
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (
       request: FastifyRequest<{ Params: { workspaceId: string; budgetId: string } }>,
       reply: FastifyReply

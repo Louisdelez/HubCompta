@@ -1,5 +1,5 @@
 // ============================================================================
-// HOOKS EXPORTS - Finance Hub
+// HOOKS EXPORTS - HubCompta
 // ============================================================================
 
 export { useDebounce } from './useDebounce';
@@ -9,4 +9,6 @@ export { usePrefetch } from './usePrefetch';
 export { useOnlineStatus, useSyncStatus, useOfflineStatus, useNetworkQuality } from './useOnlineStatus';
 export { useListNavigation } from './useListNavigation';
 export type { UseListNavigationOptions, UseListNavigationResult, ListItemProps } from './useListNavigation';
+export { usePWA } from './usePWA';
+export type { PWAStatus, PWAActions, UsePWAResult } from './usePWA';
 // Note: useTheme is exported from @/providers/ThemeProvider

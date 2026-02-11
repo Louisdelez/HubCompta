@@ -38,6 +38,78 @@ interface GoalQuery {
 }
 
 // ----------------------------------------------------------------------------
+// OpenAPI Schemas
+// ----------------------------------------------------------------------------
+
+const workspaceParamsSchema = {
+  type: 'object' as const,
+  required: ['workspaceId'],
+  properties: {
+    workspaceId: { type: 'string' as const, format: 'uuid', description: 'Workspace ID' },
+  },
+};
+
+const goalParamsSchema = {
+  type: 'object' as const,
+  required: ['workspaceId', 'goalId'],
+  properties: {
+    workspaceId: { type: 'string' as const, format: 'uuid', description: 'Workspace ID' },
+    goalId: { type: 'string' as const, format: 'uuid', description: 'Savings goal ID' },
+  },
+};
+
+const contributionParamsSchema = {
+  type: 'object' as const,
+  required: ['workspaceId', 'goalId', 'contributionId'],
+  properties: {
+    workspaceId: { type: 'string' as const, format: 'uuid', description: 'Workspace ID' },
+    goalId: { type: 'string' as const, format: 'uuid', description: 'Savings goal ID' },
+    contributionId: { type: 'string' as const, format: 'uuid', description: 'Contribution ID' },
+  },
+};
+
+const savingsGoalSchema = {
+  type: 'object' as const,
+  properties: {
+    id: { type: 'string' as const, format: 'uuid' },
+    workspaceId: { type: 'string' as const, format: 'uuid' },
+    name: { type: 'string' as const },
+    targetAmount: { type: 'number' as const },
+    currentAmount: { type: 'number' as const },
+    targetDate: { type: 'string' as const, format: 'date-time', nullable: true },
+    icon: { type: 'string' as const, nullable: true },
+    color: { type: 'string' as const, nullable: true },
+    accountId: { type: 'string' as const, format: 'uuid', nullable: true },
+    isCompleted: { type: 'boolean' as const },
+    completedAt: { type: 'string' as const, format: 'date-time', nullable: true },
+    createdAt: { type: 'string' as const, format: 'date-time' },
+    updatedAt: { type: 'string' as const, format: 'date-time' },
+  },
+};
+
+const successResponseSchema = (dataSchema: object) => ({
+  type: 'object' as const,
+  properties: {
+    success: { type: 'boolean' as const, enum: [true] },
+    data: dataSchema,
+  },
+});
+
+const errorResponseSchema = {
+  type: 'object' as const,
+  properties: {
+    success: { type: 'boolean' as const, enum: [false] },
+    error: {
+      type: 'object' as const,
+      properties: {
+        message: { type: 'string' as const },
+        code: { type: 'string' as const },
+      },
+    },
+  },
+};
+
+// ----------------------------------------------------------------------------
 // Routes
 // ----------------------------------------------------------------------------
 
@@ -51,7 +123,30 @@ export function savingsRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get<{ Params: WorkspaceParams; Querystring: GoalQuery }>(
     '/',
-    { preHandler: requirePermission('budget:read') },
+    {
+      preHandler: requirePermission('budget:read'),
+      schema: {
+        summary: 'List savings goals',
+        description: 'Retrieve all savings goals for a workspace. Supports filtering by completion status.',
+        tags: ['Savings'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        querystring: {
+          type: 'object' as const,
+          properties: {
+            includeDeleted: { type: 'boolean' as const, description: 'Include soft-deleted goals' },
+            includeCompleted: { type: 'boolean' as const, description: 'Include completed goals' },
+            page: { type: 'integer' as const, minimum: 1, description: 'Page number' },
+            pageSize: { type: 'integer' as const, minimum: 1, maximum: 100, description: 'Items per page' },
+          },
+        },
+        response: {
+          200: successResponseSchema({ type: 'array' as const, items: savingsGoalSchema }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId } = request.params;
       const query = savingsGoalQuerySchema.parse(request.query);
@@ -73,7 +168,31 @@ export function savingsRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get<{ Params: WorkspaceParams }>(
     '/summary',
-    { preHandler: requirePermission('budget:read') },
+    {
+      preHandler: requirePermission('budget:read'),
+      schema: {
+        summary: 'Get savings summary',
+        description: 'Get an overview of all savings goals including total saved, targets, and progress.',
+        tags: ['Savings'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              totalGoals: { type: 'integer' as const },
+              activeGoals: { type: 'integer' as const },
+              completedGoals: { type: 'integer' as const },
+              totalTargetAmount: { type: 'number' as const },
+              totalCurrentAmount: { type: 'number' as const },
+              overallProgress: { type: 'number' as const, description: 'Progress percentage (0-100)' },
+            },
+          }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId } = request.params;
 
@@ -91,7 +210,34 @@ export function savingsRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.post<{ Params: WorkspaceParams }>(
     '/',
-    { preHandler: requirePermission('budget:create') },
+    {
+      preHandler: requirePermission('budget:create'),
+      schema: {
+        summary: 'Create savings goal',
+        description: 'Create a new savings goal with a target amount and optional target date.',
+        tags: ['Savings'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        body: {
+          type: 'object' as const,
+          required: ['name', 'targetAmount'],
+          properties: {
+            name: { type: 'string' as const, minLength: 1, maxLength: 100, description: 'Goal name' },
+            targetAmount: { type: 'number' as const, minimum: 0.01, description: 'Target amount to save' },
+            targetDate: { type: 'string' as const, format: 'date-time', description: 'Optional target date' },
+            icon: { type: 'string' as const, description: 'Optional icon identifier' },
+            color: { type: 'string' as const, pattern: '^#[0-9A-Fa-f]{6}$', description: 'Optional hex color' },
+            accountId: { type: 'string' as const, format: 'uuid', description: 'Optional linked account ID' },
+          },
+        },
+        response: {
+          201: successResponseSchema(savingsGoalSchema),
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId } = request.params;
       const input = savingsGoalCreateSchema.parse(request.body);
@@ -126,7 +272,22 @@ export function savingsRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get<{ Params: GoalParams }>(
     '/:goalId',
-    { preHandler: requirePermission('budget:read') },
+    {
+      preHandler: requirePermission('budget:read'),
+      schema: {
+        summary: 'Get savings goal details',
+        description: 'Retrieve detailed information about a specific savings goal.',
+        tags: ['Savings'],
+        security: [{ bearerAuth: [] }],
+        params: goalParamsSchema,
+        response: {
+          200: successResponseSchema(savingsGoalSchema),
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, goalId } = request.params;
 
@@ -151,7 +312,34 @@ export function savingsRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.patch<{ Params: GoalParams }>(
     '/:goalId',
-    { preHandler: requirePermission('budget:update') },
+    {
+      preHandler: requirePermission('budget:update'),
+      schema: {
+        summary: 'Update savings goal',
+        description: 'Update an existing savings goal. All fields are optional.',
+        tags: ['Savings'],
+        security: [{ bearerAuth: [] }],
+        params: goalParamsSchema,
+        body: {
+          type: 'object' as const,
+          properties: {
+            name: { type: 'string' as const, minLength: 1, maxLength: 100, description: 'Goal name' },
+            targetAmount: { type: 'number' as const, minimum: 0.01, description: 'Target amount to save' },
+            targetDate: { type: 'string' as const, format: 'date-time', nullable: true, description: 'Target date' },
+            icon: { type: 'string' as const, nullable: true, description: 'Icon identifier' },
+            color: { type: 'string' as const, pattern: '^#[0-9A-Fa-f]{6}$', nullable: true, description: 'Hex color' },
+            accountId: { type: 'string' as const, format: 'uuid', nullable: true, description: 'Linked account ID' },
+          },
+        },
+        response: {
+          200: successResponseSchema(savingsGoalSchema),
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, goalId } = request.params;
       const input = savingsGoalUpdateSchema.parse(request.body);
@@ -180,7 +368,27 @@ export function savingsRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.delete<{ Params: GoalParams }>(
     '/:goalId',
-    { preHandler: requirePermission('budget:delete') },
+    {
+      preHandler: requirePermission('budget:delete'),
+      schema: {
+        summary: 'Delete savings goal',
+        description: 'Soft delete a savings goal. The goal can be restored later.',
+        tags: ['Savings'],
+        security: [{ bearerAuth: [] }],
+        params: goalParamsSchema,
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              message: { type: 'string' as const },
+            },
+          }),
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, goalId } = request.params;
 
@@ -208,7 +416,32 @@ export function savingsRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.post<{ Params: GoalParams }>(
     '/:goalId/contribute',
-    { preHandler: requirePermission('budget:update') },
+    {
+      preHandler: requirePermission('budget:update'),
+      schema: {
+        summary: 'Add contribution',
+        description: 'Add a contribution to a savings goal. Optionally link to an existing transaction.',
+        tags: ['Savings'],
+        security: [{ bearerAuth: [] }],
+        params: goalParamsSchema,
+        body: {
+          type: 'object' as const,
+          required: ['amount'],
+          properties: {
+            amount: { type: 'number' as const, minimum: 0.01, description: 'Contribution amount' },
+            notes: { type: 'string' as const, description: 'Optional notes' },
+            transactionId: { type: 'string' as const, format: 'uuid', description: 'Optional linked transaction ID' },
+          },
+        },
+        response: {
+          201: successResponseSchema(savingsGoalSchema),
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, goalId } = request.params;
       const input = savingsContributionCreateSchema.parse(request.body);
@@ -241,7 +474,35 @@ export function savingsRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get<{ Params: GoalParams }>(
     '/:goalId/history',
-    { preHandler: requirePermission('budget:read') },
+    {
+      preHandler: requirePermission('budget:read'),
+      schema: {
+        summary: 'Get contribution history',
+        description: 'Retrieve the full contribution history for a savings goal.',
+        tags: ['Savings'],
+        security: [{ bearerAuth: [] }],
+        params: goalParamsSchema,
+        response: {
+          200: successResponseSchema({
+            type: 'array' as const,
+            items: {
+              type: 'object' as const,
+              properties: {
+                id: { type: 'string' as const, format: 'uuid' },
+                goalId: { type: 'string' as const, format: 'uuid' },
+                amount: { type: 'number' as const },
+                notes: { type: 'string' as const, nullable: true },
+                transactionId: { type: 'string' as const, format: 'uuid', nullable: true },
+                createdAt: { type: 'string' as const, format: 'date-time' },
+              },
+            },
+          }),
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, goalId } = request.params;
 
@@ -259,7 +520,22 @@ export function savingsRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.delete<{ Params: ContributionParams }>(
     '/:goalId/contributions/:contributionId',
-    { preHandler: requirePermission('budget:update') },
+    {
+      preHandler: requirePermission('budget:update'),
+      schema: {
+        summary: 'Delete contribution',
+        description: 'Delete a contribution from a savings goal. The goal\'s current amount will be updated.',
+        tags: ['Savings'],
+        security: [{ bearerAuth: [] }],
+        params: contributionParamsSchema,
+        response: {
+          200: successResponseSchema(savingsGoalSchema),
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, goalId, contributionId } = request.params;
 
@@ -288,7 +564,22 @@ export function savingsRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.post<{ Params: GoalParams }>(
     '/:goalId/complete',
-    { preHandler: requirePermission('budget:update') },
+    {
+      preHandler: requirePermission('budget:update'),
+      schema: {
+        summary: 'Mark goal as completed',
+        description: 'Mark a savings goal as completed. This will set the completion date.',
+        tags: ['Savings'],
+        security: [{ bearerAuth: [] }],
+        params: goalParamsSchema,
+        response: {
+          200: successResponseSchema(savingsGoalSchema),
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, goalId } = request.params;
 
@@ -315,7 +606,22 @@ export function savingsRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.post<{ Params: GoalParams }>(
     '/:goalId/reopen',
-    { preHandler: requirePermission('budget:update') },
+    {
+      preHandler: requirePermission('budget:update'),
+      schema: {
+        summary: 'Reopen completed goal',
+        description: 'Reopen a previously completed savings goal to continue tracking progress.',
+        tags: ['Savings'],
+        security: [{ bearerAuth: [] }],
+        params: goalParamsSchema,
+        response: {
+          200: successResponseSchema(savingsGoalSchema),
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, goalId } = request.params;
 

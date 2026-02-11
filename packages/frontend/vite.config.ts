@@ -8,16 +8,26 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: [
+        'favicon.ico',
+        'apple-touch-icon.png',
+        'masked-icon.svg',
+        'offline.html',
+      ],
       manifest: {
         name: 'HubCompta',
         short_name: 'HubCompta',
         description: 'Self-hosted financial management platform',
-        theme_color: '#1e1e2e', // Catppuccin Mocha base
-        background_color: '#1e1e2e',
+        theme_color: '#cba6f7', // Catppuccin Mocha mauve (primary accent)
+        background_color: '#1e1e2e', // Catppuccin Mocha base
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: '/',
+        scope: '/',
+        id: 'hubcompta-pwa',
+        categories: ['finance', 'productivity', 'utilities'],
+        lang: 'fr-FR',
+        dir: 'ltr',
         icons: [
           {
             src: '/pwa-192x192.png',
@@ -33,21 +43,151 @@ export default defineConfig({
             src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable',
+            purpose: 'maskable',
+          },
+        ],
+        shortcuts: [
+          {
+            name: 'Ajouter une transaction',
+            short_name: 'Transaction',
+            description: 'Ajouter une nouvelle transaction',
+            url: '/transactions?action=new',
+            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }],
+          },
+          {
+            name: 'Tableau de bord',
+            short_name: 'Dashboard',
+            description: 'Voir le tableau de bord',
+            url: '/dashboard',
+            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }],
+          },
+          {
+            name: 'Comptes',
+            short_name: 'Comptes',
+            description: 'Voir les comptes',
+            url: '/accounts',
+            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }],
+          },
+          {
+            name: 'Budgets',
+            short_name: 'Budgets',
+            description: 'Gerer les budgets',
+            url: '/budgets',
+            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }],
           },
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf,eot}'],
+        // Offline fallback page
+        navigateFallback: '/offline.html',
+        navigateFallbackDenylist: [/^\/api/, /^\/health/],
+        // Runtime caching strategies
         runtimeCaching: [
+          // API calls - NetworkFirst with offline support
           {
-            urlPattern: /^https:\/\/api\./i,
+            urlPattern: /^.*\/api\/(?!auth|user\/sessions).*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'api-cache',
+              cacheName: 'hubcompta-api-cache',
+              networkTimeoutSeconds: 10,
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+              backgroundSync: {
+                name: 'hubcompta-api-queue',
+                options: {
+                  maxRetentionTime: 24 * 60, // 24 hours in minutes
+                },
+              },
+            },
+          },
+          // Auth API - shorter cache, no background sync
+          {
+            urlPattern: /^.*\/api\/auth.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'hubcompta-auth-cache',
+              networkTimeoutSeconds: 5,
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60, // 1 minute
+              },
+              cacheableResponse: {
+                statuses: [200],
+              },
+            },
+          },
+          // Static assets (JS/CSS with hashes) - CacheFirst
+          {
+            urlPattern: /\.(?:js|css)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'hubcompta-static-cache',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          // Images - StaleWhileRevalidate
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|gif|svg|ico|webp)$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'hubcompta-images-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          // Fonts - CacheFirst with long expiration
+          {
+            urlPattern: /\.(?:woff|woff2|ttf|eot|otf)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'hubcompta-fonts-cache',
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          // Google Fonts stylesheets - StaleWhileRevalidate
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'hubcompta-google-fonts-stylesheets',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+            },
+          },
+          // Google Fonts files - CacheFirst
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'hubcompta-google-fonts-webfonts',
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
               },
               cacheableResponse: {
                 statuses: [0, 200],
@@ -58,6 +198,7 @@ export default defineConfig({
       },
       devOptions: {
         enabled: true,
+        type: 'module',
       },
     }),
   ],

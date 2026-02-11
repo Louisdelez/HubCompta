@@ -31,6 +31,112 @@ const syncOptionsSchema = z.object({
 });
 
 // ----------------------------------------------------------------------------
+// OpenAPI Schemas
+// ----------------------------------------------------------------------------
+
+const workspaceParamsSchema = {
+  type: 'object' as const,
+  required: ['workspaceId'],
+  properties: {
+    workspaceId: { type: 'string' as const, format: 'uuid', description: 'Workspace ID' },
+  },
+};
+
+const connectionParamsSchema = {
+  type: 'object' as const,
+  required: ['workspaceId', 'connectionId'],
+  properties: {
+    workspaceId: { type: 'string' as const, format: 'uuid', description: 'Workspace ID' },
+    connectionId: { type: 'string' as const, format: 'uuid', description: 'Bank connection ID' },
+  },
+};
+
+const bankAccountParamsSchema = {
+  type: 'object' as const,
+  required: ['workspaceId', 'bankAccountId'],
+  properties: {
+    workspaceId: { type: 'string' as const, format: 'uuid', description: 'Workspace ID' },
+    bankAccountId: { type: 'string' as const, format: 'uuid', description: 'Bank account ID' },
+  },
+};
+
+const institutionSchema = {
+  type: 'object' as const,
+  properties: {
+    id: { type: 'string' as const },
+    name: { type: 'string' as const },
+    bic: { type: 'string' as const, nullable: true },
+    logo: { type: 'string' as const, format: 'uri', nullable: true },
+    countries: { type: 'array' as const, items: { type: 'string' as const } },
+  },
+};
+
+const bankAccountSchema = {
+  type: 'object' as const,
+  properties: {
+    id: { type: 'string' as const, format: 'uuid' },
+    externalId: { type: 'string' as const },
+    iban: { type: 'string' as const, nullable: true },
+    name: { type: 'string' as const },
+    ownerName: { type: 'string' as const, nullable: true },
+    currency: { type: 'string' as const },
+    balance: { type: 'number' as const, nullable: true },
+    linkedAccountId: { type: 'string' as const, format: 'uuid', nullable: true },
+    lastSyncedAt: { type: 'string' as const, format: 'date-time', nullable: true },
+  },
+};
+
+const bankConnectionSchema = {
+  type: 'object' as const,
+  properties: {
+    id: { type: 'string' as const, format: 'uuid' },
+    workspaceId: { type: 'string' as const, format: 'uuid' },
+    institutionId: { type: 'string' as const },
+    institutionName: { type: 'string' as const },
+    institutionLogo: { type: 'string' as const, format: 'uri', nullable: true },
+    provider: { type: 'string' as const, enum: ['nordigen', 'tink', 'plaid', 'truelayer'] },
+    status: { type: 'string' as const, enum: ['pending', 'active', 'expired', 'error'] },
+    lastSyncedAt: { type: 'string' as const, format: 'date-time', nullable: true },
+    expiresAt: { type: 'string' as const, format: 'date-time', nullable: true },
+    accounts: { type: 'array' as const, items: bankAccountSchema },
+    createdAt: { type: 'string' as const, format: 'date-time' },
+    updatedAt: { type: 'string' as const, format: 'date-time' },
+  },
+};
+
+const syncResultSchema = {
+  type: 'object' as const,
+  properties: {
+    bankAccountId: { type: 'string' as const, format: 'uuid' },
+    transactionsImported: { type: 'integer' as const },
+    transactionsSkipped: { type: 'integer' as const },
+    errors: { type: 'array' as const, items: { type: 'string' as const } },
+  },
+};
+
+const successResponseSchema = (dataSchema: object) => ({
+  type: 'object' as const,
+  properties: {
+    success: { type: 'boolean' as const, enum: [true] },
+    data: dataSchema,
+  },
+});
+
+const errorResponseSchema = {
+  type: 'object' as const,
+  properties: {
+    success: { type: 'boolean' as const, enum: [false] },
+    error: {
+      type: 'object' as const,
+      properties: {
+        message: { type: 'string' as const },
+        code: { type: 'string' as const },
+      },
+    },
+  },
+};
+
+// ----------------------------------------------------------------------------
 // Routes
 // ----------------------------------------------------------------------------
 
@@ -47,7 +153,28 @@ export function bankingRoutes(app: FastifyInstance): void {
     Querystring: { country?: string; provider?: string };
   }>(
     '/institutions',
-    { preHandler: requirePermission('account:read') },
+    {
+      preHandler: requirePermission('account:read'),
+      schema: {
+        summary: 'List available institutions',
+        description: 'Retrieve a list of available banking institutions for a specific country.',
+        tags: ['Banking'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        querystring: {
+          type: 'object' as const,
+          properties: {
+            country: { type: 'string' as const, default: 'FR', description: 'ISO 3166-1 alpha-2 country code' },
+            provider: { type: 'string' as const, enum: ['nordigen', 'tink', 'plaid', 'truelayer'], default: 'nordigen' },
+          },
+        },
+        response: {
+          200: successResponseSchema({ type: 'array' as const, items: institutionSchema }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const country = request.query.country ?? 'FR';
       const provider = (request.query.provider ?? 'nordigen') as 'nordigen';
@@ -69,7 +196,30 @@ export function bankingRoutes(app: FastifyInstance): void {
     Querystring: { q: string; country?: string };
   }>(
     '/institutions/search',
-    { preHandler: requirePermission('account:read') },
+    {
+      preHandler: requirePermission('account:read'),
+      schema: {
+        summary: 'Search institutions',
+        description: 'Search for banking institutions by name.',
+        tags: ['Banking'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        querystring: {
+          type: 'object' as const,
+          required: ['q'],
+          properties: {
+            q: { type: 'string' as const, minLength: 2, description: 'Search query' },
+            country: { type: 'string' as const, description: 'ISO 3166-1 alpha-2 country code' },
+          },
+        },
+        response: {
+          200: successResponseSchema({ type: 'array' as const, items: institutionSchema }),
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { q, country } = request.query;
 
@@ -87,7 +237,21 @@ export function bankingRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get<{ Params: { workspaceId: string } }>(
     '/connections',
-    { preHandler: requirePermission('account:read') },
+    {
+      preHandler: requirePermission('account:read'),
+      schema: {
+        summary: 'List bank connections',
+        description: 'Retrieve all bank connections for a workspace.',
+        tags: ['Banking'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        response: {
+          200: successResponseSchema({ type: 'array' as const, items: bankConnectionSchema }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId } = request.params;
 
@@ -108,7 +272,38 @@ export function bankingRoutes(app: FastifyInstance): void {
     Body: z.infer<typeof initiateConnectionSchema>;
   }>(
     '/connections/initiate',
-    { preHandler: requirePermission('account:create') },
+    {
+      preHandler: requirePermission('account:create'),
+      schema: {
+        summary: 'Initiate bank connection',
+        description: 'Start the OAuth flow to connect a bank account. Returns a redirect URL for user authorization.',
+        tags: ['Banking'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        body: {
+          type: 'object' as const,
+          required: ['institutionId', 'institutionName'],
+          properties: {
+            institutionId: { type: 'string' as const, description: 'Institution identifier from the institutions list' },
+            institutionName: { type: 'string' as const, description: 'Display name of the institution' },
+            institutionLogo: { type: 'string' as const, format: 'uri', nullable: true, description: 'Logo URL' },
+            provider: { type: 'string' as const, enum: ['nordigen', 'tink', 'plaid', 'truelayer'], default: 'nordigen' },
+          },
+        },
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              connectionId: { type: 'string' as const, format: 'uuid' },
+              redirectUrl: { type: 'string' as const, format: 'uri', description: 'URL to redirect user for authorization' },
+            },
+          }),
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId } = request.params;
       const userId = request.user!.sub;
@@ -150,7 +345,23 @@ export function bankingRoutes(app: FastifyInstance): void {
     Params: { workspaceId: string; connectionId: string };
   }>(
     '/connections/:connectionId/complete',
-    { preHandler: requirePermission('account:create') },
+    {
+      preHandler: requirePermission('account:create'),
+      schema: {
+        summary: 'Complete bank connection',
+        description: 'Complete the OAuth flow after user authorization. Fetches bank accounts and activates the connection.',
+        tags: ['Banking'],
+        security: [{ bearerAuth: [] }],
+        params: connectionParamsSchema,
+        response: {
+          200: successResponseSchema(bankConnectionSchema),
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, connectionId } = request.params;
 
@@ -183,7 +394,22 @@ export function bankingRoutes(app: FastifyInstance): void {
     Params: { workspaceId: string; connectionId: string };
   }>(
     '/connections/:connectionId',
-    { preHandler: requirePermission('account:read') },
+    {
+      preHandler: requirePermission('account:read'),
+      schema: {
+        summary: 'Get connection details',
+        description: 'Retrieve detailed information about a specific bank connection including all linked accounts.',
+        tags: ['Banking'],
+        security: [{ bearerAuth: [] }],
+        params: connectionParamsSchema,
+        response: {
+          200: successResponseSchema(bankConnectionSchema),
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, connectionId } = request.params;
 
@@ -204,7 +430,30 @@ export function bankingRoutes(app: FastifyInstance): void {
     Body: z.infer<typeof syncOptionsSchema>;
   }>(
     '/connections/:connectionId/sync',
-    { preHandler: requirePermission('transaction:create') },
+    {
+      preHandler: requirePermission('transaction:create'),
+      schema: {
+        summary: 'Sync transactions',
+        description: 'Synchronize transactions from the bank. Optionally sync a specific account or from a specific date.',
+        tags: ['Banking'],
+        security: [{ bearerAuth: [] }],
+        params: connectionParamsSchema,
+        body: {
+          type: 'object' as const,
+          properties: {
+            bankAccountId: { type: 'string' as const, format: 'uuid', description: 'Sync only this account' },
+            fromDate: { type: 'string' as const, format: 'date-time', description: 'Sync transactions from this date' },
+          },
+        },
+        response: {
+          200: successResponseSchema({ type: 'array' as const, items: syncResultSchema }),
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, connectionId } = request.params;
       const options = syncOptionsSchema.parse(request.body);
@@ -244,7 +493,35 @@ export function bankingRoutes(app: FastifyInstance): void {
     Body: z.infer<typeof linkAccountSchema>;
   }>(
     '/accounts/:bankAccountId/link',
-    { preHandler: requirePermission('account:update') },
+    {
+      preHandler: requirePermission('account:update'),
+      schema: {
+        summary: 'Link bank account',
+        description: 'Link a bank account to an existing application account for transaction synchronization.',
+        tags: ['Banking'],
+        security: [{ bearerAuth: [] }],
+        params: bankAccountParamsSchema,
+        body: {
+          type: 'object' as const,
+          required: ['linkedAccountId'],
+          properties: {
+            linkedAccountId: { type: 'string' as const, format: 'uuid', description: 'Application account ID to link' },
+          },
+        },
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              message: { type: 'string' as const },
+            },
+          }),
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, bankAccountId } = request.params;
       const input = linkAccountSchema.parse(request.body);
@@ -279,7 +556,27 @@ export function bankingRoutes(app: FastifyInstance): void {
     Params: { workspaceId: string; connectionId: string };
   }>(
     '/connections/:connectionId/disconnect',
-    { preHandler: requirePermission('account:delete') },
+    {
+      preHandler: requirePermission('account:delete'),
+      schema: {
+        summary: 'Disconnect bank',
+        description: 'Disconnect a bank connection. The connection will be marked as inactive but data is preserved.',
+        tags: ['Banking'],
+        security: [{ bearerAuth: [] }],
+        params: connectionParamsSchema,
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              message: { type: 'string' as const },
+            },
+          }),
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, connectionId } = request.params;
 
@@ -309,7 +606,27 @@ export function bankingRoutes(app: FastifyInstance): void {
     Params: { workspaceId: string; connectionId: string };
   }>(
     '/connections/:connectionId',
-    { preHandler: requirePermission('account:delete') },
+    {
+      preHandler: requirePermission('account:delete'),
+      schema: {
+        summary: 'Delete connection',
+        description: 'Permanently delete a bank connection and all associated data.',
+        tags: ['Banking'],
+        security: [{ bearerAuth: [] }],
+        params: connectionParamsSchema,
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              message: { type: 'string' as const },
+            },
+          }),
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       const { workspaceId, connectionId } = request.params;
 

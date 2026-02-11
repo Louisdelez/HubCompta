@@ -1,10 +1,12 @@
 // ============================================================================
 // DOCUMENTS PAGE - Finance Hub
 // Uses Catppuccin colors that adapt to the current theme
+// Virtualized for performance with large document collections
 // ============================================================================
 
-import { useState } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { Inbox, Link2, Archive, FileText } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
@@ -45,12 +47,48 @@ interface Document {
 type FilterStatus = 'all' | 'inbox' | 'linked' | 'archived';
 
 // ----------------------------------------------------------------------------
+// Constants
+// ----------------------------------------------------------------------------
+
+const CARD_HEIGHT = 260; // Approximate height of a document card
+const CARD_GAP = 16; // Gap between cards
+
+// ----------------------------------------------------------------------------
+// Hooks - Responsive columns
+// ----------------------------------------------------------------------------
+
+function useGridColumns() {
+  const [columns, setColumns] = useState(3);
+
+  useEffect(() => {
+    function updateColumns() {
+      const width = window.innerWidth;
+      if (width < 768) {
+        setColumns(1);
+      } else if (width < 1024) {
+        setColumns(2);
+      } else {
+        setColumns(3);
+      }
+    }
+
+    updateColumns();
+    window.addEventListener('resize', updateColumns);
+    return () => window.removeEventListener('resize', updateColumns);
+  }, []);
+
+  return columns;
+}
+
+// ----------------------------------------------------------------------------
 // Component
 // ----------------------------------------------------------------------------
 
 export function DocumentsPage() {
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
+  const columns = useGridColumns();
+  const parentRef = useRef<HTMLDivElement>(null);
 
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -79,33 +117,88 @@ export function DocumentsPage() {
     enabled: !!workspaceId,
   });
 
-  const handleUploadComplete = () => {
+  const documents = data?.documents ?? [];
+
+  // Group documents into rows for virtualization
+  const rows = useMemo(() => {
+    const result: Document[][] = [];
+    for (let i = 0; i < documents.length; i += columns) {
+      result.push(documents.slice(i, i + columns));
+    }
+    return result;
+  }, [documents, columns]);
+
+  // Setup virtualizer
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => CARD_HEIGHT + CARD_GAP,
+    overscan: 2,
+    getItemKey: (index) => `row-${index}`,
+  });
+
+  const handleUploadComplete = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ['documents', workspaceId] });
     setShowUpload(false);
-  };
+  }, [queryClient, workspaceId]);
 
-  const handleDocumentAction = () => {
+  const handleDocumentAction = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ['documents', workspaceId] });
-  };
+  }, [queryClient, workspaceId]);
+
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    const container = parentRef.current;
+    if (!container) return;
+
+    const currentScrollTop = container.scrollTop;
+    const clientHeight = container.clientHeight;
+    const rowHeight = CARD_HEIGHT + CARD_GAP;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        container.scrollTop = currentScrollTop + rowHeight;
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        container.scrollTop = currentScrollTop - rowHeight;
+        break;
+      case 'PageDown':
+        e.preventDefault();
+        container.scrollTop = currentScrollTop + clientHeight;
+        break;
+      case 'PageUp':
+        e.preventDefault();
+        container.scrollTop = currentScrollTop - clientHeight;
+        break;
+      case 'Home':
+        e.preventDefault();
+        container.scrollTop = 0;
+        break;
+      case 'End':
+        e.preventDefault();
+        container.scrollTop = container.scrollHeight;
+        break;
+    }
+  }, []);
 
   if (!workspaceId) {
     return (
       <div className="p-6 text-center text-ctp-subtext0">
-        Sélectionnez un espace de travail
+        Selectionnez un espace de travail
       </div>
     );
   }
 
-  const documents = data?.documents ?? [];
-
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Documents</h1>
           <p className="text-ctp-subtext0">
-            Gérez vos justificatifs et pièces jointes
+            Gerez vos justificatifs et pieces jointes
           </p>
         </div>
         <button onClick={() => setShowUpload(true)} className="btn-primary">
@@ -120,10 +213,10 @@ export function DocumentsPage() {
             <Inbox className="w-6 h-6 text-ctp-yellow" />
             <div className="flex-1">
               <p className="font-medium text-ctp-yellow">
-                {inboxCount.count} document{inboxCount.count > 1 ? 's' : ''} à traiter
+                {inboxCount.count} document{inboxCount.count > 1 ? 's' : ''} a traiter
               </p>
               <p className="text-sm text-ctp-yellow/80">
-                Ces documents n'ont pas encore été liés à une transaction
+                Ces documents n'ont pas encore ete lies a une transaction
               </p>
             </div>
             <button
@@ -152,9 +245,9 @@ export function DocumentsPage() {
               )}
             >
               {status === 'all' && 'Tous'}
-              {status === 'inbox' && <><Inbox className="w-4 h-4 inline mr-1" />À traiter</>}
-              {status === 'linked' && <><Link2 className="w-4 h-4 inline mr-1" />Liés</>}
-              {status === 'archived' && <><Archive className="w-4 h-4 inline mr-1" />Archivés</>}
+              {status === 'inbox' && <><Inbox className="w-4 h-4 inline mr-1" />A traiter</>}
+              {status === 'linked' && <><Link2 className="w-4 h-4 inline mr-1" />Lies</>}
+              {status === 'archived' && <><Archive className="w-4 h-4 inline mr-1" />Archives</>}
             </button>
           ))}
         </div>
@@ -171,7 +264,7 @@ export function DocumentsPage() {
         </div>
       </div>
 
-      {/* Documents Grid */}
+      {/* Documents Grid - Virtualized */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -179,17 +272,69 @@ export function DocumentsPage() {
           ))}
         </div>
       ) : documents.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {documents.map((doc) => (
-            <DocumentCard
-              key={doc.id}
-              document={doc}
-              workspaceId={workspaceId}
-              onView={() => setSelectedDocument(doc)}
-              onLink={() => setLinkingDocument(doc)}
-              onAction={handleDocumentAction}
-            />
-          ))}
+        <div
+          ref={parentRef}
+          className="flex-1 overflow-auto min-h-0"
+          style={{ height: 'calc(100vh - 400px)' }}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          role="grid"
+          aria-label="Grille de documents"
+          aria-rowcount={rows.length}
+        >
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const row = rows[virtualRow.index] as Document[];
+              return (
+                <div
+                  key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
+                  role="row"
+                  aria-rowindex={virtualRow.index + 1}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  <div
+                    className={clsx(
+                      'grid gap-4 pb-4',
+                      columns === 1 && 'grid-cols-1',
+                      columns === 2 && 'grid-cols-2',
+                      columns === 3 && 'grid-cols-3'
+                    )}
+                  >
+                    {row.map((doc) => (
+                      <div key={doc.id} role="gridcell">
+                        <DocumentCard
+                          document={doc}
+                          workspaceId={workspaceId}
+                          onView={() => setSelectedDocument(doc)}
+                          onLink={() => setLinkingDocument(doc)}
+                          onAction={handleDocumentAction}
+                        />
+                      </div>
+                    ))}
+                    {/* Add empty placeholders to maintain grid layout */}
+                    {row.length < columns &&
+                      Array.from({ length: columns - row.length }).map((_, i) => (
+                        <div key={`placeholder-${i}`} role="gridcell" aria-hidden="true" />
+                      ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : (
         <div className="card text-center py-12">
@@ -197,7 +342,7 @@ export function DocumentsPage() {
           <h2 className="text-xl font-bold mb-2">Aucun document</h2>
           <p className="text-ctp-subtext0 mb-6">
             {filterStatus !== 'all'
-              ? 'Aucun document dans cette catégorie'
+              ? 'Aucun document dans cette categorie'
               : 'Commencez par ajouter vos premiers justificatifs'}
           </p>
           <button onClick={() => setShowUpload(true)} className="btn-primary">

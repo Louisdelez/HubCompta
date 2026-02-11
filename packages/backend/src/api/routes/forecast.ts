@@ -25,6 +25,65 @@ const generateForecastBodySchema = z.object({
 });
 
 // ----------------------------------------------------------------------------
+// OpenAPI Schemas
+// ----------------------------------------------------------------------------
+
+const workspaceParamsSchema = {
+  type: 'object' as const,
+  required: ['workspaceId'],
+  properties: {
+    workspaceId: { type: 'string' as const, format: 'uuid', description: 'Workspace ID' },
+  },
+};
+
+const forecastSchema = {
+  type: 'object' as const,
+  properties: {
+    id: { type: 'string' as const, format: 'uuid' },
+    workspaceId: { type: 'string' as const, format: 'uuid' },
+    categoryId: { type: 'string' as const, format: 'uuid', nullable: true },
+    month: { type: 'string' as const, format: 'date-time' },
+    predictedAmount: { type: 'number' as const },
+    confidence: { type: 'number' as const, description: 'Confidence score (0-1)' },
+    method: { type: 'string' as const, enum: ['average', 'trend', 'seasonal', 'ml'], description: 'Prediction method used' },
+    category: {
+      type: 'object' as const,
+      nullable: true,
+      properties: {
+        id: { type: 'string' as const, format: 'uuid' },
+        name: { type: 'string' as const },
+        icon: { type: 'string' as const, nullable: true },
+        color: { type: 'string' as const, nullable: true },
+      },
+    },
+    createdAt: { type: 'string' as const, format: 'date-time' },
+    updatedAt: { type: 'string' as const, format: 'date-time' },
+  },
+};
+
+const successResponseSchema = (dataSchema: object) => ({
+  type: 'object' as const,
+  properties: {
+    success: { type: 'boolean' as const, enum: [true] },
+    data: dataSchema,
+  },
+});
+
+const errorResponseSchema = {
+  type: 'object' as const,
+  properties: {
+    success: { type: 'boolean' as const, enum: [false] },
+    error: {
+      type: 'object' as const,
+      properties: {
+        message: { type: 'string' as const },
+        code: { type: 'string' as const },
+      },
+    },
+  },
+};
+
+// ----------------------------------------------------------------------------
 // Route Handlers
 // ----------------------------------------------------------------------------
 
@@ -37,6 +96,28 @@ export function forecastRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get(
     '/',
+    {
+      schema: {
+        summary: 'Get forecasts',
+        description: 'Retrieve spending forecasts for a workspace. Automatically generates forecasts if none exist.',
+        tags: ['Forecast'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        querystring: {
+          type: 'object' as const,
+          properties: {
+            months: { type: 'string' as const, pattern: '^[0-9]+$', default: '6', description: 'Number of months to forecast' },
+            startMonth: { type: 'string' as const, format: 'date-time', description: 'Start of forecast period' },
+            endMonth: { type: 'string' as const, format: 'date-time', description: 'End of forecast period' },
+          },
+        },
+        response: {
+          200: successResponseSchema({ type: 'array' as const, items: forecastSchema }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (
       request: FastifyRequest<{
         Params: { workspaceId: string };
@@ -83,6 +164,38 @@ export function forecastRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get(
     '/historical',
+    {
+      schema: {
+        summary: 'Get historical spending data',
+        description: 'Retrieve historical spending data used for forecast calculations.',
+        tags: ['Forecast'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        querystring: {
+          type: 'object' as const,
+          properties: {
+            months: { type: 'string' as const, pattern: '^[0-9]+$', default: '12', description: 'Number of months of history' },
+          },
+        },
+        response: {
+          200: successResponseSchema({
+            type: 'array' as const,
+            items: {
+              type: 'object' as const,
+              properties: {
+                month: { type: 'string' as const, format: 'date' },
+                categoryId: { type: 'string' as const, format: 'uuid', nullable: true },
+                categoryName: { type: 'string' as const, nullable: true },
+                amount: { type: 'number' as const },
+                transactionCount: { type: 'integer' as const },
+              },
+            },
+          }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (
       request: FastifyRequest<{
         Params: { workspaceId: string };
@@ -108,6 +221,27 @@ export function forecastRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.post(
     '/generate',
+    {
+      schema: {
+        summary: 'Generate new forecasts',
+        description: 'Generate or regenerate spending forecasts based on historical data.',
+        tags: ['Forecast'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        body: {
+          type: 'object' as const,
+          properties: {
+            months: { type: 'integer' as const, minimum: 1, maximum: 24, default: 6, description: 'Number of months to forecast' },
+          },
+        },
+        response: {
+          201: successResponseSchema({ type: 'array' as const, items: forecastSchema }),
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (
       request: FastifyRequest<{
         Params: { workspaceId: string };
@@ -150,6 +284,49 @@ export function forecastRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get(
     '/accuracy',
+    {
+      schema: {
+        summary: 'Get forecast accuracy metrics',
+        description: 'Retrieve accuracy metrics comparing past forecasts to actual spending.',
+        tags: ['Forecast'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              overall: { type: 'number' as const, description: 'Overall accuracy percentage (0-100)' },
+              byCategory: {
+                type: 'array' as const,
+                items: {
+                  type: 'object' as const,
+                  properties: {
+                    categoryId: { type: 'string' as const, format: 'uuid' },
+                    categoryName: { type: 'string' as const },
+                    accuracy: { type: 'number' as const },
+                    sampleSize: { type: 'integer' as const },
+                  },
+                },
+              },
+              byMonth: {
+                type: 'array' as const,
+                items: {
+                  type: 'object' as const,
+                  properties: {
+                    month: { type: 'string' as const, format: 'date' },
+                    accuracy: { type: 'number' as const },
+                    predicted: { type: 'number' as const },
+                    actual: { type: 'number' as const },
+                  },
+                },
+              },
+            },
+          }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (
       request: FastifyRequest<{ Params: { workspaceId: string } }>,
       reply: FastifyReply
@@ -171,6 +348,48 @@ export function forecastRoutes(app: FastifyInstance): void {
   // --------------------------------------------------------------------------
   app.get(
     '/summary',
+    {
+      schema: {
+        summary: 'Get forecast summary',
+        description: 'Get a summary of forecasts for the next month, optimized for dashboard widgets.',
+        tags: ['Forecast'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              nextMonth: {
+                type: 'object' as const,
+                properties: {
+                  date: { type: 'string' as const, format: 'date-time' },
+                  totalPredicted: { type: 'number' as const },
+                  confidence: { type: 'number' as const },
+                  method: { type: 'string' as const },
+                },
+              },
+              topCategories: {
+                type: 'array' as const,
+                items: {
+                  type: 'object' as const,
+                  properties: {
+                    categoryId: { type: 'string' as const, format: 'uuid' },
+                    categoryName: { type: 'string' as const },
+                    categoryIcon: { type: 'string' as const, nullable: true },
+                    categoryColor: { type: 'string' as const, nullable: true },
+                    predictedAmount: { type: 'number' as const },
+                    confidence: { type: 'number' as const },
+                  },
+                },
+              },
+              accuracy: { type: 'number' as const },
+            },
+          }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
     async (
       request: FastifyRequest<{ Params: { workspaceId: string } }>,
       reply: FastifyReply

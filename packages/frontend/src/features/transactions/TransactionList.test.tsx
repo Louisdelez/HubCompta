@@ -35,6 +35,28 @@ vi.mock('./TransactionForm', () => ({
   ),
 }));
 
+// Mock @tanstack/react-virtual to bypass virtualization in tests
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: ({ count, estimateSize, getItemKey }: {
+    count: number;
+    estimateSize: (index: number) => number;
+    getItemKey?: (index: number) => string | number;
+  }) => ({
+    getVirtualItems: () =>
+      Array.from({ length: count }, (_, index) => ({
+        index,
+        key: getItemKey ? getItemKey(index) : index,
+        start: index * estimateSize(index),
+        size: estimateSize(index),
+        end: (index + 1) * estimateSize(index),
+        lane: 0,
+      })),
+    getTotalSize: () => count * 72, // Approximate size
+    measureElement: () => {},
+    scrollToIndex: () => {},
+  }),
+}));
+
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 
@@ -198,7 +220,7 @@ describe('TransactionList', () => {
       renderTransactionList();
 
       await waitFor(() => {
-        expect(screen.getByText(/non catégorisé/i)).toBeInTheDocument();
+        expect(screen.getByText(/non categorise/i)).toBeInTheDocument();
       });
     });
 
@@ -226,7 +248,7 @@ describe('TransactionList', () => {
       renderTransactionList();
 
       await waitFor(() => {
-        expect(screen.getByTitle('Rapproché')).toBeInTheDocument();
+        expect(screen.getByTitle('Rapproche')).toBeInTheDocument();
       });
     });
 
@@ -287,7 +309,7 @@ describe('TransactionList', () => {
 
       renderTransactionList();
 
-      expect(screen.getByText(/sélectionnez un espace de travail/i)).toBeInTheDocument();
+      expect(screen.getByText(/selectionnez un espace de travail/i)).toBeInTheDocument();
     });
   });
 
@@ -431,7 +453,7 @@ describe('TransactionList', () => {
         expect(screen.getByText('Page 1 sur 3')).toBeInTheDocument();
       });
 
-      expect(screen.getByText('Précédent')).toBeInTheDocument();
+      expect(screen.getByText('Precedent')).toBeInTheDocument();
       expect(screen.getByText('Suivant')).toBeInTheDocument();
     });
 
@@ -444,7 +466,7 @@ describe('TransactionList', () => {
       renderTransactionList();
 
       await waitFor(() => {
-        expect(screen.getByText('Précédent')).toBeDisabled();
+        expect(screen.getByText('Precedent')).toBeDisabled();
       });
     });
 
@@ -506,7 +528,7 @@ describe('TransactionList', () => {
         expect(screen.getByText('Page 2 sur 3')).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText('Précédent'));
+      await user.click(screen.getByText('Precedent'));
 
       await waitFor(() => {
         expect(mockApi.get).toHaveBeenCalledWith(
@@ -524,7 +546,7 @@ describe('TransactionList', () => {
         expect(screen.getByText('Grocery Shopping')).toBeInTheDocument();
       });
 
-      expect(screen.queryByText('Précédent')).not.toBeInTheDocument();
+      expect(screen.queryByText('Precedent')).not.toBeInTheDocument();
       expect(screen.queryByText('Suivant')).not.toBeInTheDocument();
     });
   });

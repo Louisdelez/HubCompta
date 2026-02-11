@@ -3,6 +3,6 @@
 // Reusable UI components
 // ============================================================================
 
-export { VirtualList } from './VirtualList';
+export { VirtualList, VirtualGroupedList } from './VirtualList';
 export { LazyImage } from './LazyImage';
 export { OfflineIndicator, OfflineBanner } from './OfflineIndicator';
