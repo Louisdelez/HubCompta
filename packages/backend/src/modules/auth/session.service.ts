@@ -13,10 +13,7 @@ import {
 } from '@/core/crypto/jwt.js';
 import { UnauthorizedError, SessionLockedError } from '@/core/middleware/errorHandler.js';
 import { randomUUID } from 'crypto';
-import * as UAParserModule from 'ua-parser-js';
-
-// Handle both ESM and CJS imports
-const UAParser = (UAParserModule as unknown as { default: typeof UAParserModule }).default ?? UAParserModule;
+import { UAParser } from 'ua-parser-js';
 
 // ----------------------------------------------------------------------------
 // Configuration
