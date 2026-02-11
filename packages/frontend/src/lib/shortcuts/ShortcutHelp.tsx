@@ -68,8 +68,10 @@ export function ShortcutHelp() {
     prevIsHelpOpenRef.current = isHelpOpen;
 
     if (wasClosedNowOpen) {
-      // Reset state on open
+      // Reset state on open - this is intentional to reset modal state when reopening
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchQuery('');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedCategory('all');
       // Focus search input
       const timer = setTimeout(() => {

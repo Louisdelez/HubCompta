@@ -781,8 +781,8 @@ export const reportService = {
       previousYear: { income: number; expenses: number; net: number };
     }> = [];
 
-    let currentYearTotals = { income: 0, expenses: 0 };
-    let previousYearTotals = { income: 0, expenses: 0 };
+    const currentYearTotals = { income: 0, expenses: 0 };
+    const previousYearTotals = { income: 0, expenses: 0 };
 
     for (let month = 1; month <= 12; month++) {
       // Current year data
@@ -1239,7 +1239,7 @@ export const reportService = {
 
     let dividends = 0;
     let realizedGains = 0;
-    let realizedLosses = 0;
+    const realizedLosses = 0;
 
     for (const tx of investTransactions) {
       if (tx.type === 'dividend') {

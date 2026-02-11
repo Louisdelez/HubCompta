@@ -3,7 +3,7 @@
 // Helper functions and utilities for WCAG compliance
 // ============================================================================
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // ----------------------------------------------------------------------------
 // Focus Management
@@ -336,11 +336,10 @@ export function generateId(prefix = 'a11y'): string {
  * Hook to generate a stable unique ID
  */
 export function useId(prefix = 'a11y'): string {
-  const idRef = useRef<string | null>(null);
-  if (idRef.current === null) {
-    idRef.current = generateId(prefix);
-  }
-  return idRef.current;
+  // Use lazy initialization with useState to generate ID only once
+  // This avoids accessing refs during render which violates React rules
+  const [id] = useState(() => generateId(prefix));
+  return id;
 }
 
 // ----------------------------------------------------------------------------
@@ -468,33 +467,27 @@ export function prefersReducedMotion(): boolean {
  * Hook to detect reduced motion preference
  */
 export function usePrefersReducedMotion(): boolean {
-  const mediaQueryRef = useRef<MediaQueryList | null>(null);
-  const callbackRef = useRef<((event: MediaQueryListEvent) => void) | null>(null);
-
-  if (typeof window === 'undefined') return false;
-
-  // Initial value - using useState pattern with ref for SSR safety
-  const getInitialValue = () => {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
     if (typeof window === 'undefined') return false;
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  };
+  });
 
   useEffect(() => {
-    mediaQueryRef.current = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (typeof window === 'undefined') return;
 
-    callbackRef.current = () => {
-      // This will trigger a re-render via the state in the calling component
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      setPrefersReducedMotion(event.matches);
     };
 
-    mediaQueryRef.current.addEventListener('change', callbackRef.current);
+    mediaQuery.addEventListener('change', handleChange);
     return () => {
-      if (mediaQueryRef.current && callbackRef.current) {
-        mediaQueryRef.current.removeEventListener('change', callbackRef.current);
-      }
+      mediaQuery.removeEventListener('change', handleChange);
     };
   }, []);
 
-  return getInitialValue();
+  return prefersReducedMotion;
 }
 
 // ----------------------------------------------------------------------------

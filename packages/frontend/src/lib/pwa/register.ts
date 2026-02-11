@@ -209,7 +209,7 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   if (!('Notification' in window)) {
     return 'denied';
   }
-  return Notification.requestPermission();
+  return await Notification.requestPermission();
 }
 
 /**

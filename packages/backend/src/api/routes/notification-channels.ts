@@ -468,31 +468,47 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
       let result: { success: boolean; error?: string };
 
       switch (channel.channelType) {
-        case 'discord':
-          result = await discordService.sendTestMessage(channel.discordWebhookUrl!);
+        case 'discord': {
+          if (!channel.discordWebhookUrl) {
+            return reply.status(400).send({ success: false, error: { message: 'Discord webhook URL not configured' } });
+          }
+          result = await discordService.sendTestMessage(channel.discordWebhookUrl);
           break;
+        }
 
-        case 'whatsapp':
+        case 'whatsapp': {
+          if (!channel.whatsappPhone) {
+            return reply.status(400).send({ success: false, error: { message: 'WhatsApp phone not configured' } });
+          }
           result = await whatsappService.sendMessage(
-            channel.whatsappPhone!,
+            channel.whatsappPhone,
             '🔔 *Test HubCompta*\n\nCeci est un message de test. Votre canal WhatsApp est correctement configure.'
           );
           break;
+        }
 
-        case 'sms':
+        case 'sms': {
+          if (!channel.smsPhone) {
+            return reply.status(400).send({ success: false, error: { message: 'SMS phone not configured' } });
+          }
           result = await smsService.sendMessage(
-            channel.smsPhone!,
+            channel.smsPhone,
             'HubCompta: Test reussi! Votre canal SMS est correctement configure.'
           );
           break;
+        }
 
-        case 'email':
+        case 'email': {
+          if (!channel.email) {
+            return reply.status(400).send({ success: false, error: { message: 'Email not configured' } });
+          }
           result = await notificationDispatcherService.sendVerificationToChannel(
             'email',
-            channel.email!,
+            channel.email,
             'TEST'
           );
           break;
+        }
 
         default:
           return reply.status(400).send({ success: false, error: { message: 'Unknown channel type' } });

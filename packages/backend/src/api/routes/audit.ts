@@ -51,8 +51,8 @@ const auditRoutes: FastifyPluginAsync = async (fastify) => {
         userId,
         action,
         resource,
-        status: status as AuditStatus | undefined,
-        severity: severity as AuditSeverity | undefined,
+        status: status,
+        severity: severity,
         from: from ? new Date(from) : undefined,
         to: to ? new Date(to) : undefined,
         page: page ? parseInt(page, 10) : 1,
@@ -102,8 +102,8 @@ const auditRoutes: FastifyPluginAsync = async (fastify) => {
       const csvData = await auditService.exportToCsv(userId, {
         action,
         resource,
-        status: status as AuditStatus | undefined,
-        severity: severity as AuditSeverity | undefined,
+        status: status,
+        severity: severity,
         from: from ? new Date(from) : undefined,
         to: to ? new Date(to) : undefined,
       });

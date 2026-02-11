@@ -51,7 +51,7 @@ const SENSITIVE_FIELDS = [
 /**
  * Recursively filter sensitive data from objects
  */
-function filterSensitiveData(data: unknown): Record<string, unknown> | unknown {
+function filterSensitiveData(data: unknown): unknown {
   if (data === null || data === undefined) {
     return {};
   }
@@ -362,7 +362,7 @@ export function measurePerformance(name: string, value: number, unit: string = '
  * Capture an exception with additional context
  */
 export function captureException(
-  error: Error | unknown,
+  error: unknown,
   context?: {
     tags?: Record<string, string>;
     extra?: Record<string, unknown>;
