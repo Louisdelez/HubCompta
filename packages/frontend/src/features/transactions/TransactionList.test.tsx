@@ -562,11 +562,15 @@ describe('TransactionList', () => {
 
       renderTransactionList();
 
+      // Find button by its role - the button contains "+ Nouvelle transaction" on desktop
+      // but has responsive text, so we use a function matcher
       await waitFor(() => {
-        expect(screen.getByText('+ Nouvelle transaction')).toBeInTheDocument();
+        const addButton = screen.getByRole('button', { name: /nouvelle transaction|ajouter/i });
+        expect(addButton).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText('+ Nouvelle transaction'));
+      const addButton = screen.getByRole('button', { name: /nouvelle transaction|ajouter/i });
+      await user.click(addButton);
 
       expect(screen.getByTestId('transaction-form')).toBeInTheDocument();
     });
@@ -593,10 +597,12 @@ describe('TransactionList', () => {
       renderTransactionList();
 
       await waitFor(() => {
-        expect(screen.getByText('+ Nouvelle transaction')).toBeInTheDocument();
+        const addButton = screen.getByRole('button', { name: /nouvelle transaction|ajouter/i });
+        expect(addButton).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText('+ Nouvelle transaction'));
+      const addButton = screen.getByRole('button', { name: /nouvelle transaction|ajouter/i });
+      await user.click(addButton);
       expect(screen.getByTestId('transaction-form')).toBeInTheDocument();
 
       await user.click(screen.getByText('Close Form'));
@@ -611,10 +617,12 @@ describe('TransactionList', () => {
       renderTransactionList();
 
       await waitFor(() => {
-        expect(screen.getByText('+ Nouvelle transaction')).toBeInTheDocument();
+        const addButton = screen.getByRole('button', { name: /nouvelle transaction|ajouter/i });
+        expect(addButton).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText('+ Nouvelle transaction'));
+      const addButton = screen.getByRole('button', { name: /nouvelle transaction|ajouter/i });
+      await user.click(addButton);
       await user.click(screen.getByText('Submit Form'));
 
       await waitFor(() => {
