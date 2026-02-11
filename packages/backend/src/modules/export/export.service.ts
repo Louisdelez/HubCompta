@@ -970,11 +970,33 @@ export const exportService = {
     return new Date().toISOString().split('T')[0] ?? '';
   },
 
-  formatCurrency(amount: number, currency: string = 'EUR'): string {
-    return new Intl.NumberFormat('fr-FR', {
+  formatCurrency(amount: number, currency: string = 'EUR', locale: string = 'fr-FR'): string {
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency,
     }).format(amount);
+  },
+
+  formatDate(date: Date | string, locale: string = 'fr-FR'): string {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return new Intl.DateTimeFormat(locale, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(dateObj);
+  },
+
+  /**
+   * Get locale for a workspace based on owner's country
+   */
+  async getWorkspaceLocale(workspaceId: string): Promise<string> {
+    const membership = await prisma.membership.findFirst({
+      where: { workspaceId, role: 'owner' },
+      include: { user: { select: { locale: true, country: true } } },
+    });
+    if (membership?.user?.locale) return membership.user.locale;
+    const country = membership?.user?.country || 'FR';
+    return country === 'CH' ? 'de-CH' : 'fr-FR';
   },
 
   /**

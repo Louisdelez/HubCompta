@@ -20,6 +20,7 @@ export function cn(...inputs: ClassValue[]): string {
 // Currency Formatting
 // ----------------------------------------------------------------------------
 
+/** Default locale for each currency (used when user locale not available) */
 const CURRENCY_LOCALES: Record<string, string> = {
   EUR: 'fr-FR',
   USD: 'en-US',
@@ -29,6 +30,27 @@ const CURRENCY_LOCALES: Record<string, string> = {
   CAD: 'en-CA',
   AUD: 'en-AU',
 };
+
+/** Country-specific formatting preferences */
+const COUNTRY_LOCALES: Record<string, string> = {
+  FR: 'fr-FR',
+  CH: 'de-CH',
+};
+
+/**
+ * Get the appropriate locale for formatting based on user preferences
+ */
+export function getFormattingLocale(
+  userLocale?: string,
+  userCountry?: string,
+  currency?: string
+): string {
+  // Priority: user locale > country default > currency default > fallback
+  if (userLocale) return userLocale;
+  if (userCountry && COUNTRY_LOCALES[userCountry]) return COUNTRY_LOCALES[userCountry];
+  if (currency && CURRENCY_LOCALES[currency]) return CURRENCY_LOCALES[currency];
+  return 'fr-FR';
+}
 
 interface FormatCurrencyOptions {
   compact?: boolean;
@@ -104,12 +126,13 @@ export function getCurrencySymbol(currency: string, locale = 'fr-FR'): string {
  */
 export function formatNumber(
   value: number,
-  options: Intl.NumberFormatOptions = {}
+  options: Intl.NumberFormatOptions & { locale?: string } = {}
 ): string {
-  const formatter = new Intl.NumberFormat('fr-FR', {
+  const { locale = 'fr-FR', ...numberOptions } = options;
+  const formatter = new Intl.NumberFormat(locale, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 4,
-    ...options,
+    ...numberOptions,
   });
 
   return formatter.format(value);
@@ -127,24 +150,25 @@ export function formatPercent(value: number, decimals: number = 2): string {
 // ----------------------------------------------------------------------------
 
 /**
- * Format a date string
+ * Format a date string with optional locale
  */
 export function formatDate(
   date: string | Date,
-  options: Intl.DateTimeFormatOptions = {
+  options: Intl.DateTimeFormatOptions & { locale?: string } = {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   }
 ): string {
+  const { locale = 'fr-FR', ...dateOptions } = options;
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('fr-FR', options).format(dateObj);
+  return new Intl.DateTimeFormat(locale, dateOptions).format(dateObj);
 }
 
 /**
- * Format a date as relative time (e.g., "il y a 2 heures")
+ * Format a date as relative time using Intl.RelativeTimeFormat
  */
-export function formatRelativeTime(date: string | Date): string {
+export function formatRelativeTime(date: string | Date, locale = 'fr-FR'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
   const diffMs = now.getTime() - dateObj.getTime();
@@ -153,16 +177,18 @@ export function formatRelativeTime(date: string | Date): string {
   const diffHour = Math.floor(diffMin / 60);
   const diffDay = Math.floor(diffHour / 24);
 
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+
   if (diffSec < 60) {
-    return "à l'instant";
+    return rtf.format(-diffSec, 'second');
   } else if (diffMin < 60) {
-    return `il y a ${diffMin} minute${diffMin > 1 ? 's' : ''}`;
+    return rtf.format(-diffMin, 'minute');
   } else if (diffHour < 24) {
-    return `il y a ${diffHour} heure${diffHour > 1 ? 's' : ''}`;
+    return rtf.format(-diffHour, 'hour');
   } else if (diffDay < 7) {
-    return `il y a ${diffDay} jour${diffDay > 1 ? 's' : ''}`;
+    return rtf.format(-diffDay, 'day');
   } else {
-    return formatDate(dateObj);
+    return formatDate(dateObj, { locale });
   }
 }
 
@@ -199,7 +225,7 @@ export function isValidEmail(email: string): boolean {
 }
 
 /**
- * Check if a string is a valid SIRET number
+ * Check if a string is a valid SIRET number (France)
  */
 export function isValidSiret(siret: string): boolean {
   const cleaned = siret.replace(/\s/g, '');
@@ -219,6 +245,46 @@ export function isValidSiret(siret: string): boolean {
   }
 
   return sum % 10 === 0;
+}
+
+/**
+ * Check if a string is a valid Swiss UID
+ * Format: CHE-XXX.XXX.XXX or CHE XXX XXX XXX
+ */
+export function isValidSwissUid(uid: string): boolean {
+  const cleaned = uid.replace(/[\s.-]/g, '').toUpperCase();
+  if (!/^CHE\d{9}$/.test(cleaned)) return false;
+
+  const digits = cleaned.slice(3);
+  const weights = [5, 4, 3, 2, 7, 6, 5, 4];
+  let sum = 0;
+
+  for (let i = 0; i < 8; i++) {
+    const char = digits[i];
+    if (!char) return false;
+    sum += parseInt(char, 10) * (weights[i] ?? 0);
+  }
+
+  const remainder = sum % 11;
+  const checkDigit = remainder === 0 ? 0 : 11 - remainder;
+  if (checkDigit === 10) return false;
+
+  const lastDigit = digits[8];
+  return lastDigit !== undefined && parseInt(lastDigit, 10) === checkDigit;
+}
+
+/**
+ * Validate business ID based on country
+ */
+export function isValidBusinessId(id: string, countryCode: 'FR' | 'CH'): boolean {
+  switch (countryCode) {
+    case 'FR':
+      return isValidSiret(id);
+    case 'CH':
+      return isValidSwissUid(id);
+    default:
+      return true;
+  }
 }
 
 // ----------------------------------------------------------------------------

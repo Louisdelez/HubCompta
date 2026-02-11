@@ -1,10 +1,11 @@
 // ============================================================================
 // VAT UTILITIES - Finance Hub
-// French VAT (TVA) calculation helpers
+// Multi-country VAT calculation helpers (France & Switzerland)
 // ============================================================================
 
 import { PRO } from '@finance-hub/shared';
 import { Decimal } from '@prisma/client/runtime/library';
+import { type CountryCode, getCountryConfig } from '@finance-hub/shared';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -30,22 +31,34 @@ export interface DocumentTotals {
 }
 
 // ----------------------------------------------------------------------------
-// Constants
+// Country-specific VAT rates
 // ----------------------------------------------------------------------------
 
 /** French VAT rates */
-export const VAT_RATES = {
-  /** Standard rate (20%) - most goods and services */
+export const VAT_RATES_FR = {
   STANDARD: new Decimal(20),
-  /** Intermediate rate (10%) - restaurants, transport, renovation */
   INTERMEDIATE: new Decimal(10),
-  /** Reduced rate (5.5%) - food, books, energy */
   REDUCED: new Decimal(5.5),
-  /** Super-reduced rate (2.1%) - press, medicines */
   SUPER_REDUCED: new Decimal(2.1),
-  /** Exempt (0%) - exports, intra-EU, medical */
   EXEMPT: new Decimal(0),
 } as const;
+
+/** Swiss VAT rates */
+export const VAT_RATES_CH = {
+  STANDARD: new Decimal(8.1),
+  REDUCED: new Decimal(2.6),
+  ACCOMMODATION: new Decimal(3.8),
+  EXEMPT: new Decimal(0),
+} as const;
+
+/** Get VAT rates for a specific country */
+export function getVatRatesForCountry(countryCode: CountryCode = 'FR') {
+  const config = getCountryConfig(countryCode);
+  return config.vatRates;
+}
+
+/** Legacy: French VAT rates (for backward compatibility) */
+export const VAT_RATES = VAT_RATES_FR;
 
 /** Default VAT rate for new lines */
 export const DEFAULT_VAT_RATE = VAT_RATES.STANDARD;
@@ -168,6 +181,54 @@ export function validateSiret(siret: string): boolean {
 }
 
 /**
+ * Validate Swiss UID (Unternehmens-Identifikationsnummer)
+ * Format: CHE-XXX.XXX.XXX or CHE XXX XXX XXX (9 digits after CHE)
+ */
+export function validateSwissUid(uid: string): boolean {
+  // Remove formatting (dots, dashes, spaces)
+  const cleaned = uid.replace(/[\s.-]/g, '').toUpperCase();
+
+  // Must start with CHE and have 9 digits
+  if (!/^CHE\d{9}$/.test(cleaned)) {
+    return false;
+  }
+
+  const digits = cleaned.slice(3);
+
+  // Modulo 11 check digit validation
+  const weights = [5, 4, 3, 2, 7, 6, 5, 4];
+  let sum = 0;
+  for (let i = 0; i < 8; i++) {
+    const char = digits[i];
+    if (!char) return false;
+    sum += parseInt(char, 10) * (weights[i] ?? 0);
+  }
+
+  const remainder = sum % 11;
+  const checkDigit = remainder === 0 ? 0 : 11 - remainder;
+  const lastDigit = digits[8];
+
+  // Check digit 10 is invalid
+  if (checkDigit === 10) return false;
+
+  return lastDigit !== undefined && parseInt(lastDigit, 10) === checkDigit;
+}
+
+/**
+ * Validate business identifier based on country
+ */
+export function validateBusinessId(id: string, countryCode: CountryCode): boolean {
+  switch (countryCode) {
+    case 'FR':
+      return validateSiret(id);
+    case 'CH':
+      return validateSwissUid(id);
+    default:
+      return true;
+  }
+}
+
+/**
  * Validate French VAT number (TVA intracommunautaire)
  * Format: FR + 2 chars (check digits) + 9 digits (SIREN)
  */
@@ -192,28 +253,113 @@ export function validateFrenchVatNumber(vatNumber: string): boolean {
 }
 
 /**
- * Format amount for display with French locale
+ * Validate Swiss VAT number (MWST-Nummer)
+ * Format: CHE-XXX.XXX.XXX MWST or CHE XXX XXX XXX MWST
  */
-export function formatAmountFR(amount: Decimal | number, currency = 'EUR'): string {
+export function validateSwissVatNumber(vatNumber: string): boolean {
+  // Remove "MWST", "TVA", "IVA" suffix and formatting
+  const cleaned = vatNumber.replace(/\s*(MWST|TVA|IVA)\s*$/i, '').trim();
+  return validateSwissUid(cleaned);
+}
+
+/**
+ * Validate VAT number based on country
+ */
+export function validateVatNumber(vatNumber: string, countryCode: CountryCode): boolean {
+  switch (countryCode) {
+    case 'FR':
+      return validateFrenchVatNumber(vatNumber);
+    case 'CH':
+      return validateSwissVatNumber(vatNumber);
+    default:
+      return true;
+  }
+}
+
+/**
+ * Format amount for display with locale-aware formatting
+ */
+export function formatAmount(
+  amount: Decimal | number,
+  currency = 'EUR',
+  countryCode: CountryCode = 'FR'
+): string {
   const numAmount = typeof amount === 'number' ? amount : amount.toNumber();
-  return new Intl.NumberFormat('fr-FR', {
+  const config = getCountryConfig(countryCode);
+  return new Intl.NumberFormat(config.formatting.locale, {
     style: 'currency',
     currency,
   }).format(numAmount);
 }
 
+/** @deprecated Use formatAmount with countryCode instead */
+export function formatAmountFR(amount: Decimal | number, currency = 'EUR'): string {
+  return formatAmount(amount, currency, 'FR');
+}
+
 /**
- * Get VAT rate label in French
+ * Get VAT rate label based on country
  */
-export function getVatRateLabel(rate: number): string {
-  const labels: Record<number, string> = {
-    20: 'TVA 20% (taux normal)',
-    10: 'TVA 10% (taux intermédiaire)',
-    5.5: 'TVA 5,5% (taux réduit)',
-    2.1: 'TVA 2,1% (taux super-réduit)',
-    0: 'Exonéré de TVA',
+export function getVatRateLabel(rate: number, countryCode: CountryCode = 'FR'): string {
+  const labels: Record<CountryCode, Record<number, string>> = {
+    FR: {
+      20: 'TVA 20% (taux normal)',
+      10: 'TVA 10% (taux intermediaire)',
+      5.5: 'TVA 5,5% (taux reduit)',
+      2.1: 'TVA 2,1% (taux super-reduit)',
+      0: 'Exonere de TVA',
+    },
+    CH: {
+      8.1: 'TVA 8,1% (taux normal)',
+      3.8: 'TVA 3,8% (hebergement)',
+      2.6: 'TVA 2,6% (taux reduit)',
+      0: 'Exonere de TVA',
+    },
   };
-  return labels[rate] || `TVA ${rate}%`;
+  const countryLabels = labels[countryCode] || labels.FR;
+  return countryLabels[rate] || `TVA ${rate}%`;
+}
+
+/**
+ * Get business ID field name for a country
+ */
+export function getBusinessIdFieldName(countryCode: CountryCode): string {
+  switch (countryCode) {
+    case 'FR':
+      return 'SIRET';
+    case 'CH':
+      return 'UID';
+    default:
+      return 'ID';
+  }
+}
+
+/**
+ * Get business ID placeholder for a country
+ */
+export function getBusinessIdPlaceholder(countryCode: CountryCode): string {
+  switch (countryCode) {
+    case 'FR':
+      return '12345678901234';
+    case 'CH':
+      return 'CHE-123.456.789';
+    default:
+      return '';
+  }
+}
+
+/**
+ * Get VAT number placeholder for a country
+ */
+export function getVatNumberPlaceholder(countryCode: CountryCode): string {
+  switch (countryCode) {
+    case 'FR':
+      return 'FR12345678901';
+    case 'CH':
+      return 'CHE-123.456.789 MWST';
+    default:
+      return '';
+  }
 }
 
 // ----------------------------------------------------------------------------

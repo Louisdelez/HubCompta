@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
-import { useWorkspace } from '@/hooks/useWorkspace';
+import { useWorkspace, useUserSettings } from '@/hooks';
 import { clsx } from 'clsx';
 import { User, Building2 } from 'lucide-react';
 
@@ -37,6 +37,7 @@ interface ContactFormProps {
 
 export function ContactForm({ contact, onClose }: ContactFormProps) {
   const { currentWorkspaceId: workspaceId } = useWorkspace();
+  const { businessIdConfig, vatNumberConfig, phonePlaceholder } = useUserSettings();
   const queryClient = useQueryClient();
   const isEditing = !!contact;
 
@@ -191,7 +192,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="input w-full"
-              placeholder="contact@entreprise.fr"
+              placeholder="contact@example.com"
             />
           </div>
 
@@ -203,7 +204,7 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className="input w-full"
-              placeholder="01 23 45 67 89"
+              placeholder={phonePlaceholder}
             />
           </div>
 
@@ -218,31 +219,30 @@ export function ContactForm({ contact, onClose }: ContactFormProps) {
             />
           </div>
 
-          {/* SIRET */}
+          {/* Business ID (SIRET for FR, UID for CH) */}
           <div>
-            <label className="block text-sm font-medium mb-1">SIRET</label>
+            <label className="block text-sm font-medium mb-1">{businessIdConfig.name}</label>
             <input
               type="text"
               value={formData.siret}
-              onChange={(e) => setFormData({ ...formData, siret: e.target.value.replace(/\D/g, '').slice(0, 14) })}
+              onChange={(e) => setFormData({ ...formData, siret: e.target.value.slice(0, businessIdConfig.maxLength) })}
               className="input w-full"
-              placeholder="12345678901234"
-              maxLength={14}
+              placeholder={businessIdConfig.placeholder}
+              maxLength={businessIdConfig.maxLength}
             />
-            <p className="text-xs text-ctp-subtext0 mt-1">14 chiffres</p>
           </div>
 
           {/* VAT Number */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              Numero de TVA intracommunautaire
+              {vatNumberConfig.label}
             </label>
             <input
               type="text"
               value={formData.vatNumber}
               onChange={(e) => setFormData({ ...formData, vatNumber: e.target.value.toUpperCase() })}
               className="input w-full"
-              placeholder="FR12345678901"
+              placeholder={vatNumberConfig.placeholder}
               maxLength={20}
             />
           </div>

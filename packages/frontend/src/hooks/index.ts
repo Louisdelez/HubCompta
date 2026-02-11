@@ -11,4 +11,6 @@ export { useListNavigation } from './useListNavigation';
 export type { UseListNavigationOptions, UseListNavigationResult, ListItemProps } from './useListNavigation';
 export { usePWA } from './usePWA';
 export type { PWAStatus, PWAActions, UsePWAResult } from './usePWA';
+export { useUserSettings } from './useUserSettings';
+export type { UserProfile, VatRate, CountryCode } from './useUserSettings';
 // Note: useTheme is exported from @/providers/ThemeProvider

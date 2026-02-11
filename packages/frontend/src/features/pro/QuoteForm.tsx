@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '@/lib/api/client';
-import { useWorkspace } from '@/hooks/useWorkspace';
+import { useWorkspace, useUserSettings } from '@/hooks';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -41,27 +41,8 @@ interface Quote {
 }
 
 // ----------------------------------------------------------------------------
-// Constants
-// ----------------------------------------------------------------------------
-
-const VAT_RATES = [
-  { value: 20, label: 'TVA 20% (normal)' },
-  { value: 10, label: 'TVA 10% (intermediaire)' },
-  { value: 5.5, label: 'TVA 5,5% (reduit)' },
-  { value: 2.1, label: 'TVA 2,1% (super-reduit)' },
-  { value: 0, label: 'Exonere' },
-];
-
-// ----------------------------------------------------------------------------
 // Helpers
 // ----------------------------------------------------------------------------
-
-function formatCurrency(amount: number, currency = 'EUR'): string {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency,
-  }).format(amount);
-}
 
 function calculateLineTotal(line: QuoteLine): number {
   const subtotal = line.quantity * line.unitPrice;
@@ -92,6 +73,7 @@ function calculateTotals(lines: QuoteLine[]) {
 export function QuoteForm() {
   const { quoteId } = useParams();
   const { currentWorkspaceId: workspaceId } = useWorkspace();
+  const { vatRates, defaultVatRate, formatCurrency } = useUserSettings();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const isEditing = !!quoteId;
@@ -104,7 +86,7 @@ export function QuoteForm() {
   });
   const [notes, setNotes] = useState('');
   const [lines, setLines] = useState<QuoteLine[]>([
-    { description: '', quantity: 1, unitPrice: 0, vatRate: 20 },
+    { description: '', quantity: 1, unitPrice: 0, vatRate: defaultVatRate },
   ]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -172,7 +154,7 @@ export function QuoteForm() {
   });
 
   const addLine = () => {
-    setLines([...lines, { description: '', quantity: 1, unitPrice: 0, vatRate: 20 }]);
+    setLines([...lines, { description: '', quantity: 1, unitPrice: 0, vatRate: defaultVatRate }]);
   };
 
   const removeLine = (index: number) => {
@@ -355,7 +337,7 @@ export function QuoteForm() {
                           onChange={(e) => updateLine(index, 'vatRate', parseFloat(e.target.value))}
                           className="input w-full"
                         >
-                          {VAT_RATES.map((rate) => (
+                          {vatRates.map((rate) => (
                             <option key={rate.value} value={rate.value}>
                               {rate.value}%
                             </option>

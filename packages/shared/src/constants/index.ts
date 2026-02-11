@@ -243,13 +243,36 @@ export const PRO = {
   /** Default payment terms in days */
   DEFAULT_PAYMENT_TERMS: 30,
 
-  /** VAT rates (France) */
+  /** VAT rates by country */
+  VAT_RATES_BY_COUNTRY: {
+    FR: {
+      STANDARD: 20,
+      INTERMEDIATE: 10,
+      REDUCED: 5.5,
+      SUPER_REDUCED: 2.1,
+      EXEMPT: 0,
+    },
+    CH: {
+      STANDARD: 8.1,
+      ACCOMMODATION: 3.8,
+      REDUCED: 2.6,
+      EXEMPT: 0,
+    },
+  } as const,
+
+  /** VAT rates (France - legacy, use VAT_RATES_BY_COUNTRY instead) */
   VAT_RATES: {
     STANDARD: 20,
     INTERMEDIATE: 10,
     REDUCED: 5.5,
     SUPER_REDUCED: 2.1,
     EXEMPT: 0,
+  } as const,
+
+  /** Business ID types by country */
+  BUSINESS_ID_TYPES: {
+    FR: { name: 'SIRET', length: 14, pattern: /^\d{14}$/ },
+    CH: { name: 'UID', length: 12, pattern: /^CHE[- ]?\d{3}[. ]?\d{3}[. ]?\d{3}$/i },
   } as const,
 } as const;
 
@@ -299,9 +322,32 @@ export const DEFAULT_CURRENCY = 'EUR';
 // Locales
 // ----------------------------------------------------------------------------
 
-export const SUPPORTED_LOCALES = ['fr-FR', 'en-US', 'en-GB', 'de-DE', 'es-ES'] as const;
+export const SUPPORTED_LOCALES = [
+  'fr-FR', 'fr-CH', 'de-CH', 'it-CH', // French & Swiss
+  'en-US', 'en-GB', 'de-DE', 'es-ES', // International
+] as const;
+
+/** Default locale (can be overridden by user's country setting) */
 export const DEFAULT_LOCALE = 'fr-FR';
+
+/** Default timezone (can be overridden by user's country setting) */
 export const DEFAULT_TIMEZONE = 'Europe/Paris';
+
+/** Defaults by country */
+export const COUNTRY_DEFAULTS = {
+  FR: {
+    locale: 'fr-FR',
+    timezone: 'Europe/Paris',
+    currency: 'EUR',
+    dateFormat: 'DD/MM/YYYY',
+  },
+  CH: {
+    locale: 'de-CH',
+    timezone: 'Europe/Zurich',
+    currency: 'CHF',
+    dateFormat: 'DD.MM.YYYY',
+  },
+} as const;
 
 // ----------------------------------------------------------------------------
 // Pagination
