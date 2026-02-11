@@ -77,10 +77,12 @@ interface ContributionHistory {
 // ----------------------------------------------------------------------------
 
 function formatCurrency(amount: number, currency: string = 'EUR'): string {
+  // Handle NaN, undefined, or null values
+  const safeAmount = Number.isFinite(amount) ? amount : 0;
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency,
-  }).format(amount);
+  }).format(safeAmount);
 }
 
 // ----------------------------------------------------------------------------
