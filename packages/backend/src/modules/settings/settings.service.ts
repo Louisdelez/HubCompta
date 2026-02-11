@@ -19,12 +19,22 @@ export interface UserPreferences {
       importComplete: boolean;
       securityAlerts: boolean;
       weeklyDigest: boolean;
+      monthlyReport: boolean;
     };
     push: {
       enabled: boolean;
       budgetAlerts: boolean;
       priceAlerts: boolean;
       billReminders: boolean;
+    };
+    smart: {
+      enabled: boolean;
+      unusualSpending: boolean;
+      lowBalanceWarning: boolean;
+      billUpcoming: boolean;
+      savingsMilestone: boolean;
+      weeklyDigest: boolean;
+      monthlyReport: boolean;
     };
   };
   // Display preferences
@@ -101,12 +111,22 @@ const DEFAULT_USER_PREFERENCES: UserPreferences = {
       importComplete: true,
       securityAlerts: true,
       weeklyDigest: false,
+      monthlyReport: true,
     },
     push: {
       enabled: true,
       budgetAlerts: true,
       priceAlerts: true,
       billReminders: true,
+    },
+    smart: {
+      enabled: true,
+      unusualSpending: true,
+      lowBalanceWarning: true,
+      billUpcoming: true,
+      savingsMilestone: true,
+      weeklyDigest: true,
+      monthlyReport: true,
     },
   },
   display: {
@@ -501,6 +521,7 @@ export const settingsService = {
       notifications: {
         email: { ...defaults.notifications.email, ...stored.notifications?.email },
         push: { ...defaults.notifications.push, ...stored.notifications?.push },
+        smart: { ...defaults.notifications.smart, ...stored.notifications?.smart },
       },
       display: { ...defaults.display, ...stored.display },
       dashboard: { ...defaults.dashboard, ...stored.dashboard },
