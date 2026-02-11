@@ -3,7 +3,7 @@
 // Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
@@ -57,7 +57,7 @@ interface TransactionFormProps {
   onSuccess: () => void;
 }
 
-interface CategorySuggestion {
+interface CategorySuggestionItem {
   categoryId: string;
   categoryName: string;
   categoryIcon?: string | null;
@@ -65,6 +65,22 @@ interface CategorySuggestion {
   confidence: number;
   pattern: string;
   source: 'pattern' | 'rule' | 'similar';
+}
+
+interface AIPrediction {
+  categoryId: string;
+  categoryName: string;
+  confidence: number;
+  features: {
+    merchant: string | null;
+    amount: number;
+    dayOfWeek: number;
+    dayOfMonth: number;
+    isWeekend: boolean;
+    amountRange: string;
+    isExpense: boolean;
+    tokens: string[];
+  };
 }
 
 // ----------------------------------------------------------------------------
@@ -87,9 +103,14 @@ export function TransactionForm({
   const isTransfer = transaction?.type === 'transfer';
 
   // State for category suggestions
-  const [suggestions, setSuggestions] = useState<CategorySuggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<CategorySuggestionItem[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [appliedPattern, setAppliedPattern] = useState<string | null>(null);
+
+  // State for AI prediction
+  const [aiPrediction, setAiPrediction] = useState<AIPrediction | null>(null);
+  const [showAiSuggestion, setShowAiSuggestion] = useState(true);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fetch accounts
   const { data: accounts } = useQuery({
@@ -146,7 +167,7 @@ export function TransactionForm({
       if (amountValue) {
         params.append('amount', String(amountValue));
       }
-      const result = await api.get<CategorySuggestion[]>(
+      const result = await api.get<CategorySuggestionItem[]>(
         `/workspaces/${workspaceId}/rules/suggest?${params.toString()}`
       );
       setSuggestions(result);
@@ -173,8 +194,83 @@ export function TransactionForm({
     },
   });
 
+  // AI Prediction mutation
+  const predictMutation = useMutation({
+    mutationFn: (data: { description: string; amount: number; date?: Date }) =>
+      api.post<AIPrediction | null>(
+        `/workspaces/${workspaceId}/categorization/predict`,
+        data
+      ),
+    onSuccess: (prediction) => {
+      if (prediction && prediction.confidence > 0.5) {
+        setAiPrediction(prediction);
+        setShowAiSuggestion(true);
+      } else {
+        setAiPrediction(null);
+      }
+    },
+    onError: () => {
+      setAiPrediction(null);
+    },
+  });
+
+  // Debounced AI prediction call
+  useEffect(() => {
+    // Only trigger for new transactions when:
+    // - description has at least 3 characters
+    // - amount is defined
+    // - no category is selected yet
+    if (
+      isEditing ||
+      !descriptionValue ||
+      descriptionValue.length < 3 ||
+      !amountValue ||
+      selectedCategoryId
+    ) {
+      setAiPrediction(null);
+      return;
+    }
+
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set new debounced call (500ms)
+    debounceTimerRef.current = setTimeout(() => {
+      predictMutation.mutate({
+        description: descriptionValue,
+        amount: amountValue,
+      });
+    }, 500);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [descriptionValue, amountValue, selectedCategoryId, isEditing]);
+
+  // Handle AI suggestion accept
+  const handleAcceptAiSuggestion = () => {
+    if (aiPrediction) {
+      setValue('categoryId', aiPrediction.categoryId);
+      setShowAiSuggestion(false);
+      setAiPrediction(null);
+      // Note: Feedback will be sent after transaction creation if needed
+    }
+  };
+
+  // Handle AI suggestion reject
+  const handleRejectAiSuggestion = () => {
+    setShowAiSuggestion(false);
+    setAiPrediction(null);
+    // Note: Feedback will be sent after transaction creation if needed
+  };
+
   // Apply suggestion handler
-  const handleApplySuggestion = (suggestion: CategorySuggestion, learn: boolean = false) => {
+  const handleApplySuggestion = (suggestion: CategorySuggestionItem, learn: boolean = false) => {
     setValue('categoryId', suggestion.categoryId);
     setAppliedPattern(suggestion.pattern);
     setShowSuggestions(false);
@@ -395,6 +491,67 @@ export function TransactionForm({
                 {errors.description && (
                   <p id="description-error" className="error-text" role="alert">{errors.description.message}</p>
                 )}
+
+                {/* AI Category Suggestion */}
+                {!isEditing && aiPrediction && showAiSuggestion && aiPrediction.confidence > 0.5 && (
+                  <div className="mt-2 flex items-center gap-2 p-2 bg-ctp-surface0 rounded-lg border border-ctp-blue/30">
+                    {/* AI Icon */}
+                    <div className="flex-shrink-0">
+                      <Sparkles className="w-4 h-4 text-ctp-blue" />
+                    </div>
+
+                    {/* Suggestion */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-ctp-text truncate">
+                          {aiPrediction.categoryName}
+                        </span>
+                        <span className={clsx(
+                          'text-xs',
+                          aiPrediction.confidence >= 0.8 ? 'text-ctp-green' :
+                          aiPrediction.confidence >= 0.6 ? 'text-ctp-yellow' :
+                          'text-ctp-peach'
+                        )}>
+                          {Math.round(aiPrediction.confidence * 100)}%
+                        </span>
+                      </div>
+                      <p className="text-xs text-ctp-subtext0">
+                        Suggestion IA
+                      </p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1">
+                      {/* Accept */}
+                      <button
+                        type="button"
+                        onClick={handleAcceptAiSuggestion}
+                        className="p-1.5 rounded-md bg-ctp-green/20 text-ctp-green hover:bg-ctp-green/30 transition-colors"
+                        title="Accepter"
+                      >
+                        <Check className="w-4 h-4" />
+                      </button>
+
+                      {/* Reject */}
+                      <button
+                        type="button"
+                        onClick={handleRejectAiSuggestion}
+                        className="p-1.5 rounded-md bg-ctp-red/20 text-ctp-red hover:bg-ctp-red/30 transition-colors"
+                        title="Rejeter"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Loading state for AI prediction */}
+                {!isEditing && predictMutation.isPending && (
+                  <div className="mt-2 flex items-center gap-2 p-2 bg-ctp-surface0 rounded-lg border border-ctp-surface1">
+                    <Sparkles className="w-4 h-4 text-ctp-blue animate-pulse" />
+                    <span className="text-sm text-ctp-subtext0">Analyse IA en cours...</span>
+                  </div>
+                )}
               </div>
 
               {/* Account */}
@@ -446,6 +603,11 @@ export function TransactionForm({
                 onChange={(id) => {
                   setValue('categoryId', id ?? '');
                   setAppliedPattern(null);
+                  // Clear AI suggestion when user manually selects a category
+                  if (aiPrediction && id !== aiPrediction.categoryId) {
+                    setAiPrediction(null);
+                    setShowAiSuggestion(false);
+                  }
                 }}
               />
 

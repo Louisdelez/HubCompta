@@ -5,3 +5,4 @@
 
 export { CategorySuggestion } from './CategorySuggestion';
 export { BulkCategorize } from './BulkCategorize';
+export { CategorizationPage } from './CategorizationPage';

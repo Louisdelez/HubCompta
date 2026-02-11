@@ -237,6 +237,9 @@ const GamificationPage = lazy(() =>
   import(/* webpackChunkName: "gamification" */ './features/gamification').then(m => ({ default: m.GamificationPage }))
 );
 
+// Categorization (AI)
+const CategorizationPage = lazy(() => import('@/features/categorization/CategorizationPage'));
+
 // Admin - grouped in same chunk since they're admin-only
 const AdminLayout = lazy(() =>
   import(/* webpackChunkName: "admin" */ './features/admin').then(m => ({ default: m.AdminLayout }))
@@ -487,6 +490,9 @@ export default function App() {
 
           {/* Gamification Routes */}
           <Route path="achievements" element={<GamificationPage />} />
+
+          {/* Categorization (AI) Routes */}
+          <Route path="categorization" element={<CategorizationPage />} />
 
           {/* Admin Routes */}
           <Route

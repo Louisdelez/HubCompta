@@ -48,6 +48,7 @@ import {
   Activity,
   BarChart3,
   Calculator,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -87,6 +88,7 @@ const secondaryNavItems: NavItem[] = [
   { name: 'Import', href: '/import', icon: Download },
   { name: 'Export', href: '/export', icon: Upload },
   { name: 'Regles', href: '/rules', icon: SlidersHorizontal },
+  { name: 'IA', href: '/categorization', icon: Sparkles },
   { name: 'Rapports', href: '/reports', icon: ClipboardList },
   { name: 'Devises', href: '/currencies', icon: BadgeDollarSign },
   { name: 'Recherche', href: '/search', icon: Search },
