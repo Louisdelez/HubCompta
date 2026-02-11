@@ -68,8 +68,9 @@ export function ProfileSettings() {
   // Update profile mutation
   const updateMutation = useMutation({
     mutationFn: (data: typeof formData) => api.patch<UserProfile>('/settings/profile', data),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+    onSuccess: (updatedProfile) => {
+      // Update cache immediately with the response data to prevent race condition
+      queryClient.setQueryData(['user-profile'], updatedProfile);
       void queryClient.invalidateQueries({ queryKey: ['tax'] });
       setIsEditing(false);
       setShowCountryInfo(false);
