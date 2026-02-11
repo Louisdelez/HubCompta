@@ -947,6 +947,7 @@ enum NotificationType {
   low_balance_warning // Account balance below threshold
   recurring_processed // Recurring transaction processed
   goal_achieved // Savings goal completed
+  bill_upcoming // Bills due in next 7 days
 }
 
 model AlertRule {

@@ -16,6 +16,7 @@ import {
   Loader2,
   ArrowUpRight,
   ArrowDownRight,
+  Download,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -88,8 +89,45 @@ const assetTypeIcons: Record<string, typeof Wallet> = {
 export function NetWorthReport() {
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [period, setPeriod] = useState<'6m' | '1y' | '2y' | 'all'>('1y');
+  const [isExporting, setIsExporting] = useState(false);
 
   const months = period === '6m' ? 6 : period === '1y' ? 12 : period === '2y' ? 24 : 60;
+
+  const handleExportPDF = async () => {
+    if (!workspaceId) return;
+    setIsExporting(true);
+
+    try {
+      const baseUrl = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? '/api/v1';
+      const token = localStorage.getItem('accessToken');
+
+      const response = await fetch(
+        `${baseUrl}/workspaces/${workspaceId}/reports/export-pdf/net-worth?months=${months}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error('Export failed');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `patrimoine_${format(new Date(), 'yyyyMMdd')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export error:', err);
+      alert("Erreur lors de l'export PDF");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['reports', workspaceId, 'net-worth', period],
@@ -193,8 +231,25 @@ export function NetWorthReport() {
       <div className="card">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold">Evolution du patrimoine</h3>
-          <div className="flex gap-1 bg-ctp-surface0 rounded-lg p-1">
-            {(['6m', '1y', '2y', 'all'] as const).map((p) => (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportPDF}
+              disabled={isExporting}
+              className={clsx(
+                'flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg',
+                'bg-ctp-red/10 text-ctp-red hover:bg-ctp-red/20',
+                'disabled:opacity-50 disabled:cursor-not-allowed'
+              )}
+            >
+              {isExporting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              PDF
+            </button>
+            <div className="flex gap-1 bg-ctp-surface0 rounded-lg p-1">
+              {(['6m', '1y', '2y', 'all'] as const).map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
@@ -214,6 +269,7 @@ export function NetWorthReport() {
                   : 'Tout'}
               </button>
             ))}
+            </div>
           </div>
         </div>
 

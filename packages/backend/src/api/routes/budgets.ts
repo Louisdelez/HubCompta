@@ -22,6 +22,8 @@ const createBudgetSchema = z.object({
   alertThreshold: z.number().min(1).max(100).optional().default(80),
   startDate: z.string().transform((s) => new Date(s)),
   endDate: z.string().optional().transform((s) => (s ? new Date(s) : undefined)),
+  envelopeMode: z.boolean().optional().default(false),
+  rolloverEnabled: z.boolean().optional().default(true),
 });
 
 const updateBudgetSchema = z.object({
@@ -29,6 +31,14 @@ const updateBudgetSchema = z.object({
   amount: z.number().positive().optional(),
   alertThreshold: z.number().min(1).max(100).optional(),
   endDate: z.string().nullable().optional().transform((s) => (s ? new Date(s) : s === null ? null : undefined)),
+  envelopeMode: z.boolean().optional(),
+  rolloverEnabled: z.boolean().optional(),
+});
+
+const reallocateSchema = z.object({
+  fromBudgetId: z.string().uuid(),
+  toBudgetId: z.string().uuid(),
+  amount: z.number().positive(),
 });
 
 // ----------------------------------------------------------------------------
@@ -67,6 +77,11 @@ const budgetSchema = {
     alertThreshold: { type: 'number' as const },
     startDate: { type: 'string' as const, format: 'date-time' },
     endDate: { type: 'string' as const, format: 'date-time', nullable: true },
+    envelopeMode: { type: 'boolean' as const, description: 'Whether envelope budgeting mode is enabled' },
+    rolloverEnabled: { type: 'boolean' as const, description: 'Whether unused funds roll over to next period' },
+    rolloverAmount: { type: 'number' as const, description: 'Amount rolled over from previous period' },
+    availableAmount: { type: 'number' as const, description: 'Total available (budget + rollover - spent)' },
+    rolloverFromPrevious: { type: 'number' as const, description: 'Rollover amount from previous month' },
     createdAt: { type: 'string' as const, format: 'date-time' },
     updatedAt: { type: 'string' as const, format: 'date-time' },
     category: {
@@ -76,6 +91,30 @@ const budgetSchema = {
         name: { type: 'string' as const },
         icon: { type: 'string' as const, nullable: true },
         color: { type: 'string' as const, nullable: true },
+      },
+    },
+  },
+};
+
+const envelopeStatusSchema = {
+  type: 'object' as const,
+  properties: {
+    totalEnvelopes: { type: 'number' as const },
+    totalAvailable: { type: 'number' as const },
+    totalSpent: { type: 'number' as const },
+    envelopes: {
+      type: 'array' as const,
+      items: {
+        type: 'object' as const,
+        properties: {
+          id: { type: 'string' as const, format: 'uuid' },
+          name: { type: 'string' as const },
+          categoryName: { type: 'string' as const },
+          budgetAmount: { type: 'number' as const },
+          rolloverAmount: { type: 'number' as const },
+          spent: { type: 'number' as const },
+          available: { type: 'number' as const },
+        },
       },
     },
   },
@@ -288,6 +327,206 @@ export function budgetRoutes(app: FastifyInstance): void {
   );
 
   // --------------------------------------------------------------------------
+  // GET /budgets/envelopes - Get envelope status for all envelope budgets
+  // --------------------------------------------------------------------------
+  app.get(
+    '/envelopes',
+    {
+      schema: {
+        summary: 'Get envelope budgets status',
+        description: 'Get an overview of all envelope budgets with rollover amounts and available funds.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        response: {
+          200: successResponseSchema(envelopeStatusSchema),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    async (request: FastifyRequest<{ Params: { workspaceId: string } }>, reply: FastifyReply) => {
+      const { workspaceId } = request.params;
+      const userId = request.user!.sub;
+
+      // Check permission
+      await checkPermission(userId, workspaceId, 'budget', 'read');
+
+      const status = await budgetService.getEnvelopeStatus(workspaceId);
+
+      return reply.send({ success: true, data: status });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /budgets/reallocate - Reallocate funds between envelope budgets
+  // --------------------------------------------------------------------------
+  app.post(
+    '/reallocate',
+    {
+      schema: {
+        summary: 'Reallocate envelope funds',
+        description: 'Transfer funds from one envelope budget to another.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        body: {
+          type: 'object' as const,
+          required: ['fromBudgetId', 'toBudgetId', 'amount'],
+          properties: {
+            fromBudgetId: { type: 'string' as const, format: 'uuid', description: 'Source envelope budget ID' },
+            toBudgetId: { type: 'string' as const, format: 'uuid', description: 'Destination envelope budget ID' },
+            amount: { type: 'number' as const, minimum: 0.01, description: 'Amount to transfer' },
+          },
+        },
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              from: budgetSchema,
+              to: budgetSchema,
+            },
+          }),
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{
+        Params: { workspaceId: string };
+        Body: { fromBudgetId: string; toBudgetId: string; amount: number };
+      }>,
+      reply: FastifyReply
+    ) => {
+      const { workspaceId } = request.params;
+      const userId = request.user!.sub;
+
+      // Check permission
+      await checkPermission(userId, workspaceId, 'budget', 'update');
+
+      // Validate body
+      const input = reallocateSchema.parse(request.body);
+
+      const result = await budgetService.reallocateEnvelope(
+        workspaceId,
+        input.fromBudgetId,
+        input.toBudgetId,
+        input.amount
+      );
+
+      // Audit log
+      await auditService.log({
+        workspaceId,
+        userId,
+        action: 'budget.reallocate',
+        entityType: 'budget',
+        entityId: input.fromBudgetId,
+        newValue: { from: input.fromBudgetId, to: input.toBudgetId, amount: input.amount },
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] ?? null,
+      });
+
+      return reply.send({ success: true, data: result });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /budgets/process-rollover - Process month-end rollover for envelope budgets
+  // --------------------------------------------------------------------------
+  app.post(
+    '/process-rollover',
+    {
+      schema: {
+        summary: 'Process month-end rollover',
+        description: 'Process rollover for all envelope budgets at month end. Usually called by a scheduled job.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: workspaceParamsSchema,
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              processed: { type: 'number' as const, description: 'Number of budgets processed' },
+              updated: { type: 'number' as const, description: 'Number of budgets updated with rollover' },
+            },
+          }),
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    async (request: FastifyRequest<{ Params: { workspaceId: string } }>, reply: FastifyReply) => {
+      const { workspaceId } = request.params;
+      const userId = request.user!.sub;
+
+      // Check permission - require admin level for this operation
+      await checkPermission(userId, workspaceId, 'budget', 'update');
+
+      const result = await budgetService.processMonthEndRollover(workspaceId);
+
+      // Audit log
+      await auditService.log({
+        workspaceId,
+        userId,
+        action: 'budget.process_rollover',
+        entityType: 'budget',
+        entityId: workspaceId,
+        newValue: result,
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'] ?? null,
+      });
+
+      return reply.send({ success: true, data: result });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /budgets/:budgetId/rollover - Get rollover calculation for a budget
+  // --------------------------------------------------------------------------
+  app.get(
+    '/:budgetId/rollover',
+    {
+      schema: {
+        summary: 'Get budget rollover calculation',
+        description: 'Calculate the potential rollover amount for a budget based on previous month spending.',
+        tags: ['Budgets'],
+        security: [{ bearerAuth: [] }],
+        params: budgetParamsSchema,
+        response: {
+          200: successResponseSchema({
+            type: 'object' as const,
+            properties: {
+              rolloverAmount: { type: 'number' as const, description: 'Calculated rollover amount' },
+              previousSpent: { type: 'number' as const, description: 'Amount spent in previous period' },
+              previousBudget: { type: 'number' as const, description: 'Budget amount for previous period' },
+            },
+          }),
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{ Params: { workspaceId: string; budgetId: string } }>,
+      reply: FastifyReply
+    ) => {
+      const { workspaceId, budgetId } = request.params;
+      const userId = request.user!.sub;
+
+      // Check permission
+      await checkPermission(userId, workspaceId, 'budget', 'read');
+
+      const rollover = await budgetService.calculateRollover(workspaceId, budgetId);
+
+      return reply.send({ success: true, data: rollover });
+    }
+  );
+
+  // --------------------------------------------------------------------------
   // POST /budgets - Create new budget
   // --------------------------------------------------------------------------
   app.post(
@@ -310,6 +549,8 @@ export function budgetRoutes(app: FastifyInstance): void {
             alertThreshold: { type: 'number' as const, minimum: 1, maximum: 100, default: 80, description: 'Alert threshold percentage' },
             startDate: { type: 'string' as const, format: 'date-time', description: 'Budget start date' },
             endDate: { type: 'string' as const, format: 'date-time', description: 'Optional end date' },
+            envelopeMode: { type: 'boolean' as const, default: false, description: 'Enable envelope budgeting mode' },
+            rolloverEnabled: { type: 'boolean' as const, default: true, description: 'Enable rollover of unused funds' },
           },
         },
         response: {
@@ -470,6 +711,8 @@ export function budgetRoutes(app: FastifyInstance): void {
             amount: { type: 'number' as const, minimum: 0.01, description: 'Budget amount' },
             alertThreshold: { type: 'number' as const, minimum: 1, maximum: 100, description: 'Alert threshold percentage' },
             endDate: { type: 'string' as const, format: 'date-time', nullable: true, description: 'End date' },
+            envelopeMode: { type: 'boolean' as const, description: 'Enable envelope budgeting mode' },
+            rolloverEnabled: { type: 'boolean' as const, description: 'Enable rollover of unused funds' },
           },
         },
         response: {

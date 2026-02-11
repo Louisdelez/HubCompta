@@ -527,6 +527,317 @@ export const smartAlertService = {
       }
     }
   },
+
+  // ==========================================================================
+  // Smart Alert Detection Methods
+  // ==========================================================================
+
+  /**
+   * Detect unusual spending in a workspace
+   * Analyzes recent transactions and flags those significantly above category average
+   */
+  async detectUnusualSpending(
+    workspaceId: string
+  ): Promise<Array<{
+    transactionId: string;
+    amount: number;
+    categoryId: string;
+    categoryName: string;
+    percentAboveAverage: number;
+    description: string;
+  }>> {
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
+    // Get recent expense transactions
+    const recentTransactions = await prisma.transaction.findMany({
+      where: {
+        workspaceId,
+        deletedAt: null,
+        type: 'expense',
+        date: { gte: oneDayAgo },
+        categoryId: { not: null },
+      },
+      include: { category: true },
+    });
+
+    const unusualSpending: Array<{
+      transactionId: string;
+      amount: number;
+      categoryId: string;
+      categoryName: string;
+      percentAboveAverage: number;
+      description: string;
+    }> = [];
+
+    for (const tx of recentTransactions) {
+      if (!tx.categoryId || !tx.category) continue;
+
+      const amount = Math.abs(tx.amount.toNumber());
+
+      // Get average transaction amount for this category
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+      const avgResult = await prisma.transaction.aggregate({
+        where: {
+          workspaceId,
+          categoryId: tx.categoryId,
+          type: 'expense',
+          deletedAt: null,
+          date: { gte: threeMonthsAgo, lt: oneDayAgo },
+        },
+        _avg: { amount: true },
+        _count: true,
+      });
+
+      const avgAmount = Math.abs(avgResult._avg.amount?.toNumber() ?? 0);
+      const transactionCount = avgResult._count;
+
+      // Skip if not enough historical data
+      if (transactionCount < 3 || avgAmount === 0) continue;
+
+      // Flag if transaction is significantly above average (3x or more and at least 50 EUR)
+      if (amount > avgAmount * 3 && amount > 50) {
+        const percentAboveAverage = Math.round(((amount - avgAmount) / avgAmount) * 100);
+
+        unusualSpending.push({
+          transactionId: tx.id,
+          amount,
+          categoryId: tx.categoryId,
+          categoryName: tx.category.name,
+          percentAboveAverage,
+          description: tx.description,
+        });
+      }
+    }
+
+    return unusualSpending;
+  },
+
+  /**
+   * Check all accounts in a workspace for low balances
+   */
+  async checkLowBalanceForWorkspace(
+    workspaceId: string,
+    defaultThreshold: number = 100
+  ): Promise<Array<{
+    accountId: string;
+    accountName: string;
+    balance: number;
+    threshold: number;
+  }>> {
+    const accounts = await prisma.account.findMany({
+      where: {
+        workspaceId,
+        deletedAt: null,
+        type: { in: ['checking', 'savings'] },
+      },
+    });
+
+    const lowBalanceAccounts: Array<{
+      accountId: string;
+      accountName: string;
+      balance: number;
+      threshold: number;
+    }> = [];
+
+    for (const account of accounts) {
+      const balance = account.balance.toNumber();
+      // Use account-specific threshold if set, otherwise use default
+      const threshold = defaultThreshold;
+
+      if (balance < threshold && balance >= 0) {
+        lowBalanceAccounts.push({
+          accountId: account.id,
+          accountName: account.name,
+          balance,
+          threshold,
+        });
+      }
+    }
+
+    return lowBalanceAccounts;
+  },
+
+  /**
+   * Check for bills due in the next 7 days
+   */
+  async checkUpcomingBills(
+    workspaceId: string
+  ): Promise<Array<{
+    recurrenceId: string;
+    description: string;
+    amount: number;
+    dueDate: Date;
+    daysUntilDue: number;
+  }>> {
+    const now = new Date();
+    const sevenDaysFromNow = new Date();
+    sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+
+    // Get recurring transactions due in next 7 days
+    const recurrences = await prisma.recurrence.findMany({
+      where: {
+        workspaceId,
+        isActive: true,
+        nextRunAt: {
+          gte: now,
+          lte: sevenDaysFromNow,
+        },
+      },
+    });
+
+    const upcomingBills: Array<{
+      recurrenceId: string;
+      description: string;
+      amount: number;
+      dueDate: Date;
+      daysUntilDue: number;
+    }> = [];
+
+    for (const recurrence of recurrences) {
+      if (!recurrence.nextRunAt) continue;
+
+      const template = recurrence.template as Record<string, unknown> | null;
+      const amount = Math.abs((template?.amount as number) ?? 0);
+      const description = (template?.description as string) ?? recurrence.name ?? 'Paiement recurrent';
+
+      // Skip if amount is 0 or very small
+      if (amount < 1) continue;
+
+      const daysUntilDue = Math.ceil(
+        (recurrence.nextRunAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      upcomingBills.push({
+        recurrenceId: recurrence.id,
+        description,
+        amount,
+        dueDate: recurrence.nextRunAt,
+        daysUntilDue,
+      });
+    }
+
+    // Sort by due date (earliest first)
+    upcomingBills.sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+
+    return upcomingBills;
+  },
+
+  /**
+   * Run all anomaly detection checks for a workspace and send notifications
+   */
+  async runAnomalyDetection(
+    workspaceId: string,
+    userId: string
+  ): Promise<{
+    success: true;
+    unusualSpending: number;
+    lowBalanceAlerts: number;
+    upcomingBills: number;
+  }> {
+    let unusualSpendingCount = 0;
+    let lowBalanceCount = 0;
+    let upcomingBillsCount = 0;
+
+    try {
+      // 1. Detect unusual spending
+      const unusualTransactions = await this.detectUnusualSpending(workspaceId);
+      for (const tx of unusualTransactions) {
+        // Check if we already notified for this transaction
+        const existingNotification = await prisma.notification.findFirst({
+          where: {
+            userId,
+            workspaceId,
+            type: 'unusual_spending',
+            data: {
+              path: ['transactionId'],
+              equals: tx.transactionId,
+            },
+          },
+        });
+
+        if (!existingNotification) {
+          await notificationService.notifyUnusualSpending(userId, workspaceId, tx);
+          unusualSpendingCount++;
+        }
+      }
+
+      // 2. Check low balances
+      const lowBalanceAccounts = await this.checkLowBalanceForWorkspace(workspaceId);
+      for (const account of lowBalanceAccounts) {
+        // Only notify once per day per account
+        const oneDayAgo = new Date();
+        oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
+        const recentNotification = await prisma.notification.findFirst({
+          where: {
+            userId,
+            workspaceId,
+            type: 'low_balance_warning',
+            createdAt: { gte: oneDayAgo },
+            data: {
+              path: ['accountId'],
+              equals: account.accountId,
+            },
+          },
+        });
+
+        if (!recentNotification) {
+          await notificationService.notifyLowBalance(userId, workspaceId, {
+            id: account.accountId,
+            name: account.accountName,
+            balance: account.balance,
+            threshold: account.threshold,
+          });
+          lowBalanceCount++;
+        }
+      }
+
+      // 3. Check upcoming bills
+      const upcomingBills = await this.checkUpcomingBills(workspaceId);
+      for (const bill of upcomingBills) {
+        // Only notify once per recurrence per due date
+        const existingNotification = await prisma.notification.findFirst({
+          where: {
+            userId,
+            workspaceId,
+            type: 'bill_upcoming',
+            data: {
+              path: ['recurrenceId'],
+              equals: bill.recurrenceId,
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        // Check if we already notified for this specific due date
+        const lastNotificationData = existingNotification?.data as { dueDate?: string } | null;
+        const alreadyNotified = lastNotificationData?.dueDate === bill.dueDate.toISOString();
+
+        if (!alreadyNotified) {
+          await notificationService.notifyBillUpcoming(userId, workspaceId, bill);
+          upcomingBillsCount++;
+        }
+      }
+
+      logger.info(
+        { workspaceId, unusualSpendingCount, lowBalanceCount, upcomingBillsCount },
+        'Anomaly detection completed'
+      );
+    } catch (error) {
+      logger.error({ error, workspaceId }, 'Anomaly detection failed');
+      throw error;
+    }
+
+    return {
+      success: true,
+      unusualSpending: unusualSpendingCount,
+      lowBalanceAlerts: lowBalanceCount,
+      upcomingBills: upcomingBillsCount,
+    };
+  },
 };
 
 export default smartAlertService;

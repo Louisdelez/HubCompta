@@ -123,6 +123,25 @@ export const memberUpdateSchema = z.object({
   }),
 });
 
+// Family invite schema with spending controls
+export const familyInviteSchema = z.object({
+  email: emailSchema,
+  displayName: z.string().min(1).max(100).trim().optional(),
+  role: memberRoleSchema.refine((role) => role !== 'owner', {
+    message: 'Cannot invite as owner',
+  }),
+  spendingLimit: z.number().positive().optional().nullable(),
+  approvalRequired: z.boolean().optional(),
+  visibleCategories: z.array(z.string().uuid()).optional(),
+});
+
+// Member family settings update schema
+export const memberFamilySettingsSchema = z.object({
+  spendingLimit: z.number().positive().optional().nullable(),
+  approvalRequired: z.boolean().optional(),
+  visibleCategories: z.array(z.string().uuid()).optional(),
+});
+
 // ----------------------------------------------------------------------------
 // Account Schemas
 // ----------------------------------------------------------------------------
@@ -529,6 +548,8 @@ export type WorkspaceCreateInput = z.infer<typeof workspaceCreateSchema>;
 export type WorkspaceUpdateInput = z.infer<typeof workspaceUpdateSchema>;
 export type MemberInviteInput = z.infer<typeof memberInviteSchema>;
 export type MemberUpdateInput = z.infer<typeof memberUpdateSchema>;
+export type FamilyInviteInput = z.infer<typeof familyInviteSchema>;
+export type MemberFamilySettingsInput = z.infer<typeof memberFamilySettingsSchema>;
 
 export type AccountCreateInput = z.infer<typeof accountCreateSchema>;
 export type AccountUpdateInput = z.infer<typeof accountUpdateSchema>;

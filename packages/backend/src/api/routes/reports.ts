@@ -7,11 +7,13 @@ import type { FastifyInstance } from 'fastify';
 import { reportService } from '@/modules/reports/report.service.js';
 import { exportService } from '@/modules/reports/export.service.js';
 import { reportBuilderService, type ReportConfig } from '@/modules/reports/report-builder.service.js';
+import { pdfExportService, type PDFReportType } from '@/modules/reports/pdf-export.service.js';
 import { transactionService } from '@/modules/transactions/transaction.service.js';
 import { balanceService } from '@/modules/accounts/balance.service.js';
 import { accountService } from '@/modules/accounts/account.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
 import { workspaceContextMiddleware, requirePermission } from '@/core/middleware/workspaceContext.js';
+import { prisma } from '@/core/database/client.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -433,6 +435,217 @@ export function reportRoutes(app: FastifyInstance): void {
         success: true,
         data,
       });
+    }
+  );
+
+  // ==========================================================================
+  // ADVANCED REPORTS - NET WORTH, YEAR COMPARISON, TAX SUMMARY
+  // ==========================================================================
+
+  // --------------------------------------------------------------------------
+  // GET /reports/net-worth-report - Full net worth report with history
+  // --------------------------------------------------------------------------
+  app.get<{ Params: WorkspaceParams; Querystring: { months?: string } }>(
+    '/net-worth-report',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const months = request.query.months ? parseInt(request.query.months) : 12;
+
+      const data = await reportService.generateNetWorthReport(workspaceId, months);
+
+      return reply.send({
+        success: true,
+        data,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /reports/year-comparison - Year over year comparison
+  // --------------------------------------------------------------------------
+  app.get<{ Params: WorkspaceParams; Querystring: { year?: string } }>(
+    '/year-comparison',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const year = request.query.year ? parseInt(request.query.year) : new Date().getFullYear();
+
+      const data = await reportService.generateYearOverYear(workspaceId, year);
+
+      return reply.send({
+        success: true,
+        data,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /reports/category-trends-report - Enhanced category trends
+  // --------------------------------------------------------------------------
+  app.get<{ Params: WorkspaceParams; Querystring: { months?: string } }>(
+    '/category-trends-report',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const months = request.query.months ? parseInt(request.query.months) : 6;
+
+      const data = await reportService.generateCategoryTrendsReport(workspaceId, months);
+
+      return reply.send({
+        success: true,
+        data,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /reports/tax-summary - Tax summary report (FR/CH)
+  // --------------------------------------------------------------------------
+  app.get<{ Params: WorkspaceParams; Querystring: { year?: string; country?: string } }>(
+    '/tax-summary',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+      const year = request.query.year ? parseInt(request.query.year) : new Date().getFullYear();
+      const country = (request.query.country || 'FR') as 'FR' | 'CH';
+
+      // Try to get country from workspace owner's profile
+      let userCountry = country;
+      try {
+        const membership = await prisma.membership.findFirst({
+          where: { workspaceId, role: 'owner' },
+          include: { user: { select: { country: true } } },
+        });
+        if (membership?.user?.country) {
+          userCountry = membership.user.country as 'FR' | 'CH';
+        }
+      } catch {
+        // Use default country
+      }
+
+      const data = await reportService.generateTaxSummary(workspaceId, year, userCountry);
+
+      return reply.send({
+        success: true,
+        data,
+      });
+    }
+  );
+
+  // ==========================================================================
+  // PDF EXPORTS
+  // ==========================================================================
+
+  // --------------------------------------------------------------------------
+  // GET /reports/export-pdf/:type - Export report as PDF
+  // --------------------------------------------------------------------------
+  app.get<{
+    Params: WorkspaceParams & { type: string };
+    Querystring: DateRangeQuery & { year?: string; months?: string; country?: string };
+  }>(
+    '/export-pdf/:type',
+    { preHandler: requirePermission('transaction:read') },
+    async (request, reply) => {
+      const { workspaceId, type } = request.params;
+      const { from, to, year, months, country } = request.query;
+
+      let reportData: unknown;
+      let pdfType: PDFReportType;
+      let title: string;
+      let subtitle: string | undefined;
+      let period: { from: Date; to: Date } | { year: number } | undefined;
+
+      // Get workspace currency
+      const workspace = await prisma.workspace.findUnique({
+        where: { id: workspaceId },
+        select: { currency: true },
+      });
+      const currency = workspace?.currency || 'EUR';
+
+      switch (type) {
+        case 'net-worth': {
+          const m = months ? parseInt(months) : 12;
+          reportData = await reportService.generateNetWorthReport(workspaceId, m);
+          pdfType = 'net_worth';
+          title = 'Rapport Patrimoine';
+          subtitle = `Evolution sur ${m} mois`;
+          break;
+        }
+
+        case 'year-comparison': {
+          const y = year ? parseInt(year) : new Date().getFullYear();
+          reportData = await reportService.generateYearOverYear(workspaceId, y);
+          pdfType = 'year_comparison';
+          title = 'Comparaison Annuelle';
+          period = { year: y };
+          break;
+        }
+
+        case 'category-trends': {
+          const m = months ? parseInt(months) : 6;
+          reportData = await reportService.generateCategoryTrendsReport(workspaceId, m);
+          pdfType = 'category_trends';
+          title = 'Tendances par Categorie';
+          subtitle = `${m} derniers mois`;
+          break;
+        }
+
+        case 'tax-summary': {
+          const y = year ? parseInt(year) : new Date().getFullYear();
+          const c = (country || 'FR') as 'FR' | 'CH';
+          reportData = await reportService.generateTaxSummary(workspaceId, y, c);
+          pdfType = 'tax_summary';
+          title = 'Resume Fiscal';
+          period = { year: y };
+          break;
+        }
+
+        case 'cash-flow': {
+          const range = parseDateRange({ from, to });
+          reportData = await reportService.getCashFlowReport(workspaceId, range);
+          pdfType = 'cash_flow';
+          title = 'Flux de Tresorerie';
+          period = range;
+          break;
+        }
+
+        case 'profit-loss': {
+          const range = parseDateRange({ from, to });
+          reportData = await reportService.getProfitLossReport(workspaceId, range);
+          pdfType = 'profit_loss';
+          title = 'Compte de Resultat';
+          period = range;
+          break;
+        }
+
+        case 'budget': {
+          const range = parseDateRange({ from, to });
+          reportData = await reportService.getBudgetVsActualReport(workspaceId, range);
+          pdfType = 'budget_report';
+          title = 'Budget vs Realise';
+          period = range;
+          break;
+        }
+
+        default:
+          return reply.status(400).send({
+            success: false,
+            error: { message: `Type de rapport non supporte: ${type}` },
+          });
+      }
+
+      const pdf = await pdfExportService.generateReportPDF(reportData, pdfType, {
+        title,
+        subtitle,
+        period,
+        currency,
+      });
+
+      reply.header('Content-Type', pdf.mimeType);
+      reply.header('Content-Disposition', `attachment; filename="${pdf.filename}"`);
+      reply.header('Content-Length', pdf.size);
+      return reply.send(pdf.content);
     }
   );
 

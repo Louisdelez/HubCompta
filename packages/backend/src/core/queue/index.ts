@@ -42,6 +42,7 @@ export const QUEUES = {
   RECURRENCES: 'recurrences',
   EXCHANGE_RATES: 'exchange-rates',
   PORTFOLIO_SNAPSHOT: 'portfolio-snapshot',
+  SMART_NOTIFICATIONS: 'smart-notifications',
 } as const;
 
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
@@ -146,6 +147,12 @@ export interface PortfolioSnapshotJobData {
   workspaceId?: string; // Optional: specific workspace, or all if not set
 }
 
+export interface SmartNotificationJobData {
+  type: 'weekly_summary' | 'monthly_report' | 'anomaly_detection';
+  workspaceId?: string; // Optional: specific workspace, or all if not set
+  userId?: string; // Optional: specific user, or all if not set
+}
+
 // ----------------------------------------------------------------------------
 // Queue Operations
 // ----------------------------------------------------------------------------
@@ -225,6 +232,16 @@ export async function addRecurrenceJob(data: RecurrenceJobData): Promise<Job<Rec
     });
   }
   return queue.add('process-due', data);
+}
+
+/**
+ * Add a smart notification job
+ */
+export async function addSmartNotificationJob(data: SmartNotificationJobData): Promise<Job<SmartNotificationJobData>> {
+  const queue = getQueue(QUEUES.SMART_NOTIFICATIONS);
+  return queue.add(`process-${data.type}`, data, {
+    jobId: `${data.type}-${data.workspaceId ?? 'all'}-${Date.now()}`,
+  });
 }
 
 /**
@@ -318,6 +335,45 @@ export async function setupScheduledJobs(): Promise<void> {
         pattern: '0 23 * * *', // Daily at 23:00 UTC
       },
       jobId: 'scheduled-portfolio-snapshots',
+    }
+  );
+
+  // Smart notifications queue
+  const smartNotificationsQueue = getQueue(QUEUES.SMART_NOTIFICATIONS);
+
+  // Weekly summary - every Monday at 8:00 UTC
+  await smartNotificationsQueue.add(
+    'process-weekly-summary',
+    { type: 'weekly_summary' as const },
+    {
+      repeat: {
+        pattern: '0 8 * * 1', // Monday at 8:00 UTC
+      },
+      jobId: 'scheduled-weekly-summary',
+    }
+  );
+
+  // Monthly report - 1st of each month at 9:00 UTC
+  await smartNotificationsQueue.add(
+    'process-monthly-report',
+    { type: 'monthly_report' as const },
+    {
+      repeat: {
+        pattern: '0 9 1 * *', // 1st of month at 9:00 UTC
+      },
+      jobId: 'scheduled-monthly-report',
+    }
+  );
+
+  // Anomaly detection - every 4 hours
+  await smartNotificationsQueue.add(
+    'process-anomaly-detection',
+    { type: 'anomaly_detection' as const },
+    {
+      repeat: {
+        pattern: '0 */4 * * *', // Every 4 hours
+      },
+      jobId: 'scheduled-anomaly-detection',
     }
   );
 

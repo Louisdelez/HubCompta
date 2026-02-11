@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { BarChart3, Pencil, Trash2, Folder } from 'lucide-react';
+import { BarChart3, Pencil, Trash2, Folder, TrendingUp, Wallet } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -29,6 +29,12 @@ interface BudgetWithProgress {
   percentUsed: number;
   isOverBudget: boolean;
   isAlertTriggered: boolean;
+  // Envelope mode fields
+  envelopeMode: boolean;
+  rolloverEnabled: boolean;
+  rolloverAmount: number;
+  availableAmount: number;
+  rolloverFromPrevious: number;
 }
 
 interface BudgetCardProps {
@@ -128,19 +134,44 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
             <p className="text-sm text-ctp-subtext0">{budget.category.name}</p>
           </div>
         </div>
-        {statusBadge && (
-          <span className={clsx('text-xs px-2 py-1 rounded-full font-medium', statusBadge.className)}>
-            {statusBadge.text}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {budget.envelopeMode && (
+            <span className="text-xs px-2 py-1 rounded-full font-medium bg-ctp-mauve/20 text-ctp-mauve flex items-center gap-1">
+              <Wallet className="w-3 h-3" />
+              Enveloppe
+            </span>
+          )}
+          {statusBadge && (
+            <span className={clsx('text-xs px-2 py-1 rounded-full font-medium', statusBadge.className)}>
+              {statusBadge.text}
+            </span>
+          )}
+        </div>
       </div>
+
+      {/* Rollover Info (if envelope mode with rollover) */}
+      {budget.envelopeMode && budget.rolloverFromPrevious > 0 && (
+        <div className="mb-3 p-2 rounded-lg bg-ctp-mauve/10 border border-ctp-mauve/20">
+          <div className="flex items-center gap-2 text-sm">
+            <TrendingUp className="w-4 h-4 text-ctp-mauve" />
+            <span className="text-ctp-subtext0">Report du mois précédent:</span>
+            <span className="font-medium text-ctp-mauve">
+              +{formatCurrency(budget.rolloverFromPrevious)}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Progress Bar */}
       <div className="mb-3">
         <div className="flex justify-between text-sm mb-1">
           <span className="font-medium text-ctp-text">{budget.percentUsed}%</span>
           <span className="text-ctp-subtext0">
-            {formatCurrency(budget.spent)} / {formatCurrency(Number(budget.amount))}
+            {formatCurrency(budget.spent)} / {formatCurrency(
+              budget.envelopeMode
+                ? budget.availableAmount + budget.spent
+                : Number(budget.amount)
+            )}
           </span>
         </div>
         <div className="h-3 bg-ctp-surface1 rounded-full overflow-hidden">
@@ -154,7 +185,9 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
       {/* Stats */}
       <div className="flex justify-between text-sm">
         <div>
-          <p className="text-ctp-subtext0">Restant</p>
+          <p className="text-ctp-subtext0">
+            {budget.envelopeMode ? 'Disponible' : 'Restant'}
+          </p>
           <p
             className={clsx(
               'font-medium',
@@ -162,13 +195,20 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
             )}
           >
             {budget.isOverBudget ? '-' : ''}
-            {formatCurrency(budget.remaining)}
+            {formatCurrency(budget.envelopeMode ? budget.availableAmount : budget.remaining)}
           </p>
         </div>
-        <div className="text-right">
-          <p className="text-ctp-subtext0">Alerte à</p>
-          <p className="font-medium text-ctp-text">{budget.alertThreshold}%</p>
-        </div>
+        {budget.envelopeMode ? (
+          <div className="text-right">
+            <p className="text-ctp-subtext0">Budget de base</p>
+            <p className="font-medium text-ctp-text">{formatCurrency(Number(budget.amount))}</p>
+          </div>
+        ) : (
+          <div className="text-right">
+            <p className="text-ctp-subtext0">Alerte à</p>
+            <p className="font-medium text-ctp-text">{budget.alertThreshold}%</p>
+          </div>
+        )}
       </div>
 
       {/* Actions */}

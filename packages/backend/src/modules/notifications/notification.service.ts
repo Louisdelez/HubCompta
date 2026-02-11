@@ -495,6 +495,162 @@ export const notificationService = {
       data,
     });
   },
+
+  // ==========================================================================
+  // Smart Notification Creators
+  // ==========================================================================
+
+  // --------------------------------------------------------------------------
+  // Unusual Spending Alert
+  // --------------------------------------------------------------------------
+  notifyUnusualSpending(
+    userId: string,
+    workspaceId: string,
+    data: {
+      transactionId: string;
+      amount: number;
+      categoryName?: string;
+      percentAboveAverage: number;
+      description: string;
+    }
+  ) {
+    const title = data.categoryName
+      ? `Depense inhabituelle dans "${data.categoryName}"`
+      : 'Depense inhabituelle detectee';
+    const message = `${data.description}: ${data.amount.toFixed(2)} EUR (${data.percentAboveAverage}% au-dessus de la moyenne)`;
+
+    return this.create({
+      userId,
+      workspaceId,
+      type: 'unusual_spending',
+      title,
+      message,
+      data,
+    });
+  },
+
+  // --------------------------------------------------------------------------
+  // Weekly Summary
+  // --------------------------------------------------------------------------
+  notifyWeeklySummary(
+    userId: string,
+    workspaceId: string,
+    summary: {
+      totalSpent: number;
+      totalIncome: number;
+      netChange: number;
+      comparedToAverage: number;
+      topCategories: string[];
+      insights: string[];
+    }
+  ) {
+    const title = summary.netChange >= 0
+      ? `Resume hebdomadaire: +${summary.netChange.toFixed(0)} EUR`
+      : `Resume hebdomadaire: ${summary.netChange.toFixed(0)} EUR`;
+
+    return this.create({
+      userId,
+      workspaceId,
+      type: 'weekly_summary',
+      title,
+      message: summary.insights.join(' '),
+      data: summary,
+    });
+  },
+
+  // --------------------------------------------------------------------------
+  // Monthly Report
+  // --------------------------------------------------------------------------
+  notifyMonthlyReport(
+    userId: string,
+    workspaceId: string,
+    report: {
+      month: string;
+      totalSpent: number;
+      totalIncome: number;
+      netChange: number;
+      comparedToLastMonth: number;
+      topCategories: Array<{ name: string; amount: number }>;
+      savingsRate: number;
+      insights: string[];
+    }
+  ) {
+    const title = `Rapport mensuel - ${report.month}`;
+    const message = report.insights[0] ?? `Depenses: ${report.totalSpent.toFixed(0)} EUR | Revenus: ${report.totalIncome.toFixed(0)} EUR`;
+
+    return this.create({
+      userId,
+      workspaceId,
+      type: 'monthly_report',
+      title,
+      message,
+      data: report,
+    });
+  },
+
+  // --------------------------------------------------------------------------
+  // Low Balance Warning
+  // --------------------------------------------------------------------------
+  notifyLowBalance(
+    userId: string,
+    workspaceId: string,
+    account: {
+      id: string;
+      name: string;
+      balance: number;
+      threshold: number;
+    }
+  ) {
+    return this.create({
+      userId,
+      workspaceId,
+      type: 'low_balance_warning',
+      title: `Solde bas: ${account.name}`,
+      message: `Le solde de votre compte "${account.name}" est de ${account.balance.toFixed(2)} EUR (seuil: ${account.threshold.toFixed(2)} EUR)`,
+      data: {
+        accountId: account.id,
+        accountName: account.name,
+        balance: account.balance,
+        threshold: account.threshold,
+      },
+    });
+  },
+
+  // --------------------------------------------------------------------------
+  // Bill Upcoming
+  // --------------------------------------------------------------------------
+  notifyBillUpcoming(
+    userId: string,
+    workspaceId: string,
+    bill: {
+      recurrenceId: string;
+      description: string;
+      amount: number;
+      dueDate: Date;
+      daysUntilDue: number;
+    }
+  ) {
+    const title = bill.daysUntilDue === 0
+      ? `Facture due aujourd'hui`
+      : bill.daysUntilDue === 1
+      ? `Facture due demain`
+      : `Facture due dans ${bill.daysUntilDue} jours`;
+
+    return this.create({
+      userId,
+      workspaceId,
+      type: 'bill_upcoming',
+      title,
+      message: `"${bill.description}" - ${bill.amount.toFixed(2)} EUR`,
+      data: {
+        recurrenceId: bill.recurrenceId,
+        description: bill.description,
+        amount: bill.amount,
+        dueDate: bill.dueDate.toISOString(),
+        daysUntilDue: bill.daysUntilDue,
+      },
+    });
+  },
 };
 
 export default notificationService;

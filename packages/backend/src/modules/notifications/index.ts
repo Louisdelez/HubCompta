@@ -4,6 +4,8 @@
 
 export { notificationService } from './notification.service.js';
 export { alertService } from './alert.service.js';
+export { smartAlertService } from './smart-alert.service.js';
+export { summaryService } from './summary.service.js';
 export type {
   CreateNotificationInput,
   NotificationFilters,
@@ -19,3 +21,11 @@ export type {
   LargeTransactionConfig,
   RecurringReminderConfig,
 } from './alert.service.js';
+export type {
+  AnomalyDetectionResult,
+  SpendingSummary,
+} from './smart-alert.service.js';
+export type {
+  WeeklySummary,
+  MonthlySummary,
+} from './summary.service.js';

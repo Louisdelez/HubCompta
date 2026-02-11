@@ -15,6 +15,7 @@ import {
   Minus,
   Loader2,
   Calendar,
+  Download,
 } from 'lucide-react';
 import {
   BarChart,
@@ -116,6 +117,43 @@ export function YearComparisonReport() {
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const currentYear = new Date().getFullYear();
   const [compareYear, setCompareYear] = useState(currentYear - 1);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportPDF = async () => {
+    if (!workspaceId) return;
+    setIsExporting(true);
+
+    try {
+      const baseUrl = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? '/api/v1';
+      const token = localStorage.getItem('accessToken');
+
+      const response = await fetch(
+        `${baseUrl}/workspaces/${workspaceId}/reports/export-pdf/year-comparison?year=${compareYear}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error('Export failed');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `comparaison_${currentYear}_vs_${compareYear}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export error:', err);
+      alert("Erreur lors de l'export PDF");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['reports', workspaceId, 'year-comparison', compareYear],
@@ -160,24 +198,42 @@ export function YearComparisonReport() {
   return (
     <div className="space-y-6">
       {/* Year Selector */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <h2 className="text-lg font-semibold">
           {currentYear} vs {compareYear}
         </h2>
-        <select
-          value={compareYear}
-          onChange={(e) => setCompareYear(parseInt(e.target.value))}
-          className="input-select w-32"
-        >
-          {[...Array(5)].map((_, i) => {
-            const year = currentYear - 1 - i;
-            return (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            );
-          })}
-        </select>
+        <div className="flex items-center gap-3">
+          <select
+            value={compareYear}
+            onChange={(e) => setCompareYear(parseInt(e.target.value))}
+            className="input-select w-32"
+          >
+            {[...Array(5)].map((_, i) => {
+              const year = currentYear - 1 - i;
+              return (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              );
+            })}
+          </select>
+          <button
+            onClick={handleExportPDF}
+            disabled={isExporting}
+            className={clsx(
+              'flex items-center gap-2 px-4 py-2 rounded-lg',
+              'bg-ctp-red/10 text-ctp-red hover:bg-ctp-red/20',
+              'disabled:opacity-50 disabled:cursor-not-allowed'
+            )}
+          >
+            {isExporting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            Exporter PDF
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}

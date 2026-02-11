@@ -14,14 +14,30 @@ import {
   ChevronRight,
   X,
   Loader2,
+  Wallet,
+  Receipt,
+  Calendar,
+  BarChart3,
 } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
 
+type InsightType =
+  | 'spending_spike'
+  | 'saving_opportunity'
+  | 'budget_risk'
+  | 'trend'
+  | 'tip'
+  | 'unusual_spending'
+  | 'weekly_summary'
+  | 'monthly_report'
+  | 'low_balance_warning'
+  | 'bill_upcoming';
+
 interface Insight {
   id: string;
-  type: 'spending_spike' | 'saving_opportunity' | 'budget_risk' | 'trend' | 'tip';
+  type: InsightType;
   title: string;
   message: string;
   impact?: number;
@@ -30,6 +46,7 @@ interface Insight {
   actionLabel?: string;
   severity: 'info' | 'warning' | 'success' | 'danger';
   createdAt: string;
+  data?: Record<string, unknown>;
 }
 
 interface SmartInsightCardProps {
@@ -38,14 +55,19 @@ interface SmartInsightCardProps {
 }
 
 const insightTypeConfig: Record<
-  Insight['type'],
-  { icon: typeof Sparkles; color: string }
+  InsightType,
+  { icon: typeof Sparkles; color: string; bgColor: string }
 > = {
-  spending_spike: { icon: TrendingUp, color: 'text-ctp-red' },
-  saving_opportunity: { icon: Lightbulb, color: 'text-ctp-green' },
-  budget_risk: { icon: AlertTriangle, color: 'text-ctp-yellow' },
-  trend: { icon: TrendingDown, color: 'text-ctp-blue' },
-  tip: { icon: Sparkles, color: 'text-ctp-mauve' },
+  spending_spike: { icon: TrendingUp, color: 'text-ctp-red', bgColor: 'bg-ctp-red/20' },
+  saving_opportunity: { icon: Lightbulb, color: 'text-ctp-green', bgColor: 'bg-ctp-green/20' },
+  budget_risk: { icon: AlertTriangle, color: 'text-ctp-yellow', bgColor: 'bg-ctp-yellow/20' },
+  trend: { icon: TrendingDown, color: 'text-ctp-blue', bgColor: 'bg-ctp-blue/20' },
+  tip: { icon: Sparkles, color: 'text-ctp-mauve', bgColor: 'bg-ctp-mauve/20' },
+  unusual_spending: { icon: AlertTriangle, color: 'text-ctp-peach', bgColor: 'bg-ctp-peach/20' },
+  weekly_summary: { icon: Calendar, color: 'text-ctp-teal', bgColor: 'bg-ctp-teal/20' },
+  monthly_report: { icon: BarChart3, color: 'text-ctp-sapphire', bgColor: 'bg-ctp-sapphire/20' },
+  low_balance_warning: { icon: Wallet, color: 'text-ctp-maroon', bgColor: 'bg-ctp-maroon/20' },
+  bill_upcoming: { icon: Receipt, color: 'text-ctp-flamingo', bgColor: 'bg-ctp-flamingo/20' },
 };
 
 const severityColors: Record<Insight['severity'], string> = {
@@ -193,13 +215,7 @@ export function SmartInsightCard({ compact = false, limit = 5 }: SmartInsightCar
                 <div
                   className={clsx(
                     'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0',
-                    insight.severity === 'danger'
-                      ? 'bg-ctp-red/20'
-                      : insight.severity === 'warning'
-                      ? 'bg-ctp-yellow/20'
-                      : insight.severity === 'success'
-                      ? 'bg-ctp-green/20'
-                      : 'bg-ctp-blue/20'
+                    config.bgColor
                   )}
                 >
                   <Icon className={clsx('w-5 h-5', config.color)} />
@@ -235,6 +251,42 @@ export function SmartInsightCard({ compact = false, limit = 5 }: SmartInsightCar
                     <span className="inline-block text-xs bg-ctp-surface0 text-ctp-subtext0 px-2 py-0.5 rounded-full">
                       {insight.category}
                     </span>
+                  )}
+
+                  {/* Smart notification specific data */}
+                  {insight.type === 'weekly_summary' && insight.data && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {(insight.data.topCategories as string[] | undefined)?.slice(0, 3).map((cat) => (
+                        <span
+                          key={cat}
+                          className="text-xs bg-ctp-surface0 text-ctp-subtext0 px-2 py-0.5 rounded-full"
+                        >
+                          {cat}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {insight.type === 'low_balance_warning' && insight.data && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-ctp-subtext0">Solde:</span>
+                      <span className="text-sm font-semibold text-ctp-red">
+                        {formatCurrency((insight.data.balance as number) ?? 0)}
+                      </span>
+                    </div>
+                  )}
+
+                  {insight.type === 'bill_upcoming' && insight.data && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-ctp-subtext0">Echeance:</span>
+                      <span className="text-sm font-medium text-ctp-text">
+                        {(insight.data.daysUntilDue as number) === 0
+                          ? "Aujourd'hui"
+                          : (insight.data.daysUntilDue as number) === 1
+                          ? 'Demain'
+                          : `Dans ${insight.data.daysUntilDue} jours`}
+                      </span>
+                    </div>
                   )}
 
                   {/* Action */}

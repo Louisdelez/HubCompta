@@ -31,6 +31,10 @@ export interface Invitation {
   invitedByName: string;
   expiresAt: Date;
   createdAt: Date;
+  // Family sharing fields
+  spendingLimit?: number | null;
+  approvalRequired?: boolean;
+  visibleCategories?: string[];
 }
 
 interface StoredInvitation {
@@ -39,6 +43,16 @@ interface StoredInvitation {
   role: MembershipRole;
   invitedBy: string;
   createdAt: string;
+  // Family sharing fields
+  spendingLimit?: number | null;
+  approvalRequired?: boolean;
+  visibleCategories?: string[];
+}
+
+export interface FamilyInviteOptions {
+  spendingLimit?: number;
+  approvalRequired?: boolean;
+  visibleCategories?: string[];
 }
 
 // ----------------------------------------------------------------------------
@@ -69,7 +83,8 @@ export const invitationService = {
     workspaceId: string,
     email: string,
     role: MembershipRole,
-    invitedBy: string
+    invitedBy: string,
+    familyOptions?: FamilyInviteOptions
   ): Promise<{ code: string; invitation: Invitation }> {
     // Validate role
     if (role === 'owner') {
@@ -117,6 +132,10 @@ export const invitationService = {
       role,
       invitedBy,
       createdAt: new Date().toISOString(),
+      // Family sharing options
+      spendingLimit: familyOptions?.spendingLimit ?? null,
+      approvalRequired: familyOptions?.approvalRequired ?? false,
+      visibleCategories: familyOptions?.visibleCategories ?? [],
     };
 
     await redisClient.setex(
@@ -142,6 +161,10 @@ export const invitationService = {
       invitedByName: inviter?.displayName ?? 'Unknown',
       expiresAt,
       createdAt: new Date(),
+      // Family sharing options
+      spendingLimit: familyOptions?.spendingLimit ?? null,
+      approvalRequired: familyOptions?.approvalRequired ?? false,
+      visibleCategories: familyOptions?.visibleCategories ?? [],
     };
 
     return { code, invitation };
@@ -181,6 +204,10 @@ export const invitationService = {
       invitedByName: inviter?.displayName ?? 'Unknown',
       expiresAt,
       createdAt: new Date(data.createdAt),
+      // Family sharing options
+      spendingLimit: data.spendingLimit,
+      approvalRequired: data.approvalRequired,
+      visibleCategories: data.visibleCategories,
     };
   },
 
@@ -203,12 +230,32 @@ export const invitationService = {
       throw new ValidationError('This invitation is for a different email address');
     }
 
-    // Add member
-    await membershipService.addMember(
-      invitation.workspaceId,
-      userId,
-      invitation.role
-    );
+    // Check if family sharing options exist
+    const hasFamilyOptions = invitation.spendingLimit !== null ||
+      invitation.approvalRequired ||
+      (invitation.visibleCategories && invitation.visibleCategories.length > 0);
+
+    if (hasFamilyOptions) {
+      // Use inviteFamily for family members with settings
+      await membershipService.inviteFamily(
+        invitation.workspaceId,
+        userId,
+        {
+          email: invitation.email,
+          role: invitation.role,
+          spendingLimit: invitation.spendingLimit ?? undefined,
+          approvalRequired: invitation.approvalRequired,
+          visibleCategories: invitation.visibleCategories,
+        }
+      );
+    } else {
+      // Standard member addition
+      await membershipService.addMember(
+        invitation.workspaceId,
+        userId,
+        invitation.role
+      );
+    }
 
     // Delete invitation
     await this.revoke(code);

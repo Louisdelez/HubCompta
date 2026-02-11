@@ -15,6 +15,8 @@ import {
   workspaceUpdateSchema,
   memberInviteSchema,
   memberUpdateSchema,
+  familyInviteSchema,
+  memberFamilySettingsSchema,
 } from '@finance-hub/shared';
 import { ForbiddenError } from '@/core/middleware/errorHandler.js';
 
@@ -349,6 +351,142 @@ export function workspaceRoutes(app: FastifyInstance): void {
       return reply.send({
         success: true,
         data: { message: 'Member removed' },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:id/members/invite - Family invite with spending controls
+  // --------------------------------------------------------------------------
+  app.post<{ Params: { id: string; workspaceId?: string } }>(
+    '/:id/members/invite',
+    {
+      preHandler: [
+        async (req, reply) => {
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
+          await workspaceContextMiddleware(req, reply);
+        },
+        requirePermission('member:invite'),
+      ],
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+      const input = familyInviteSchema.parse(request.body);
+
+      // First, try to find user by email
+      const { code, invitation } = await invitationService.create(
+        id,
+        input.email,
+        input.role,
+        request.user!.sub,
+        {
+          spendingLimit: input.spendingLimit ?? undefined,
+          approvalRequired: input.approvalRequired,
+          visibleCategories: input.visibleCategories,
+        }
+      );
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId: id,
+        action: AUDIT_ACTIONS.WORKSPACE_MEMBER_INVITED,
+        changes: {
+          email: input.email,
+          role: input.role,
+          spendingLimit: input.spendingLimit,
+          approvalRequired: input.approvalRequired,
+        },
+        ipAddress: request.ip,
+      });
+
+      return reply.status(201).send({
+        success: true,
+        data: {
+          invitation,
+          inviteLink: `/invite/${code}`,
+        },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // PATCH /workspaces/:id/members/:memberId/settings - Update family settings
+  // --------------------------------------------------------------------------
+  app.patch<{ Params: { id: string; memberId: string; workspaceId?: string } }>(
+    '/:id/members/:memberId/settings',
+    {
+      preHandler: [
+        async (req, reply) => {
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
+          await workspaceContextMiddleware(req, reply);
+        },
+        requirePermission('member:update'),
+      ],
+    },
+    async (request, reply) => {
+      const { id, memberId } = request.params;
+      const input = memberFamilySettingsSchema.parse(request.body);
+
+      const membership = await membershipService.updateFamilySettings(
+        id,
+        memberId,
+        input
+      );
+
+      await auditService.log({
+        userId: request.user!.sub,
+        workspaceId: id,
+        action: 'workspace.member.settings_updated',
+        entityType: 'membership',
+        entityId: memberId,
+        changes: input,
+        ipAddress: request.ip,
+      });
+
+      return reply.send({
+        success: true,
+        data: membership,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:id/members/:memberId/spending - Check spending limit
+  // --------------------------------------------------------------------------
+  app.get<{ Params: { id: string; memberId: string; workspaceId?: string } }>(
+    '/:id/members/:memberId/spending',
+    {
+      preHandler: [
+        async (req, reply) => {
+          (req.params as { id: string; workspaceId?: string }).workspaceId = req.params.id;
+          await workspaceContextMiddleware(req, reply);
+        },
+        requirePermission('member:read'),
+      ],
+    },
+    async (request, reply) => {
+      const { memberId } = request.params;
+
+      // Get the membership to find the user
+      const members = await membershipService.listMembers(request.params.id);
+      const member = members.find((m) => m.id === memberId);
+
+      if (!member) {
+        throw new ForbiddenError('Member not found');
+      }
+
+      const spendingCheck = await membershipService.checkSpendingLimit(
+        member.userId,
+        request.params.id,
+        0 // Check current status only
+      );
+
+      return reply.send({
+        success: true,
+        data: {
+          ...spendingCheck,
+          memberName: member.displayName,
+        },
       });
     }
   );

@@ -18,6 +18,26 @@ export interface MemberInfo {
   displayName: string;
   role: MembershipRole;
   joinedAt: Date;
+  // Family sharing fields
+  spendingLimit: number | null;
+  approvalRequired: boolean;
+  visibleCategories: string[];
+  currentMonthSpent?: number;
+}
+
+export interface FamilyInviteInput {
+  email: string;
+  role: MembershipRole;
+  spendingLimit?: number;
+  approvalRequired?: boolean;
+  visibleCategories?: string[];
+}
+
+export interface SpendingLimitCheckResult {
+  allowed: boolean;
+  currentSpent: number;
+  limit: number | null;
+  remaining: number | null;
 }
 
 // ----------------------------------------------------------------------------
@@ -53,7 +73,7 @@ export const membershipService = {
   },
 
   /**
-   * List all members of a workspace
+   * List all members of a workspace with spending info
    */
   async listMembers(workspaceId: string): Promise<MemberInfo[]> {
     const memberships = await prisma.membership.findMany({
@@ -73,14 +93,50 @@ export const membershipService = {
       ],
     });
 
-    return memberships.map((m) => ({
-      id: m.id,
-      userId: m.userId,
-      email: m.user.email,
-      displayName: m.user.displayName,
-      role: m.role,
-      joinedAt: m.createdAt,
-    }));
+    // Get current month spending for members with limits
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const results: MemberInfo[] = [];
+
+    for (const m of memberships) {
+      let currentMonthSpent: number | undefined;
+
+      // Only calculate spent amount if member has a spending limit
+      if (m.spendingLimit !== null) {
+        const spentResult = await prisma.transaction.aggregate({
+          where: {
+            workspaceId,
+            type: 'expense',
+            date: {
+              gte: startOfMonth,
+              lte: endOfMonth,
+            },
+            deletedAt: null,
+            // In a real app, you'd track which user created each transaction
+            // For now, we aggregate all expenses for simplicity
+          },
+          _sum: { amount: true },
+        });
+        currentMonthSpent = Number(spentResult._sum.amount ?? 0);
+      }
+
+      results.push({
+        id: m.id,
+        userId: m.userId,
+        email: m.user.email,
+        displayName: m.user.displayName,
+        role: m.role,
+        joinedAt: m.createdAt,
+        spendingLimit: m.spendingLimit ? Number(m.spendingLimit) : null,
+        approvalRequired: m.approvalRequired,
+        visibleCategories: m.visibleCategories,
+        currentMonthSpent,
+      });
+    }
+
+    return results;
   },
 
   /**
@@ -232,6 +288,214 @@ export const membershipService = {
         data: { ownerId: newOwnerId },
       }),
     ]);
+  },
+
+  // --------------------------------------------------------------------------
+  // Family Sharing Methods
+  // --------------------------------------------------------------------------
+
+  /**
+   * Invite a family member with optional spending controls
+   */
+  async inviteFamily(
+    workspaceId: string,
+    userId: string,
+    input: FamilyInviteInput
+  ): Promise<Membership> {
+    // Check if already a member
+    const existing = await this.get(workspaceId, userId);
+    if (existing) {
+      throw new ConflictError('User is already a member of this workspace');
+    }
+
+    // Check member limit
+    const canAdd = await workspaceService.canAddMember(workspaceId);
+    if (!canAdd) {
+      throw new ForbiddenError('Workspace has reached its member limit');
+    }
+
+    // Cannot add as owner
+    if (input.role === 'owner') {
+      throw new ValidationError('Cannot add member as owner');
+    }
+
+    return prisma.membership.create({
+      data: {
+        workspaceId,
+        userId,
+        role: input.role,
+        spendingLimit: input.spendingLimit ?? null,
+        approvalRequired: input.approvalRequired ?? false,
+        visibleCategories: input.visibleCategories ?? [],
+      },
+    });
+  },
+
+  /**
+   * Set spending limit for a member
+   */
+  async setSpendingLimit(
+    workspaceId: string,
+    memberId: string,
+    limit: number | null
+  ): Promise<Membership> {
+    const membership = await prisma.membership.findUnique({
+      where: { id: memberId },
+    });
+
+    if (!membership || membership.workspaceId !== workspaceId) {
+      throw new NotFoundError('Membership', memberId);
+    }
+
+    // Cannot set limit on owner
+    if (membership.role === 'owner') {
+      throw new ForbiddenError('Cannot set spending limit on workspace owner');
+    }
+
+    return prisma.membership.update({
+      where: { id: memberId },
+      data: { spendingLimit: limit },
+    });
+  },
+
+  /**
+   * Set approval required for a member
+   */
+  async setApprovalRequired(
+    workspaceId: string,
+    memberId: string,
+    required: boolean
+  ): Promise<Membership> {
+    const membership = await prisma.membership.findUnique({
+      where: { id: memberId },
+    });
+
+    if (!membership || membership.workspaceId !== workspaceId) {
+      throw new NotFoundError('Membership', memberId);
+    }
+
+    // Cannot require approval on owner
+    if (membership.role === 'owner') {
+      throw new ForbiddenError('Cannot require approval for workspace owner');
+    }
+
+    return prisma.membership.update({
+      where: { id: memberId },
+      data: { approvalRequired: required },
+    });
+  },
+
+  /**
+   * Set visible categories for a member
+   */
+  async setVisibleCategories(
+    workspaceId: string,
+    memberId: string,
+    categoryIds: string[]
+  ): Promise<Membership> {
+    const membership = await prisma.membership.findUnique({
+      where: { id: memberId },
+    });
+
+    if (!membership || membership.workspaceId !== workspaceId) {
+      throw new NotFoundError('Membership', memberId);
+    }
+
+    return prisma.membership.update({
+      where: { id: memberId },
+      data: { visibleCategories: categoryIds },
+    });
+  },
+
+  /**
+   * Check if a user is within their spending limit
+   */
+  async checkSpendingLimit(
+    userId: string,
+    workspaceId: string,
+    amount: number
+  ): Promise<SpendingLimitCheckResult> {
+    const membership = await this.get(workspaceId, userId);
+
+    if (!membership) {
+      throw new NotFoundError('Membership', userId);
+    }
+
+    // No limit set - always allowed
+    if (membership.spendingLimit === null) {
+      return {
+        allowed: true,
+        currentSpent: 0,
+        limit: null,
+        remaining: null,
+      };
+    }
+
+    const limit = Number(membership.spendingLimit);
+
+    // Calculate current month spending
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const spentResult = await prisma.transaction.aggregate({
+      where: {
+        workspaceId,
+        type: 'expense',
+        date: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+        deletedAt: null,
+      },
+      _sum: { amount: true },
+    });
+
+    const currentSpent = Number(spentResult._sum.amount ?? 0);
+    const remaining = limit - currentSpent;
+    const allowed = currentSpent + amount <= limit;
+
+    return {
+      allowed,
+      currentSpent,
+      limit,
+      remaining: Math.max(0, remaining),
+    };
+  },
+
+  /**
+   * Update member family settings
+   */
+  async updateFamilySettings(
+    workspaceId: string,
+    memberId: string,
+    settings: {
+      spendingLimit?: number | null;
+      approvalRequired?: boolean;
+      visibleCategories?: string[];
+    }
+  ): Promise<Membership> {
+    const membership = await prisma.membership.findUnique({
+      where: { id: memberId },
+    });
+
+    if (!membership || membership.workspaceId !== workspaceId) {
+      throw new NotFoundError('Membership', memberId);
+    }
+
+    // Cannot update owner settings
+    if (membership.role === 'owner') {
+      throw new ForbiddenError('Cannot update family settings for workspace owner');
+    }
+
+    return prisma.membership.update({
+      where: { id: memberId },
+      data: {
+        ...(settings.spendingLimit !== undefined && { spendingLimit: settings.spendingLimit }),
+        ...(settings.approvalRequired !== undefined && { approvalRequired: settings.approvalRequired }),
+        ...(settings.visibleCategories !== undefined && { visibleCategories: settings.visibleCategories }),
+      },
+    });
   },
 };
 

@@ -21,6 +21,7 @@ import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
 import { AddBankModal } from './AddBankModal';
+import { LinkAccountModal } from './LinkAccountModal';
 
 interface BankAccount {
   id: string;
@@ -87,8 +88,6 @@ function BankAccountRow({
   onLink,
 }: {
   account: BankAccount;
-  workspaceId: string;
-  connectionId: string;
   onLink: () => void;
 }) {
   return (
@@ -134,9 +133,11 @@ function BankAccountRow({
 function BankConnectionCard({
   connection,
   workspaceId,
+  onLinkAccount,
 }: {
   connection: BankConnection;
   workspaceId: string;
+  onLinkAccount: (account: BankAccount) => void;
 }) {
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState(false);
@@ -257,11 +258,7 @@ function BankConnectionCard({
             <BankAccountRow
               key={account.id}
               account={account}
-              workspaceId={workspaceId}
-              connectionId={connection.id}
-              onLink={() => {
-                // TODO: Open link modal
-              }}
+              onLink={() => onLinkAccount(account)}
             />
           ))}
         </div>
@@ -273,6 +270,7 @@ function BankConnectionCard({
 export function BankConnectionsPage() {
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [accountToLink, setAccountToLink] = useState<BankAccount | null>(null);
 
   const { data: connections = [], isLoading } = useQuery({
     queryKey: ['banking', workspaceId, 'connections'],
@@ -333,6 +331,7 @@ export function BankConnectionsPage() {
               key={connection.id}
               connection={connection}
               workspaceId={workspaceId}
+              onLinkAccount={setAccountToLink}
             />
           ))}
         </div>
@@ -359,6 +358,16 @@ export function BankConnectionsPage() {
         <AddBankModal
           workspaceId={workspaceId}
           onClose={() => setShowAddModal(false)}
+        />
+      )}
+
+      {/* Link Account Modal */}
+      {accountToLink && (
+        <LinkAccountModal
+          workspaceId={workspaceId}
+          bankAccount={accountToLink}
+          onClose={() => setAccountToLink(null)}
+          onLinked={() => setAccountToLink(null)}
         />
       )}
     </div>

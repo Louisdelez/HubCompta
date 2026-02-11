@@ -226,6 +226,9 @@ const DataManagementPage = lazy(() =>
 const BankConnectionsPage = lazy(() =>
   import(/* webpackChunkName: "banking" */ './features/banking').then(m => ({ default: m.BankConnectionsPage }))
 );
+const BankingCallbackPage = lazy(() =>
+  import(/* webpackChunkName: "banking" */ './features/banking').then(m => ({ default: m.BankingCallbackPage }))
+);
 
 // Workspace Members
 const MembersPage = lazy(() =>
@@ -483,6 +486,7 @@ export default function App() {
 
           {/* Banking Routes */}
           <Route path="banking" element={<BankConnectionsPage />} />
+          <Route path="banking/callback" element={<BankingCallbackPage />} />
           <Route path="workspaces/:workspaceId/banking" element={<BankConnectionsPage />} />
 
           {/* Workspace Members Routes */}

@@ -32,6 +32,9 @@ interface BudgetWithProgress {
     icon: string | null;
     color: string | null;
   };
+  // Envelope mode fields
+  envelopeMode?: boolean;
+  rolloverEnabled?: boolean;
 }
 
 interface BudgetFormProps {
@@ -61,6 +64,8 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
   const [endDate, setEndDate] = useState(
     budget?.endDate ? new Date(budget.endDate).toISOString().split('T')[0] : ''
   );
+  const [envelopeMode, setEnvelopeMode] = useState(budget?.envelopeMode ?? false);
+  const [rolloverEnabled, setRolloverEnabled] = useState(budget?.rolloverEnabled ?? true);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch categories (only expense categories)
@@ -80,6 +85,8 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
         alertThreshold: parseInt(alertThreshold, 10),
         startDate,
         endDate: endDate || undefined,
+        envelopeMode,
+        rolloverEnabled,
       };
 
       if (isEditing) {
@@ -88,6 +95,8 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
           amount: data.amount,
           alertThreshold: data.alertThreshold,
           endDate: data.endDate || null,
+          envelopeMode: data.envelopeMode,
+          rolloverEnabled: data.rolloverEnabled,
         });
       }
       return api.post(`/workspaces/${workspaceId}/budgets`, data);
@@ -271,6 +280,55 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
                 Vous serez alerté lorsque ce pourcentage sera atteint
               </p>
             </div>
+
+            {/* Envelope Mode Section */}
+            {period === 'monthly' && (
+              <div className="space-y-3 p-4 rounded-lg bg-ctp-surface0 border border-ctp-surface1">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label htmlFor="envelopeMode" className="font-medium text-ctp-text cursor-pointer">
+                      Mode Enveloppes
+                    </label>
+                    <p className="text-xs text-ctp-subtext0 mt-0.5">
+                      Gerez votre budget comme une enveloppe avec report automatique
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      id="envelopeMode"
+                      type="checkbox"
+                      checked={envelopeMode}
+                      onChange={(e) => setEnvelopeMode(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-ctp-surface2 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ctp-mauve/50 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ctp-mauve"></div>
+                  </label>
+                </div>
+
+                {envelopeMode && (
+                  <div className="flex items-center justify-between pt-2 border-t border-ctp-surface1">
+                    <div>
+                      <label htmlFor="rolloverEnabled" className="font-medium text-ctp-text cursor-pointer">
+                        Report automatique
+                      </label>
+                      <p className="text-xs text-ctp-subtext0 mt-0.5">
+                        Les fonds non utilises sont reportes au mois suivant
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        id="rolloverEnabled"
+                        type="checkbox"
+                        checked={rolloverEnabled}
+                        onChange={(e) => setRolloverEnabled(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-ctp-surface2 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ctp-green/50 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ctp-green"></div>
+                    </label>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Dates */}
             <div className="grid grid-cols-2 gap-4">

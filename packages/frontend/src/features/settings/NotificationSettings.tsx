@@ -6,7 +6,19 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Bell, Mail, Smartphone, Save, Loader2 } from 'lucide-react';
+import {
+  Bell,
+  Mail,
+  Smartphone,
+  Save,
+  Loader2,
+  TrendingUp,
+  Calendar,
+  AlertTriangle,
+  Wallet,
+  Receipt,
+  BarChart3,
+} from 'lucide-react';
 import { api } from '@/lib/api';
 
 // ----------------------------------------------------------------------------
@@ -21,12 +33,21 @@ interface NotificationPreferences {
       importComplete: boolean;
       securityAlerts: boolean;
       weeklyDigest: boolean;
+      monthlyReport: boolean;
     };
     push: {
       enabled: boolean;
       budgetAlerts: boolean;
       priceAlerts: boolean;
       billReminders: boolean;
+    };
+    smart: {
+      enabled: boolean;
+      unusualSpending: boolean;
+      lowBalanceWarning: boolean;
+      billUpcoming: boolean;
+      weeklySummary: boolean;
+      monthlyReport: boolean;
     };
   };
 }
@@ -43,12 +64,21 @@ const defaultNotifications: NotificationPreferences['notifications'] = {
     importComplete: true,
     securityAlerts: true,
     weeklyDigest: false,
+    monthlyReport: true,
   },
   push: {
     enabled: true,
     budgetAlerts: true,
     priceAlerts: true,
     billReminders: true,
+  },
+  smart: {
+    enabled: true,
+    unusualSpending: true,
+    lowBalanceWarning: true,
+    billUpcoming: true,
+    weeklySummary: true,
+    monthlyReport: true,
   },
 };
 
@@ -94,6 +124,15 @@ export function NotificationSettings() {
     setFormData({
       ...formData,
       push: { ...formData.push, [key]: value },
+    });
+    setIsEditing(true);
+  };
+
+  const handleSmartChange = (key: keyof NotificationPreferences['notifications']['smart'], value: boolean) => {
+    if (!formData) return;
+    setFormData({
+      ...formData,
+      smart: { ...formData.smart, [key]: value },
     });
     setIsEditing(true);
   };
@@ -215,6 +254,24 @@ export function NotificationSettings() {
                 className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
               />
             </label>
+
+            {/* Monthly Report */}
+            <label className="flex items-center justify-between cursor-pointer">
+              <div>
+                <span className="text-sm font-medium text-ctp-subtext1">
+                  Rapport mensuel
+                </span>
+                <p className="text-xs text-ctp-subtext0">
+                  Recevez un rapport detaille de vos finances chaque mois
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={formData.email.monthlyReport}
+                onChange={(e) => handleEmailChange('monthlyReport', e.target.checked)}
+                className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
+              />
+            </label>
           </div>
         )}
       </div>
@@ -301,6 +358,156 @@ export function NotificationSettings() {
                 className="h-5 w-5 text-ctp-blue rounded focus:ring-ctp-blue"
               />
             </label>
+          </div>
+        )}
+      </div>
+
+      {/* Smart Notifications */}
+      <div className="bg-ctp-mantle rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-ctp-surface1">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <TrendingUp className="h-5 w-5 text-ctp-mauve" />
+              <div>
+                <h2 className="text-lg font-semibold text-ctp-text">
+                  Notifications intelligentes
+                </h2>
+                <p className="text-sm text-ctp-subtext0">
+                  Alertes automatiques et analyses de vos finances
+                </p>
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.smart.enabled}
+                onChange={(e) => handleSmartChange('enabled', e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-ctp-surface1 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-ctp-mauve/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-ctp-surface2 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ctp-mauve"></div>
+            </label>
+          </div>
+        </div>
+
+        {formData.smart.enabled && (
+          <div className="p-6 space-y-4">
+            {/* Alerts Section */}
+            <div className="pb-4 border-b border-ctp-surface0">
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle className="h-4 w-4 text-ctp-yellow" />
+                <span className="text-sm font-semibold text-ctp-subtext1">Alertes</span>
+              </div>
+
+              {/* Unusual Spending */}
+              <label className="flex items-center justify-between cursor-pointer mb-3">
+                <div>
+                  <span className="text-sm font-medium text-ctp-subtext1">
+                    Depenses inhabituelles
+                  </span>
+                  <p className="text-xs text-ctp-subtext0">
+                    Detection de transactions significativement au-dessus de la moyenne
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={formData.smart.unusualSpending}
+                  onChange={(e) => handleSmartChange('unusualSpending', e.target.checked)}
+                  className="h-5 w-5 text-ctp-mauve rounded focus:ring-ctp-mauve"
+                />
+              </label>
+
+              {/* Low Balance Warning */}
+              <label className="flex items-center justify-between cursor-pointer mb-3">
+                <div className="flex items-start gap-2">
+                  <Wallet className="h-4 w-4 text-ctp-peach mt-0.5" />
+                  <div>
+                    <span className="text-sm font-medium text-ctp-subtext1">
+                      Solde bas
+                    </span>
+                    <p className="text-xs text-ctp-subtext0">
+                      Alerte quand le solde d'un compte est bas
+                    </p>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={formData.smart.lowBalanceWarning}
+                  onChange={(e) => handleSmartChange('lowBalanceWarning', e.target.checked)}
+                  className="h-5 w-5 text-ctp-mauve rounded focus:ring-ctp-mauve"
+                />
+              </label>
+
+              {/* Bill Upcoming */}
+              <label className="flex items-center justify-between cursor-pointer">
+                <div className="flex items-start gap-2">
+                  <Receipt className="h-4 w-4 text-ctp-red mt-0.5" />
+                  <div>
+                    <span className="text-sm font-medium text-ctp-subtext1">
+                      Factures a venir
+                    </span>
+                    <p className="text-xs text-ctp-subtext0">
+                      Alerte 7 jours avant les paiements recurrents
+                    </p>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={formData.smart.billUpcoming}
+                  onChange={(e) => handleSmartChange('billUpcoming', e.target.checked)}
+                  className="h-5 w-5 text-ctp-mauve rounded focus:ring-ctp-mauve"
+                />
+              </label>
+            </div>
+
+            {/* Summaries Section */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <BarChart3 className="h-4 w-4 text-ctp-blue" />
+                <span className="text-sm font-semibold text-ctp-subtext1">Resumes</span>
+              </div>
+
+              {/* Weekly Summary */}
+              <label className="flex items-center justify-between cursor-pointer mb-3">
+                <div className="flex items-start gap-2">
+                  <Calendar className="h-4 w-4 text-ctp-teal mt-0.5" />
+                  <div>
+                    <span className="text-sm font-medium text-ctp-subtext1">
+                      Resume hebdomadaire
+                    </span>
+                    <p className="text-xs text-ctp-subtext0">
+                      Resume de vos depenses et revenus chaque semaine
+                    </p>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={formData.smart.weeklySummary}
+                  onChange={(e) => handleSmartChange('weeklySummary', e.target.checked)}
+                  className="h-5 w-5 text-ctp-mauve rounded focus:ring-ctp-mauve"
+                />
+              </label>
+
+              {/* Monthly Report */}
+              <label className="flex items-center justify-between cursor-pointer">
+                <div className="flex items-start gap-2">
+                  <BarChart3 className="h-4 w-4 text-ctp-green mt-0.5" />
+                  <div>
+                    <span className="text-sm font-medium text-ctp-subtext1">
+                      Rapport mensuel
+                    </span>
+                    <p className="text-xs text-ctp-subtext0">
+                      Rapport detaille de vos finances chaque mois
+                    </p>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={formData.smart.monthlyReport}
+                  onChange={(e) => handleSmartChange('monthlyReport', e.target.checked)}
+                  className="h-5 w-5 text-ctp-mauve rounded focus:ring-ctp-mauve"
+                />
+              </label>
+            </div>
           </div>
         )}
       </div>

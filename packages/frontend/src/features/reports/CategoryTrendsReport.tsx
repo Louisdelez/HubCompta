@@ -13,6 +13,7 @@ import {
   Folder,
   ArrowUpRight,
   ArrowDownRight,
+  Download,
 } from 'lucide-react';
 import {
   LineChart,
@@ -72,8 +73,45 @@ export function CategoryTrendsReport() {
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [period, setPeriod] = useState<'6m' | '12m'>('6m');
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
+  const [isExporting, setIsExporting] = useState(false);
 
   const months = period === '6m' ? 6 : 12;
+
+  const handleExportPDF = async () => {
+    if (!workspaceId) return;
+    setIsExporting(true);
+
+    try {
+      const baseUrl = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? '/api/v1';
+      const token = localStorage.getItem('accessToken');
+
+      const response = await fetch(
+        `${baseUrl}/workspaces/${workspaceId}/reports/export-pdf/category-trends?months=${months}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error('Export failed');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `tendances_categories_${months}m.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export error:', err);
+      alert("Erreur lors de l'export PDF");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['reports', workspaceId, 'category-trends', period],
@@ -147,29 +185,47 @@ export function CategoryTrendsReport() {
       {/* Controls */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <h2 className="text-lg font-semibold">Tendances par categorie</h2>
-        <div className="flex gap-1 bg-ctp-surface0 rounded-lg p-1">
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => setPeriod('6m')}
+            onClick={handleExportPDF}
+            disabled={isExporting}
             className={clsx(
-              'px-3 py-1 text-sm rounded-md transition-colors',
-              period === '6m'
-                ? 'bg-ctp-surface1 text-ctp-text'
-                : 'text-ctp-subtext0 hover:text-ctp-text'
+              'flex items-center gap-2 px-4 py-2 rounded-lg',
+              'bg-ctp-red/10 text-ctp-red hover:bg-ctp-red/20',
+              'disabled:opacity-50 disabled:cursor-not-allowed'
             )}
           >
-            6 mois
-          </button>
-          <button
-            onClick={() => setPeriod('12m')}
-            className={clsx(
-              'px-3 py-1 text-sm rounded-md transition-colors',
-              period === '12m'
-                ? 'bg-ctp-surface1 text-ctp-text'
-                : 'text-ctp-subtext0 hover:text-ctp-text'
+            {isExporting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
             )}
-          >
-            12 mois
+            Exporter PDF
           </button>
+          <div className="flex gap-1 bg-ctp-surface0 rounded-lg p-1">
+            <button
+              onClick={() => setPeriod('6m')}
+              className={clsx(
+                'px-3 py-1 text-sm rounded-md transition-colors',
+                period === '6m'
+                  ? 'bg-ctp-surface1 text-ctp-text'
+                  : 'text-ctp-subtext0 hover:text-ctp-text'
+              )}
+            >
+              6 mois
+            </button>
+            <button
+              onClick={() => setPeriod('12m')}
+              className={clsx(
+                'px-3 py-1 text-sm rounded-md transition-colors',
+                period === '12m'
+                  ? 'bg-ctp-surface1 text-ctp-text'
+                  : 'text-ctp-subtext0 hover:text-ctp-text'
+              )}
+            >
+              12 mois
+            </button>
+          </div>
         </div>
       </div>
 

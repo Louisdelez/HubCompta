@@ -16,21 +16,21 @@ import {
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
-interface EnvelopeBudget {
+interface EnvelopeBudgetItem {
   id: string;
   name: string;
-  amount: number;
-  spent: number;
-  remaining: number;
+  categoryName: string;
+  budgetAmount: number;
   rolloverAmount: number;
-  availableAmount: number;
-  percentUsed: number;
-  category: {
-    id: string;
-    name: string;
-    icon: string | null;
-    color: string | null;
-  };
+  spent: number;
+  available: number;
+}
+
+interface EnvelopeStatusResponse {
+  totalEnvelopes: number;
+  totalAvailable: number;
+  totalSpent: number;
+  envelopes: EnvelopeBudgetItem[];
 }
 
 interface EnvelopeOverviewProps {
@@ -51,14 +51,16 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
   const [targetEnvelope, setTargetEnvelope] = useState<string | null>(null);
   const [reallocateAmount, setReallocateAmount] = useState('');
 
-  const { data: envelopes = [], isLoading } = useQuery({
+  const { data: envelopeData, isLoading } = useQuery({
     queryKey: ['budgets', workspaceId, 'envelopes'],
     queryFn: () =>
-      api.get<EnvelopeBudget[]>(
+      api.get<EnvelopeStatusResponse>(
         `/workspaces/${workspaceId}/budgets/envelopes`
       ),
     enabled: !!workspaceId,
   });
+
+  const envelopes = envelopeData?.envelopes ?? [];
 
   const reallocateMutation = useMutation({
     mutationFn: (data: {
@@ -76,10 +78,10 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
     },
   });
 
-  // Calculate totals
-  const totalBudgeted = envelopes.reduce((sum, e) => sum + e.amount, 0);
-  const totalSpent = envelopes.reduce((sum, e) => sum + e.spent, 0);
-  const totalAvailable = envelopes.reduce((sum, e) => sum + e.availableAmount, 0);
+  // Use totals from the API response
+  const totalBudgeted = envelopes.reduce((sum, e) => sum + e.budgetAmount, 0);
+  const totalSpent = envelopeData?.totalSpent ?? 0;
+  const totalAvailable = envelopeData?.totalAvailable ?? 0;
   const totalRollover = envelopes.reduce((sum, e) => sum + e.rolloverAmount, 0);
 
   const handleReallocate = () => {
@@ -92,7 +94,7 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
   };
 
   const sourceEnvelopeData = envelopes.find((e) => e.id === sourceEnvelope);
-  const maxTransferAmount = sourceEnvelopeData?.remaining ?? 0;
+  const maxTransferAmount = sourceEnvelopeData?.available ?? 0;
 
   if (isLoading) {
     return (
@@ -174,10 +176,10 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
               >
                 <option value="">Selectionner...</option>
                 {envelopes
-                  .filter((e) => e.remaining > 0)
+                  .filter((e) => e.available > 0)
                   .map((e) => (
                     <option key={e.id} value={e.id}>
-                      {e.category.icon} {e.name} ({formatCurrency(e.remaining)})
+                      {e.name} ({formatCurrency(e.available)})
                     </option>
                   ))}
               </select>
@@ -200,7 +202,7 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
                   .filter((e) => e.id !== sourceEnvelope)
                   .map((e) => (
                     <option key={e.id} value={e.id}>
-                      {e.category.icon} {e.name}
+                      {e.name}
                     </option>
                   ))}
               </select>
@@ -252,10 +254,11 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
       {/* Envelope Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {envelopes.map((envelope) => {
-          const percentUsed = Math.round(
-            (envelope.spent / envelope.availableAmount) * 100
-          );
-          const isOverBudget = envelope.spent > envelope.availableAmount;
+          const totalAvailableForEnvelope = envelope.budgetAmount + envelope.rolloverAmount;
+          const percentUsed = totalAvailableForEnvelope > 0
+            ? Math.round((envelope.spent / totalAvailableForEnvelope) * 100)
+            : 0;
+          const isOverBudget = envelope.spent > totalAvailableForEnvelope;
           const isNearLimit = percentUsed >= 80 && !isOverBudget;
 
           return (
@@ -269,15 +272,13 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
             >
               {/* Category Header */}
               <div className="flex items-center gap-2 mb-3">
-                {envelope.category.icon && (
-                  <span className="text-2xl">{envelope.category.icon}</span>
-                )}
+                <Wallet className="w-6 h-6 text-ctp-mauve" />
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-ctp-text truncate">
                     {envelope.name}
                   </h3>
                   <p className="text-sm text-ctp-subtext0">
-                    {envelope.category.name}
+                    {envelope.categoryName}
                   </p>
                 </div>
                 {isOverBudget && (
@@ -302,7 +303,7 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
                   </span>
                   <span className="text-ctp-subtext0">
                     {formatCurrency(envelope.spent)} /{' '}
-                    {formatCurrency(envelope.availableAmount)}
+                    {formatCurrency(totalAvailableForEnvelope)}
                   </span>
                 </div>
                 <div className="h-3 bg-ctp-surface1 rounded-full overflow-hidden">
@@ -325,16 +326,16 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
               {/* Stats */}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p className="text-ctp-subtext0">Restant</p>
+                  <p className="text-ctp-subtext0">Disponible</p>
                   <p
                     className={clsx(
                       'font-medium',
-                      envelope.remaining < 0
+                      envelope.available < 0
                         ? 'text-ctp-red'
                         : 'text-ctp-green'
                     )}
                   >
-                    {formatCurrency(envelope.remaining)}
+                    {formatCurrency(envelope.available)}
                   </p>
                 </div>
                 {envelope.rolloverAmount > 0 && (

@@ -92,6 +92,10 @@ export interface Membership extends Timestamps {
   workspaceId: UUID;
   userId: UUID;
   role: MembershipRole;
+  // Family sharing fields
+  spendingLimit: number | null;
+  approvalRequired: boolean;
+  visibleCategories: string[];
 }
 
 // ----------------------------------------------------------------------------

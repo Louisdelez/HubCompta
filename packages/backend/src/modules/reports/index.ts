@@ -34,3 +34,10 @@ export type {
   ExportFormat,
   ExportedReport,
 } from './report-builder.service.js';
+
+export { pdfExportService } from './pdf-export.service.js';
+export type {
+  PDFReportType,
+  PDFExportOptions,
+  PDFExportResult,
+} from './pdf-export.service.js';

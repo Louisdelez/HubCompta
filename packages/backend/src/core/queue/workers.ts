@@ -8,13 +8,17 @@ import type { ConnectionOptions } from 'bullmq';
 import { assetService } from '../../modules/invest/asset.service.js';
 import { positionService } from '../../modules/invest/position.service.js';
 import { currencyService } from '../../modules/currency/currency.service.js';
+import { smartAlertService } from '../../modules/notifications/smart-alert.service.js';
+import { summaryService } from '../../modules/notifications/summary.service.js';
 import type {
   MarketDataJobData,
   ExchangeRateJobData,
   PortfolioSnapshotJobData,
+  SmartNotificationJobData,
 } from './index.js';
 import { QUEUES } from './index.js';
 import { logger } from '../middleware/logger.js';
+import { prisma } from '../database/client.js';
 
 // Parse Redis URL for connection options
 const REDIS_URL = process.env.REDIS_URL;
@@ -36,6 +40,7 @@ function parseRedisUrl(url: string): ConnectionOptions {
 let marketDataWorker: Worker | null = null;
 let exchangeRatesWorker: Worker | null = null;
 let portfolioSnapshotWorker: Worker | null = null;
+let smartNotificationsWorker: Worker | null = null;
 
 // ----------------------------------------------------------------------------
 // Market Data Worker
@@ -110,6 +115,82 @@ async function processPortfolioSnapshotJob(job: Job<PortfolioSnapshotJobData>): 
 }
 
 // ----------------------------------------------------------------------------
+// Smart Notifications Worker
+// ----------------------------------------------------------------------------
+
+async function processSmartNotificationJob(job: Job<SmartNotificationJobData>): Promise<void> {
+  const { type, workspaceId, userId } = job.data;
+
+  logger.info({ type, workspaceId: workspaceId || 'all', jobId: job.id }, 'Processing smart notification job');
+
+  try {
+    switch (type) {
+      case 'weekly_summary': {
+        const result = await summaryService.processAllWeeklySummaries();
+        logger.info({ processed: result.processed, failed: result.failed }, 'Weekly summaries complete');
+        break;
+      }
+
+      case 'monthly_report': {
+        const result = await summaryService.processAllMonthlyReports();
+        logger.info({ processed: result.processed, failed: result.failed }, 'Monthly reports complete');
+        break;
+      }
+
+      case 'anomaly_detection': {
+        // If specific workspace provided, process only that one
+        if (workspaceId && userId) {
+          const result = await smartAlertService.runAnomalyDetection(workspaceId, userId);
+          logger.info(
+            { workspaceId, ...result },
+            'Anomaly detection complete for workspace'
+          );
+        } else {
+          // Process all active workspaces
+          const workspaces = await prisma.workspace.findMany({
+            where: { deletedAt: null },
+            include: {
+              memberships: {
+                where: { role: 'owner' },
+                take: 1,
+              },
+            },
+          });
+
+          let processed = 0;
+          let failed = 0;
+
+          for (const workspace of workspaces) {
+            const owner = workspace.memberships[0];
+            if (!owner) continue;
+
+            try {
+              await smartAlertService.runAnomalyDetection(workspace.id, owner.userId);
+              processed++;
+            } catch (error) {
+              logger.error(
+                { error, workspaceId: workspace.id },
+                'Failed to run anomaly detection for workspace'
+              );
+              failed++;
+            }
+          }
+
+          logger.info({ processed, failed }, 'Anomaly detection complete for all workspaces');
+        }
+        break;
+      }
+
+      default:
+        logger.warn({ type }, 'Unknown smart notification type');
+    }
+  } catch (error) {
+    logger.error({ error, jobId: job.id }, 'Smart notification job failed');
+    throw error;
+  }
+}
+
+// ----------------------------------------------------------------------------
 // Worker Initialization
 // ----------------------------------------------------------------------------
 
@@ -175,6 +256,24 @@ export function initializeWorkers(): void {
     logger.error({ jobId: job?.id, queue: QUEUES.PORTFOLIO_SNAPSHOT, error }, 'Portfolio snapshot job failed');
   });
 
+  // Smart Notifications Worker
+  smartNotificationsWorker = new Worker<SmartNotificationJobData>(
+    QUEUES.SMART_NOTIFICATIONS,
+    processSmartNotificationJob,
+    {
+      connection,
+      concurrency: 1,
+    }
+  );
+
+  smartNotificationsWorker.on('completed', (job) => {
+    logger.info({ jobId: job.id, queue: QUEUES.SMART_NOTIFICATIONS }, 'Smart notification job completed');
+  });
+
+  smartNotificationsWorker.on('failed', (job, error) => {
+    logger.error({ jobId: job?.id, queue: QUEUES.SMART_NOTIFICATIONS, error }, 'Smart notification job failed');
+  });
+
   logger.info('Queue workers initialized');
 }
 
@@ -195,6 +294,10 @@ export async function shutdownWorkers(): Promise<void> {
 
   if (portfolioSnapshotWorker) {
     shutdownPromises.push(portfolioSnapshotWorker.close());
+  }
+
+  if (smartNotificationsWorker) {
+    shutdownPromises.push(smartNotificationsWorker.close());
   }
 
   await Promise.all(shutdownPromises);

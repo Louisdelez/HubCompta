@@ -15,3 +15,4 @@ export { SettlementHistory } from './SettlementHistory';
 export { SettlementHistoryChart } from './SettlementHistoryChart';
 export { FamilyInviteModal } from './FamilyInviteModal';
 export { SpendingLimitForm } from './SpendingLimitForm';
+export { WorkspaceMembers } from './WorkspaceMembers';

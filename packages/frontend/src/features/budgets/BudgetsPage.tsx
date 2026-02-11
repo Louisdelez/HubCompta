@@ -37,6 +37,12 @@ interface BudgetWithProgress {
   percentUsed: number;
   isOverBudget: boolean;
   isAlertTriggered: boolean;
+  // Envelope mode fields
+  envelopeMode: boolean;
+  rolloverEnabled: boolean;
+  rolloverAmount: number;
+  availableAmount: number;
+  rolloverFromPrevious: number;
 }
 
 interface BudgetSummary {

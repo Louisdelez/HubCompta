@@ -180,6 +180,8 @@ export const budgetService = {
         alertThreshold: input.alertThreshold ?? 80,
         startDate: input.startDate,
         endDate: input.endDate,
+        envelopeMode: input.envelopeMode ?? false,
+        rolloverEnabled: input.rolloverEnabled ?? true,
       },
     });
   },

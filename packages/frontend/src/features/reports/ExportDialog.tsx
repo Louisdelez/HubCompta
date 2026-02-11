@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { X, Download, FileText, FileJson, Loader2 } from 'lucide-react';
+import { X, Download, FileText, FileJson, File, Loader2 } from 'lucide-react';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
@@ -23,25 +23,49 @@ export type ExportType =
   | 'cash_flow'
   | 'profit_loss'
   | 'invoices'
-  | 'quotes';
+  | 'quotes'
+  | 'net_worth'
+  | 'year_comparison'
+  | 'category_trends'
+  | 'tax_summary';
+
+export type ExportFormat = 'csv' | 'json' | 'pdf';
 
 interface ExportDialogProps {
   isOpen: boolean;
   onClose: () => void;
   type: ExportType;
   dateRange?: { from: Date; to: Date };
+  year?: number;
+  months?: number;
   title?: string;
+  supportsPDF?: boolean;
 }
 
 const exportLabels: Record<ExportType, string> = {
   transactions: 'Transactions',
-  categories: 'Catégories',
+  categories: 'Categories',
   accounts: 'Comptes',
-  budget_report: 'Rapport budgétaire',
-  cash_flow: 'Flux de trésorerie',
-  profit_loss: 'Compte de résultat',
+  budget_report: 'Rapport budgetaire',
+  cash_flow: 'Flux de tresorerie',
+  profit_loss: 'Compte de resultat',
   invoices: 'Factures',
   quotes: 'Devis',
+  net_worth: 'Patrimoine',
+  year_comparison: 'Comparaison annuelle',
+  category_trends: 'Tendances categories',
+  tax_summary: 'Resume fiscal',
+};
+
+// Map export types to PDF endpoint types
+const pdfTypeMap: Partial<Record<ExportType, string>> = {
+  budget_report: 'budget',
+  cash_flow: 'cash-flow',
+  profit_loss: 'profit-loss',
+  net_worth: 'net-worth',
+  year_comparison: 'year-comparison',
+  category_trends: 'category-trends',
+  tax_summary: 'tax-summary',
 };
 
 // ----------------------------------------------------------------------------
@@ -53,10 +77,16 @@ export function ExportDialog({
   onClose,
   type,
   dateRange,
+  year,
+  months,
   title,
+  supportsPDF = false,
 }: ExportDialogProps) {
   const { currentWorkspace } = useWorkspace();
-  const [exportFormat, setExportFormat] = useState<'csv' | 'json'>('csv');
+
+  // Determine if PDF is supported for this type
+  const canExportPDF = supportsPDF || !!pdfTypeMap[type];
+  const [exportFormat, setExportFormat] = useState<ExportFormat>(canExportPDF ? 'pdf' : 'csv');
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
@@ -65,17 +95,45 @@ export function ExportDialog({
     setIsExporting(true);
 
     try {
-      // Build URL
       const baseUrl = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? 'http://localhost:3000/api/v1';
-      let url = `${baseUrl}/workspaces/${currentWorkspace.id}/reports/export/${type}?format=${exportFormat}`;
-
-      // Add date range if provided
-      if (dateRange) {
-        url += `&from=${format(dateRange.from, 'yyyy-MM-dd')}&to=${format(dateRange.to, 'yyyy-MM-dd')}`;
-      }
-
-      // Get token from storage
       const token = localStorage.getItem('accessToken');
+      let url: string;
+      let filename: string;
+
+      if (exportFormat === 'pdf' && pdfTypeMap[type]) {
+        // Use PDF export endpoint
+        const pdfType = pdfTypeMap[type];
+        url = `${baseUrl}/workspaces/${currentWorkspace.id}/reports/export-pdf/${pdfType}`;
+
+        // Add query params
+        const params = new URLSearchParams();
+        if (dateRange) {
+          params.append('from', format(dateRange.from, 'yyyy-MM-dd'));
+          params.append('to', format(dateRange.to, 'yyyy-MM-dd'));
+        }
+        if (year) {
+          params.append('year', year.toString());
+        }
+        if (months) {
+          params.append('months', months.toString());
+        }
+
+        if (params.toString()) {
+          url += `?${params.toString()}`;
+        }
+
+        filename = `${type}_${format(new Date(), 'yyyyMMdd')}.pdf`;
+      } else {
+        // Use standard export endpoint
+        url = `${baseUrl}/workspaces/${currentWorkspace.id}/reports/export/${type}?format=${exportFormat}`;
+
+        // Add date range if provided
+        if (dateRange) {
+          url += `&from=${format(dateRange.from, 'yyyy-MM-dd')}&to=${format(dateRange.to, 'yyyy-MM-dd')}`;
+        }
+
+        filename = `${type}_export.${exportFormat}`;
+      }
 
       // Fetch the export
       const response = await fetch(url, {
@@ -88,9 +146,8 @@ export function ExportDialog({
         throw new Error('Export failed');
       }
 
-      // Get filename from Content-Disposition header
+      // Get filename from Content-Disposition header if available
       const contentDisposition = response.headers.get('Content-Disposition');
-      let filename = `${type}_export.${exportFormat}`;
       if (contentDisposition) {
         const match = contentDisposition.match(/filename="(.+)"/);
         if (match && match[1]) {
@@ -153,7 +210,25 @@ export function ExportDialog({
           {/* Format selection */}
           <div>
             <label className="block text-sm font-medium text-ctp-subtext1 mb-2">Format</label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className={cn('grid gap-3', canExportPDF ? 'grid-cols-3' : 'grid-cols-2')}>
+              {canExportPDF && (
+                <button
+                  type="button"
+                  onClick={() => setExportFormat('pdf')}
+                  className={cn(
+                    'flex items-center justify-center gap-2 px-4 py-3 border rounded-lg',
+                    exportFormat === 'pdf'
+                      ? 'border-ctp-red bg-ctp-red/10 text-ctp-red'
+                      : 'border-ctp-surface1 hover:border-ctp-surface2'
+                  )}
+                >
+                  <File className="h-5 w-5" />
+                  <div className="text-left">
+                    <p className="font-medium">PDF</p>
+                    <p className="text-xs text-ctp-subtext0">Rapport complet</p>
+                  </div>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setExportFormat('csv')}
@@ -183,7 +258,7 @@ export function ExportDialog({
                 <FileJson className="h-5 w-5" />
                 <div className="text-left">
                   <p className="font-medium">JSON</p>
-                  <p className="text-xs text-ctp-subtext0">Données brutes</p>
+                  <p className="text-xs text-ctp-subtext0">Donnees brutes</p>
                 </div>
               </button>
             </div>
