@@ -283,7 +283,8 @@ export function TransactionForm({
 
   const createMutation = useMutation({
     mutationFn: async (data: TransactionFormData) => {
-      const amount = data.type === 'expense' ? -Math.abs(data.amount) : Math.abs(data.amount);
+      // Always send positive amount - the API handles sign based on type
+      const amount = Math.abs(data.amount);
       const result = await api.post(`/workspaces/${workspaceId}/transactions`, {
         accountId: data.accountId,
         type: data.type,
@@ -291,8 +292,8 @@ export function TransactionForm({
         currency: data.currency,
         description: data.description,
         date: data.date,
-        categoryId: data.categoryId,
-        notes: data.notes,
+        categoryId: data.categoryId || null,
+        notes: data.notes || null,
         tags: selectedTags,
       });
       return result;
@@ -310,10 +311,13 @@ export function TransactionForm({
 
   const updateMutation = useMutation({
     mutationFn: (data: TransactionFormData) => {
-      const amount = data.type === 'expense' ? -Math.abs(data.amount) : Math.abs(data.amount);
+      // Always send positive amount - the API handles sign based on type
+      const amount = Math.abs(data.amount);
       return api.patch(`/workspaces/${workspaceId}/transactions/${transaction!.id}`, {
         ...data,
         amount,
+        categoryId: data.categoryId || null,
+        notes: data.notes || null,
       });
     },
     onSuccess: () => {

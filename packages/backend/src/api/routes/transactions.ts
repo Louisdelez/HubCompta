@@ -135,8 +135,12 @@ export function transactionRoutes(app: FastifyInstance): void {
       const { workspaceId } = request.params;
       const input = transactionCreateSchema.parse(request.body);
 
+      // Convert amount to negative for expenses (API receives positive amounts)
+      const signedAmount = input.type === 'expense' ? -Math.abs(input.amount) : Math.abs(input.amount);
+
       const transaction = await transactionService.create(workspaceId, {
         ...input,
+        amount: signedAmount,
         date: new Date(input.date),
       });
 
@@ -231,8 +235,22 @@ export function transactionRoutes(app: FastifyInstance): void {
       const { workspaceId, transactionId } = request.params;
       const input = transactionUpdateSchema.parse(request.body);
 
+      // If amount is being updated, we need to convert it based on type
+      let signedAmount = input.amount;
+      if (input.amount !== undefined) {
+        // Get the type to use (either from input or from existing transaction)
+        let typeToUse = input.type;
+        if (!typeToUse) {
+          const existing = await transactionService.getById(workspaceId, transactionId);
+          typeToUse = existing?.type;
+        }
+        // Convert amount based on type
+        signedAmount = typeToUse === 'expense' ? -Math.abs(input.amount) : Math.abs(input.amount);
+      }
+
       const transaction = await transactionService.update(workspaceId, transactionId, {
         ...input,
+        amount: signedAmount,
         date: input.date ? new Date(input.date) : undefined,
       });
 
@@ -395,6 +413,8 @@ export function transactionRoutes(app: FastifyInstance): void {
 
       const transactionsWithDates: TransactionCreateInput[] = transactions.map((t) => ({
         ...t,
+        // Convert amount to negative for expenses (API receives positive amounts)
+        amount: t.type === 'expense' ? -Math.abs(t.amount) : Math.abs(t.amount),
         date: new Date(t.date),
       }));
 
@@ -430,13 +450,21 @@ export function transactionRoutes(app: FastifyInstance): void {
       const { workspaceId } = request.params;
       const { updates } = batchUpdateSchema.parse(request.body);
 
-      const updatesWithDates: BatchUpdateItem[] = updates.map((u) => ({
-        id: u.id,
-        data: {
-          ...u.data,
-          date: u.data.date ? new Date(u.data.date) : undefined,
-        },
-      }));
+      const updatesWithDates: BatchUpdateItem[] = updates.map((u) => {
+        let amount = u.data.amount;
+        // If amount and type are both provided, convert amount based on type
+        if (amount !== undefined && u.data.type) {
+          amount = u.data.type === 'expense' ? -Math.abs(amount) : Math.abs(amount);
+        }
+        return {
+          id: u.id,
+          data: {
+            ...u.data,
+            amount,
+            date: u.data.date ? new Date(u.data.date) : undefined,
+          },
+        };
+      });
 
       const result = await transactionService.updateMany(workspaceId, updatesWithDates);
 
