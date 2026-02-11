@@ -136,7 +136,7 @@ describe('WorkspaceService', () => {
   // ============================================================================
 
   describe('create', () => {
-    it('should create a workspace with owner membership', async () => {
+    it('should create a workspace with owner membership and default categories', async () => {
       const userId = 'user-123';
       const input = {
         name: 'My Workspace',
@@ -153,6 +153,9 @@ describe('WorkspaceService', () => {
           },
           membership: {
             create: vi.fn().mockResolvedValue(createMockMembership()),
+          },
+          category: {
+            createMany: vi.fn().mockResolvedValue({ count: 17 }),
           },
         };
         return callback(tx);
@@ -185,6 +188,9 @@ describe('WorkspaceService', () => {
           membership: {
             create: vi.fn(),
           },
+          category: {
+            createMany: vi.fn().mockResolvedValue({ count: 17 }),
+          },
         };
         return callback(tx);
       });
@@ -211,6 +217,9 @@ describe('WorkspaceService', () => {
           },
           membership: {
             create: vi.fn(),
+          },
+          category: {
+            createMany: vi.fn().mockResolvedValue({ count: 17 }),
           },
         };
         return callback(tx);
@@ -248,6 +257,9 @@ describe('WorkspaceService', () => {
           membership: {
             create: vi.fn(),
           },
+          category: {
+            createMany: vi.fn().mockResolvedValue({ count: 17 }),
+          },
         };
         return callback(tx);
       });
@@ -257,6 +269,56 @@ describe('WorkspaceService', () => {
       expect(result.settings).toMatchObject({
         fiscalYearStart: 1,
         enableProMode: false,
+      });
+    });
+
+    it('should create default categories with isSystem flag', async () => {
+      const userId = 'user-123';
+      const input = {
+        name: 'My Workspace',
+        type: 'personal' as const,
+        currency: 'EUR',
+      };
+
+      const mockWorkspace = createMockWorkspace({ name: input.name });
+      const categoryCreateManyMock = vi.fn().mockResolvedValue({ count: 17 });
+
+      vi.mocked(prisma.$transaction).mockImplementation(async (callback: any) => {
+        const tx = {
+          workspace: {
+            create: vi.fn().mockResolvedValue(mockWorkspace),
+          },
+          membership: {
+            create: vi.fn().mockResolvedValue(createMockMembership()),
+          },
+          category: {
+            createMany: categoryCreateManyMock,
+          },
+        };
+        return callback(tx);
+      });
+
+      await workspaceService.create(userId, input);
+
+      expect(categoryCreateManyMock).toHaveBeenCalledWith({
+        data: expect.arrayContaining([
+          expect.objectContaining({
+            workspaceId: mockWorkspace.id,
+            name: 'Alimentation',
+            type: 'expense',
+            icon: expect.any(String),
+            color: expect.any(String),
+            isSystem: true,
+          }),
+          expect.objectContaining({
+            workspaceId: mockWorkspace.id,
+            name: 'Salaire',
+            type: 'income',
+            icon: expect.any(String),
+            color: expect.any(String),
+            isSystem: true,
+          }),
+        ]),
       });
     });
   });
