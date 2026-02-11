@@ -112,12 +112,14 @@ export function transactionRoutes(app: FastifyInstance): void {
 
       return reply.send({
         success: true,
-        data: transactions,
-        meta: {
-          page: options.page,
-          limit: options.limit,
-          total,
-          totalPages: Math.ceil(total / options.limit),
+        data: {
+          transactions,
+          meta: {
+            page: options.page,
+            limit: options.limit,
+            total,
+            totalPages: Math.ceil(total / options.limit),
+          },
         },
       });
     }

@@ -152,8 +152,9 @@ export function ForecastChart({
     const now = new Date();
     const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0] ?? '';
 
-    // Add historical data
-    for (const point of historicalData) {
+    // Add historical data (with safety checks)
+    for (const point of historicalData ?? []) {
+      if (!point?.month) continue;
       const monthKey = point.month.split('T')[0] ?? '';
       data.push({
         month: monthKey,
@@ -162,8 +163,9 @@ export function ForecastChart({
       });
     }
 
-    // Add forecasts
-    for (const forecast of forecasts) {
+    // Add forecasts (with safety checks)
+    for (const forecast of forecasts ?? []) {
+      if (!forecast?.month) continue;
       const monthKey = forecast.month.split('T')[0] ?? '';
       const existing = data.find((d) => d.month === monthKey);
 

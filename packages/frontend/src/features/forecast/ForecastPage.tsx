@@ -45,6 +45,14 @@ interface ForecastData {
   createdAt: string;
 }
 
+interface HistoricalDataRaw {
+  month: string;
+  categoryId: string | null;
+  categoryName: string | null;
+  amount: number;
+  transactionCount: number;
+}
+
 interface HistoricalData {
   categoryId: string;
   categoryName: string;
@@ -94,11 +102,31 @@ export function ForecastPage() {
     enabled: !!workspaceId,
   });
 
-  // Fetch historical data
+  // Fetch historical data and transform to grouped format
   const { data: historicalData } = useQuery({
     queryKey: ['forecast', workspaceId, 'historical'],
-    queryFn: () =>
-      api.get<HistoricalData[]>(`/workspaces/${workspaceId}/forecast/historical?months=12`),
+    queryFn: async () => {
+      const rawData = await api.get<HistoricalDataRaw[]>(`/workspaces/${workspaceId}/forecast/historical?months=12`);
+
+      // Transform flat array to grouped by category
+      const grouped: Record<string, HistoricalData> = {};
+
+      for (const item of rawData) {
+        const catId = item.categoryId ?? 'uncategorized';
+        if (!grouped[catId]) {
+          grouped[catId] = {
+            categoryId: catId,
+            categoryName: item.categoryName ?? 'Non catégorisé',
+            categoryIcon: null,
+            categoryColor: null,
+            data: [],
+          };
+        }
+        grouped[catId].data.push({ month: item.month, amount: item.amount });
+      }
+
+      return Object.values(grouped);
+    },
     enabled: !!workspaceId,
   });
 
@@ -170,12 +198,14 @@ export function ForecastPage() {
   // Prepare chart data - combine historical with forecasts
   const chartHistoricalData =
     historicalData?.reduce((acc, category) => {
-      for (const point of category.data) {
+      const dataPoints = Array.isArray(category?.data) ? category.data : [];
+      for (const point of dataPoints) {
+        if (!point?.month) continue;
         const existing = acc.find((d) => d.month === point.month);
         if (existing) {
-          existing.amount += point.amount;
+          existing.amount += point.amount ?? 0;
         } else {
-          acc.push({ month: point.month, amount: point.amount });
+          acc.push({ month: point.month, amount: point.amount ?? 0 });
         }
       }
       return acc;
