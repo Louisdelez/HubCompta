@@ -79,13 +79,12 @@ class NetWorthService {
     });
     const baseCurrency = workspace?.currency ?? 'EUR';
 
-    // Get all accounts (excluding loan type accounts as we track loans separately)
+    // Get all accounts (including loan type accounts for liability calculation)
     const accounts = await prisma.account.findMany({
       where: {
         workspaceId,
         deletedAt: null,
         isArchived: false,
-        type: { notIn: ['loan'] },
       },
       select: {
         id: true,
@@ -156,21 +155,25 @@ class NetWorthService {
 
     // Assets: positive account balances + investments + credits (money owed to me)
     // For accounts, we include positive checking/savings balances as assets
-    // Negative balances (like credit card debt) are liabilities
+    // Negative balances (like credit card debt, loans) are liabilities
     let accountsAssets = 0;
     let accountsLiabilities = 0;
 
     for (const acc of accounts) {
       const balance = acc.balance.toNumber();
-      if (acc.type === 'credit_card') {
-        // Credit card: negative balance = debt, positive = overpayment (asset)
+      if (acc.type === 'credit_card' || acc.type === 'loan') {
+        // Credit card and loan: negative balance = debt (liability)
+        // Positive balance on credit card = overpayment (asset)
+        // Loan accounts typically have negative balance representing debt
         if (balance < 0) {
           accountsLiabilities += Math.abs(balance);
-        } else {
+        } else if (balance > 0) {
+          // Rare case: overpayment on credit card or loan is an asset
           accountsAssets += balance;
         }
       } else {
-        // Other accounts: positive = asset, negative = debt (overdraft)
+        // Other accounts (checking, savings, cash, investment):
+        // positive = asset, negative = debt (overdraft)
         if (balance >= 0) {
           accountsAssets += balance;
         } else {

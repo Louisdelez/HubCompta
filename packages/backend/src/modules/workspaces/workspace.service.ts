@@ -5,8 +5,41 @@
 import { prisma } from '@/core/database/client.js';
 import { NotFoundError } from '@/core/middleware/errorHandler.js';
 import { WORKSPACE } from '@finance-hub/shared';
-import type { Workspace, WorkspaceType, MembershipRole } from '@prisma/client';
+import type { Workspace, WorkspaceType, MembershipRole, CategoryType } from '@prisma/client';
 import type { WorkspaceCreateInput, WorkspaceUpdateInput } from '@finance-hub/shared';
+
+// ----------------------------------------------------------------------------
+// Default Categories (French)
+// ----------------------------------------------------------------------------
+
+interface DefaultCategory {
+  name: string;
+  type: CategoryType;
+  icon: string;
+  color: string;
+}
+
+const DEFAULT_CATEGORIES: DefaultCategory[] = [
+  // Expense categories
+  { name: 'Alimentation', type: 'expense', icon: '🛒', color: '#22c55e' },
+  { name: 'Transport', type: 'expense', icon: '🚗', color: '#3b82f6' },
+  { name: 'Logement', type: 'expense', icon: '🏠', color: '#a855f7' },
+  { name: 'Loisirs', type: 'expense', icon: '🎬', color: '#ec4899' },
+  { name: 'Santé', type: 'expense', icon: '💊', color: '#ef4444' },
+  { name: 'Shopping', type: 'expense', icon: '🛍️', color: '#f97316' },
+  { name: 'Restaurants', type: 'expense', icon: '🍽️', color: '#eab308' },
+  { name: 'Abonnements', type: 'expense', icon: '📱', color: '#14b8a6' },
+  { name: 'Éducation', type: 'expense', icon: '📚', color: '#6366f1' },
+  { name: 'Voyages', type: 'expense', icon: '✈️', color: '#06b6d4' },
+  { name: 'Cadeaux', type: 'expense', icon: '🎁', color: '#f43f5e' },
+  { name: 'Autres dépenses', type: 'expense', icon: '📦', color: '#6b7280' },
+  // Income categories
+  { name: 'Salaire', type: 'income', icon: '💰', color: '#22c55e' },
+  { name: 'Freelance', type: 'income', icon: '💻', color: '#3b82f6' },
+  { name: 'Investissements', type: 'income', icon: '📈', color: '#a855f7' },
+  { name: 'Remboursements', type: 'income', icon: '🔄', color: '#14b8a6' },
+  { name: 'Autres revenus', type: 'income', icon: '💵', color: '#6b7280' },
+];
 
 // ----------------------------------------------------------------------------
 // Types
@@ -52,6 +85,18 @@ export const workspaceService = {
           userId,
           role: 'owner',
         },
+      });
+
+      // Create default categories
+      await tx.category.createMany({
+        data: DEFAULT_CATEGORIES.map((cat) => ({
+          workspaceId: ws.id,
+          name: cat.name,
+          type: cat.type,
+          icon: cat.icon,
+          color: cat.color,
+          isSystem: true,
+        })),
       });
 
       return ws;

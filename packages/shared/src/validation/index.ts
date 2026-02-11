@@ -11,6 +11,24 @@ import { AUTH, WORKSPACE, ACCOUNT, TRANSACTION, BUDGET, DOCUMENT, PRO, INVEST, L
 
 export const uuidSchema = z.string().uuid();
 
+// Helper for optional date fields that accepts null, undefined, or empty string
+const optionalDateSchema = z.preprocess(
+  (val) => (val === '' || val === null || val === undefined ? null : val),
+  z.coerce.date().nullable()
+).optional();
+
+// Helper for optional hex color fields
+const optionalColorSchema = z.preprocess(
+  (val) => (val === '' || val === null || val === undefined ? null : val),
+  z.string().regex(/^#[0-9A-Fa-f]{6}$/).nullable()
+).optional();
+
+// Helper for optional UUID fields
+const optionalUuidSchema = z.preprocess(
+  (val) => (val === '' || val === null || val === undefined ? null : val),
+  z.string().uuid().nullable()
+).optional();
+
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(25),
@@ -506,19 +524,19 @@ export const savingsGoalCreateSchema = z.object({
   name: z.string().min(1).max(100).trim(),
   targetAmount: z.number().positive('Target amount must be positive'),
   currency: z.string().length(3).toUpperCase().default('EUR'),
-  targetDate: z.coerce.date().optional().nullable(),
+  targetDate: optionalDateSchema,
   icon: z.string().max(10).optional().nullable(),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional().nullable(),
-  accountId: z.string().uuid().optional().nullable(),
+  color: optionalColorSchema,
+  accountId: optionalUuidSchema,
 });
 
 export const savingsGoalUpdateSchema = z.object({
   name: z.string().min(1).max(100).trim().optional(),
   targetAmount: z.number().positive('Target amount must be positive').optional(),
-  targetDate: z.coerce.date().optional().nullable(),
+  targetDate: optionalDateSchema,
   icon: z.string().max(10).optional().nullable(),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional().nullable(),
-  accountId: z.string().uuid().optional().nullable(),
+  color: optionalColorSchema,
+  accountId: optionalUuidSchema,
 });
 
 export const savingsContributionCreateSchema = z.object({

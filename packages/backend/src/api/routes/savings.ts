@@ -224,10 +224,10 @@ export function savingsRoutes(app: FastifyInstance): void {
           properties: {
             name: { type: 'string' as const, minLength: 1, maxLength: 100, description: 'Goal name' },
             targetAmount: { type: 'number' as const, minimum: 0.01, description: 'Target amount to save' },
-            targetDate: { type: 'string' as const, format: 'date-time', description: 'Optional target date' },
-            icon: { type: 'string' as const, description: 'Optional icon identifier' },
-            color: { type: 'string' as const, pattern: '^#[0-9A-Fa-f]{6}$', description: 'Optional hex color' },
-            accountId: { type: 'string' as const, format: 'uuid', description: 'Optional linked account ID' },
+            targetDate: { type: 'string' as const, format: 'date-time', nullable: true, description: 'Optional target date' },
+            icon: { type: 'string' as const, nullable: true, description: 'Optional icon identifier' },
+            color: { type: 'string' as const, pattern: '^#[0-9A-Fa-f]{6}$', nullable: true, description: 'Optional hex color' },
+            accountId: { type: 'string' as const, format: 'uuid', nullable: true, description: 'Optional linked account ID' },
           },
         },
         response: {
