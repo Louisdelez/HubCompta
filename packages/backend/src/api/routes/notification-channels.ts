@@ -97,7 +97,7 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
       updatedAt: channel.updatedAt,
     }));
 
-    return reply.send({ data: sanitizedChannels });
+    return reply.send({ success: true, data: sanitizedChannels });
   });
 
   // --------------------------------------------------------------------------
@@ -140,7 +140,7 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
       ],
     };
 
-    return reply.send({ data: categorizedTypes });
+    return reply.send({ success: true, data: categorizedTypes });
   });
 
   // --------------------------------------------------------------------------
@@ -155,10 +155,11 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
       const channel = await notificationChannelService.getChannel(channelId, userId);
 
       if (!channel) {
-        return reply.status(404).send({ error: 'Channel not found' });
+        return reply.status(404).send({ success: false, error: { message: 'Channel not found' } });
       }
 
       return reply.send({
+        success: true,
         data: {
           id: channel.id,
           channelType: channel.channelType,
@@ -188,14 +189,14 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
     if (body.channelType === 'discord' && body.discordWebhookUrl) {
       const isValid = await discordService.validateWebhookUrl(body.discordWebhookUrl);
       if (!isValid) {
-        return reply.status(400).send({ error: 'Invalid Discord webhook URL' });
+        return reply.status(400).send({ success: false, error: { message: 'Invalid Discord webhook URL' } });
       }
     }
 
     // Validate WhatsApp phone if provided
     if (body.channelType === 'whatsapp' && body.whatsappPhone) {
       if (!whatsappService.isValidPhoneNumber(body.whatsappPhone)) {
-        return reply.status(400).send({ error: 'Invalid phone number format' });
+        return reply.status(400).send({ success: false, error: { message: 'Invalid phone number format' } });
       }
     }
 
@@ -212,6 +213,7 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
       logger.info({ userId, channelType: body.channelType }, 'Notification channel added');
 
       return reply.status(201).send({
+        success: true,
         data: {
           id: channel.id,
           channelType: channel.channelType,
@@ -221,7 +223,7 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to create channel';
-      return reply.status(400).send({ error: message });
+      return reply.status(400).send({ success: false, error: { message } });
     }
   });
 
@@ -239,14 +241,14 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
       if (body.discordWebhookUrl) {
         const isValid = await discordService.validateWebhookUrl(body.discordWebhookUrl);
         if (!isValid) {
-          return reply.status(400).send({ error: 'Invalid Discord webhook URL' });
+          return reply.status(400).send({ success: false, error: { message: 'Invalid Discord webhook URL' } });
         }
       }
 
       // Validate WhatsApp phone if provided
       if (body.whatsappPhone) {
         if (!whatsappService.isValidPhoneNumber(body.whatsappPhone)) {
-          return reply.status(400).send({ error: 'Invalid phone number format' });
+          return reply.status(400).send({ success: false, error: { message: 'Invalid phone number format' } });
         }
       }
 
@@ -254,6 +256,7 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
         const channel = await notificationChannelService.updateChannel(channelId, userId, body);
 
         return reply.send({
+          success: true,
           data: {
             id: channel.id,
             channelType: channel.channelType,
@@ -265,7 +268,7 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to update channel';
-        return reply.status(400).send({ error: message });
+        return reply.status(400).send({ success: false, error: { message } });
       }
     }
   );
@@ -284,7 +287,7 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
         return reply.status(204).send();
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to delete channel';
-        return reply.status(400).send({ error: message });
+        return reply.status(400).send({ success: false, error: { message } });
       }
     }
   );
@@ -300,7 +303,7 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
 
       const channel = await notificationChannelService.getChannel(channelId, userId);
       if (!channel) {
-        return reply.status(404).send({ error: 'Channel not found' });
+        return reply.status(404).send({ success: false, error: { message: 'Channel not found' } });
       }
 
       // Generate verification code
@@ -319,7 +322,7 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
           target = channel.discordWebhookUrl!;
           break;
         default:
-          return reply.status(400).send({ error: 'Unknown channel type' });
+          return reply.status(400).send({ success: false, error: { message: 'Unknown channel type' } });
       }
 
       // Send verification code
@@ -330,14 +333,17 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
       );
 
       if (!result.success) {
-        return reply.status(500).send({ error: result.error ?? 'Failed to send verification code' });
+        return reply.status(500).send({ success: false, error: { message: result.error ?? 'Failed to send verification code' } });
       }
 
       logger.info({ userId, channelType: channel.channelType }, 'Verification code sent');
 
       return reply.send({
-        message: 'Verification code sent',
-        expiresIn: '15 minutes',
+        success: true,
+        data: {
+          message: 'Verification code sent',
+          expiresIn: '15 minutes',
+        },
       });
     }
   );
@@ -355,12 +361,12 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
       const result = await notificationChannelService.verifyChannel(channelId, userId, code);
 
       if (!result.success) {
-        return reply.status(400).send({ error: result.error });
+        return reply.status(400).send({ success: false, error: { message: result.error } });
       }
 
       logger.info({ userId, channelId }, 'Channel verified');
 
-      return reply.send({ message: 'Channel verified and activated' });
+      return reply.send({ success: true, data: { message: 'Channel verified and activated' } });
     }
   );
 
@@ -375,10 +381,11 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
 
       const channel = await notificationChannelService.getChannel(channelId, userId);
       if (!channel) {
-        return reply.status(404).send({ error: 'Channel not found' });
+        return reply.status(404).send({ success: false, error: { message: 'Channel not found' } });
       }
 
       return reply.send({
+        success: true,
         data: {
           enabledTypes: channel.enabledTypes,
           availableTypes: NOTIFICATION_TYPES,
@@ -401,13 +408,14 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
         const validTypes = await notificationChannelService.setEnabledTypes(channelId, userId, enabledTypes);
 
         return reply.send({
+          success: true,
           data: {
             enabledTypes: validTypes,
           },
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to update preferences';
-        return reply.status(400).send({ error: message });
+        return reply.status(400).send({ success: false, error: { message } });
       }
     }
   );
@@ -423,11 +431,11 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
 
       const channel = await notificationChannelService.getChannel(channelId, userId);
       if (!channel) {
-        return reply.status(404).send({ error: 'Channel not found' });
+        return reply.status(404).send({ success: false, error: { message: 'Channel not found' } });
       }
 
       if (!channel.isActive) {
-        return reply.status(400).send({ error: 'Channel must be verified and active to send test' });
+        return reply.status(400).send({ success: false, error: { message: 'Channel must be verified and active to send test' } });
       }
 
       // Send test based on channel type
@@ -454,14 +462,14 @@ export async function notificationChannelRoutes(app: FastifyInstance): Promise<v
           break;
 
         default:
-          return reply.status(400).send({ error: 'Unknown channel type' });
+          return reply.status(400).send({ success: false, error: { message: 'Unknown channel type' } });
       }
 
       if (!result.success) {
-        return reply.status(500).send({ error: result.error ?? 'Failed to send test message' });
+        return reply.status(500).send({ success: false, error: { message: result.error ?? 'Failed to send test message' } });
       }
 
-      return reply.send({ message: 'Test message sent' });
+      return reply.send({ success: true, data: { message: 'Test message sent' } });
     }
   );
 }

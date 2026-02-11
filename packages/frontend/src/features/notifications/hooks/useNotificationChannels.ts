@@ -80,10 +80,10 @@ export function useNotificationChannels() {
   return useQuery({
     queryKey: channelKeys.all,
     queryFn: async () => {
-      const response = await api.get<{ data: NotificationChannel[] }>(
+      const response = await api.get<NotificationChannel[]>(
         '/users/me/notification-channels'
       );
-      return response.data;
+      return response;
     },
   });
 }
@@ -95,10 +95,10 @@ export function useNotificationTypes() {
   return useQuery({
     queryKey: channelKeys.types,
     queryFn: async () => {
-      const response = await api.get<{ data: NotificationTypesResponse }>(
+      const response = await api.get<NotificationTypesResponse>(
         '/users/me/notification-channels/types'
       );
-      return response.data;
+      return response;
     },
     staleTime: 1000 * 60 * 60, // 1 hour
   });
@@ -112,11 +112,11 @@ export function useAddChannel() {
 
   return useMutation({
     mutationFn: async (input: CreateChannelInput) => {
-      const response = await api.post<{ data: { id: string; channelType: ChannelType; isActive: boolean } }>(
+      const response = await api.post<{ id: string; channelType: ChannelType; isActive: boolean }>(
         '/users/me/notification-channels',
         input
       );
-      return response.data;
+      return response;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: channelKeys.all });
@@ -132,11 +132,11 @@ export function useUpdateChannel(channelId: string) {
 
   return useMutation({
     mutationFn: async (input: UpdateChannelInput) => {
-      const response = await api.patch<{ data: NotificationChannel }>(
+      const response = await api.patch<NotificationChannel>(
         `/users/me/notification-channels/${channelId}`,
         input
       );
-      return response.data;
+      return response;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: channelKeys.all });
@@ -202,11 +202,11 @@ export function useUpdateChannelPreferences(channelId: string) {
 
   return useMutation({
     mutationFn: async (enabledTypes: string[]) => {
-      const response = await api.put<{ data: { enabledTypes: string[] } }>(
+      const response = await api.put<{ enabledTypes: string[] }>(
         `/users/me/notification-channels/${channelId}/preferences`,
         { enabledTypes }
       );
-      return response.data;
+      return response;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: channelKeys.all });

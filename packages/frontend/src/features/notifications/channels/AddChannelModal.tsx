@@ -125,7 +125,9 @@ export function AddChannelModal({ open, onClose, onSuccess, existingTypes }: Add
       onSuccess(result.id);
       resetForm();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      const errorMessage = err instanceof Error ? err.message :
+        (err && typeof err === 'object' && 'message' in err) ? String(err.message) : 'Une erreur est survenue';
+      setError(errorMessage);
     }
   };
 
