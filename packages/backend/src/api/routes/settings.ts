@@ -117,15 +117,15 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get('/profile', async (request, reply) => {
     const userId = request.user?.sub;
     if (!userId) {
-      return reply.status(401).send({ error: 'Non authentifié' });
+      return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
     }
 
     const profile = await settingsService.getUserProfile(userId);
     if (!profile) {
-      return reply.status(404).send({ error: 'Utilisateur non trouvé' });
+      return reply.status(404).send({ success: false, error: { code: 'NOT_FOUND', message: 'Utilisateur non trouvé' } });
     }
 
-    return { data: profile };
+    return { success: true, data: profile };
   });
 
   /**
@@ -134,7 +134,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.patch<{ Body: UserProfileUpdate }>('/profile', async (request, reply) => {
     const userId = request.user?.sub;
     if (!userId) {
-      return reply.status(401).send({ error: 'Non authentifié' });
+      return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
     }
 
     const { displayName, country, locale, timezone, theme } = request.body;
@@ -156,7 +156,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
       ipAddress: request.ip,
     });
 
-    return { data: profile };
+    return { success: true, data: profile };
   });
 
   // ==========================================================================
@@ -169,11 +169,11 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get('/preferences', async (request, reply) => {
     const userId = request.user?.sub;
     if (!userId) {
-      return reply.status(401).send({ error: 'Non authentifié' });
+      return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
     }
 
     const preferences = await settingsService.getUserPreferences(userId);
-    return { data: preferences };
+    return { success: true, data: preferences };
   });
 
   /**
@@ -182,7 +182,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.patch<{ Body: PreferencesUpdate }>('/preferences', async (request, reply) => {
     const userId = request.user?.sub;
     if (!userId) {
-      return reply.status(401).send({ error: 'Non authentifié' });
+      return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
     }
 
     const preferences = await settingsService.updateUserPreferences(userId, request.body as unknown as Partial<UserPreferences>);
@@ -196,7 +196,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
       ipAddress: request.ip,
     });
 
-    return { data: preferences };
+    return { success: true, data: preferences };
   });
 
   /**
@@ -205,7 +205,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.post('/preferences/reset', async (request, reply) => {
     const userId = request.user?.sub;
     if (!userId) {
-      return reply.status(401).send({ error: 'Non authentifié' });
+      return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
     }
 
     const preferences = await settingsService.resetUserPreferences(userId);
@@ -219,7 +219,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
       ipAddress: request.ip,
     });
 
-    return { data: preferences };
+    return { success: true, data: preferences };
   });
 
   // ==========================================================================
@@ -234,17 +234,17 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const userId = request.user?.sub;
       if (!userId) {
-        return reply.status(401).send({ error: 'Non authentifié' });
+        return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
       }
 
       const { workspaceId } = request.params;
       const workspace = await settingsService.getWorkspaceDetails(workspaceId);
 
       if (!workspace) {
-        return reply.status(404).send({ error: 'Workspace non trouvé' });
+        return reply.status(404).send({ success: false, error: { code: 'NOT_FOUND', message: 'Workspace non trouvé' } });
       }
 
-      return { data: workspace };
+      return { success: true, data: workspace };
     }
   );
 
@@ -256,7 +256,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const userId = request.user?.sub;
       if (!userId) {
-        return reply.status(401).send({ error: 'Non authentifié' });
+        return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
       }
 
       const { workspaceId } = request.params;
@@ -277,7 +277,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
         ipAddress: request.ip,
       });
 
-      return { data: workspace };
+      return { success: true, data: workspace };
     }
   );
 
@@ -289,13 +289,13 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const userId = request.user?.sub;
       if (!userId) {
-        return reply.status(401).send({ error: 'Non authentifié' });
+        return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
       }
 
       const { workspaceId } = request.params;
       const settings = await settingsService.getWorkspaceSettings(workspaceId);
 
-      return { data: settings };
+      return { success: true, data: settings };
     }
   );
 
@@ -307,7 +307,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const userId = request.user?.sub;
       if (!userId) {
-        return reply.status(401).send({ error: 'Non authentifié' });
+        return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
       }
 
       const { workspaceId } = request.params;
@@ -323,7 +323,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
         ipAddress: request.ip,
       });
 
-      return { data: settings };
+      return { success: true, data: settings };
     }
   );
 
@@ -335,7 +335,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const userId = request.user?.sub;
       if (!userId) {
-        return reply.status(401).send({ error: 'Non authentifié' });
+        return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
       }
 
       const { workspaceId } = request.params;
@@ -351,7 +351,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
         ipAddress: request.ip,
       });
 
-      return { data: settings };
+      return { success: true, data: settings };
     }
   );
 
@@ -365,11 +365,11 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get('/data/summary', async (request, reply) => {
     const userId = request.user?.sub;
     if (!userId) {
-      return reply.status(401).send({ error: 'Non authentifié' });
+      return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
     }
 
     const summary = await settingsService.getUserDataSummary(userId);
-    return { data: summary };
+    return { success: true, data: summary };
   });
 
   /**
@@ -378,7 +378,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get('/data/export', async (request, reply) => {
     const userId = request.user?.sub;
     if (!userId) {
-      return reply.status(401).send({ error: 'Non authentifié' });
+      return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
     }
 
     const data = await settingsService.exportUserData(userId);
@@ -408,7 +408,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.delete('/data/account', async (request, reply) => {
     const userId = request.user?.sub;
     if (!userId) {
-      return reply.status(401).send({ error: 'Non authentifié' });
+      return reply.status(401).send({ success: false, error: { code: 'UNAUTHORIZED', message: 'Non authentifié' } });
     }
 
     // Log before deletion
