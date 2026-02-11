@@ -55,10 +55,13 @@ export function SavingsProgress({
   isCompleted = false,
   className,
 }: SavingsProgressProps) {
+  // Ensure progress is a valid number between 0 and 100
+  const safeProgress = Number.isFinite(progress) ? Math.min(100, Math.max(0, progress)) : 0;
+
   const config = getSizeConfig(size);
   const circumference = 2 * Math.PI * config.radius;
-  const offset = circumference - (progress / 100) * circumference;
-  const progressColor = getProgressColor(progress, isCompleted, color);
+  const offset = circumference - (safeProgress / 100) * circumference;
+  const progressColor = getProgressColor(safeProgress, isCompleted, color);
 
   return (
     <div className={clsx('relative inline-flex items-center justify-center', className)}>
@@ -99,7 +102,7 @@ export function SavingsProgress({
             {isCompleted ? (
               <span className="text-ctp-green">100%</span>
             ) : (
-              <span className="text-ctp-text">{Math.round(progress)}%</span>
+              <span className="text-ctp-text">{Math.round(safeProgress)}%</span>
             )}
           </span>
         </div>
