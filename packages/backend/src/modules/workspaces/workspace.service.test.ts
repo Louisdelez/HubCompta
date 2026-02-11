@@ -117,6 +117,7 @@ const createMockMembership = (overrides = {}): Membership => ({
   spendingLimit: null,
   approvalRequired: false,
   visibleCategories: [],
+  settings: {},
   createdAt: new Date('2024-01-15T10:00:00Z'),
   updatedAt: new Date('2024-01-15T10:00:00Z'),
   ...overrides,

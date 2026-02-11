@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
-import { X, Users, Loader2, Wallet, Shield, Eye, Settings } from 'lucide-react';
+import { X, Users, Loader2, Wallet, Shield, Eye } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { InviteMember } from './InviteMember';
@@ -23,7 +23,7 @@ interface Member {
   userId: string;
   email: string;
   displayName: string;
-  role: 'owner' | 'admin' | 'accountant' | 'member' | 'readonly';
+  role: 'owner' | 'admin' | 'accountant' | 'member' | 'family_member' | 'readonly';
   joinedAt: string;
   // Family sharing fields
   spendingLimit: number | null;
@@ -41,6 +41,7 @@ const ROLE_LABELS: Record<Member['role'], string> = {
   admin: 'Administrateur',
   accountant: 'Comptable',
   member: 'Membre',
+  family_member: 'Membre famille',
   readonly: 'Lecture seule',
 };
 
@@ -49,6 +50,7 @@ const ROLE_COLORS: Record<Member['role'], string> = {
   admin: 'bg-ctp-mauve/20 text-ctp-mauve',
   accountant: 'bg-ctp-green/20 text-ctp-green',
   member: 'bg-ctp-surface1 text-ctp-subtext0',
+  family_member: 'bg-ctp-blue/20 text-ctp-blue',
   readonly: 'bg-ctp-surface0 text-ctp-overlay1',
 };
 
@@ -211,6 +213,7 @@ export function MembersPage() {
                   <option value="admin">Administrateur</option>
                   <option value="accountant">Comptable</option>
                   <option value="member">Membre</option>
+                  <option value="family_member">Membre famille</option>
                   <option value="readonly">Lecture seule</option>
                 </select>
               ) : (

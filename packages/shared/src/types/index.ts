@@ -85,7 +85,7 @@ export interface WorkspaceSettings {
   enableInvestMode: boolean;
 }
 
-export type MembershipRole = 'owner' | 'admin' | 'accountant' | 'member' | 'readonly';
+export type MembershipRole = 'owner' | 'admin' | 'accountant' | 'member' | 'family_member' | 'readonly';
 
 export interface Membership extends Timestamps {
   id: UUID;

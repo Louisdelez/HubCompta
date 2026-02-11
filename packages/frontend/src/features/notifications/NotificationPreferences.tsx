@@ -58,7 +58,7 @@ const notificationTypeConfig: Record<
     category: 'savings',
   },
 
-  // Spending
+  // Spending (Alerts)
   unusual_spending: {
     icon: AlertTriangle,
     label: 'Depense inhabituelle',
@@ -88,17 +88,17 @@ const notificationTypeConfig: Record<
   weekly_summary: {
     icon: Calendar,
     label: 'Resume hebdomadaire',
-    description: 'Resume de vos finances chaque semaine',
+    description: 'Resume de vos finances chaque semaine (lundi matin)',
     category: 'summaries',
   },
   monthly_report: {
     icon: TrendingUp,
     label: 'Rapport mensuel',
-    description: 'Rapport detaille chaque mois',
+    description: 'Rapport detaille chaque mois (1er du mois)',
     category: 'summaries',
   },
 
-  // Recurring
+  // Recurring / Reminders
   recurring_processed: {
     icon: RefreshCcw,
     label: 'Transaction recurrente',
@@ -109,6 +109,12 @@ const notificationTypeConfig: Record<
     icon: Calendar,
     label: 'Echeance a venir',
     description: 'Rappel avant une echeance recurrente',
+    category: 'recurring',
+  },
+  bill_upcoming: {
+    icon: Calendar,
+    label: 'Facture a venir',
+    description: 'Rappel des factures dues dans les 7 prochains jours',
     category: 'recurring',
   },
 };

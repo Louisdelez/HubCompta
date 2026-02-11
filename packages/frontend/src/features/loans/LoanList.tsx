@@ -48,6 +48,7 @@ interface LoanListProps {
   onViewDetails: (loan: Loan) => void;
   onAddPayment: (loan: Loan) => void;
   onCreateNew: () => void;
+  onAnalyze?: (loan: Loan) => void;
 }
 
 // ----------------------------------------------------------------------------
@@ -62,6 +63,7 @@ export function LoanList({
   onViewDetails,
   onAddPayment,
   onCreateNew,
+  onAnalyze,
 }: LoanListProps) {
   // Filter loans based on active tab
   const filteredLoans = loans.filter((loan) => {
@@ -113,16 +115,20 @@ export function LoanList({
               Dettes ({debts.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {debts.map((loan) => (
-                <LoanCard
-                  key={loan.id}
-                  loan={loan}
-                  workspaceId={workspaceId}
-                  onEdit={() => onEdit(loan)}
-                  onViewDetails={() => onViewDetails(loan)}
-                  onAddPayment={() => onAddPayment(loan)}
-                />
-              ))}
+              {debts.map((loan) => {
+                const canSimulate = onAnalyze && loan.interestRate !== null && loan.interestRate > 0;
+                return (
+                  <LoanCard
+                    key={loan.id}
+                    loan={loan}
+                    workspaceId={workspaceId}
+                    onEdit={() => onEdit(loan)}
+                    onViewDetails={() => onViewDetails(loan)}
+                    onAddPayment={() => onAddPayment(loan)}
+                    {...(canSimulate ? { onSimulate: () => onAnalyze(loan) } : {})}
+                  />
+                );
+              })}
             </div>
           </section>
         )}
@@ -135,16 +141,20 @@ export function LoanList({
               Creances ({credits.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {credits.map((loan) => (
-                <LoanCard
-                  key={loan.id}
-                  loan={loan}
-                  workspaceId={workspaceId}
-                  onEdit={() => onEdit(loan)}
-                  onViewDetails={() => onViewDetails(loan)}
-                  onAddPayment={() => onAddPayment(loan)}
-                />
-              ))}
+              {credits.map((loan) => {
+                const canSimulate = onAnalyze && loan.interestRate !== null && loan.interestRate > 0;
+                return (
+                  <LoanCard
+                    key={loan.id}
+                    loan={loan}
+                    workspaceId={workspaceId}
+                    onEdit={() => onEdit(loan)}
+                    onViewDetails={() => onViewDetails(loan)}
+                    onAddPayment={() => onAddPayment(loan)}
+                    {...(canSimulate ? { onSimulate: () => onAnalyze(loan) } : {})}
+                  />
+                );
+              })}
             </div>
           </section>
         )}
@@ -155,16 +165,20 @@ export function LoanList({
   // Flat list for filtered tabs
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {filteredLoans.map((loan) => (
-        <LoanCard
-          key={loan.id}
-          loan={loan}
-          workspaceId={workspaceId}
-          onEdit={() => onEdit(loan)}
-          onViewDetails={() => onViewDetails(loan)}
-          onAddPayment={() => onAddPayment(loan)}
-        />
-      ))}
+      {filteredLoans.map((loan) => {
+        const canSimulate = onAnalyze && loan.interestRate !== null && loan.interestRate > 0;
+        return (
+          <LoanCard
+            key={loan.id}
+            loan={loan}
+            workspaceId={workspaceId}
+            onEdit={() => onEdit(loan)}
+            onViewDetails={() => onViewDetails(loan)}
+            onAddPayment={() => onAddPayment(loan)}
+            {...(canSimulate ? { onSimulate: () => onAnalyze(loan) } : {})}
+          />
+        );
+      })}
     </div>
   );
 }

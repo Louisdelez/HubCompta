@@ -83,6 +83,42 @@ export function loanRoutes(app: FastifyInstance): void {
   );
 
   // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/loans/debt-free-date - Get projected debt-free date
+  // --------------------------------------------------------------------------
+  app.get<{ Params: WorkspaceParams }>(
+    '/debt-free-date',
+    { preHandler: requirePermission('account:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+
+      const debtFreeData = await loanService.getDebtFreeDate(workspaceId);
+
+      return reply.send({
+        success: true,
+        data: debtFreeData,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/loans/debt-summary - Get comprehensive debt summary
+  // --------------------------------------------------------------------------
+  app.get<{ Params: WorkspaceParams }>(
+    '/debt-summary',
+    { preHandler: requirePermission('account:read') },
+    async (request, reply) => {
+      const { workspaceId } = request.params;
+
+      const summary = await loanService.getDebtSummary(workspaceId);
+
+      return reply.send({
+        success: true,
+        data: summary,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
   // POST /workspaces/:workspaceId/loans - Create loan
   // --------------------------------------------------------------------------
   app.post<{ Params: WorkspaceParams }>(
@@ -256,6 +292,66 @@ export function loanRoutes(app: FastifyInstance): void {
       return reply.send({
         success: true,
         data: loan,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // POST /workspaces/:workspaceId/loans/:loanId/simulate - Simulate extra payment
+  // --------------------------------------------------------------------------
+  app.post<{ Params: LoanParams; Body: { extraAmount: number; paymentType?: 'monthly' | 'one_time' } }>(
+    '/:loanId/simulate',
+    { preHandler: requirePermission('account:read') },
+    async (request, reply) => {
+      const { workspaceId, loanId } = request.params;
+      const { extraAmount, paymentType = 'monthly' } = request.body;
+
+      const simulation = await loanService.simulateExtraPayment(
+        workspaceId,
+        loanId,
+        extraAmount,
+        paymentType
+      );
+
+      return reply.send({
+        success: true,
+        data: simulation,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/loans/:loanId/amortization - Get amortization schedule
+  // --------------------------------------------------------------------------
+  app.get<{ Params: LoanParams }>(
+    '/:loanId/amortization',
+    { preHandler: requirePermission('account:read') },
+    async (request, reply) => {
+      const { workspaceId, loanId } = request.params;
+
+      const schedule = await loanService.generateAmortizationSchedule(workspaceId, loanId);
+
+      return reply.send({
+        success: true,
+        data: schedule,
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // GET /workspaces/:workspaceId/loans/:loanId/interest - Get total interest calculation
+  // --------------------------------------------------------------------------
+  app.get<{ Params: LoanParams }>(
+    '/:loanId/interest',
+    { preHandler: requirePermission('account:read') },
+    async (request, reply) => {
+      const { workspaceId, loanId } = request.params;
+
+      const interestData = await loanService.calculateTotalInterest(workspaceId, loanId);
+
+      return reply.send({
+        success: true,
+        data: interestData,
       });
     }
   );

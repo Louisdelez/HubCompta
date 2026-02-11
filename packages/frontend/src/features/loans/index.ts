@@ -13,3 +13,5 @@ export { LoanSummary } from './LoanSummary';
 export { LoanSimulator } from './LoanSimulator';
 export { AmortizationTable } from './AmortizationTable';
 export { LoanProgressChart } from './LoanProgressChart';
+export { DebtFreeCalculator } from './DebtFreeCalculator';
+export { DebtOverview } from './DebtOverview';

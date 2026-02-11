@@ -838,6 +838,393 @@ export const smartAlertService = {
       upcomingBills: upcomingBillsCount,
     };
   },
+
+  /**
+   * Check all savings goals progress in a workspace
+   * Returns goals that have reached milestones or are off track
+   */
+  async checkSavingsProgress(
+    workspaceId: string,
+    userId: string
+  ): Promise<{
+    milestonesReached: number;
+    offTrackAlerts: number;
+  }> {
+    let milestonesReached = 0;
+    let offTrackAlerts = 0;
+
+    try {
+      // Get all active savings goals
+      const goals = await prisma.savingsGoal.findMany({
+        where: {
+          workspaceId,
+          deletedAt: null,
+          isCompleted: false,
+        },
+      });
+
+      for (const goal of goals) {
+        // Check milestones
+        const currentAmount = goal.currentAmount.toNumber();
+        const targetAmount = goal.targetAmount.toNumber();
+        const progress = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
+
+        const milestones = [25, 50, 75, 100];
+
+        for (const milestone of milestones) {
+          if (progress >= milestone) {
+            // Check if we already notified for this milestone
+            const existingNotification = await prisma.notification.findFirst({
+              where: {
+                userId,
+                workspaceId,
+                type: 'savings_milestone',
+                data: {
+                  path: ['goalId'],
+                  equals: goal.id,
+                },
+              },
+              orderBy: { createdAt: 'desc' },
+            });
+
+            const lastMilestone = (existingNotification?.data as { milestone?: number })?.milestone ?? 0;
+
+            if (milestone > lastMilestone) {
+              const emoji = milestone === 100 ? '🎉' : milestone === 75 ? '🔥' : milestone === 50 ? '🌟' : '✨';
+
+              await notificationService.create({
+                userId,
+                workspaceId,
+                type: 'savings_milestone',
+                title: `${emoji} ${goal.name}: ${milestone}% atteint !`,
+                message: milestone === 100
+                  ? `Felicitations ! Vous avez atteint votre objectif d'epargne !`
+                  : `Vous avez atteint ${milestone}% de votre objectif "${goal.name}"`,
+                data: {
+                  goalId: goal.id,
+                  goalName: goal.name,
+                  milestone,
+                  currentAmount,
+                  targetAmount,
+                },
+              });
+              milestonesReached++;
+              break;
+            }
+          }
+        }
+
+        // Check if goal is off track (has target date)
+        if (goal.targetDate) {
+          const targetDate = new Date(goal.targetDate);
+          const now = new Date();
+          const daysRemaining = Math.ceil((targetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+          if (daysRemaining > 0) {
+            const remaining = targetAmount - currentAmount;
+            const monthsRemaining = Math.max(1, daysRemaining / 30);
+            const requiredMonthly = remaining / monthsRemaining;
+
+            // Get average monthly contribution (last 6 months)
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+            const contributions = await prisma.savingsContribution.aggregate({
+              where: {
+                savingsGoalId: goal.id,
+                date: { gte: sixMonthsAgo },
+              },
+              _sum: { amount: true },
+            });
+
+            const totalContributed = contributions._sum.amount?.toNumber() ?? 0;
+            const avgMonthly = totalContributed / 6;
+
+            // Warn if significantly off track (contributing less than 50% of required)
+            if (avgMonthly < requiredMonthly * 0.5 && remaining > 100) {
+              // Check if already notified this week
+              const oneWeekAgo = new Date();
+              oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+              const recentNotification = await prisma.notification.findFirst({
+                where: {
+                  userId,
+                  workspaceId,
+                  type: 'savings_off_track',
+                  createdAt: { gte: oneWeekAgo },
+                  data: {
+                    path: ['goalId'],
+                    equals: goal.id,
+                  },
+                },
+              });
+
+              if (!recentNotification) {
+                await notificationService.create({
+                  userId,
+                  workspaceId,
+                  type: 'savings_off_track',
+                  title: `📈 Objectif "${goal.name}" en retard`,
+                  message: `Pour atteindre votre objectif a temps, vous devriez epargner ${requiredMonthly.toFixed(0)} EUR/mois (actuellement ${avgMonthly.toFixed(0)} EUR/mois)`,
+                  data: {
+                    goalId: goal.id,
+                    goalName: goal.name,
+                    required: requiredMonthly,
+                    current: avgMonthly,
+                    daysRemaining,
+                  },
+                });
+                offTrackAlerts++;
+              }
+            }
+          }
+        }
+      }
+
+      logger.info({ workspaceId, milestonesReached, offTrackAlerts }, 'Savings progress check completed');
+    } catch (error) {
+      logger.error({ error, workspaceId }, 'Savings progress check failed');
+      throw error;
+    }
+
+    return { milestonesReached, offTrackAlerts };
+  },
+
+  /**
+   * Check budget status for a workspace
+   * Alerts when budgets are at warning (80%) or exceeded (100%)
+   */
+  async checkBudgetStatus(
+    workspaceId: string,
+    userId: string
+  ): Promise<{
+    warningAlerts: number;
+    exceededAlerts: number;
+  }> {
+    let warningAlerts = 0;
+    let exceededAlerts = 0;
+
+    try {
+      // Get all active budgets
+      const budgets = await prisma.budget.findMany({
+        where: {
+          workspaceId,
+        },
+        include: { category: true },
+      });
+
+      const now = new Date();
+
+      for (const budget of budgets) {
+        // Calculate date range based on period
+        let startDate: Date;
+        let endDate: Date;
+
+        if (budget.period === 'monthly') {
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        } else {
+          startDate = new Date(now.getFullYear(), 0, 1);
+          endDate = new Date(now.getFullYear(), 11, 31);
+        }
+
+        // Get spending for this budget
+        const spending = await prisma.transaction.aggregate({
+          where: {
+            workspaceId,
+            categoryId: budget.categoryId,
+            deletedAt: null,
+            date: { gte: startDate, lte: endDate },
+            amount: { lt: 0 },
+          },
+          _sum: { amount: true },
+        });
+
+        const totalSpent = Math.abs(spending._sum.amount?.toNumber() ?? 0);
+        const budgetAmount = budget.amount.toNumber();
+        const percentUsed = budgetAmount > 0 ? (totalSpent / budgetAmount) * 100 : 0;
+
+        const budgetInfo = {
+          id: budget.id,
+          name: budget.name ?? budget.category.name,
+          categoryName: budget.category.name,
+          amount: budgetAmount,
+          spent: totalSpent,
+        };
+
+        // Check if exceeded (100%+)
+        if (percentUsed >= 100) {
+          // Check if already notified today
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          const recentNotification = await prisma.notification.findFirst({
+            where: {
+              userId,
+              workspaceId,
+              type: 'budget_alert',
+              createdAt: { gte: today },
+              data: {
+                path: ['budgetId'],
+                equals: budget.id,
+              },
+            },
+          });
+
+          if (!recentNotification) {
+            await notificationService.notifyBudgetAlert(
+              userId,
+              workspaceId,
+              budgetInfo,
+              percentUsed,
+              true
+            );
+            exceededAlerts++;
+          }
+        }
+        // Check if warning (80-99%)
+        else if (percentUsed >= 80) {
+          // Check if already notified this week for warning
+          const oneWeekAgo = new Date();
+          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+          const recentNotification = await prisma.notification.findFirst({
+            where: {
+              userId,
+              workspaceId,
+              type: 'budget_warning',
+              createdAt: { gte: oneWeekAgo },
+              data: {
+                path: ['budgetId'],
+                equals: budget.id,
+              },
+            },
+          });
+
+          if (!recentNotification) {
+            await notificationService.notifyBudgetAlert(
+              userId,
+              workspaceId,
+              budgetInfo,
+              percentUsed,
+              false
+            );
+            warningAlerts++;
+          }
+        }
+      }
+
+      logger.info({ workspaceId, warningAlerts, exceededAlerts }, 'Budget status check completed');
+    } catch (error) {
+      logger.error({ error, workspaceId }, 'Budget status check failed');
+      throw error;
+    }
+
+    return { warningAlerts, exceededAlerts };
+  },
+
+  /**
+   * Run all daily checks for a workspace (budgets, savings, bills, balances)
+   */
+  async runDailyChecks(
+    workspaceId: string,
+    userId: string
+  ): Promise<{
+    success: true;
+    budgets: { warnings: number; exceeded: number };
+    savings: { milestones: number; offTrack: number };
+    lowBalances: number;
+    upcomingBills: number;
+  }> {
+    try {
+      // Run budget checks
+      const budgetResults = await this.checkBudgetStatus(workspaceId, userId);
+
+      // Run savings checks
+      const savingsResults = await this.checkSavingsProgress(workspaceId, userId);
+
+      // Run balance checks
+      const lowBalanceAccounts = await this.checkLowBalanceForWorkspace(workspaceId);
+      let lowBalanceCount = 0;
+
+      for (const account of lowBalanceAccounts) {
+        const oneDayAgo = new Date();
+        oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
+        const recentNotification = await prisma.notification.findFirst({
+          where: {
+            userId,
+            workspaceId,
+            type: 'low_balance_warning',
+            createdAt: { gte: oneDayAgo },
+            data: {
+              path: ['accountId'],
+              equals: account.accountId,
+            },
+          },
+        });
+
+        if (!recentNotification) {
+          await notificationService.notifyLowBalance(userId, workspaceId, {
+            id: account.accountId,
+            name: account.accountName,
+            balance: account.balance,
+            threshold: account.threshold,
+          });
+          lowBalanceCount++;
+        }
+      }
+
+      // Run upcoming bills check
+      const upcomingBills = await this.checkUpcomingBills(workspaceId);
+      let upcomingBillsCount = 0;
+
+      for (const bill of upcomingBills) {
+        const existingNotification = await prisma.notification.findFirst({
+          where: {
+            userId,
+            workspaceId,
+            type: 'bill_upcoming',
+            data: {
+              path: ['recurrenceId'],
+              equals: bill.recurrenceId,
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        const lastNotificationData = existingNotification?.data as { dueDate?: string } | null;
+        const alreadyNotified = lastNotificationData?.dueDate === bill.dueDate.toISOString();
+
+        if (!alreadyNotified) {
+          await notificationService.notifyBillUpcoming(userId, workspaceId, bill);
+          upcomingBillsCount++;
+        }
+      }
+
+      logger.info(
+        {
+          workspaceId,
+          budgets: budgetResults,
+          savings: savingsResults,
+          lowBalanceCount,
+          upcomingBillsCount,
+        },
+        'Daily checks completed'
+      );
+
+      return {
+        success: true,
+        budgets: { warnings: budgetResults.warningAlerts, exceeded: budgetResults.exceededAlerts },
+        savings: { milestones: savingsResults.milestonesReached, offTrack: savingsResults.offTrackAlerts },
+        lowBalances: lowBalanceCount,
+        upcomingBills: upcomingBillsCount,
+      };
+    } catch (error) {
+      logger.error({ error, workspaceId }, 'Daily checks failed');
+      throw error;
+    }
+  },
 };
 
 export default smartAlertService;

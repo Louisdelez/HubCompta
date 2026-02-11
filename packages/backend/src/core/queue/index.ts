@@ -148,7 +148,7 @@ export interface PortfolioSnapshotJobData {
 }
 
 export interface SmartNotificationJobData {
-  type: 'weekly_summary' | 'monthly_report' | 'anomaly_detection';
+  type: 'weekly_summary' | 'monthly_report' | 'anomaly_detection' | 'daily_checks';
   workspaceId?: string; // Optional: specific workspace, or all if not set
   userId?: string; // Optional: specific user, or all if not set
 }
@@ -374,6 +374,18 @@ export async function setupScheduledJobs(): Promise<void> {
         pattern: '0 */4 * * *', // Every 4 hours
       },
       jobId: 'scheduled-anomaly-detection',
+    }
+  );
+
+  // Daily checks (budgets, savings, bills, balances) - daily at 7:00 UTC
+  await smartNotificationsQueue.add(
+    'process-daily-checks',
+    { type: 'daily_checks' as const },
+    {
+      repeat: {
+        pattern: '0 7 * * *', // Daily at 7:00 UTC
+      },
+      jobId: 'scheduled-daily-checks',
     }
   );
 

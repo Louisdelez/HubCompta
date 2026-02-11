@@ -20,6 +20,9 @@ import {
   Target,
   DollarSign,
   Loader2,
+  Calendar,
+  Receipt,
+  ChevronRight,
 } from 'lucide-react';
 import {
   BarChart,
@@ -39,6 +42,10 @@ import { useWorkspace } from '@/hooks/useWorkspace';
 import { cn, formatCurrency, formatPercent } from '@/lib/utils';
 import { DateRangePicker, type DateRange } from './DateRangePicker';
 import { ExportDialog, type ExportType } from './ExportDialog';
+import { NetWorthReport } from './NetWorthReport';
+import { YearComparisonReport } from './YearComparisonReport';
+import { CategoryTrendsReport } from './CategoryTrendsReport';
+import { TaxSummaryReport } from './TaxSummaryReport';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -95,6 +102,16 @@ interface SummaryData {
   totalBalance: number;
 }
 
+// Report tabs type
+type ReportTab = 'overview' | 'net-worth' | 'year-comparison' | 'category-trends' | 'tax-summary';
+
+interface ReportTabConfig {
+  id: ReportTab;
+  label: string;
+  icon: React.ReactNode;
+  description: string;
+}
+
 // ----------------------------------------------------------------------------
 // Chart Colors
 // ----------------------------------------------------------------------------
@@ -114,12 +131,47 @@ const CHART_COLORS = [
   'var(--ctp-sky, #89dceb)',
 ];
 
+// Report tabs configuration
+const REPORT_TABS: ReportTabConfig[] = [
+  {
+    id: 'overview',
+    label: 'Vue d\'ensemble',
+    icon: <BarChart3 className="h-4 w-4" />,
+    description: 'Resume mensuel et tendances',
+  },
+  {
+    id: 'net-worth',
+    label: 'Patrimoine',
+    icon: <Wallet className="h-4 w-4" />,
+    description: 'Evolution de votre patrimoine net',
+  },
+  {
+    id: 'year-comparison',
+    label: 'Comparaison annuelle',
+    icon: <Calendar className="h-4 w-4" />,
+    description: 'Comparez annee N vs N-1',
+  },
+  {
+    id: 'category-trends',
+    label: 'Tendances',
+    icon: <TrendingUp className="h-4 w-4" />,
+    description: 'Evolution par categorie',
+  },
+  {
+    id: 'tax-summary',
+    label: 'Resume fiscal',
+    icon: <Receipt className="h-4 w-4" />,
+    description: 'Synthese pour vos impots',
+  },
+];
+
 // ----------------------------------------------------------------------------
 // Component
 // ----------------------------------------------------------------------------
 
 export function ReportsPage() {
   const { currentWorkspace } = useWorkspace();
+  const [activeTab, setActiveTab] = useState<ReportTab>('overview');
   const [dateRange, setDateRange] = useState<DateRange>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
@@ -205,26 +257,26 @@ export function ReportsPage() {
     );
   }
 
-  return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-ctp-text">Rapports</h1>
-          <p className="text-ctp-subtext0">Analysez vos finances en détail</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <DateRangePicker value={dateRange} onChange={setDateRange} />
-          <button
-            onClick={() => setExportType('transactions')}
-            className="px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg hover:bg-ctp-blue/90 flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Exporter
-          </button>
-        </div>
-      </div>
+  // Render the content based on active tab
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'net-worth':
+        return <NetWorthReport />;
+      case 'year-comparison':
+        return <YearComparisonReport />;
+      case 'category-trends':
+        return <CategoryTrendsReport />;
+      case 'tax-summary':
+        return <TaxSummaryReport />;
+      case 'overview':
+      default:
+        return renderOverview();
+    }
+  };
 
+  // Render the overview content (extracted for clarity)
+  const renderOverview = () => (
+    <>
       {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -241,16 +293,16 @@ export function ReportsPage() {
               {getChangeIcon(summary.comparison.incomeChange)}
               <span className={cn('text-sm', getChangeColor(summary.comparison.incomeChange))}>
                 {summary.comparison.incomeChange >= 0 ? '+' : ''}
-                {formatPercent(summary.comparison.incomeChange)} vs mois préc.
+                {formatPercent(summary.comparison.incomeChange)} vs mois prec.
               </span>
             </div>
           </div>
 
-          {/* Dépenses */}
+          {/* Depenses */}
           <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
             <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <TrendingDown className="h-4 w-4" />
-              <span className="text-sm">Dépenses</span>
+              <span className="text-sm">Depenses</span>
             </div>
             <p className="text-2xl font-semibold text-ctp-text">
               {formatCurrency(summary.flow.expenses, 'EUR')}
@@ -259,16 +311,16 @@ export function ReportsPage() {
               {getChangeIcon(-summary.comparison.expenseChange)}
               <span className={cn('text-sm', getChangeColor(summary.comparison.expenseChange, true))}>
                 {summary.comparison.expenseChange >= 0 ? '+' : ''}
-                {formatPercent(summary.comparison.expenseChange)} vs mois préc.
+                {formatPercent(summary.comparison.expenseChange)} vs mois prec.
               </span>
             </div>
           </div>
 
-          {/* Épargne */}
+          {/* Epargne */}
           <div className={cn('border border-ctp-surface1 rounded-lg p-4', summary.flow.net >= 0 ? 'bg-ctp-green/10' : 'bg-ctp-red/10')}>
             <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <Wallet className="h-4 w-4" />
-              <span className="text-sm">Épargne nette</span>
+              <span className="text-sm">Epargne nette</span>
             </div>
             <p className={cn('text-2xl font-semibold', summary.flow.net >= 0 ? 'text-ctp-green' : 'text-ctp-red')}>
               {summary.flow.net >= 0 ? '+' : ''}
@@ -299,7 +351,7 @@ export function ReportsPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-ctp-subtext0" />
-              <h2 className="text-sm font-medium text-ctp-subtext1">Évolution Revenus/Dépenses</h2>
+              <h2 className="text-sm font-medium text-ctp-subtext1">Evolution Revenus/Depenses</h2>
             </div>
             <button
               onClick={() => setExportType('cash_flow')}
@@ -322,13 +374,13 @@ export function ReportsPage() {
                   />
                   <Legend />
                   <Bar dataKey="revenus" name="Revenus" fill="var(--ctp-green, #a6e3a1)" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="depenses" name="Dépenses" fill="var(--ctp-red, #f38ba8)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="depenses" name="Depenses" fill="var(--ctp-red, #f38ba8)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
             <div className="h-64 flex items-center justify-center text-ctp-subtext0">
-              Pas de données disponibles
+              Pas de donnees disponibles
             </div>
           )}
         </div>
@@ -338,7 +390,7 @@ export function ReportsPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <PieChart className="h-4 w-4 text-ctp-subtext0" />
-              <h2 className="text-sm font-medium text-ctp-subtext1">Dépenses par catégorie</h2>
+              <h2 className="text-sm font-medium text-ctp-subtext1">Depenses par categorie</h2>
             </div>
             <button
               onClick={() => setExportType('categories')}
@@ -376,7 +428,7 @@ export function ReportsPage() {
             </div>
           ) : (
             <div className="h-64 flex items-center justify-center text-ctp-subtext0">
-              Pas de données disponibles
+              Pas de donnees disponibles
             </div>
           )}
         </div>
@@ -388,7 +440,7 @@ export function ReportsPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Target className="h-4 w-4 text-ctp-subtext0" />
-              <h2 className="text-sm font-medium text-ctp-subtext1">Budget vs Réalisé</h2>
+              <h2 className="text-sm font-medium text-ctp-subtext1">Budget vs Realise</h2>
             </div>
             <button
               onClick={() => setExportType('budget_report')}
@@ -401,10 +453,10 @@ export function ReportsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-ctp-surface1">
-                  <th className="text-left text-xs font-medium text-ctp-subtext0 py-2">Catégorie</th>
+                  <th className="text-left text-xs font-medium text-ctp-subtext0 py-2">Categorie</th>
                   <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">Budget</th>
-                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">Réalisé</th>
-                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">Écart</th>
+                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">Realise</th>
+                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">Ecart</th>
                   <th className="text-center text-xs font-medium text-ctp-subtext0 py-2">Statut</th>
                 </tr>
               </thead>
@@ -441,7 +493,7 @@ export function ReportsPage() {
                       >
                         {cat.status === 'under' && 'Sous budget'}
                         {cat.status === 'on_track' && 'Dans les clous'}
-                        {cat.status === 'over' && 'Dépassé'}
+                        {cat.status === 'over' && 'Depasse'}
                       </span>
                     </td>
                   </tr>
@@ -479,7 +531,7 @@ export function ReportsPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-ctp-subtext0" />
-              <h2 className="text-sm font-medium text-ctp-subtext1">Flux de trésorerie</h2>
+              <h2 className="text-sm font-medium text-ctp-subtext1">Flux de tresorerie</h2>
             </div>
             <button
               onClick={() => setExportType('cash_flow')}
@@ -496,7 +548,7 @@ export function ReportsPage() {
               </p>
             </div>
             <div className="p-4 bg-ctp-green/10 rounded-lg">
-              <p className="text-xs text-ctp-subtext0 mb-1">Flux opérationnel</p>
+              <p className="text-xs text-ctp-subtext0 mb-1">Flux operationnel</p>
               <p className={cn('text-lg font-semibold', cashFlow.operating.net >= 0 ? 'text-ctp-green' : 'text-ctp-red')}>
                 {cashFlow.operating.net >= 0 ? '+' : ''}
                 {formatCurrency(cashFlow.operating.net, 'EUR')}
@@ -510,7 +562,7 @@ export function ReportsPage() {
               </p>
             </div>
             <div className="p-4 bg-ctp-surface1 rounded-lg">
-              <p className="text-xs text-ctp-subtext0 mb-1">Solde de clôture</p>
+              <p className="text-xs text-ctp-subtext0 mb-1">Solde de cloture</p>
               <p className="text-lg font-semibold text-ctp-text">
                 {formatCurrency(cashFlow.closingBalance, 'EUR')}
               </p>
@@ -518,6 +570,75 @@ export function ReportsPage() {
           </div>
         </div>
       )}
+
+      {/* Quick Access to Advanced Reports */}
+      <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
+        <h2 className="text-sm font-medium text-ctp-subtext1 mb-4">Rapports avances</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {REPORT_TABS.filter(tab => tab.id !== 'overview').map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className="flex items-center gap-3 p-4 bg-ctp-surface1 rounded-lg hover:bg-ctp-surface2 transition-colors text-left group"
+            >
+              <div className="p-2 bg-ctp-blue/10 rounded-lg text-ctp-blue group-hover:bg-ctp-blue/20">
+                {tab.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-ctp-text truncate">{tab.label}</p>
+                <p className="text-xs text-ctp-subtext0 truncate">{tab.description}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-ctp-overlay1 group-hover:text-ctp-text" />
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-ctp-text">Rapports</h1>
+          <p className="text-ctp-subtext0">Analysez vos finances en detail</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {activeTab === 'overview' && (
+            <DateRangePicker value={dateRange} onChange={setDateRange} />
+          )}
+          <button
+            onClick={() => setExportType('transactions')}
+            className="px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg hover:bg-ctp-blue/90 flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Exporter
+          </button>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="flex items-center gap-1 p-1 bg-ctp-surface0 rounded-lg border border-ctp-surface1 overflow-x-auto">
+        {REPORT_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={cn(
+              'flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors',
+              activeTab === tab.id
+                ? 'bg-ctp-surface1 text-ctp-text'
+                : 'text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface1/50'
+            )}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      {renderTabContent()}
 
       {/* Export Dialog */}
       <ExportDialog

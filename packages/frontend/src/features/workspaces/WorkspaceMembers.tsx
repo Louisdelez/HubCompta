@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, Users, Loader2, Wallet, Shield, Eye, Settings, UserPlus } from 'lucide-react';
+import { X, Users, Loader2, Wallet, Shield, Eye, UserPlus } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { SpendingLimitForm } from './SpendingLimitForm';
 import { FamilyInviteModal } from './FamilyInviteModal';
@@ -21,7 +21,7 @@ interface Member {
   userId: string;
   email: string;
   displayName: string;
-  role: 'owner' | 'admin' | 'accountant' | 'member' | 'readonly';
+  role: 'owner' | 'admin' | 'accountant' | 'member' | 'family_member' | 'readonly';
   joinedAt: string;
   // Family sharing fields
   spendingLimit: number | null;
@@ -48,6 +48,7 @@ const ROLE_LABELS: Record<Member['role'], string> = {
   admin: 'Administrateur',
   accountant: 'Comptable',
   member: 'Membre',
+  family_member: 'Membre famille',
   readonly: 'Lecture seule',
 };
 
@@ -56,6 +57,7 @@ const ROLE_COLORS: Record<Member['role'], string> = {
   admin: 'bg-ctp-mauve/20 text-ctp-mauve',
   accountant: 'bg-ctp-green/20 text-ctp-green',
   member: 'bg-ctp-surface1 text-ctp-subtext0',
+  family_member: 'bg-ctp-blue/20 text-ctp-blue',
   readonly: 'bg-ctp-surface0 text-ctp-overlay1',
 };
 
@@ -96,15 +98,6 @@ export function WorkspaceMembers({
     queryKey: ['workspace-members', workspaceId],
     queryFn: () => api.get<Member[]>(`/workspaces/${workspaceId}/members`),
     enabled: !!workspaceId,
-  });
-
-  // Update role mutation
-  const updateRoleMutation = useMutation({
-    mutationFn: ({ memberId, role }: { memberId: string; role: string }) =>
-      api.patch(`/workspaces/${workspaceId}/members/${memberId}`, { role }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['workspace-members', workspaceId] });
-    },
   });
 
   // Update family settings mutation

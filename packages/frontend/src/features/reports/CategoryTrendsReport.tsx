@@ -117,7 +117,7 @@ export function CategoryTrendsReport() {
     queryKey: ['reports', workspaceId, 'category-trends', period],
     queryFn: () =>
       api.get<CategoryTrendsResponse>(
-        `/workspaces/${workspaceId}/reports/category-trends?months=${months}`
+        `/workspaces/${workspaceId}/reports/category-trends-report?months=${months}`
       ),
     enabled: !!workspaceId,
   });

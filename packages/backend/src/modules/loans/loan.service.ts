@@ -68,6 +68,42 @@ export interface LoanSummary {
   creditByCurrency: Record<string, number>;
 }
 
+export interface ExtraPaymentSimulation {
+  newEndDate: Date;
+  originalEndDate: Date;
+  interestSaved: number;
+  monthsReduced: number;
+  newTotalInterest: number;
+  originalTotalInterest: number;
+  newMonthlyPayment: number;
+}
+
+export interface AmortizationRow {
+  month: number;
+  date: Date;
+  payment: number;
+  principal: number;
+  interest: number;
+  balance: number;
+  cumulativeInterest: number;
+  cumulativePrincipal: number;
+}
+
+export interface DebtSummary {
+  totalDebt: number;
+  totalMonthlyPayment: number;
+  projectedDebtFreeDate: Date | null;
+  debtsByType: {
+    loanId: string;
+    name: string;
+    balance: number;
+    monthlyPayment: number;
+    interestRate: number;
+    projectedEndDate: Date | null;
+  }[];
+  totalInterestRemaining: number;
+}
+
 // ----------------------------------------------------------------------------
 // Helper Functions
 // ----------------------------------------------------------------------------
@@ -88,6 +124,74 @@ function convertPaymentDecimalsToNumber(payment: LoanPayment) {
     principal: payment.principal.toNumber(),
     interest: payment.interest.toNumber(),
   };
+}
+
+// ----------------------------------------------------------------------------
+// Loan Service
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// Calculation Helpers
+// ----------------------------------------------------------------------------
+
+/**
+ * Calculate monthly payment for a loan using the standard amortization formula
+ */
+function calculateMonthlyPayment(
+  principal: number,
+  annualRate: number,
+  termMonths: number
+): number {
+  if (annualRate === 0) {
+    return principal / termMonths;
+  }
+  const monthlyRate = annualRate / 12 / 100;
+  return (principal * monthlyRate * Math.pow(1 + monthlyRate, termMonths)) /
+    (Math.pow(1 + monthlyRate, termMonths) - 1);
+}
+
+/**
+ * Calculate remaining months to pay off a loan
+ */
+function calculateRemainingMonths(
+  balance: number,
+  monthlyPayment: number,
+  annualRate: number
+): number {
+  if (balance <= 0) return 0;
+  if (annualRate === 0) {
+    return Math.ceil(balance / monthlyPayment);
+  }
+  const monthlyRate = annualRate / 12 / 100;
+  // n = -ln(1 - r*P/M) / ln(1 + r)
+  const denominator = monthlyPayment - balance * monthlyRate;
+  if (denominator <= 0) return 999; // Payment too low to cover interest
+  return Math.ceil(-Math.log(denominator / monthlyPayment) / Math.log(1 + monthlyRate));
+}
+
+/**
+ * Calculate total interest for remaining loan life
+ */
+function calculateTotalInterestRemaining(
+  balance: number,
+  monthlyPayment: number,
+  annualRate: number,
+  remainingMonths: number
+): number {
+  if (annualRate === 0) return 0;
+
+  let totalInterest = 0;
+  let currentBalance = balance;
+  const monthlyRate = annualRate / 12 / 100;
+
+  for (let i = 0; i < remainingMonths && currentBalance > 0; i++) {
+    const interest = currentBalance * monthlyRate;
+    totalInterest += interest;
+    const principalPaid = Math.min(monthlyPayment - interest, currentBalance);
+    currentBalance -= principalPaid;
+  }
+
+  return totalInterest;
 }
 
 // ----------------------------------------------------------------------------
@@ -448,6 +552,336 @@ export const loanService = {
       creditCount,
       debtByCurrency,
       creditByCurrency,
+    };
+  },
+
+  /**
+   * Simulate the impact of an extra payment on a loan
+   */
+  async simulateExtraPayment(
+    workspaceId: string,
+    loanId: string,
+    extraAmount: number,
+    paymentType: 'monthly' | 'one_time' = 'monthly'
+  ): Promise<ExtraPaymentSimulation> {
+    const loan = await prisma.loan.findFirst({
+      where: {
+        id: loanId,
+        workspaceId,
+        deletedAt: null,
+      },
+    });
+
+    if (!loan) {
+      throw new NotFoundError('Loan', loanId);
+    }
+
+    const balance = loan.currentBalance.toNumber();
+    const interestRate = loan.interestRate?.toNumber() ?? 0;
+    const startDate = loan.startDate;
+    const endDate = loan.endDate;
+
+    // Calculate original term and monthly payment
+    let originalTermMonths: number;
+    let monthlyPayment: number;
+
+    if (endDate) {
+      const monthsDiff = Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (30 * 24 * 60 * 60 * 1000)
+      );
+      originalTermMonths = monthsDiff;
+      monthlyPayment = calculateMonthlyPayment(
+        loan.principalAmount.toNumber(),
+        interestRate,
+        originalTermMonths
+      );
+    } else {
+      // If no end date, assume a 20-year term for simulation purposes
+      originalTermMonths = 240;
+      monthlyPayment = calculateMonthlyPayment(
+        loan.principalAmount.toNumber(),
+        interestRate,
+        originalTermMonths
+      );
+    }
+
+    // Calculate original remaining months from current balance
+    const originalRemainingMonths = calculateRemainingMonths(
+      balance,
+      monthlyPayment,
+      interestRate
+    );
+
+    // Calculate original total interest remaining
+    const originalTotalInterest = calculateTotalInterestRemaining(
+      balance,
+      monthlyPayment,
+      interestRate,
+      originalRemainingMonths
+    );
+
+    // Calculate new scenario based on payment type
+    let newBalance = balance;
+    let newMonthlyPayment = monthlyPayment;
+
+    if (paymentType === 'one_time') {
+      // One-time extra payment reduces the balance
+      newBalance = Math.max(0, balance - extraAmount);
+    } else {
+      // Monthly extra payment increases the monthly payment
+      newMonthlyPayment = monthlyPayment + extraAmount;
+    }
+
+    // Calculate new remaining months
+    const newRemainingMonths = calculateRemainingMonths(
+      newBalance,
+      newMonthlyPayment,
+      interestRate
+    );
+
+    // Calculate new total interest
+    const newTotalInterest = calculateTotalInterestRemaining(
+      newBalance,
+      newMonthlyPayment,
+      interestRate,
+      newRemainingMonths
+    );
+
+    const now = new Date();
+    const originalEndDate = new Date(now);
+    originalEndDate.setMonth(originalEndDate.getMonth() + originalRemainingMonths);
+
+    const newEndDate = new Date(now);
+    newEndDate.setMonth(newEndDate.getMonth() + newRemainingMonths);
+
+    return {
+      originalEndDate,
+      newEndDate,
+      interestSaved: originalTotalInterest - newTotalInterest,
+      monthsReduced: originalRemainingMonths - newRemainingMonths,
+      originalTotalInterest,
+      newTotalInterest,
+      newMonthlyPayment,
+    };
+  },
+
+  /**
+   * Generate full amortization schedule for a loan
+   */
+  async generateAmortizationSchedule(
+    workspaceId: string,
+    loanId: string
+  ): Promise<AmortizationRow[]> {
+    const loan = await prisma.loan.findFirst({
+      where: {
+        id: loanId,
+        workspaceId,
+        deletedAt: null,
+      },
+    });
+
+    if (!loan) {
+      throw new NotFoundError('Loan', loanId);
+    }
+
+    const principalAmount = loan.principalAmount.toNumber();
+    const interestRate = loan.interestRate?.toNumber() ?? 0;
+    const startDate = loan.startDate;
+    const endDate = loan.endDate;
+    const monthlyRate = interestRate / 12 / 100;
+
+    // Calculate term in months
+    let termMonths: number;
+    if (endDate) {
+      termMonths = Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (30 * 24 * 60 * 60 * 1000)
+      );
+    } else {
+      // Default to a reasonable term if not specified
+      termMonths = 240;
+    }
+
+    // Calculate monthly payment
+    const monthlyPayment = calculateMonthlyPayment(principalAmount, interestRate, termMonths);
+
+    const schedule: AmortizationRow[] = [];
+    let balance = principalAmount;
+    let cumulativeInterest = 0;
+    let cumulativePrincipal = 0;
+
+    for (let month = 1; month <= termMonths && balance > 0; month++) {
+      const interest = balance * monthlyRate;
+      const principalPaid = Math.min(monthlyPayment - interest, balance);
+      const actualPayment = principalPaid + interest;
+
+      balance = Math.max(0, balance - principalPaid);
+      cumulativeInterest += interest;
+      cumulativePrincipal += principalPaid;
+
+      const paymentDate = new Date(startDate);
+      paymentDate.setMonth(paymentDate.getMonth() + month - 1);
+
+      schedule.push({
+        month,
+        date: paymentDate,
+        payment: actualPayment,
+        principal: principalPaid,
+        interest,
+        balance,
+        cumulativeInterest,
+        cumulativePrincipal,
+      });
+    }
+
+    return schedule;
+  },
+
+  /**
+   * Calculate total interest over the life of a loan
+   */
+  async calculateTotalInterest(
+    workspaceId: string,
+    loanId: string
+  ): Promise<{ totalInterest: number; totalCost: number; interestRatio: number }> {
+    const schedule = await this.generateAmortizationSchedule(workspaceId, loanId);
+    const loan = await this.getById(workspaceId, loanId);
+
+    if (!loan) {
+      throw new NotFoundError('Loan', loanId);
+    }
+
+    const totalInterest = schedule.reduce((sum, row) => sum + row.interest, 0);
+    const totalCost = loan.principalAmount + totalInterest;
+    const interestRatio = (totalInterest / loan.principalAmount) * 100;
+
+    return {
+      totalInterest,
+      totalCost,
+      interestRatio,
+    };
+  },
+
+  /**
+   * Calculate when all debts will be paid off for a workspace
+   */
+  async getDebtFreeDate(workspaceId: string): Promise<{ date: Date | null; totalMonths: number }> {
+    const loans = await prisma.loan.findMany({
+      where: {
+        workspaceId,
+        deletedAt: null,
+        type: 'debt',
+        currentBalance: { gt: 0 },
+      },
+    });
+
+    if (loans.length === 0) {
+      return { date: new Date(), totalMonths: 0 };
+    }
+
+    let maxMonths = 0;
+
+    for (const loan of loans) {
+      const balance = loan.currentBalance.toNumber();
+      const principalAmount = loan.principalAmount.toNumber();
+      const interestRate = loan.interestRate?.toNumber() ?? 0;
+      const startDate = loan.startDate;
+      const endDate = loan.endDate;
+
+      let termMonths: number;
+      if (endDate) {
+        termMonths = Math.ceil(
+          (endDate.getTime() - startDate.getTime()) / (30 * 24 * 60 * 60 * 1000)
+        );
+      } else {
+        termMonths = 240;
+      }
+
+      const monthlyPayment = calculateMonthlyPayment(principalAmount, interestRate, termMonths);
+      const remainingMonths = calculateRemainingMonths(balance, monthlyPayment, interestRate);
+
+      if (remainingMonths > maxMonths) {
+        maxMonths = remainingMonths;
+      }
+    }
+
+    const debtFreeDate = new Date();
+    debtFreeDate.setMonth(debtFreeDate.getMonth() + maxMonths);
+
+    return {
+      date: debtFreeDate,
+      totalMonths: maxMonths,
+    };
+  },
+
+  /**
+   * Get comprehensive debt summary for a workspace
+   */
+  async getDebtSummary(workspaceId: string): Promise<DebtSummary> {
+    const loans = await prisma.loan.findMany({
+      where: {
+        workspaceId,
+        deletedAt: null,
+        type: 'debt',
+      },
+    });
+
+    let totalDebt = 0;
+    let totalMonthlyPayment = 0;
+    let totalInterestRemaining = 0;
+    const debtsByType: DebtSummary['debtsByType'] = [];
+
+    for (const loan of loans) {
+      const balance = loan.currentBalance.toNumber();
+      const principalAmount = loan.principalAmount.toNumber();
+      const interestRate = loan.interestRate?.toNumber() ?? 0;
+      const startDate = loan.startDate;
+      const endDate = loan.endDate;
+
+      totalDebt += balance;
+
+      let termMonths: number;
+      if (endDate) {
+        termMonths = Math.ceil(
+          (endDate.getTime() - startDate.getTime()) / (30 * 24 * 60 * 60 * 1000)
+        );
+      } else {
+        termMonths = 240;
+      }
+
+      const monthlyPayment = calculateMonthlyPayment(principalAmount, interestRate, termMonths);
+      const remainingMonths = calculateRemainingMonths(balance, monthlyPayment, interestRate);
+      const interestRemaining = calculateTotalInterestRemaining(
+        balance,
+        monthlyPayment,
+        interestRate,
+        remainingMonths
+      );
+
+      totalMonthlyPayment += monthlyPayment;
+      totalInterestRemaining += interestRemaining;
+
+      const projectedEndDate = new Date();
+      projectedEndDate.setMonth(projectedEndDate.getMonth() + remainingMonths);
+
+      debtsByType.push({
+        loanId: loan.id,
+        name: loan.name,
+        balance,
+        monthlyPayment,
+        interestRate,
+        projectedEndDate: balance > 0 ? projectedEndDate : null,
+      });
+    }
+
+    // Get debt-free date
+    const { date: projectedDebtFreeDate } = await this.getDebtFreeDate(workspaceId);
+
+    return {
+      totalDebt,
+      totalMonthlyPayment,
+      projectedDebtFreeDate,
+      debtsByType,
+      totalInterestRemaining,
     };
   },
 };

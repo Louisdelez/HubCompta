@@ -12,3 +12,12 @@ export { NetWorthReport } from './NetWorthReport';
 export { YearComparisonReport } from './YearComparisonReport';
 export { CategoryTrendsReport } from './CategoryTrendsReport';
 export { TaxSummaryReport } from './TaxSummaryReport';
+export {
+  PDFExportButton,
+  NetWorthPDFButton,
+  YearComparisonPDFButton,
+  CategoryTrendsPDFButton,
+  TaxSummaryPDFButton,
+  CashFlowPDFButton,
+} from './PDFExportButton';
+export type { PDFReportType } from './PDFExportButton';

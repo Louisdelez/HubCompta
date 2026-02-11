@@ -181,6 +181,50 @@ async function processSmartNotificationJob(job: Job<SmartNotificationJobData>): 
         break;
       }
 
+      case 'daily_checks': {
+        // If specific workspace provided, process only that one
+        if (workspaceId && userId) {
+          const result = await smartAlertService.runDailyChecks(workspaceId, userId);
+          logger.info(
+            { workspaceId, ...result },
+            'Daily checks complete for workspace'
+          );
+        } else {
+          // Process all active workspaces
+          const workspaces = await prisma.workspace.findMany({
+            where: { deletedAt: null },
+            include: {
+              memberships: {
+                where: { role: 'owner' },
+                take: 1,
+              },
+            },
+          });
+
+          let processed = 0;
+          let failed = 0;
+
+          for (const workspace of workspaces) {
+            const owner = workspace.memberships[0];
+            if (!owner) continue;
+
+            try {
+              await smartAlertService.runDailyChecks(workspace.id, owner.userId);
+              processed++;
+            } catch (error) {
+              logger.error(
+                { error, workspaceId: workspace.id },
+                'Failed to run daily checks for workspace'
+              );
+              failed++;
+            }
+          }
+
+          logger.info({ processed, failed }, 'Daily checks complete for all workspaces');
+        }
+        break;
+      }
+
       default:
         logger.warn({ type }, 'Unknown smart notification type');
     }

@@ -190,6 +190,10 @@ export const ROLE_DESCRIPTIONS: Record<MembershipRole, { name: string; descripti
     name: 'Membre',
     description: 'Peut ajouter des transactions et documents',
   },
+  family_member: {
+    name: 'Membre familial',
+    description: 'Acces limite avec controles de depenses',
+  },
   readonly: {
     name: 'Lecture seule',
     description: 'Consultation uniquement',

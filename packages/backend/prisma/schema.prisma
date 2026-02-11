@@ -206,6 +206,8 @@ model Membership {
   spendingLimit     Decimal?       @map("spending_limit") @db.Decimal(19, 4)
   approvalRequired  Boolean        @default(false) @map("approval_required")
   visibleCategories String[]       @map("visible_categories")
+  // Member-specific settings (notification preferences, etc.)
+  settings          Json           @default("{}")
   createdAt         DateTime       @default(now()) @map("created_at")
   updatedAt         DateTime       @updatedAt @map("updated_at")
 
@@ -223,6 +225,7 @@ enum MembershipRole {
   admin
   accountant
   member
+  family_member
   readonly
 }
 

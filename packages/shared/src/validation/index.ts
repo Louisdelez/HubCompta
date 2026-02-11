@@ -126,7 +126,7 @@ export const workspaceUpdateSchema = z.object({
   }).optional(),
 });
 
-export const memberRoleSchema = z.enum(['owner', 'admin', 'accountant', 'member', 'readonly']);
+export const memberRoleSchema = z.enum(['owner', 'admin', 'accountant', 'member', 'family_member', 'readonly']);
 
 export const memberInviteSchema = z.object({
   email: emailSchema,

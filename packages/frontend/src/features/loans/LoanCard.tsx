@@ -4,8 +4,19 @@
 // Uses Catppuccin colors: red for debts, green for credits
 // ============================================================================
 
+import { useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Pencil, Trash2, DollarSign, Eye, Building2, User } from 'lucide-react';
+import {
+  Pencil,
+  Trash2,
+  DollarSign,
+  Eye,
+  Building2,
+  User,
+  Calculator,
+  Calendar,
+  TrendingUp,
+} from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -48,6 +59,7 @@ interface LoanCardProps {
   onEdit: () => void;
   onViewDetails: () => void;
   onAddPayment: () => void;
+  onSimulate?: () => void;
 }
 
 // ----------------------------------------------------------------------------
@@ -73,15 +85,121 @@ function formatDate(dateStr: string): string {
 // Component
 // ----------------------------------------------------------------------------
 
+// ----------------------------------------------------------------------------
+// Calculation Helpers
+// ----------------------------------------------------------------------------
+
+function calculateMonthlyPayment(
+  principal: number,
+  annualRate: number,
+  termMonths: number
+): number {
+  if (annualRate === 0 || termMonths === 0) {
+    return termMonths > 0 ? principal / termMonths : 0;
+  }
+  const monthlyRate = annualRate / 12 / 100;
+  return (principal * monthlyRate * Math.pow(1 + monthlyRate, termMonths)) /
+    (Math.pow(1 + monthlyRate, termMonths) - 1);
+}
+
+function calculateRemainingMonths(
+  balance: number,
+  monthlyPayment: number,
+  annualRate: number
+): number {
+  if (balance <= 0) return 0;
+  if (monthlyPayment <= 0) return 999;
+  if (annualRate === 0) {
+    return Math.ceil(balance / monthlyPayment);
+  }
+  const monthlyRate = annualRate / 12 / 100;
+  const denominator = monthlyPayment - balance * monthlyRate;
+  if (denominator <= 0) return 999;
+  return Math.ceil(-Math.log(denominator / monthlyPayment) / Math.log(1 + monthlyRate));
+}
+
+function calculateTotalInterest(
+  balance: number,
+  monthlyPayment: number,
+  annualRate: number,
+  remainingMonths: number
+): number {
+  if (annualRate === 0) return 0;
+  let totalInterest = 0;
+  let currentBalance = balance;
+  const monthlyRate = annualRate / 12 / 100;
+
+  for (let i = 0; i < remainingMonths && currentBalance > 0; i++) {
+    const interest = currentBalance * monthlyRate;
+    totalInterest += interest;
+    const principalPaid = Math.min(monthlyPayment - interest, currentBalance);
+    currentBalance -= principalPaid;
+  }
+
+  return totalInterest;
+}
+
+// ----------------------------------------------------------------------------
+// Component
+// ----------------------------------------------------------------------------
+
 export function LoanCard({
   loan,
   workspaceId,
   onEdit,
   onViewDetails,
   onAddPayment,
+  onSimulate,
 }: LoanCardProps) {
   const queryClient = useQueryClient();
   const isDebt = loan.type === 'debt';
+
+  // Calculate loan statistics
+  const loanStats = useMemo(() => {
+    const startDate = new Date(loan.startDate);
+    const endDate = loan.endDate ? new Date(loan.endDate) : null;
+    const interestRate = loan.interestRate ?? 0;
+
+    // Calculate term in months
+    let termMonths = 0;
+    if (endDate) {
+      termMonths = Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (30 * 24 * 60 * 60 * 1000)
+      );
+    } else {
+      termMonths = 240; // Default 20 years
+    }
+
+    const monthlyPayment = calculateMonthlyPayment(
+      loan.principalAmount,
+      interestRate,
+      termMonths
+    );
+
+    const remainingMonths = calculateRemainingMonths(
+      loan.currentBalance,
+      monthlyPayment,
+      interestRate
+    );
+
+    const totalInterestRemaining = calculateTotalInterest(
+      loan.currentBalance,
+      monthlyPayment,
+      interestRate,
+      remainingMonths
+    );
+
+    const projectedEndDate = new Date();
+    projectedEndDate.setMonth(projectedEndDate.getMonth() + remainingMonths);
+
+    return {
+      monthlyPayment,
+      remainingMonths,
+      totalInterestRemaining,
+      projectedEndDate,
+      termMonths,
+    };
+  }, [loan]);
 
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/workspaces/${workspaceId}/loans/${loan.id}`),
@@ -168,19 +286,59 @@ export function LoanCard({
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-2 text-sm mb-4">
         <div className="bg-ctp-surface0 rounded-lg p-2 text-center">
-          <p className="text-ctp-subtext0">Paiements</p>
+          <p className="text-ctp-subtext0 text-xs">Paiements</p>
           <p className="font-semibold text-ctp-text">{loan.paymentCount}</p>
         </div>
         <div className="bg-ctp-surface0 rounded-lg p-2 text-center">
-          <p className="text-ctp-subtext0">Interets payes</p>
+          <p className="text-ctp-subtext0 text-xs">Interets payes</p>
           <p className="font-semibold text-ctp-yellow">
             {formatCurrency(loan.totalInterestPaid, loan.currency)}
           </p>
         </div>
       </div>
+
+      {/* Enhanced Stats */}
+      {loan.interestRate !== null && loan.interestRate > 0 && (
+        <div className="grid grid-cols-3 gap-2 text-xs mb-4">
+          <div className="bg-ctp-surface0/50 rounded-lg p-2 text-center">
+            <Calendar className="w-3 h-3 mx-auto text-ctp-overlay1 mb-1" />
+            <p className="text-ctp-subtext0">Mois restants</p>
+            <p className="font-medium text-ctp-text">
+              {loanStats.remainingMonths < 999 ? loanStats.remainingMonths : '?'}
+            </p>
+          </div>
+          <div className="bg-ctp-surface0/50 rounded-lg p-2 text-center">
+            <DollarSign className="w-3 h-3 mx-auto text-ctp-overlay1 mb-1" />
+            <p className="text-ctp-subtext0">Mensualite</p>
+            <p className="font-medium text-ctp-text">
+              {formatCurrency(loanStats.monthlyPayment, loan.currency)}
+            </p>
+          </div>
+          <div className="bg-ctp-surface0/50 rounded-lg p-2 text-center">
+            <TrendingUp className="w-3 h-3 mx-auto text-ctp-overlay1 mb-1" />
+            <p className="text-ctp-subtext0">Interets a venir</p>
+            <p className="font-medium text-ctp-yellow">
+              {formatCurrency(loanStats.totalInterestRemaining, loan.currency)}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Projected End Date */}
+      {loan.interestRate !== null && loan.interestRate > 0 && loanStats.remainingMonths < 999 && (
+        <div className="flex items-center justify-between text-xs text-ctp-subtext0 mb-4 px-1">
+          <span>Fin prevue:</span>
+          <span className="font-medium text-ctp-text">
+            {new Intl.DateTimeFormat('fr-FR', {
+              month: 'short',
+              year: 'numeric',
+            }).format(loanStats.projectedEndDate)}
+          </span>
+        </div>
+      )}
 
       {/* Dates */}
       <div className="text-xs text-ctp-subtext0 mb-4">
@@ -207,6 +365,15 @@ export function LoanCard({
         >
           <Eye className="w-4 h-4" /> Details
         </button>
+        {onSimulate && loan.interestRate !== null && loan.interestRate > 0 && (
+          <button
+            onClick={onSimulate}
+            className="btn-ghost text-sm p-2 hover:bg-ctp-blue/10 hover:text-ctp-blue"
+            title="Simuler un remboursement anticipe"
+          >
+            <Calculator className="w-4 h-4" />
+          </button>
+        )}
         <button
           onClick={onEdit}
           className="btn-ghost text-sm p-2"

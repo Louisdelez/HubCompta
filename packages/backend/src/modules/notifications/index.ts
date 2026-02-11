@@ -6,6 +6,7 @@ export { notificationService } from './notification.service.js';
 export { alertService } from './alert.service.js';
 export { smartAlertService } from './smart-alert.service.js';
 export { summaryService } from './summary.service.js';
+export { insightsService } from './insights.service.js';
 export type {
   CreateNotificationInput,
   NotificationFilters,
@@ -29,3 +30,8 @@ export type {
   WeeklySummary,
   MonthlySummary,
 } from './summary.service.js';
+export type {
+  Insight,
+  InsightType,
+  InsightSeverity,
+} from './insights.service.js';

@@ -33,7 +33,9 @@ type InsightType =
   | 'weekly_summary'
   | 'monthly_report'
   | 'low_balance_warning'
-  | 'bill_upcoming';
+  | 'bill_upcoming'
+  | 'savings_milestone'
+  | 'savings_off_track';
 
 interface Insight {
   id: string;
@@ -68,6 +70,8 @@ const insightTypeConfig: Record<
   monthly_report: { icon: BarChart3, color: 'text-ctp-sapphire', bgColor: 'bg-ctp-sapphire/20' },
   low_balance_warning: { icon: Wallet, color: 'text-ctp-maroon', bgColor: 'bg-ctp-maroon/20' },
   bill_upcoming: { icon: Receipt, color: 'text-ctp-flamingo', bgColor: 'bg-ctp-flamingo/20' },
+  savings_milestone: { icon: Sparkles, color: 'text-ctp-green', bgColor: 'bg-ctp-green/20' },
+  savings_off_track: { icon: AlertTriangle, color: 'text-ctp-yellow', bgColor: 'bg-ctp-yellow/20' },
 };
 
 const severityColors: Record<Insight['severity'], string> = {
@@ -285,6 +289,37 @@ export function SmartInsightCard({ compact = false, limit = 5 }: SmartInsightCar
                           : (insight.data.daysUntilDue as number) === 1
                           ? 'Demain'
                           : `Dans ${insight.data.daysUntilDue} jours`}
+                      </span>
+                    </div>
+                  )}
+
+                  {insight.type === 'savings_milestone' && insight.data && (
+                    <div className="flex items-center gap-3 mt-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-ctp-subtext0">Progres:</span>
+                        <span className="text-sm font-semibold text-ctp-green">
+                          {insight.data.milestone as number}%
+                        </span>
+                      </div>
+                      <div className="flex-1 h-2 bg-ctp-surface0 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-ctp-green rounded-full transition-all"
+                          style={{ width: `${insight.data.milestone as number}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {insight.type === 'savings_off_track' && insight.data && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-ctp-subtext0">Requis:</span>
+                      <span className="text-sm font-semibold text-ctp-yellow">
+                        {formatCurrency((insight.data.required as number) ?? 0)}/mois
+                      </span>
+                      <span className="text-xs text-ctp-subtext0">|</span>
+                      <span className="text-xs text-ctp-subtext0">Actuel:</span>
+                      <span className="text-sm text-ctp-text">
+                        {formatCurrency((insight.data.current as number) ?? 0)}/mois
                       </span>
                     </div>
                   )}

@@ -59,7 +59,8 @@ export type WidgetType =
   | 'spending'
   | 'quick-actions'
   | 'monthly-summary'
-  | 'portfolio';
+  | 'portfolio'
+  | 'family-overview';
 
 // ----------------------------------------------------------------------------
 // Lazy-loaded Widget Components
@@ -75,6 +76,7 @@ const SpendingWidget = lazy(() => import('./SpendingWidget'));
 const QuickActionsWidget = lazy(() => import('./QuickActionsWidget'));
 const MonthlySummaryWidget = lazy(() => import('./MonthlySummaryWidget'));
 const PortfolioWidget = lazy(() => import('./PortfolioWidget'));
+const FamilyOverviewWidget = lazy(() => import('./FamilyOverviewWidget'));
 
 // ----------------------------------------------------------------------------
 // Widget Registry
@@ -170,6 +172,15 @@ export const WIDGET_REGISTRY: Record<WidgetType, WidgetDefinition> = {
     category: 'invest',
     defaultSize: { w: 4, h: 3, minW: 3, minH: 2, maxW: 6, maxH: 4 },
     Component: PortfolioWidget,
+  },
+  'family-overview': {
+    type: 'family-overview',
+    name: 'Vue famille',
+    description: 'Resume du partage familial et approbations',
+    icon: 'users',
+    category: 'finance',
+    defaultSize: { w: 4, h: 4, minW: 3, minH: 3, maxW: 6, maxH: 5 },
+    Component: FamilyOverviewWidget,
   },
 };
 

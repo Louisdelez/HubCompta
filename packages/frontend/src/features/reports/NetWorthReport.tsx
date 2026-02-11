@@ -133,7 +133,7 @@ export function NetWorthReport() {
     queryKey: ['reports', workspaceId, 'net-worth', period],
     queryFn: () =>
       api.get<NetWorthResponse>(
-        `/workspaces/${workspaceId}/reports/net-worth?months=${months}`
+        `/workspaces/${workspaceId}/reports/net-worth-report?months=${months}`
       ),
     enabled: !!workspaceId,
   });
