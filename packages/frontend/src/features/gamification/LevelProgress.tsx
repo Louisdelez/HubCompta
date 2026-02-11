@@ -26,11 +26,15 @@ function getTotalXpForLevel(level: number): number {
 }
 
 export function LevelProgress({
-  level,
-  totalXp,
-  currentStreak = 0,
+  level: rawLevel,
+  totalXp: rawTotalXp,
+  currentStreak: rawCurrentStreak = 0,
   compact = false,
 }: LevelProgressProps) {
+  // Ensure values are valid numbers
+  const level = Number.isFinite(rawLevel) && rawLevel > 0 ? rawLevel : 1;
+  const totalXp = Number.isFinite(rawTotalXp) ? rawTotalXp : 0;
+  const currentStreak = Number.isFinite(rawCurrentStreak) ? rawCurrentStreak : 0;
   const xpForCurrentLevel = getXpForLevel(level);
   const totalXpForCurrentLevel = getTotalXpForLevel(level);
   const xpInCurrentLevel = totalXp - totalXpForCurrentLevel;

@@ -14,11 +14,14 @@ interface StreakCounterProps {
 }
 
 export function StreakCounter({
-  currentStreak,
-  longestStreak,
+  currentStreak: rawCurrentStreak,
+  longestStreak: rawLongestStreak,
   lastActivityDate,
   compact = false,
 }: StreakCounterProps) {
+  // Ensure streak values are valid numbers
+  const currentStreak = Number.isFinite(rawCurrentStreak) ? rawCurrentStreak : 0;
+  const longestStreak = Number.isFinite(rawLongestStreak) ? rawLongestStreak : 0;
   const isActive = lastActivityDate
     ? new Date(lastActivityDate).toDateString() === new Date().toDateString()
     : false;

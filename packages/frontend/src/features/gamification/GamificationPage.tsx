@@ -73,13 +73,13 @@ export function GamificationPage() {
           {stats && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <LevelProgress
-                level={stats.level}
-                totalXp={stats.totalXp}
-                currentStreak={stats.currentStreak}
+                level={stats.level ?? 1}
+                totalXp={stats.totalXp ?? 0}
+                currentStreak={stats.currentStreak ?? 0}
               />
               <StreakCounter
-                currentStreak={stats.currentStreak}
-                longestStreak={stats.longestStreak}
+                currentStreak={stats.currentStreak ?? 0}
+                longestStreak={stats.longestStreak ?? 0}
               />
             </div>
           )}
@@ -91,19 +91,19 @@ export function GamificationPage() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center p-3 bg-ctp-surface0 rounded-lg">
                   <p className="text-2xl font-bold text-ctp-text">
-                    {stats.transactionCount}
+                    {stats.transactionCount ?? 0}
                   </p>
                   <p className="text-sm text-ctp-subtext0">Transactions</p>
                 </div>
                 <div className="text-center p-3 bg-ctp-surface0 rounded-lg">
                   <p className="text-2xl font-bold text-ctp-green">
-                    {stats.budgetsOnTrack}
+                    {stats.budgetsOnTrack ?? 0}
                   </p>
                   <p className="text-sm text-ctp-subtext0">Budgets respectes</p>
                 </div>
                 <div className="text-center p-3 bg-ctp-surface0 rounded-lg">
                   <p className="text-2xl font-bold text-ctp-yellow">
-                    {stats.goalsCompleted}
+                    {stats.goalsCompleted ?? 0}
                   </p>
                   <p className="text-sm text-ctp-subtext0">Objectifs atteints</p>
                 </div>
