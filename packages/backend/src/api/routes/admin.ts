@@ -10,7 +10,7 @@ import { storageClient } from '../../core/storage/s3.js';
 import { getBackupQueue } from '../../core/queue/index.js';
 import { authGuard } from '../../core/auth/authGuard.js';
 import { logger } from '../../core/middleware/logger.js';
-import { cacheService, CACHE_KEYS } from '../../core/cache/index.js';
+import { cacheService } from '../../core/cache/index.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -502,12 +502,13 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
               await cacheService.invalidateExchangeRates();
               clearedCount = 1;
               break;
-            case 'all':
+            case 'all': {
               const userCleared = await cacheService.delPattern('user:*');
               const workspaceCleared = await cacheService.delPattern('workspace:*');
               const globalCleared = await cacheService.delPattern('global:*');
               clearedCount = userCleared + workspaceCleared + globalCleared;
               break;
+            }
             default:
               return reply.status(400).send({
                 error: 'Invalid cache type',

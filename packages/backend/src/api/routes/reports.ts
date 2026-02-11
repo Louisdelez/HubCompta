@@ -14,7 +14,7 @@ import { balanceService } from '@/modules/accounts/balance.service.js';
 import { accountService } from '@/modules/accounts/account.service.js';
 import { authGuard } from '@/core/auth/authGuard.js';
 import { workspaceContextMiddleware, requirePermission } from '@/core/middleware/workspaceContext.js';
-import { pdfReportRateLimit, exportRateLimit } from '@/core/middleware/rateLimit.js';
+import { pdfReportRateLimit } from '@/core/middleware/rateLimit.js';
 import { prisma } from '@/core/database/client.js';
 
 // ----------------------------------------------------------------------------

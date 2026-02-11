@@ -335,21 +335,21 @@ export const insightsService = {
   getActionUrl(notificationType: string, data: Record<string, unknown> | null): string | undefined {
     switch (notificationType) {
       case 'unusual_spending':
-        return data?.transactionId ? `/transactions/${data.transactionId}` : '/transactions';
+        return data?.transactionId ? `/transactions/${String(data.transactionId)}` : '/transactions';
       case 'weekly_summary':
         return '/dashboard';
       case 'monthly_report':
         return '/reports';
       case 'low_balance_warning':
-        return data?.accountId ? `/accounts/${data.accountId}` : '/accounts';
+        return data?.accountId ? `/accounts/${String(data.accountId)}` : '/accounts';
       case 'bill_upcoming':
         return '/recurrences';
       case 'budget_alert':
       case 'budget_warning':
-        return data?.budgetId ? `/budgets/${data.budgetId}` : '/budgets';
+        return data?.budgetId ? `/budgets/${String(data.budgetId)}` : '/budgets';
       case 'savings_milestone':
       case 'savings_off_track':
-        return data?.goalId ? `/savings/${data.goalId}` : '/savings';
+        return data?.goalId ? `/savings/${String(data.goalId)}` : '/savings';
       default:
         return undefined;
     }

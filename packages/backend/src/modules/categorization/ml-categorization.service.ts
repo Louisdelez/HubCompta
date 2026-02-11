@@ -4,7 +4,6 @@
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
-import { Decimal } from '@prisma/client/runtime/library';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -199,7 +198,7 @@ export const mlCategorizationService = {
   async findPatternMatches(
     workspaceId: string,
     description: string,
-    tokens: string[]
+    _tokens: string[]
   ): Promise<PatternMatch[]> {
     const patterns = await prisma.categoryPattern.findMany({
       where: { workspaceId },

@@ -6,7 +6,7 @@
 import { prisma } from '@/core/database/client.js';
 import type { Notification, NotificationType, ChannelType } from '@prisma/client';
 import { logger } from '@/core/middleware/logger.js';
-import { emailService, notificationPreferencesService } from '@/core/email/index.js';
+import { emailService } from '@/core/email/index.js';
 import { whatsappService } from './whatsapp.service.js';
 import { smsService } from './sms.service.js';
 import { discordService } from './discord.service.js';
@@ -342,7 +342,7 @@ export const notificationDispatcherService = {
     code: string
   ): Promise<{ success: boolean; error?: string }> {
     switch (channelType) {
-      case 'email':
+      case 'email': {
         if (!emailService.isConfigured()) {
           return { success: false, error: 'Email service not configured' };
         }
@@ -353,24 +353,28 @@ export const notificationDispatcherService = {
           text: `Votre code de verification HubCompta est: ${code}\n\nCe code expire dans 15 minutes.`,
         });
         return { success: emailResult.success, error: emailResult.error };
+      }
 
-      case 'whatsapp':
+      case 'whatsapp': {
         if (!whatsappService.isConfigured()) {
           return { success: false, error: 'WhatsApp service not configured' };
         }
         const whatsappResult = await whatsappService.sendVerificationCode(target, code);
         return { success: whatsappResult.success, error: whatsappResult.error };
+      }
 
-      case 'sms':
+      case 'sms': {
         if (!smsService.isConfigured()) {
           return { success: false, error: 'SMS service not configured' };
         }
         const smsResult = await smsService.sendVerificationCode(target, code);
         return { success: smsResult.success, error: smsResult.error };
+      }
 
-      case 'discord':
+      case 'discord': {
         const discordResult = await discordService.sendVerificationCode(target, code);
         return { success: discordResult.success, error: discordResult.error };
+      }
 
       default:
         return { success: false, error: `Unknown channel type: ${channelType}` };

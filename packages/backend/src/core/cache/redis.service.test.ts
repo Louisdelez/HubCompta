@@ -2,7 +2,7 @@
 // REDIS CACHE SERVICE TESTS - Finance Hub
 // ============================================================================
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 // Mock Redis before importing the service
 vi.mock('ioredis', () => {

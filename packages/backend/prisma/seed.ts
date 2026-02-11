@@ -298,7 +298,7 @@ async function seedDemoData() {
   // Create demo transactions for the last 3 months
   console.log('  Creating demo transactions...');
   const today = new Date();
-  const threeMonthsAgo = subMonths(today, 3);
+  const _threeMonthsAgo = subMonths(today, 3);
 
   const transactions: Array<{
     workspaceId: string;

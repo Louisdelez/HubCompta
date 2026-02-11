@@ -311,7 +311,7 @@ export function trackSlowQuery(
  * Capture an exception with additional context
  */
 export function captureException(
-  error: Error | unknown,
+  error: unknown,
   context?: {
     tags?: Record<string, string>;
     extra?: Record<string, unknown>;

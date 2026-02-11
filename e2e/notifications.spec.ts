@@ -15,7 +15,7 @@ class NotificationsPage {
 
   async openNotificationBell() {
     // Click on the notification bell in the header/nav
-    const bellButton = this.page.locator('button').filter({
+    const _bellButton = this.page.locator('button').filter({
       has: this.page.locator('svg'),
     }).filter({
       hasText: /^$/,
@@ -173,7 +173,7 @@ class NotificationChannelsPage {
 // Page Object: Notification Preferences
 // ----------------------------------------------------------------------------
 
-class NotificationPreferencesPage {
+class _NotificationPreferencesPage {
   constructor(private page: Page) {}
 
   async goto() {
@@ -272,7 +272,7 @@ test.describe('Viewing Notifications', () => {
     // If there are notifications, they may be grouped by category
     await page.waitForTimeout(500);
 
-    const categories = ['Alertes', 'Epargne', 'Resumes', 'Recurrences', 'Autres'];
+    const _categories = ['Alertes', 'Epargne', 'Resumes', 'Recurrences', 'Autres'];
     // Just verify the panel opened - categories depend on having notifications
     expect(true).toBe(true);
   });
@@ -310,7 +310,7 @@ test.describe('Viewing Notifications', () => {
     // If there are notifications with delete buttons
     const deleteButton = page.locator('button:has(svg.lucide-x), button:has(svg[class*="x"])').first();
     if (await deleteButton.isVisible()) {
-      const initialCount = await page.locator('[class*="border-l-4"]').count();
+      const _initialCount = await page.locator('[class*="border-l-4"]').count();
       await deleteButton.click();
       await page.waitForTimeout(500);
       // Count should decrease or notification should disappear
@@ -525,14 +525,14 @@ test.describe('Notification Preferences', () => {
 
     if ((await toggleButtons.count()) > 0) {
       const firstToggle = toggleButtons.first();
-      const initialClasses = await firstToggle.getAttribute('class');
+      const _initialClasses = await firstToggle.getAttribute('class');
 
       // Click to toggle
       await firstToggle.click();
       await page.waitForTimeout(500);
 
       // Classes should change (color change indicates toggle)
-      const newClasses = await firstToggle.getAttribute('class');
+      const _newClasses = await firstToggle.getAttribute('class');
       // Either classes changed or action was processed
       expect(true).toBe(true);
     }
@@ -658,7 +658,7 @@ test.describe('Notification Navigation', () => {
     // If there are notifications with action buttons
     const actionButton = page.locator('button:has-text("Voir"), a:has-text("Voir")').first();
     if (await actionButton.isVisible()) {
-      const currentUrl = page.url();
+      const _currentUrl = page.url();
       await actionButton.click();
       await page.waitForTimeout(500);
       // URL should change or navigation should occur

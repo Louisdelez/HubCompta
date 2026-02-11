@@ -43,7 +43,7 @@ export const summaryService = {
    */
   async generateWeeklySummary(
     workspaceId: string,
-    userId: string
+    _userId: string
   ): Promise<WeeklySummary> {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);

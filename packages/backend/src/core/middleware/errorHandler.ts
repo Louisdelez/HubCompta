@@ -5,7 +5,6 @@
 import type { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
 import {
-  Sentry,
   sentryErrorHandler,
   addBreadcrumb,
   isSentryEnabled,

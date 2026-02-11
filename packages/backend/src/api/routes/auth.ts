@@ -20,7 +20,6 @@ import {
 import {
   loginRateLimit,
   registerRateLimit,
-  forgotPasswordRateLimit,
   sensitiveRateLimit,
 } from '@/core/middleware/rateLimit.js';
 import {

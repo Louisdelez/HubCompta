@@ -40,7 +40,7 @@ interface NordigenRequisition {
   accounts: string[];
 }
 
-interface NordigenAccount {
+interface _NordigenAccount {
   id: string;
   iban: string;
   institution_id: string;

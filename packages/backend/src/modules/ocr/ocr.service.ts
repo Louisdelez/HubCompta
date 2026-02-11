@@ -66,17 +66,17 @@ const KNOWN_MERCHANTS: Record<string, string[]> = {
 };
 
 // French date patterns (DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY)
-const DATE_PATTERNS = [
-  /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/g, // DD/MM/YYYY or DD/MM/YY
+const _DATE_PATTERNS = [
+  /(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})/g, // DD/MM/YYYY or DD/MM/YY
   /(\d{1,2})\s+(janvier|fevrier|février|mars|avril|mai|juin|juillet|aout|août|septembre|octobre|novembre|decembre|décembre)\s+(\d{2,4})/gi,
 ];
 
 // French/European amount patterns
-const AMOUNT_PATTERNS = [
-  /(?:total|ttc|a\s*payer|net|montant|somme)[\s:]*(\d+[\.,]\d{2})\s*(?:€|eur|euros?)?/gi,
-  /(\d+[\.,]\d{2})\s*(?:€|eur|euros?)\s*(?:total|ttc)?/gi,
-  /(?:€|eur)\s*(\d+[\.,]\d{2})/gi,
-  /(\d{1,4}[\.,]\d{2})\s*$/gm, // Amount at end of line
+const _AMOUNT_PATTERNS = [
+  /(?:total|ttc|a\s*payer|net|montant|somme)[\s:]*(\d+[.,]\d{2})\s*(?:€|eur|euros?)?/gi,
+  /(\d+[.,]\d{2})\s*(?:€|eur|euros?)\s*(?:total|ttc)?/gi,
+  /(?:€|eur)\s*(\d+[.,]\d{2})/gi,
+  /(\d{1,4}[.,]\d{2})\s*$/gm, // Amount at end of line
 ];
 
 // ----------------------------------------------------------------------------
@@ -223,7 +223,7 @@ export const ocrService = {
    */
   parseDate(text: string): Date | null {
     // Try numeric date patterns
-    const numericMatch = text.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+    const numericMatch = text.match(/(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})/);
     if (numericMatch) {
       const day = parseInt(numericMatch[1] as string, 10);
       const month = parseInt(numericMatch[2] as string, 10);
@@ -288,8 +288,8 @@ export const ocrService = {
 
     // Priority 1: Look for explicit "total" or "a payer" amounts
     const totalPatterns = [
-      /(?:total|ttc|a\s*payer|net\s*a\s*payer|montant\s*total|somme\s*due)[\s:]*(\d+[\.,]\d{2})/gi,
-      /(\d+[\.,]\d{2})\s*(?:€|eur)?\s*(?:total|ttc)/gi,
+      /(?:total|ttc|a\s*payer|net\s*a\s*payer|montant\s*total|somme\s*due)[\s:]*(\d+[.,]\d{2})/gi,
+      /(\d+[.,]\d{2})\s*(?:€|eur)?\s*(?:total|ttc)/gi,
     ];
 
     for (const pattern of totalPatterns) {
@@ -307,7 +307,7 @@ export const ocrService = {
     }
 
     // Priority 2: Look for amounts with euro symbol
-    const euroPattern = /(\d+[\.,]\d{2})\s*€/g;
+    const euroPattern = /(\d+[.,]\d{2})\s*€/g;
     const euroMatches = [...text.matchAll(euroPattern)];
     if (euroMatches.length > 0) {
       // Find the largest amount (likely the total)
@@ -321,7 +321,7 @@ export const ocrService = {
     }
 
     // Priority 3: Look for the largest decimal number (likely the total)
-    const decimalPattern = /(\d{1,5}[\.,]\d{2})/g;
+    const decimalPattern = /(\d{1,5}[.,]\d{2})/g;
     const decimalMatches = [...text.matchAll(decimalPattern)];
     const amounts = decimalMatches
       .map((m) => parseFloat((m[1] as string).replace(',', '.')))
@@ -341,7 +341,7 @@ export const ocrService = {
     const items: ReceiptItem[] = [];
 
     // Pattern: item name followed by price
-    const itemPattern = /^(.+?)\s+(\d+[\.,]\d{2})\s*(?:€|eur)?$/i;
+    const itemPattern = /^(.+?)\s+(\d+[.,]\d{2})\s*(?:€|eur)?$/i;
 
     for (const line of lines) {
       const match = line.match(itemPattern);

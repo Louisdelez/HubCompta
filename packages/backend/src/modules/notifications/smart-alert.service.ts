@@ -133,7 +133,7 @@ export const smartAlertService = {
   async checkCategorySpike(
     workspaceId: string,
     categoryId: string,
-    currentAmount: number
+    _currentAmount: number
   ): Promise<{ percentageAbove: number; monthlyAverage: number } | null> {
     // Get average monthly spending in this category
     const sixMonthsAgo = new Date();
@@ -247,7 +247,7 @@ export const smartAlertService = {
    */
   async generateWeeklySummary(
     workspaceId: string,
-    userId: string
+    _userId: string
   ): Promise<SpendingSummary> {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);

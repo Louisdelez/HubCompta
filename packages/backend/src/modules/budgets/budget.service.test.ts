@@ -602,8 +602,7 @@ describe('BudgetService', () => {
       vi.mocked(prisma.$transaction).mockResolvedValue([null, null]);
 
       // Mock getById for the returned budgets
-      const originalGetById = budgetService.getById;
-      vi.spyOn(budgetService, 'getById').mockImplementation(async (workspaceId, budgetId) => {
+      vi.spyOn(budgetService, 'getById').mockImplementation(async (_workspaceId, budgetId) => {
         const mockResult = {
           ...createMockBudget({ id: budgetId }),
           category: { id: 'cat-1', name: 'Food', icon: '🍔', color: '#FF5722' },

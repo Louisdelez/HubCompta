@@ -35,7 +35,7 @@ export interface PDFResult {
   size: number;
 }
 
-interface TransactionForPDF {
+interface _TransactionForPDF {
   id: string;
   date: Date;
   description: string;

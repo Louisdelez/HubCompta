@@ -388,7 +388,7 @@ test.describe('Budget Alerts', () => {
     await page.waitForTimeout(1000);
 
     // Budgets approaching threshold should have yellow highlight
-    const yellowHighlight = page.locator('.text-ctp-yellow, .border-ctp-yellow');
+    const _yellowHighlight = page.locator('.text-ctp-yellow, .border-ctp-yellow');
     // This may or may not be visible depending on data
     expect(true).toBe(true);
   });
@@ -398,7 +398,7 @@ test.describe('Budget Alerts', () => {
     await page.waitForTimeout(1000);
 
     // Over-budget items should have red highlight
-    const redHighlight = page.locator('.text-ctp-red, .border-ctp-red');
+    const _redHighlight = page.locator('.text-ctp-red, .border-ctp-red');
     // This may or may not be visible depending on data
     expect(true).toBe(true);
   });
