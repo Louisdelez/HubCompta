@@ -14,6 +14,7 @@ import { authGuard } from '@/core/auth/authGuard.js';
 
 interface UserProfileUpdate {
   displayName?: string;
+  country?: string;
   locale?: string;
   timezone?: string;
   theme?: string;
@@ -136,10 +137,11 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.status(401).send({ error: 'Non authentifié' });
     }
 
-    const { displayName, locale, timezone, theme } = request.body;
+    const { displayName, country, locale, timezone, theme } = request.body;
 
     const profile = await settingsService.updateUserProfile(userId, {
       displayName,
+      country,
       locale,
       timezone,
       theme,
@@ -150,7 +152,7 @@ const settingsRoutes: FastifyPluginAsync = async (fastify) => {
       action: AUDIT_ACTIONS.USER_UPDATED,
       entityType: 'user',
       entityId: userId,
-      changes: { displayName, locale, timezone, theme },
+      changes: { displayName, country, locale, timezone, theme },
       ipAddress: request.ip,
     });
 
