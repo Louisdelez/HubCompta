@@ -58,39 +58,39 @@ function createMockRequest(overrides: Partial<FastifyRequest> = {}): FastifyRequ
   } as FastifyRequest;
 }
 
-interface MockReply {
+interface MockReplyInternal {
   statusCode: number;
   sentData: unknown;
-  headers: Record<string, string>;
+  headers: Record<string, string | number>;
   header: ReturnType<typeof vi.fn>;
   status: ReturnType<typeof vi.fn>;
   send: ReturnType<typeof vi.fn>;
 }
 
-function createMockReply(): MockReply & FastifyReply {
-  const mockReply: MockReply = {
+function createMockReply(): { reply: FastifyReply; mock: MockReplyInternal } {
+  const mockReply: MockReplyInternal = {
     statusCode: 200,
-    sentData: undefined as unknown,
-    headers: {} as Record<string, string>,
+    sentData: undefined,
+    headers: {},
     header: vi.fn(),
     status: vi.fn(),
     send: vi.fn(),
   };
 
-  mockReply.header = vi.fn((name: string, value: string) => {
+  mockReply.header.mockImplementation((name: string, value: string | number) => {
     mockReply.headers[name] = value;
     return mockReply;
   });
-  mockReply.status = vi.fn((code: number) => {
+  mockReply.status.mockImplementation((code: number) => {
     mockReply.statusCode = code;
     return mockReply;
   });
-  mockReply.send = vi.fn((data: unknown) => {
+  mockReply.send.mockImplementation((data: unknown) => {
     mockReply.sentData = data;
     return mockReply;
   });
 
-  return mockReply as unknown as MockReply & FastifyReply;
+  return { reply: mockReply as unknown as FastifyReply, mock: mockReply };
 }
 
 // ----------------------------------------------------------------------------
@@ -126,13 +126,13 @@ describe('Rate Limit Middleware', () => {
     it('should allow request when under limit', async () => {
       const middleware = createRateLimitMiddleware({ category: 'api' });
       const request = createMockRequest();
-      const reply = createMockReply();
+      const { reply, mock } = createMockReply();
 
       await middleware(request, reply);
 
-      expect(reply.status).not.toHaveBeenCalledWith(429);
-      expect(reply.headers['X-RateLimit-Limit']).toBe(100);
-      expect(reply.headers['X-RateLimit-Remaining']).toBe(99);
+      expect(mock.status).not.toHaveBeenCalledWith(429);
+      expect(mock.headers['X-RateLimit-Limit']).toBe(100);
+      expect(mock.headers['X-RateLimit-Remaining']).toBe(99);
     });
 
     it('should block request when limit exceeded', async () => {
@@ -146,18 +146,18 @@ describe('Rate Limit Middleware', () => {
 
       const middleware = createRateLimitMiddleware({ category: 'api' });
       const request = createMockRequest();
-      const reply = createMockReply();
+      const { reply, mock } = createMockReply();
 
       await middleware(request, reply);
 
-      expect(reply.status).toHaveBeenCalledWith(429);
-      expect(reply.sentData).toMatchObject({
+      expect(mock.status).toHaveBeenCalledWith(429);
+      expect(mock.sentData).toMatchObject({
         success: false,
         error: {
           code: 'RATE_LIMIT_EXCEEDED',
         },
       });
-      expect(reply.headers['Retry-After']).toBeDefined();
+      expect(mock.headers['Retry-After']).toBeDefined();
     });
 
     it('should use custom key generator', async () => {
@@ -168,7 +168,7 @@ describe('Rate Limit Middleware', () => {
       });
 
       const request = createMockRequest({ body: { email: 'test@example.com' } });
-      const reply = createMockReply();
+      const { reply } = createMockReply();
 
       await middleware(request, reply);
 
@@ -182,12 +182,12 @@ describe('Rate Limit Middleware', () => {
       });
 
       const request = createMockRequest();
-      const reply = createMockReply();
+      const { reply, mock } = createMockReply();
 
       await middleware(request, reply);
 
       expect(mockRedisGet).not.toHaveBeenCalled();
-      expect(reply.header).not.toHaveBeenCalled();
+      expect(mock.header).not.toHaveBeenCalled();
     });
 
     it('should use user ID as identifier when authenticated', async () => {
@@ -201,7 +201,7 @@ describe('Rate Limit Middleware', () => {
           exp: Math.floor(Date.now() / 1000) + 3600,
         },
       });
-      const reply = createMockReply();
+      const { reply } = createMockReply();
 
       await middleware(request, reply);
 
@@ -216,7 +216,7 @@ describe('Rate Limit Middleware', () => {
     it('should use IP as identifier when not authenticated', async () => {
       const middleware = createRateLimitMiddleware({ category: 'api' });
       const request = createMockRequest({ ip: '192.168.1.100' });
-      const reply = createMockReply();
+      const { reply } = createMockReply();
 
       await middleware(request, reply);
 
@@ -234,7 +234,7 @@ describe('Rate Limit Middleware', () => {
       const request = createMockRequest({
         body: { email: 'test@example.com', password: 'secret' },
       });
-      const reply = createMockReply();
+      const { reply } = createMockReply();
 
       await loginRateLimit(request, reply);
 
@@ -251,7 +251,7 @@ describe('Rate Limit Middleware', () => {
         ip: '10.0.0.1',
         body: { password: 'secret' },
       });
-      const reply = createMockReply();
+      const { reply } = createMockReply();
 
       await loginRateLimit(request, reply);
 
@@ -270,7 +270,7 @@ describe('Rate Limit Middleware', () => {
         ip: '10.0.0.2',
         body: { email: 'new@example.com' },
       });
-      const reply = createMockReply();
+      const { reply } = createMockReply();
 
       await registerRateLimit(request, reply);
 
@@ -397,7 +397,7 @@ describe('Rate Limit Middleware', () => {
           'x-forwarded-for': '203.0.113.50, 198.51.100.1, 192.0.2.1',
         },
       });
-      const reply = createMockReply();
+      const { reply } = createMockReply();
 
       await apiRateLimit(request, reply);
 
@@ -413,13 +413,13 @@ describe('Rate Limit Middleware', () => {
   describe('Rate limit headers', () => {
     it('should set all required headers on success', async () => {
       const request = createMockRequest();
-      const reply = createMockReply();
+      const { reply, mock } = createMockReply();
 
       await apiRateLimit(request, reply);
 
-      expect(reply.headers['X-RateLimit-Limit']).toBeDefined();
-      expect(reply.headers['X-RateLimit-Remaining']).toBeDefined();
-      expect(reply.headers['X-RateLimit-Reset']).toBeDefined();
+      expect(mock.headers['X-RateLimit-Limit']).toBeDefined();
+      expect(mock.headers['X-RateLimit-Remaining']).toBeDefined();
+      expect(mock.headers['X-RateLimit-Reset']).toBeDefined();
     });
 
     it('should set Retry-After header on rate limit', async () => {
@@ -431,11 +431,11 @@ describe('Rate Limit Middleware', () => {
       );
 
       const request = createMockRequest();
-      const reply = createMockReply();
+      const { reply, mock } = createMockReply();
 
       await apiRateLimit(request, reply);
 
-      expect(reply.headers['Retry-After']).toBeDefined();
+      expect(mock.headers['Retry-After']).toBeDefined();
     });
   });
 
@@ -450,13 +450,13 @@ describe('Rate Limit Middleware', () => {
       );
 
       const request = createMockRequest();
-      const reply = createMockReply();
+      const { reply, mock } = createMockReply();
 
       await apiRateLimit(request, reply);
 
       // Should not be rate limited because window expired
-      expect(reply.status).not.toHaveBeenCalledWith(429);
-      expect(reply.headers['X-RateLimit-Remaining']).toBe(99);
+      expect(mock.status).not.toHaveBeenCalledWith(429);
+      expect(mock.headers['X-RateLimit-Remaining']).toBe(99);
     });
   });
 });

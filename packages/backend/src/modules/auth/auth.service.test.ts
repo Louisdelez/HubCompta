@@ -108,6 +108,31 @@ import { signAccessToken, signRefreshToken, hashToken, verifyRefreshToken } from
 import { sessionService } from './session.service.js';
 import { mfaService } from './mfa.service.js';
 
+// Helper to create mock session with all required fields
+const createMockSession = (overrides = {}) => ({
+  id: 'mock-uuid-123',
+  userId: 'user-123',
+  deviceId: 'device-456',
+  tokenHash: 'mock-token-hash',
+  expiresAt: new Date('2024-01-16T10:00:00Z'),
+  isLocked: false,
+  lockedAt: null,
+  createdAt: new Date('2024-01-15T10:00:00Z'),
+  updatedAt: new Date('2024-01-15T10:00:00Z'),
+  // New session fields
+  ipAddress: null,
+  userAgent: null,
+  deviceName: null,
+  browser: null,
+  os: null,
+  deviceType: null,
+  location: null,
+  lastActive: new Date('2024-01-15T10:00:00Z'),
+  isRevoked: false,
+  revokedAt: null,
+  ...overrides,
+});
+
 // ============================================================================
 // SESSION SERVICE TESTS
 // ============================================================================
@@ -132,17 +157,7 @@ describe('SessionService', () => {
       vi.mocked(signAccessToken).mockReturnValue('mock-access-token');
       vi.mocked(signRefreshToken).mockReturnValue('mock-refresh-token');
       vi.mocked(hashToken).mockReturnValue('mock-token-hash');
-      vi.mocked(prisma.session.create).mockResolvedValue({
-        id: 'mock-uuid-123',
-        userId,
-        deviceId,
-        tokenHash: 'mock-token-hash',
-        expiresAt: new Date('2024-01-16T10:00:00Z'),
-        isLocked: false,
-        lockedAt: null,
-        createdAt: new Date('2024-01-15T10:00:00Z'),
-        updatedAt: new Date('2024-01-15T10:00:00Z'),
-      });
+      vi.mocked(prisma.session.create).mockResolvedValue(createMockSession({ userId, deviceId }));
 
       const result = await sessionService.create(userId, deviceId, email);
 
@@ -183,17 +198,7 @@ describe('SessionService', () => {
       vi.mocked(signAccessToken).mockReturnValue('token');
       vi.mocked(signRefreshToken).mockReturnValue('token');
       vi.mocked(hashToken).mockReturnValue('hash');
-      vi.mocked(prisma.session.create).mockResolvedValue({
-        id: 'mock-uuid-123',
-        userId: 'user-123',
-        deviceId: 'device-456',
-        tokenHash: 'hash',
-        expiresAt: new Date('2024-01-16T10:00:00Z'),
-        isLocked: false,
-        lockedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      vi.mocked(prisma.session.create).mockResolvedValue(createMockSession({ tokenHash: 'hash' }));
 
       await sessionService.create('user-123', 'device-456', 'test@example.com');
 
@@ -216,19 +221,13 @@ describe('SessionService', () => {
         sessionId,
       });
 
-      vi.mocked(prisma.session.findUnique).mockResolvedValue({
+      vi.mocked(prisma.session.findUnique).mockResolvedValue(createMockSession({
         id: sessionId,
-        userId: 'user-123',
-        deviceId: 'device-456',
         tokenHash: 'valid-hash',
         expiresAt: new Date('2024-01-20T10:00:00Z'),
-        isLocked: false,
-        lockedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
         user: { email: 'test@example.com' },
         device: { name: 'Test Device' },
-      } as any);
+      }) as any);
 
       vi.mocked(hashToken).mockReturnValue('valid-hash');
       vi.mocked(signAccessToken).mockReturnValue('new-access-token');
@@ -276,19 +275,13 @@ describe('SessionService', () => {
         sessionId: 'session-123',
       });
 
-      vi.mocked(prisma.session.findUnique).mockResolvedValue({
+      vi.mocked(prisma.session.findUnique).mockResolvedValue(createMockSession({
         id: 'session-123',
-        userId: 'user-123',
-        deviceId: 'device-456',
         tokenHash: 'different-hash',
         expiresAt: new Date('2024-01-20T10:00:00Z'),
-        isLocked: false,
-        lockedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
         user: { email: 'test@example.com' },
         device: { name: 'Test Device' },
-      } as any);
+      }) as any);
 
       vi.mocked(hashToken).mockReturnValue('reused-token-hash');
       vi.mocked(prisma.session.findMany).mockResolvedValue([
@@ -315,19 +308,13 @@ describe('SessionService', () => {
         sessionId: 'session-123',
       });
 
-      vi.mocked(prisma.session.findUnique).mockResolvedValue({
+      vi.mocked(prisma.session.findUnique).mockResolvedValue(createMockSession({
         id: 'session-123',
-        userId: 'user-123',
-        deviceId: 'device-456',
         tokenHash: 'valid-hash',
         expiresAt: new Date('2024-01-10T10:00:00Z'), // Expired
-        isLocked: false,
-        lockedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
         user: { email: 'test@example.com' },
         device: { name: 'Test Device' },
-      } as any);
+      }) as any);
 
       vi.mocked(hashToken).mockReturnValue('valid-hash');
       vi.mocked(prisma.session.update).mockResolvedValue({} as any);
@@ -342,19 +329,15 @@ describe('SessionService', () => {
         sessionId: 'session-123',
       });
 
-      vi.mocked(prisma.session.findUnique).mockResolvedValue({
+      vi.mocked(prisma.session.findUnique).mockResolvedValue(createMockSession({
         id: 'session-123',
-        userId: 'user-123',
-        deviceId: 'device-456',
         tokenHash: 'valid-hash',
         expiresAt: new Date('2024-01-20T10:00:00Z'),
         isLocked: true,
         lockedAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
         user: { email: 'test@example.com' },
         device: { name: 'Test Device' },
-      } as any);
+      }) as any);
 
       vi.mocked(hashToken).mockReturnValue('valid-hash');
 
@@ -547,17 +530,11 @@ describe('SessionService', () => {
       const sessionId = 'session-123';
 
       vi.mocked(getJson).mockResolvedValue(null);
-      vi.mocked(prisma.session.findUnique).mockResolvedValue({
+      vi.mocked(prisma.session.findUnique).mockResolvedValue(createMockSession({
         id: sessionId,
-        userId: 'user-123',
-        deviceId: 'device-456',
-        isLocked: false,
         expiresAt: new Date('2024-01-20T10:00:00Z'),
         tokenHash: 'hash',
-        lockedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      }) as any);
 
       const result = await sessionService.validate(sessionId);
 
@@ -572,17 +549,11 @@ describe('SessionService', () => {
 
     it('should return null for expired session', async () => {
       vi.mocked(getJson).mockResolvedValue(null);
-      vi.mocked(prisma.session.findUnique).mockResolvedValue({
+      vi.mocked(prisma.session.findUnique).mockResolvedValue(createMockSession({
         id: 'session-123',
-        userId: 'user-123',
-        deviceId: 'device-456',
-        isLocked: false,
         expiresAt: new Date('2024-01-10T10:00:00Z'), // Expired
         tokenHash: 'hash',
-        lockedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      }) as any);
 
       const result = await sessionService.validate('session-123');
 

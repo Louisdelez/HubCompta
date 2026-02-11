@@ -97,6 +97,27 @@ const createMockNotification = (overrides = {}): Notification => ({
   deliveredVia: [],
   deliveryStatus: null,
   createdAt: new Date(),
+  ...overrides,
+});
+
+// Helper to create mock channel
+const createMockChannel = (overrides = {}) => ({
+  id: 'channel-123',
+  userId: 'user-123',
+  channelType: 'email' as ChannelType,
+  email: 'test@example.com',
+  emailVerified: false,
+  whatsappPhone: null,
+  whatsappVerified: false,
+  smsPhone: null,
+  smsVerified: false,
+  discordWebhookUrl: null,
+  discordVerified: false,
+  enabledTypes: ['budget_alert', 'budget_warning'],
+  isActive: true,
+  verificationCode: null,
+  verificationSentAt: null,
+  createdAt: new Date(),
   updatedAt: new Date(),
   ...overrides,
 });
@@ -125,28 +146,25 @@ describe('notificationDispatcherService', () => {
       const notification = createMockNotification();
 
       vi.mocked(notificationChannelService.getActiveChannelsForType).mockResolvedValue([
-        {
+        createMockChannel({
           id: 'channel-1',
           channelType: 'email' as ChannelType,
           email: 'test@example.com',
-          whatsappPhone: null,
-          discordWebhookUrl: null,
-        },
-        {
+        }),
+        createMockChannel({
           id: 'channel-2',
           channelType: 'discord' as ChannelType,
           email: null,
-          whatsappPhone: null,
           discordWebhookUrl: 'https://discord.com/api/webhooks/123/abc',
-        },
-      ]);
+        }),
+      ] as any);
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue({
         id: 'user-123',
         displayName: 'Test User',
       } as any);
 
-      vi.mocked(prisma.notification.update).mockResolvedValue(notification);
+      vi.mocked(prisma.notification.update).mockResolvedValue(notification as any);
 
       const result = await notificationDispatcherService.dispatch(notification);
 
@@ -160,13 +178,11 @@ describe('notificationDispatcherService', () => {
       const notification = createMockNotification();
 
       vi.mocked(notificationChannelService.getActiveChannelsForType).mockResolvedValue([
-        {
+        createMockChannel({
           id: 'channel-1',
           channelType: 'email' as ChannelType,
           email: 'test@example.com',
-          whatsappPhone: null,
-          discordWebhookUrl: null,
-        },
+        }),
       ]);
 
       const result = await notificationDispatcherService.dispatch(notification, { skipEmail: true });
@@ -179,20 +195,17 @@ describe('notificationDispatcherService', () => {
       const notification = createMockNotification();
 
       vi.mocked(notificationChannelService.getActiveChannelsForType).mockResolvedValue([
-        {
+        createMockChannel({
           id: 'channel-1',
           channelType: 'email' as ChannelType,
           email: 'test@example.com',
-          whatsappPhone: null,
-          discordWebhookUrl: null,
-        },
-        {
+        }),
+        createMockChannel({
           id: 'channel-2',
           channelType: 'discord' as ChannelType,
           email: null,
-          whatsappPhone: null,
           discordWebhookUrl: 'https://discord.com/api/webhooks/123/abc',
-        },
+        }),
       ]);
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue({
@@ -216,13 +229,11 @@ describe('notificationDispatcherService', () => {
       const notification = createMockNotification();
 
       vi.mocked(notificationChannelService.getActiveChannelsForType).mockResolvedValue([
-        {
+        createMockChannel({
           id: 'channel-1',
           channelType: 'email' as ChannelType,
           email: 'test@example.com',
-          whatsappPhone: null,
-          discordWebhookUrl: null,
-        },
+        }),
       ]);
 
       vi.mocked(prisma.user.findUnique).mockResolvedValue({
@@ -249,13 +260,12 @@ describe('notificationDispatcherService', () => {
       const notification = createMockNotification();
 
       vi.mocked(notificationChannelService.getActiveChannelsForType).mockResolvedValue([
-        {
+        createMockChannel({
           id: 'channel-1',
           channelType: 'discord' as ChannelType,
           email: null,
-          whatsappPhone: null,
           discordWebhookUrl: 'https://discord.com/api/webhooks/123/abc',
-        },
+        }),
       ]);
 
       vi.mocked(discordService.sendWebhook).mockResolvedValue({
