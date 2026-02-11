@@ -7,6 +7,13 @@ export { alertService } from './alert.service.js';
 export { smartAlertService } from './smart-alert.service.js';
 export { summaryService } from './summary.service.js';
 export { insightsService } from './insights.service.js';
+
+// Multi-channel notification services
+export { notificationChannelService } from './channel.service.js';
+export { whatsappService } from './whatsapp.service.js';
+export { discordService } from './discord.service.js';
+export { notificationDispatcherService } from './dispatcher.service.js';
+
 export type {
   CreateNotificationInput,
   NotificationFilters,
@@ -35,3 +42,20 @@ export type {
   InsightType,
   InsightSeverity,
 } from './insights.service.js';
+export type {
+  CreateChannelInput,
+  UpdateChannelInput,
+  ChannelVerificationResult,
+} from './channel.service.js';
+export type {
+  WhatsAppMessage,
+  WhatsAppSendResult,
+} from './whatsapp.service.js';
+export type {
+  DiscordEmbed,
+  DiscordSendResult,
+} from './discord.service.js';
+export type {
+  DeliveryReport,
+  DispatchOptions,
+} from './dispatcher.service.js';

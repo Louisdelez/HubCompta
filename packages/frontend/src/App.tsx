@@ -211,6 +211,9 @@ const SettlementPage = lazy(() =>
 const AlertSettings = lazy(() =>
   import(/* webpackChunkName: "notifications" */ './features/notifications').then(m => ({ default: m.AlertSettings }))
 );
+const NotificationChannelsPage = lazy(() =>
+  import(/* webpackChunkName: "notifications" */ './features/notifications/channels').then(m => ({ default: m.NotificationChannelsPage }))
+);
 
 // Activity
 const ActivityPage = lazy(() =>
@@ -469,6 +472,7 @@ export default function App() {
 
           {/* Settings Routes */}
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="settings/notification-channels" element={<NotificationChannelsPage />} />
           <Route path="workspaces/:workspaceId/settings" element={<WorkspaceSettingsPage />} />
           <Route path="notifications/alerts" element={<AlertSettings />} />
 

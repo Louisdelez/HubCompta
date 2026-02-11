@@ -44,6 +44,7 @@ model User {
   searchHistory           SearchHistory[]
   reportTemplates         ReportTemplate[]
   notificationPreferences NotificationPreferences?
+  notificationChannels    NotificationChannel[]
   dashboardLayouts        DashboardLayout[]
   bankConnections         BankConnection[]
   userAchievements        UserAchievement[]
@@ -907,16 +908,18 @@ enum AuditSeverity {
 // ============================================================================
 
 model Notification {
-  id          String           @id @default(uuid()) @db.Uuid
-  userId      String           @map("user_id") @db.Uuid
-  workspaceId String?          @map("workspace_id") @db.Uuid
-  type        NotificationType
-  title       String           @db.VarChar(200)
-  message     String           @db.Text
-  data        Json? // Additional data (e.g., entity references)
-  isRead      Boolean          @default(false) @map("is_read")
-  readAt      DateTime?        @map("read_at")
-  createdAt   DateTime         @default(now()) @map("created_at")
+  id             String           @id @default(uuid()) @db.Uuid
+  userId         String           @map("user_id") @db.Uuid
+  workspaceId    String?          @map("workspace_id") @db.Uuid
+  type           NotificationType
+  title          String           @db.VarChar(200)
+  message        String           @db.Text
+  data           Json? // Additional data (e.g., entity references)
+  isRead         Boolean          @default(false) @map("is_read")
+  readAt         DateTime?        @map("read_at")
+  deliveredVia   String[]         @default([]) @map("delivered_via") // ["email", "discord", "whatsapp"]
+  deliveryStatus Json?            @map("delivery_status") // { email: "sent", discord: "failed" }
+  createdAt      DateTime         @default(now()) @map("created_at")
 
   // Relations
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -951,6 +954,52 @@ enum NotificationType {
   recurring_processed // Recurring transaction processed
   goal_achieved // Savings goal completed
   bill_upcoming // Bills due in next 7 days
+}
+
+// ============================================================================
+// NOTIFICATION CHANNELS (Multi-channel delivery)
+// ============================================================================
+
+model NotificationChannel {
+  id                String      @id @default(uuid()) @db.Uuid
+  userId            String      @map("user_id") @db.Uuid
+  channelType       ChannelType @map("channel_type")
+
+  // Email
+  email             String?     @db.VarChar(255)
+  emailVerified     Boolean     @default(false) @map("email_verified")
+
+  // WhatsApp
+  whatsappPhone     String?     @map("whatsapp_phone") @db.VarChar(20)
+  whatsappVerified  Boolean     @default(false) @map("whatsapp_verified")
+
+  // Discord
+  discordWebhookUrl String?     @map("discord_webhook_url") @db.Text
+  discordVerified   Boolean     @default(false) @map("discord_verified")
+
+  // Préférences par type de notification (liste des types activés)
+  enabledTypes      String[]    @default([]) @map("enabled_types")
+
+  // Métadonnées
+  isActive          Boolean     @default(true) @map("is_active")
+  verificationCode  String?     @map("verification_code") @db.VarChar(10)
+  verificationSentAt DateTime?  @map("verification_sent_at")
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, channelType])
+  @@index([userId])
+  @@index([channelType])
+  @@map("notification_channels")
+}
+
+enum ChannelType {
+  email
+  whatsapp
+  discord
 }
 
 model AlertRule {

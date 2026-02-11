@@ -31,6 +31,7 @@ import { portfolioRoutes } from './portfolio.js';
 
 // Notification routes
 import { notificationRoutes } from './notifications.js';
+import { notificationChannelRoutes } from './notification-channels.js';
 
 // Alert routes
 import { alertRoutes } from './alerts.js';
@@ -223,6 +224,9 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   // ----------------------------------------------------------------------------
 
   await app.register(notificationRoutes, { prefix: `${apiPrefix}/notifications` });
+
+  // Notification Channels Routes (user scoped)
+  await app.register(notificationChannelRoutes, { prefix: `${apiPrefix}/users/me/notification-channels` });
 
   // ----------------------------------------------------------------------------
   // Settings Routes (user scoped)

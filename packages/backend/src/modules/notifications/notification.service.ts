@@ -1,6 +1,6 @@
 // ============================================================================
 // NOTIFICATION SERVICE - Finance Hub
-// In-app notifications management with email integration
+// In-app notifications management with multi-channel delivery
 // ============================================================================
 
 import { prisma } from '@/core/database/client.js';
@@ -9,6 +9,7 @@ import { broadcastNotification } from '@/core/websocket/index.js';
 import type { NotificationPayload } from '@/core/websocket/types.js';
 import { emailService, notificationPreferencesService } from '@/core/email/index.js';
 import { logger } from '@/core/middleware/logger.js';
+import { notificationDispatcherService } from './dispatcher.service.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -42,7 +43,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Create Notification
   // --------------------------------------------------------------------------
-  async create(input: CreateNotificationInput) {
+  async create(input: CreateNotificationInput, options?: { skipMultiChannel?: boolean }) {
     const notification = await prisma.notification.create({
       data: {
         userId: input.userId,
@@ -65,6 +66,13 @@ export const notificationService = {
       createdAt: notification.createdAt.toISOString(),
     };
     broadcastNotification(input.userId, payload);
+
+    // Dispatch to multi-channel (async, don't block the response)
+    if (!options?.skipMultiChannel) {
+      notificationDispatcherService.dispatch(notification).catch((error) => {
+        logger.error({ error, notificationId: notification.id }, 'Failed to dispatch notification to channels');
+      });
+    }
 
     return notification;
   },

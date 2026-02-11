@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Bell,
@@ -512,6 +513,27 @@ export function NotificationSettings() {
         )}
       </div>
 
+      {/* Notification Channels */}
+      <div className="bg-ctp-mantle rounded-lg shadow p-6">
+        <div className="flex items-center gap-3">
+          <Smartphone className="h-5 w-5 text-ctp-green" />
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-ctp-text">
+              Canaux de notification
+            </h3>
+            <p className="text-xs text-ctp-subtext0">
+              Configurez Email, WhatsApp et Discord pour vos notifications
+            </p>
+          </div>
+          <Link
+            to="/settings/notification-channels"
+            className="text-sm text-ctp-blue hover:text-ctp-sapphire font-medium"
+          >
+            Configurer
+          </Link>
+        </div>
+      </div>
+
       {/* In-app notification settings link */}
       <div className="bg-ctp-mantle rounded-lg shadow p-6">
         <div className="flex items-center gap-3">
@@ -524,12 +546,12 @@ export function NotificationSettings() {
               Configurez des alertes personnalisees (budget, solde, prix, etc.)
             </p>
           </div>
-          <a
-            href="/notifications/alerts"
+          <Link
+            to="/notifications/alerts"
             className="text-sm text-ctp-blue hover:text-ctp-sapphire font-medium"
           >
             Configurer
-          </a>
+          </Link>
         </div>
       </div>
 
