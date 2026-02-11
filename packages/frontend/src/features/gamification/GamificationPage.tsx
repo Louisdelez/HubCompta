@@ -6,7 +6,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Trophy, Loader2, Users } from 'lucide-react';
 import { api } from '@/lib/api/client';
-import { useWorkspace } from '@/hooks/useWorkspace';
 import { LevelProgress } from './LevelProgress';
 import { StreakCounter } from './StreakCounter';
 import { AchievementList } from './AchievementList';
@@ -31,31 +30,17 @@ interface LeaderboardEntry {
 }
 
 export function GamificationPage() {
-  const { currentWorkspaceId: workspaceId } = useWorkspace();
-
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['gamification', workspaceId, 'stats'],
+    queryKey: ['gamification', 'stats'],
     queryFn: () =>
-      api.get<UserStats>(`/workspaces/${workspaceId}/gamification/stats`),
-    enabled: !!workspaceId,
+      api.get<UserStats>(`/gamification/stats`),
   });
 
   const { data: leaderboard = [], isLoading: leaderboardLoading } = useQuery({
-    queryKey: ['gamification', workspaceId, 'leaderboard'],
+    queryKey: ['gamification', 'leaderboard'],
     queryFn: () =>
-      api.get<LeaderboardEntry[]>(
-        `/workspaces/${workspaceId}/gamification/leaderboard`
-      ),
-    enabled: !!workspaceId,
+      api.get<LeaderboardEntry[]>(`/gamification/leaderboard`),
   });
-
-  if (!workspaceId) {
-    return (
-      <div className="p-6 text-center text-ctp-subtext0">
-        Selectionnez un espace de travail
-      </div>
-    );
-  }
 
   if (statsLoading) {
     return (

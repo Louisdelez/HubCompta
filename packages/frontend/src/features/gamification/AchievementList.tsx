@@ -7,7 +7,6 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Trophy, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api/client';
-import { useWorkspace } from '@/hooks/useWorkspace';
 import { clsx } from 'clsx';
 import { AchievementBadge } from './AchievementBadge';
 
@@ -45,16 +44,12 @@ const categoryLabels: Record<string, string> = {
 const categoryOrder = ['onboarding', 'transactions', 'budgeting', 'savings', 'streaks', 'milestones'];
 
 export function AchievementList() {
-  const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['gamification', workspaceId, 'achievements'],
+    queryKey: ['gamification', 'achievements'],
     queryFn: () =>
-      api.get<AchievementsResponse>(
-        `/workspaces/${workspaceId}/gamification/achievements`
-      ),
-    enabled: !!workspaceId,
+      api.get<AchievementsResponse>(`/gamification/achievements`),
   });
 
   const achievements = data?.achievements ?? [];
@@ -86,10 +81,6 @@ export function AchievementList() {
     const achievement = achievements.find((a) => a.id === ua.achievementId);
     return sum + (achievement?.xpReward ?? 0);
   }, 0);
-
-  if (!workspaceId) {
-    return null;
-  }
 
   if (isLoading) {
     return (
