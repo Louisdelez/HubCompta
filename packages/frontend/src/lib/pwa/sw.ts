@@ -390,7 +390,7 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Push notification event (for future use)
+// Push notification event
 self.addEventListener('push', (event) => {
   if (!event.data) return;
 
@@ -398,23 +398,37 @@ self.addEventListener('push', (event) => {
     const data = event.data.json() as {
       body?: string;
       title?: string;
+      icon?: string;
+      badge?: string;
       tag?: string;
       data?: Record<string, unknown>;
       requireInteraction?: boolean;
+      actions?: Array<{ action: string; title: string; icon?: string }>;
     };
 
-    const options: NotificationOptions = {
+    // Extended NotificationOptions with service worker specific properties
+    const options = {
       body: data.body || '',
-      icon: '/pwa-192x192.png',
-      badge: '/pwa-192x192.png',
+      icon: data.icon || '/pwa-192x192.png',
+      badge: data.badge || '/pwa-192x192.png',
       tag: data.tag || 'hubcompta-notification',
       data: data.data || {},
       requireInteraction: data.requireInteraction || false,
-    };
+      vibrate: [200, 100, 200], // Vibration pattern
+      silent: false,
+      // Add actions if provided
+      ...(data.actions && data.actions.length > 0 ? { actions: data.actions } : {}),
+    } as NotificationOptions;
 
     event.waitUntil(
       self.registration.showNotification(data.title || 'HubCompta', options)
     );
+
+    // Notify clients that a push was received
+    void notifyClient('push-received', {
+      notificationId: data.data?.notificationId,
+      type: data.data?.type,
+    });
   } catch (error) {
     console.error('[ServiceWorker] Push notification error:', error);
   }
@@ -424,7 +438,24 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const url = event.notification.data?.url || '/';
+  const notificationData = event.notification.data as {
+    url?: string;
+    notificationId?: string;
+    type?: string;
+  } | undefined;
+
+  // Handle action clicks
+  if (event.action) {
+    console.log('[ServiceWorker] Notification action clicked:', event.action);
+    // Notify clients of action
+    void notifyClient('notification-action', {
+      action: event.action,
+      notificationId: notificationData?.notificationId,
+      type: notificationData?.type,
+    });
+  }
+
+  const url = notificationData?.url || '/notifications';
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window' }).then((clientList) => {
@@ -442,6 +473,20 @@ self.addEventListener('notificationclick', (event) => {
       return undefined;
     })
   );
+});
+
+// Notification close event
+self.addEventListener('notificationclose', (event) => {
+  const notificationData = event.notification.data as {
+    notificationId?: string;
+    type?: string;
+  } | undefined;
+
+  // Notify clients that notification was dismissed
+  void notifyClient('notification-dismissed', {
+    notificationId: notificationData?.notificationId,
+    type: notificationData?.type,
+  });
 });
 
 // Export for TypeScript

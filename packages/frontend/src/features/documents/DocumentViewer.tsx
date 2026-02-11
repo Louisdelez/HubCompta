@@ -147,6 +147,8 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
                       src={downloadData.url}
                       alt={document.filename}
                       className="w-full max-h-96 object-contain bg-ctp-surface0"
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <iframe

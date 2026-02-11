@@ -5,15 +5,15 @@
 </p>
 
 <p align="center">
-  <strong>Self-hosted financial management platform for individuals, families, and small businesses</strong>
+  <strong>Plateforme de gestion financiere auto-hebergeable pour particuliers, familles et petites entreprises</strong>
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> •
-  <a href="#quick-start">Quick Start</a> •
+  <a href="#fonctionnalites">Fonctionnalites</a> •
+  <a href="#demarrage-rapide">Demarrage rapide</a> •
   <a href="#documentation">Documentation</a> •
-  <a href="#contributing">Contributing</a> •
-  <a href="#license">License</a>
+  <a href="#contribuer">Contribuer</a> •
+  <a href="#licence">Licence</a>
 </p>
 
 <p align="center">
@@ -27,175 +27,233 @@
 
 ---
 
-## Overview
+## Presentation
 
-HubCompta is a comprehensive, self-hosted financial management solution designed to run on your own infrastructure (NAS, VPS, or home server). It provides complete control over your financial data with no subscription fees or cloud dependencies.
+HubCompta est une solution complete de gestion financiere auto-hebergee, concue pour fonctionner sur votre propre infrastructure (NAS, VPS ou serveur domestique). Elle offre un controle total sur vos donnees financieres sans frais d'abonnement ni dependance au cloud.
 
-### Why HubCompta?
+### Pourquoi HubCompta ?
 
-- **Privacy First**: Your financial data stays on your servers
-- **No Subscription**: One-time setup, no recurring costs
-- **Full Control**: Open source, fully customizable
-- **Multi-User**: Perfect for families or small teams
-- **Offline Ready**: PWA with offline support
-
----
-
-## Features
-
-### Core Financial Management
-- **Multi-Account Tracking**: Bank accounts, cash, savings, investments
-- **Transaction Management**: Income, expenses, transfers with categorization
-- **Budget Tracking**: Set budgets per category with real-time alerts
-- **Document Storage**: Attach receipts and invoices to transactions
-
-### Import & Export
-- **CSV Import**: Auto-detect bank formats, duplicate detection
-- **Smart Rules**: Auto-categorize transactions based on patterns
-- **Data Export**: CSV, JSON, and HTML reports
-- **Full Backup**: Complete workspace backup and restore
-
-### Pro Mode (for Freelancers)
-- **Contact Management**: Clients and suppliers database
-- **Quote Generation**: Create and send professional quotes
-- **Invoice Management**: Convert quotes to invoices, track payments
-- **VAT Calculation**: Automatic tax calculations
-
-### Investment Tracking
-- **Portfolio Dashboard**: Track stocks, ETFs, crypto
-- **Market Data**: Real-time prices from Yahoo Finance & CoinGecko
-- **Performance Metrics**: PRU calculation, gains/losses
-- **Allocation Charts**: Visualize your portfolio distribution
-
-### Multi-Currency
-- **Multiple Currencies**: EUR, USD, GBP, CHF, and more
-- **Auto Exchange Rates**: Daily updates from ECB
-- **Unified Totals**: See all accounts in your preferred currency
-
-### Advanced Features
-- **Global Search**: Find anything with Cmd/Ctrl+K
-- **Saved Filters**: Save complex search filters
-- **Recurring Transactions**: Automate regular transactions
-- **Notifications**: Budget alerts, payment reminders
-
-### Security
-- **MFA Authentication**: TOTP and WebAuthn support
-- **Session Management**: Device tracking, session lock
-- **Role-Based Access**: Owner, Admin, Member, Viewer roles
-- **Audit Logs**: Track all sensitive actions
+- **Confidentialite** : Vos donnees financieres restent sur vos serveurs
+- **Sans abonnement** : Installation unique, pas de couts recurrents
+- **Controle total** : Open source, entierement personnalisable
+- **Multi-utilisateurs** : Ideal pour les familles ou petites equipes
+- **Mode hors-ligne** : PWA avec support offline
 
 ---
 
-## Quick Start
+## Fonctionnalites
 
-### Prerequisites
+### Gestion financiere de base
+- **Multi-comptes** : Comptes bancaires, especes, epargne, investissements
+- **Gestion des transactions** : Revenus, depenses, virements avec categorisation
+- **Suivi des budgets** : Definir des budgets par categorie avec alertes en temps reel
+- **Stockage de documents** : Joindre justificatifs et factures aux transactions
 
-- Docker 24+ and Docker Compose 2.20+
-- Domain name (for HTTPS) or localhost for development
-- 2GB RAM minimum, 10GB disk space
+### Import et export
+- **Import CSV** : Detection automatique des formats bancaires, detection des doublons
+- **Regles intelligentes** : Categorisation automatique basee sur des motifs
+- **Export des donnees** : CSV, JSON et rapports HTML
+- **Sauvegarde complete** : Sauvegarde et restauration de l'espace de travail
 
-### Development Setup
+### Mode Pro (pour independants)
+- **Gestion des contacts** : Base de donnees clients et fournisseurs
+- **Generation de devis** : Creer et envoyer des devis professionnels
+- **Gestion des factures** : Conversion devis en factures, suivi des paiements
+- **Calcul TVA** : Calculs fiscaux automatiques
+
+### Suivi des investissements
+- **Tableau de bord portefeuille** : Suivre actions, ETF, crypto
+- **Donnees de marche** : Prix en temps reel via Yahoo Finance et CoinGecko
+- **Metriques de performance** : Calcul PRU, plus/moins-values
+- **Graphiques d'allocation** : Visualiser la repartition du portefeuille
+
+### Multi-devises
+- **Plusieurs devises** : EUR, USD, GBP, CHF, et plus
+- **Taux de change automatiques** : Mise a jour quotidienne depuis la BCE
+- **Totaux unifies** : Voir tous les comptes dans votre devise preferee
+
+### Fonctionnalites avancees
+- **Recherche globale** : Trouver n'importe quoi avec Cmd/Ctrl+K
+- **Filtres sauvegardes** : Enregistrer des filtres de recherche complexes
+- **Transactions recurrentes** : Automatiser les transactions regulieres
+- **Notifications** : Alertes budget, rappels de paiement
+
+### Securite
+- **Authentification MFA** : Support TOTP et WebAuthn
+- **Gestion des sessions** : Suivi des appareils, verrouillage de session
+- **Acces base sur les roles** : Roles Proprietaire, Admin, Membre, Lecteur
+- **Journaux d'audit** : Tracer toutes les actions sensibles
+
+---
+
+## Captures d'ecran
+
+<p align="center">
+  <img src="docs/assets/screenshot-dashboard.png" alt="Tableau de bord" width="45%" />
+  <img src="docs/assets/screenshot-transactions.png" alt="Transactions" width="45%" />
+</p>
+
+<p align="center">
+  <img src="docs/assets/screenshot-budgets.png" alt="Budgets" width="45%" />
+  <img src="docs/assets/screenshot-reports.png" alt="Rapports" width="45%" />
+</p>
+
+---
+
+## Stack technique
+
+### Backend
+| Composant | Technologie |
+|-----------|-------------|
+| Runtime | Node.js 20 LTS |
+| Framework | Fastify 5.x |
+| Base de donnees | PostgreSQL 16 + Prisma ORM |
+| Cache | Redis 7 |
+| Queue | BullMQ |
+| Stockage | Compatible S3 (MinIO) |
+
+### Frontend
+| Composant | Technologie |
+|-----------|-------------|
+| Framework | React 18 |
+| Build | Vite 5 |
+| Styles | Tailwind CSS 3 |
+| Etat | TanStack Query v5 + Zustand |
+| Routeur | React Router 6 |
+
+### Infrastructure
+| Composant | Technologie |
+|-----------|-------------|
+| Reverse Proxy | Traefik 3 avec HTTPS automatique |
+| Conteneurs | Docker et Docker Compose |
+| CI/CD | GitHub Actions (optionnel) |
+
+---
+
+## Demarrage rapide
+
+### Prerequis
+
+- Docker 24+ et Docker Compose 2.20+
+- Nom de domaine (pour HTTPS) ou localhost pour le developpement
+- Minimum 2 Go RAM, 10 Go d'espace disque
+
+### Installation pour le developpement
 
 ```bash
-# Clone the repository
+# Cloner le repository
 git clone https://github.com/Louisdelez/HubCompta.git
 cd HubCompta
 
-# Start infrastructure (PostgreSQL, Redis, MinIO)
+# Demarrer l'infrastructure (PostgreSQL, Redis, MinIO)
 cd docker
 docker compose -f docker-compose.dev.yml up -d
 
-# Install dependencies
+# Installer les dependances
 cd ..
 pnpm install
 
-# Setup environment
+# Configurer l'environnement
 cp .env.example .env
-# Edit .env with your settings
+# Editer .env avec vos parametres
 
-# Generate Prisma client and run migrations
+# Generer le client Prisma et executer les migrations
 cd packages/backend
 npx prisma generate
 npx prisma migrate dev
 
-# Start development servers
+# Demarrer les serveurs de developpement
 cd ../..
 pnpm dev
 ```
 
-Access the application at `http://localhost:5173`
+Acceder a l'application sur `http://localhost:5173`
 
-### Production Deployment
+### Deploiement en production
 
 ```bash
-# Clone and configure
+# Cloner et configurer
 git clone https://github.com/Louisdelez/HubCompta.git
 cd HubCompta/docker
 
-# Configure environment
+# Configurer l'environnement
 cp .env.example .env
-nano .env  # Edit with your settings
+nano .env  # Editer avec vos parametres
 
-# Deploy
+# Deployer
 docker compose -f docker-compose.prod.yml up -d --build
 
-# Run migrations
+# Executer les migrations
 docker compose -f docker-compose.prod.yml exec backend npx prisma migrate deploy
 ```
 
-See [Deployment Guide](docs/deployment.md) for detailed instructions.
+Voir [Guide de deploiement](docs/DEPLOYMENT.md) pour les instructions detaillees.
 
 ---
 
-## Tech Stack
+## Variables d'environnement
 
-### Backend
-- **Runtime**: Node.js 20 LTS
-- **Framework**: Fastify 4.x
-- **Database**: PostgreSQL 16 + Prisma ORM
-- **Cache**: Redis 7
-- **Queue**: BullMQ
-- **Storage**: S3-compatible (MinIO)
+### Variables requises
 
-### Frontend
-- **Framework**: React 18
-- **Build**: Vite 5
-- **Styling**: Tailwind CSS 3
-- **State**: TanStack Query v5 + Zustand
-- **Router**: React Router 6
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | URL de connexion PostgreSQL |
+| `REDIS_URL` | URL de connexion Redis |
+| `JWT_SECRET` | Secret pour les tokens JWT (min 32 caracteres) |
+| `JWT_REFRESH_SECRET` | Secret pour les refresh tokens |
+| `MINIO_ACCESS_KEY` | Cle d'acces MinIO |
+| `MINIO_SECRET_KEY` | Cle secrete MinIO |
+| `APP_URL` | URL de l'application |
 
-### Infrastructure
-- **Reverse Proxy**: Traefik 3 with auto HTTPS
-- **Containers**: Docker & Docker Compose
-- **CI/CD**: GitHub Actions (optional)
+### Variables optionnelles
+
+| Variable | Defaut | Description |
+|----------|--------|-------------|
+| `NODE_ENV` | `development` | Environnement d'execution |
+| `PORT` | `3001` | Port du serveur backend |
+| `LOG_LEVEL` | `info` | Niveau de log |
+| `TZ` | `Europe/Paris` | Fuseau horaire |
+
+Voir [Configuration](docs/configuration.md) pour la liste complete.
 
 ---
 
-## Project Structure
+## Documentation API
+
+L'API REST est documentee avec Swagger/OpenAPI.
+
+- **Developpement** : http://localhost:3001/documentation
+- **Production** : https://votre-domaine.com/documentation
+
+Voir [Reference API](docs/api.md) pour la documentation complete.
+
+---
+
+## Structure du projet
 
 ```
 HubCompta/
-├── docker/                 # Docker configurations
-│   ├── config/            # Nginx, Traefik configs
-│   ├── Dockerfile.*       # Multi-stage Dockerfiles
-│   └── docker-compose.*   # Compose files
+├── docker/                 # Configurations Docker
+│   ├── config/            # Configs Nginx, Traefik
+│   ├── Dockerfile.*       # Dockerfiles multi-stages
+│   └── docker-compose.*   # Fichiers Compose
 ├── packages/
-│   ├── backend/           # Fastify API server
-│   │   ├── prisma/       # Database schema & migrations
+│   ├── backend/           # Serveur API Fastify
+│   │   ├── prisma/       # Schema et migrations
 │   │   └── src/
-│   │       ├── api/      # Route handlers
+│   │       ├── api/      # Gestionnaires de routes
 │   │       ├── core/     # Middleware, auth, queue
-│   │       └── modules/  # Business logic
-│   ├── frontend/          # React SPA
+│   │       └── modules/  # Logique metier
+│   ├── frontend/          # SPA React
 │   │   └── src/
-│   │       ├── components/  # Reusable UI
-│   │       ├── features/    # Feature modules
-│   │       ├── hooks/       # Custom hooks
-│   │       └── lib/         # Utilities
-│   ├── worker/            # Background job processor
-│   └── shared/            # Shared types & validation
-├── scripts/               # Utility scripts
-├── specs/                 # Specifications & docs
+│   │       ├── components/  # UI reutilisable
+│   │       ├── features/    # Modules fonctionnels
+│   │       ├── hooks/       # Hooks personnalises
+│   │       └── lib/         # Utilitaires
+│   ├── worker/            # Processeur de jobs en arriere-plan
+│   └── shared/            # Types et validation partages
+├── scripts/               # Scripts utilitaires
+├── specs/                 # Specifications et docs
 └── docs/                  # Documentation
 ```
 
@@ -205,80 +263,66 @@ HubCompta/
 
 | Document | Description |
 |----------|-------------|
-| [Deployment Guide](docs/deployment.md) | Production deployment instructions |
-| [API Reference](docs/api.md) | REST API documentation |
-| [Configuration](docs/configuration.md) | Environment variables & settings |
-| [Architecture](docs/architecture.md) | System design & decisions |
-| [Contributing](CONTRIBUTING.md) | How to contribute |
+| [Guide de deploiement](docs/DEPLOYMENT.md) | Instructions de deploiement en production |
+| [Reference API](docs/api.md) | Documentation de l'API REST |
+| [Configuration](docs/configuration.md) | Variables d'environnement et parametres |
+| [Architecture](docs/architecture.md) | Conception systeme et decisions |
+| [Contribuer](docs/CONTRIBUTING.md) | Comment contribuer |
 
 ---
 
-## Screenshots
+## Feuille de route
 
-<p align="center">
-  <img src="docs/assets/screenshot-dashboard.png" alt="Dashboard" width="45%" />
-  <img src="docs/assets/screenshot-transactions.png" alt="Transactions" width="45%" />
-</p>
-
-<p align="center">
-  <img src="docs/assets/screenshot-budgets.png" alt="Budgets" width="45%" />
-  <img src="docs/assets/screenshot-reports.png" alt="Reports" width="45%" />
-</p>
-
----
-
-## Roadmap
-
-- [x] Core transaction management
-- [x] Multi-user workspaces
-- [x] Budget tracking
-- [x] Document management
-- [x] CSV import
-- [x] Pro mode (invoicing)
-- [x] Investment tracking
-- [x] Multi-currency
-- [x] Advanced search
-- [x] Docker deployment
-- [ ] Mobile app (React Native)
-- [ ] Bank sync (Open Banking)
-- [ ] AI categorization
-- [ ] Crypto wallet integration
+- [x] Gestion des transactions de base
+- [x] Espaces de travail multi-utilisateurs
+- [x] Suivi des budgets
+- [x] Gestion des documents
+- [x] Import CSV
+- [x] Mode Pro (facturation)
+- [x] Suivi des investissements
+- [x] Multi-devises
+- [x] Recherche avancee
+- [x] Deploiement Docker
+- [ ] Application mobile (React Native)
+- [ ] Synchronisation bancaire (Open Banking)
+- [ ] Categorisation IA
+- [ ] Integration portefeuilles crypto
 
 ---
 
-## Contributing
+## Contribuer
 
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
+Les contributions sont les bienvenues ! Veuillez lire notre [Guide de contribution](docs/CONTRIBUTING.md) pour plus de details.
 
 ```bash
-# Fork and clone
-git clone https://github.com/YOUR_USERNAME/HubCompta.git
+# Fork et clone
+git clone https://github.com/VOTRE_NOM/HubCompta.git
 
-# Create a branch
-git checkout -b feature/amazing-feature
+# Creer une branche
+git checkout -b feature/fonctionnalite-geniale
 
-# Make your changes and commit
-git commit -m "feat: add amazing feature"
+# Faire vos modifications et commit
+git commit -m "feat: ajouter fonctionnalite geniale"
 
-# Push and create a PR
-git push origin feature/amazing-feature
+# Push et creer une PR
+git push origin feature/fonctionnalite-geniale
 ```
 
 ---
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/Louisdelez/HubCompta/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/Louisdelez/HubCompta/discussions)
+- **Issues** : [GitHub Issues](https://github.com/Louisdelez/HubCompta/issues)
+- **Discussions** : [GitHub Discussions](https://github.com/Louisdelez/HubCompta/discussions)
 
 ---
 
-## License
+## Licence
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de details.
 
 ---
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/Louisdelez">Louis Delez</a>
+  Fait avec soin par <a href="https://github.com/Louisdelez">Louis Delez</a>
 </p>

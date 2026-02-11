@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { lazy, Suspense, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from './features/auth/AuthProvider';
 import { AppLayout } from './components/layout/AppLayout';
 import { PageLoading, DashboardSkeleton, TableSkeleton } from './components/ui/Loading';
@@ -305,11 +306,12 @@ function RegisterPage() {
 }
 
 function NotFoundPage() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen flex items-center justify-center bg-ctp-base">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-ctp-text">404</h1>
-        <p className="text-ctp-subtext0 mt-2">Page not found</p>
+        <h1 className="text-4xl font-bold text-ctp-text">{t('404.title')}</h1>
+        <p className="text-ctp-subtext0 mt-2">{t('404.message')}</p>
       </div>
     </div>
   );
@@ -318,6 +320,7 @@ function NotFoundPage() {
 // Protected route wrapper with route prefetching
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
+  const { t } = useTranslation();
 
   // Prefetch common routes after authentication
   useEffect(() => {
@@ -329,7 +332,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-ctp-base">
-        <PageLoading text="Authenticating..." />
+        <PageLoading text={t('auth.authenticating')} />
       </div>
     );
   }

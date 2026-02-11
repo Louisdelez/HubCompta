@@ -143,6 +143,10 @@ export function MfaSetup() {
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(setupData.qrCodeUrl)}`}
                 alt="QR Code MFA"
                 className="w-48 h-48"
+                loading="eager"
+                decoding="async"
+                width={192}
+                height={192}
               />
             </div>
           </div>

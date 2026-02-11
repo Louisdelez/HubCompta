@@ -1,8 +1,10 @@
 // ============================================================================
 // DOCUMENT CARD - Finance Hub
 // Uses Catppuccin colors that adapt to the current theme
+// Memoized for performance in lists
 // ============================================================================
 
+import { memo, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Image, BookOpen, Sheet, FileSpreadsheet, FileText, Lock, Inbox, Link2, Archive, X, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -84,7 +86,7 @@ function formatCurrency(amount: number): string {
 // Component
 // ----------------------------------------------------------------------------
 
-export function DocumentCard({
+function DocumentCardComponent({
   document,
   workspaceId,
   onView,
@@ -110,17 +112,17 @@ export function DocumentCard({
     onSuccess: onAction,
   });
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (confirm(`Supprimer "${document.filename}" ?`)) {
       deleteMutation.mutate();
     }
-  };
+  }, [document.filename, deleteMutation]);
 
-  const handleUnlink = (transactionId: string) => {
+  const handleUnlink = useCallback((transactionId: string) => {
     if (confirm('Délier ce document de la transaction ?')) {
       unlinkMutation.mutate(transactionId);
     }
-  };
+  }, [unlinkMutation]);
 
   return (
     <div
@@ -237,5 +239,8 @@ export function DocumentCard({
     </div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders in lists
+export const DocumentCard = memo(DocumentCardComponent);
 
 export default DocumentCard;

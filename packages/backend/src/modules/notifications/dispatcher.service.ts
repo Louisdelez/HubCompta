@@ -11,6 +11,7 @@ import { whatsappService } from './whatsapp.service.js';
 import { smsService } from './sms.service.js';
 import { discordService } from './discord.service.js';
 import { notificationChannelService } from './channel.service.js';
+import { pushService } from './push.service.js';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -19,16 +20,17 @@ import { notificationChannelService } from './channel.service.js';
 export interface DeliveryReport {
   notificationId: string;
   channels: {
-    [K in ChannelType]?: {
+    [K in ChannelType | 'push']?: {
       success: boolean;
       error?: string;
     };
   };
-  deliveredVia: ChannelType[];
+  deliveredVia: (ChannelType | 'push')[];
 }
 
 export interface DispatchOptions {
   skipEmail?: boolean; // Skip email even if configured (for in-app only notifications)
+  skipPush?: boolean; // Skip push notifications
   forceChannels?: ChannelType[]; // Only send to these channels
 }
 
@@ -81,6 +83,17 @@ export const notificationDispatcherService = {
 
       if (result.success) {
         report.deliveredVia.push(channel.channelType);
+      }
+    }
+
+    // Send push notification (always, unless skipped)
+    if (!options.skipPush) {
+      const pushResult = await this.dispatchToPush(notification);
+      if (pushResult.attempted) {
+        report.channels['push'] = { success: pushResult.success, error: pushResult.error };
+        if (pushResult.success) {
+          report.deliveredVia.push('push');
+        }
       }
     }
 
@@ -205,6 +218,28 @@ export const notificationDispatcherService = {
     const result = await discordService.sendWebhook(webhookUrl, embed);
 
     return { success: result.success, error: result.error };
+  },
+
+  /**
+   * Dispatch to push notifications
+   */
+  async dispatchToPush(notification: Notification): Promise<{ attempted: boolean; success: boolean; error?: string }> {
+    if (!pushService.isConfigured()) {
+      return { attempted: false, success: false };
+    }
+
+    try {
+      const result = await pushService.sendForNotification(notification);
+      return {
+        attempted: true,
+        success: result.success,
+        error: result.sentCount === 0 ? 'No subscriptions' : undefined,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error({ error: errorMessage, notificationId: notification.id }, 'Failed to send push notification');
+      return { attempted: true, success: false, error: errorMessage };
+    }
   },
 
   /**

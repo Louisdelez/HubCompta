@@ -50,6 +50,7 @@ model User {
   bankConnections         BankConnection[]
   userAchievements        UserAchievement[]
   userStats               UserStats?
+  pushSubscriptions       PushSubscription[]
 
   @@map("users")
 }
@@ -1680,4 +1681,30 @@ model DashboardLayout {
   @@index([userId])
   @@index([workspaceId])
   @@map("dashboard_layouts")
+}
+
+// ============================================================================
+// PUSH SUBSCRIPTIONS (Web Push Notifications)
+// ============================================================================
+
+model PushSubscription {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id") @db.Uuid
+  endpoint       String   @unique @db.Text // Push service endpoint URL
+  p256dh         String   @db.Text // Client public key for encryption
+  auth           String   @db.Text // Authentication secret
+  userAgent      String?  @map("user_agent") @db.VarChar(500)
+  deviceName     String?  @map("device_name") @db.VarChar(100)
+  isActive       Boolean  @default(true) @map("is_active")
+  lastUsedAt     DateTime? @map("last_used_at")
+  failureCount   Int      @default(0) @map("failure_count") // Track delivery failures
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isActive])
+  @@map("push_subscriptions")
 }

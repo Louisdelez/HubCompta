@@ -10,10 +10,17 @@ import { OnboardingProvider } from './features/onboarding';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { registerServiceWorker } from './lib/pwa/register';
 import { initSentry } from './lib/sentry';
+import { initWebVitals } from './lib/webVitals';
 import './index.css';
+
+// Initialize i18n
+import './lib/i18n';
 
 // Initialize Sentry before rendering
 initSentry();
+
+// Initialize Web Vitals monitoring (LCP, FID, CLS, INP, TTFB)
+initWebVitals();
 
 // Create a client
 const queryClient = new QueryClient({

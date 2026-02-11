@@ -179,6 +179,10 @@ function BankConnectionCard({
               src={connection.institutionLogo}
               alt={connection.institutionName}
               className="w-10 h-10 rounded-lg object-contain bg-white p-1"
+              loading="lazy"
+              decoding="async"
+              width={40}
+              height={40}
             />
           ) : (
             <div className="w-10 h-10 bg-ctp-surface1 rounded-lg flex items-center justify-center">

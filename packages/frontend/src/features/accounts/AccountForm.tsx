@@ -153,35 +153,50 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  const modalTitle = isEditing ? 'Modifier le compte' : 'Nouveau compte';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="account-modal-title"
+    >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/50"
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
       {/* Modal */}
       <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-auto animate-scale-in">
         <div className="p-6">
-          <h2 className="text-xl font-bold mb-4">
-            {isEditing ? 'Modifier le compte' : 'Nouveau compte'}
+          <h2 id="account-modal-title" className="text-xl font-bold mb-4 text-ctp-text">
+            {modalTitle}
           </h2>
 
           {error && (
-            <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4">
+            <div
+              className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4"
+              role="alert"
+              aria-live="assertive"
+            >
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" aria-label="Formulaire de compte">
             {/* Account Type (only for creation) */}
             {!isEditing && (
-              <div>
-                <label className="label">Type de compte</label>
-                <div className="grid grid-cols-3 gap-2">
+              <fieldset>
+                <legend className="label">Type de compte</legend>
+                <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Type de compte">
                   {ACCOUNT_TYPES.map((type) => (
                     <label
                       key={type.value}
                       className={clsx(
-                        'flex flex-col items-center p-3 rounded-lg border-2 cursor-pointer transition-colors',
+                        'flex flex-col items-center p-3 rounded-lg border-2 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-ctp-blue focus-within:ring-offset-2',
                         selectedType === type.value
                           ? 'border-ctp-blue bg-ctp-blue/10'
                           : 'border-ctp-surface1 hover:border-ctp-surface2'
@@ -192,13 +207,14 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
                         value={type.value}
                         {...register('type')}
                         className="sr-only"
+                        aria-label={type.label}
                       />
-                      <type.icon className="w-5 h-5" />
+                      <type.icon className="w-5 h-5" aria-hidden="true" />
                       <span className="text-xs mt-1 text-center">{type.label}</span>
                     </label>
                   ))}
                 </div>
-              </div>
+              </fieldset>
             )}
 
             {/* Name */}
@@ -209,10 +225,13 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
                 type="text"
                 className="input"
                 placeholder="Mon compte"
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? 'name-error' : undefined}
+                aria-required="true"
                 {...register('name', { required: 'Nom requis' })}
               />
               {errors.name && (
-                <p className="error-text">{errors.name.message}</p>
+                <p id="name-error" className="error-text" role="alert">{errors.name.message}</p>
               )}
             </div>
 
@@ -243,31 +262,46 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
             )}
 
             {/* Color */}
-            <div>
-              <label className="label">Couleur</label>
-              <div className="flex flex-wrap gap-2">
-                {COLORS.map((color) => (
+            <fieldset>
+              <legend className="label">Couleur</legend>
+              <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Couleur du compte">
+                {COLORS.map((color, index) => (
                   <button
                     key={color}
                     type="button"
                     onClick={() => setValue('color', color)}
                     className={clsx(
-                      'w-8 h-8 rounded-full transition-transform',
+                      'w-8 h-8 rounded-full transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-blue focus-visible:ring-offset-2',
                       selectedColor === color && 'ring-2 ring-offset-2 ring-ctp-blue scale-110'
                     )}
                     style={{ backgroundColor: color }}
+                    aria-label={`Couleur ${index + 1}`}
+                    aria-pressed={selectedColor === color}
+                    role="radio"
+                    aria-checked={selectedColor === color}
                   />
                 ))}
               </div>
-            </div>
+            </fieldset>
 
             {/* Actions */}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={onClose} className="btn-secondary flex-1">
                 Annuler
               </button>
-              <button type="submit" disabled={isPending} className="btn-primary flex-1">
-                {isPending ? 'Enregistrement...' : isEditing ? 'Enregistrer' : 'Créer'}
+              <button
+                type="submit"
+                disabled={isPending}
+                aria-disabled={isPending}
+                aria-busy={isPending}
+                className="btn-primary flex-1"
+              >
+                {isPending ? (
+                  <>
+                    <span aria-hidden="true">Enregistrement...</span>
+                    <span className="sr-only">Enregistrement en cours</span>
+                  </>
+                ) : isEditing ? 'Enregistrer' : 'Creer'}
               </button>
             </div>
           </form>

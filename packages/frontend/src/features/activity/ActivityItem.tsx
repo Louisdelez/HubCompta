@@ -2,8 +2,10 @@
 // ACTIVITY ITEM COMPONENT - Finance Hub
 // Individual activity item in the activity feed
 // Uses Catppuccin colors that adapt to the current theme
+// Memoized for performance in virtualized lists
 // ============================================================================
 
+import { memo } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
@@ -252,7 +254,7 @@ function getEntityLink(activity: Activity, workspaceId?: string): string | null 
 // Component
 // ----------------------------------------------------------------------------
 
-export function ActivityItem({ activity, workspaceId, showWorkspace = false }: ActivityItemProps) {
+function ActivityItemComponent({ activity, workspaceId, showWorkspace = false }: ActivityItemProps) {
   const colors = getActivityColor(activity.actionType, activity.action);
   const icon = getActivityIcon(activity.actionType, activity.action);
   const entityLink = getEntityLink(activity, workspaceId);
@@ -296,6 +298,10 @@ export function ActivityItem({ activity, workspaceId, showWorkspace = false }: A
                     src={activity.user.avatarUrl}
                     alt={activity.user.name}
                     className="w-5 h-5 rounded-full"
+                    loading="lazy"
+                    decoding="async"
+                    width={20}
+                    height={20}
                   />
                 ) : (
                   <div className="w-5 h-5 rounded-full bg-ctp-surface2 flex items-center justify-center">
@@ -347,5 +353,8 @@ export function ActivityItem({ activity, workspaceId, showWorkspace = false }: A
 
   return content;
 }
+
+// Memoize to prevent re-renders when parent list re-renders
+export const ActivityItem = memo(ActivityItemComponent);
 
 export default ActivityItem;

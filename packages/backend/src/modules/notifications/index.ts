@@ -14,6 +14,7 @@ export { whatsappService } from './whatsapp.service.js';
 export { smsService } from './sms.service.js';
 export { discordService } from './discord.service.js';
 export { notificationDispatcherService } from './dispatcher.service.js';
+export { pushService } from './push.service.js';
 
 export type {
   CreateNotificationInput,
@@ -63,3 +64,8 @@ export type {
   DeliveryReport,
   DispatchOptions,
 } from './dispatcher.service.js';
+export type {
+  PushSubscriptionInput,
+  PushNotificationPayload,
+  PushSendResult,
+} from './push.service.js';

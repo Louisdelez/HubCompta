@@ -1,11 +1,20 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type PluginOption } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 import path from 'path';
 
 export default defineConfig({
   plugins: [
     react(),
+    // Bundle analyzer - generates stats.html when building
+    visualizer({
+      filename: 'dist/stats.html',
+      open: false, // Set to true to auto-open after build
+      gzipSize: true,
+      brotliSize: true,
+      template: 'treemap', // or 'sunburst', 'network'
+    }) as PluginOption,
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: [
@@ -30,17 +39,61 @@ export default defineConfig({
         dir: 'ltr',
         icons: [
           {
+            src: '/pwa-72x72.png',
+            sizes: '72x72',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/pwa-96x96.png',
+            sizes: '96x96',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/pwa-128x128.png',
+            sizes: '128x128',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/pwa-144x144.png',
+            sizes: '144x144',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/pwa-152x152.png',
+            sizes: '152x152',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
             src: '/pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/pwa-384x384.png',
+            sizes: '384x384',
+            type: 'image/png',
+            purpose: 'any',
           },
           {
             src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
+            purpose: 'any',
           },
           {
-            src: '/pwa-512x512.png',
+            src: '/pwa-maskable-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+          {
+            src: '/pwa-maskable-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
@@ -52,28 +105,42 @@ export default defineConfig({
             short_name: 'Transaction',
             description: 'Ajouter une nouvelle transaction',
             url: '/transactions?action=new',
-            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }],
+            icons: [{ src: '/pwa-96x96.png', sizes: '96x96' }],
           },
           {
             name: 'Tableau de bord',
             short_name: 'Dashboard',
             description: 'Voir le tableau de bord',
             url: '/dashboard',
-            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }],
+            icons: [{ src: '/pwa-96x96.png', sizes: '96x96' }],
           },
           {
             name: 'Comptes',
             short_name: 'Comptes',
             description: 'Voir les comptes',
             url: '/accounts',
-            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }],
+            icons: [{ src: '/pwa-96x96.png', sizes: '96x96' }],
           },
           {
             name: 'Budgets',
             short_name: 'Budgets',
             description: 'Gerer les budgets',
             url: '/budgets',
-            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }],
+            icons: [{ src: '/pwa-96x96.png', sizes: '96x96' }],
+          },
+          {
+            name: 'Scanner un document',
+            short_name: 'Scanner',
+            description: 'Scanner un document ou recu',
+            url: '/documents?action=scan',
+            icons: [{ src: '/pwa-96x96.png', sizes: '96x96' }],
+          },
+          {
+            name: 'Importer des donnees',
+            short_name: 'Import',
+            description: 'Importer des transactions',
+            url: '/import',
+            icons: [{ src: '/pwa-96x96.png', sizes: '96x96' }],
           },
         ],
       },
@@ -225,18 +292,88 @@ export default defineConfig({
   build: {
     target: 'es2022',
     sourcemap: true,
+    // Enable minification
+    minify: 'esbuild',
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Core React libraries - loaded on every page
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          // Data fetching - used across the app
-          query: ['@tanstack/react-query'],
-          // UI libraries - icons and charts
-          ui: ['lucide-react'],
-          charts: ['recharts'],
-          // Form handling (if used)
-          // forms: ['react-hook-form', 'zod'],
+        // Granular vendor chunking for better caching
+        manualChunks: (id: string) => {
+          // React core - loaded on every page (most stable, rarely changes)
+          if (id.includes('node_modules/react/') ||
+              id.includes('node_modules/react-dom/') ||
+              id.includes('node_modules/scheduler/')) {
+            return 'vendor-react';
+          }
+
+          // Router - needed for navigation (stable)
+          if (id.includes('node_modules/react-router') ||
+              id.includes('node_modules/@remix-run/')) {
+            return 'vendor-router';
+          }
+
+          // Data fetching - TanStack Query (relatively stable)
+          if (id.includes('node_modules/@tanstack/')) {
+            return 'vendor-query';
+          }
+
+          // Icons - lucide-react (large, tree-shakeable)
+          if (id.includes('node_modules/lucide-react')) {
+            return 'vendor-icons';
+          }
+
+          // Charts - recharts (large, only loaded when needed)
+          if (id.includes('node_modules/recharts') ||
+              id.includes('node_modules/d3-') ||
+              id.includes('node_modules/victory-vendor')) {
+            return 'vendor-charts';
+          }
+
+          // Forms - react-hook-form
+          if (id.includes('node_modules/react-hook-form')) {
+            return 'vendor-forms';
+          }
+
+          // State management - zustand
+          if (id.includes('node_modules/zustand')) {
+            return 'vendor-state';
+          }
+
+          // Date utilities
+          if (id.includes('node_modules/date-fns')) {
+            return 'vendor-date';
+          }
+
+          // Utilities - clsx, tailwind-merge
+          if (id.includes('node_modules/clsx') ||
+              id.includes('node_modules/tailwind-merge')) {
+            return 'vendor-utils';
+          }
+
+          // PWA/Service worker utilities
+          if (id.includes('node_modules/workbox-') ||
+              id.includes('node_modules/idb')) {
+            return 'vendor-pwa';
+          }
+
+          // Sentry error tracking (loaded async)
+          if (id.includes('node_modules/@sentry/')) {
+            return 'vendor-sentry';
+          }
+
+          // Grid layout (used in dashboard)
+          if (id.includes('node_modules/react-grid-layout')) {
+            return 'vendor-grid';
+          }
+
+          // Onboarding/tour
+          if (id.includes('node_modules/react-joyride')) {
+            return 'vendor-onboarding';
+          }
+
+          // Other vendor modules - group small deps together
+          if (id.includes('node_modules/')) {
+            return 'vendor-misc';
+          }
         },
         // Better chunk naming for debugging
         chunkFileNames: (chunkInfo) => {

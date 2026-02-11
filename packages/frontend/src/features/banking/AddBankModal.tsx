@@ -165,6 +165,10 @@ export function AddBankModal({ workspaceId, onClose }: AddBankModalProps) {
                           src={institution.logo}
                           alt={institution.name}
                           className="w-10 h-10 rounded-lg object-contain bg-white p-1"
+                          loading="lazy"
+                          decoding="async"
+                          width={40}
+                          height={40}
                         />
                       ) : (
                         <div className="w-10 h-10 bg-ctp-surface1 rounded-lg flex items-center justify-center">
@@ -204,6 +208,10 @@ export function AddBankModal({ workspaceId, onClose }: AddBankModalProps) {
                     src={selectedInstitution.logo}
                     alt={selectedInstitution.name}
                     className="w-12 h-12 rounded-lg object-contain bg-white p-1"
+                    loading="lazy"
+                    decoding="async"
+                    width={48}
+                    height={48}
                   />
                 ) : (
                   <div className="w-12 h-12 bg-ctp-surface1 rounded-lg flex items-center justify-center">

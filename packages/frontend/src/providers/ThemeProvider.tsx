@@ -1,6 +1,7 @@
 // ============================================================================
 // THEME PROVIDER - Finance Hub
 // Catppuccin theme support (Latte, Frappé, Macchiato, Mocha)
+// With automatic time-based and system preference switching
 // https://catppuccin.com
 // ============================================================================
 
@@ -11,14 +12,38 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo, t
 // ----------------------------------------------------------------------------
 
 export type CatppuccinFlavor = 'latte' | 'frappe' | 'macchiato' | 'mocha';
-export type Theme = CatppuccinFlavor | 'system';
+export type ThemeMode = 'auto' | 'system' | CatppuccinFlavor;
+/** @deprecated Use ThemeMode instead */
+export type Theme = ThemeMode;
+
+export interface AutoThemeConfig {
+  lightTheme: CatppuccinFlavor;
+  darkTheme: CatppuccinFlavor;
+  lightStart: number; // Hour (0-23) when light theme starts
+  lightEnd: number;   // Hour (0-23) when light theme ends
+}
 
 interface ThemeContextValue {
-  theme: Theme;
+  /** Current theme mode setting */
+  theme: ThemeMode;
+  /** The actual resolved theme after applying auto/system logic */
   resolvedTheme: CatppuccinFlavor;
-  setTheme: (theme: Theme) => void;
+  /** Set the theme mode */
+  setTheme: (theme: ThemeMode) => void;
+  /** Cycle through available themes */
   cycleTheme: () => void;
+  /** Whether the current resolved theme is dark */
   isDark: boolean;
+  /** Whether auto mode is currently active */
+  isAutoMode: boolean;
+  /** Whether system mode is currently active */
+  isSystemMode: boolean;
+  /** Current indicator text for the active mode */
+  modeIndicator: string;
+  /** Auto theme configuration */
+  autoConfig: AutoThemeConfig;
+  /** Update auto theme configuration */
+  setAutoConfig: (config: Partial<AutoThemeConfig>) => void;
 }
 
 // Theme metadata for UI
@@ -118,8 +143,16 @@ export const THEME_META: Record<CatppuccinFlavor, {
 // Constants
 // ----------------------------------------------------------------------------
 
-const STORAGE_KEY = 'finance-hub-catppuccin-theme';
+const STORAGE_KEY = 'theme-mode';
+const STORAGE_KEY_AUTO_CONFIG = 'theme-auto-config';
 const FLAVORS: CatppuccinFlavor[] = ['latte', 'frappe', 'macchiato', 'mocha'];
+
+const DEFAULT_AUTO_CONFIG: AutoThemeConfig = {
+  lightTheme: 'latte',
+  darkTheme: 'mocha',
+  lightStart: 7,  // 7 AM
+  lightEnd: 19,   // 7 PM
+};
 
 // ----------------------------------------------------------------------------
 // Context
@@ -136,13 +169,80 @@ function getSystemTheme(): CatppuccinFlavor {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'mocha' : 'latte';
 }
 
-function getStoredTheme(): Theme {
-  if (typeof window === 'undefined') return 'system';
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored && (FLAVORS.includes(stored as CatppuccinFlavor) || stored === 'system')) {
-    return stored as Theme;
+function getTimeBasedTheme(config: AutoThemeConfig): CatppuccinFlavor {
+  if (typeof window === 'undefined') return config.lightTheme;
+
+  const now = new Date();
+  const currentHour = now.getHours();
+
+  // Handle normal range (e.g., 7-19)
+  if (config.lightStart < config.lightEnd) {
+    const isDaytime = currentHour >= config.lightStart && currentHour < config.lightEnd;
+    return isDaytime ? config.lightTheme : config.darkTheme;
   }
+
+  // Handle overnight range (e.g., 22-6 would mean light from 10pm to 6am)
+  const isDaytime = currentHour >= config.lightStart || currentHour < config.lightEnd;
+  return isDaytime ? config.lightTheme : config.darkTheme;
+}
+
+function getStoredTheme(): ThemeMode {
+  if (typeof window === 'undefined') return 'system';
+
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored && (FLAVORS.includes(stored as CatppuccinFlavor) || stored === 'system' || stored === 'auto')) {
+    return stored as ThemeMode;
+  }
+
+  // Migration: check for old storage key
+  const oldKey = 'finance-hub-catppuccin-theme';
+  const oldStored = localStorage.getItem(oldKey);
+  if (oldStored && (FLAVORS.includes(oldStored as CatppuccinFlavor) || oldStored === 'system')) {
+    // Migrate to new key
+    localStorage.setItem(STORAGE_KEY, oldStored);
+    localStorage.removeItem(oldKey);
+    return oldStored as ThemeMode;
+  }
+
   return 'system';
+}
+
+function getStoredAutoConfig(): AutoThemeConfig {
+  if (typeof window === 'undefined') return DEFAULT_AUTO_CONFIG;
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY_AUTO_CONFIG);
+    if (stored) {
+      const parsed = JSON.parse(stored) as Partial<AutoThemeConfig>;
+      return { ...DEFAULT_AUTO_CONFIG, ...parsed };
+    }
+  } catch {
+    // Ignore parse errors
+  }
+
+  return DEFAULT_AUTO_CONFIG;
+}
+
+function getModeIndicator(theme: ThemeMode, resolvedTheme: CatppuccinFlavor, config: AutoThemeConfig): string {
+  if (theme === 'auto') {
+    const now = new Date();
+    const currentHour = now.getHours();
+    let isDaytime: boolean;
+
+    if (config.lightStart < config.lightEnd) {
+      isDaytime = currentHour >= config.lightStart && currentHour < config.lightEnd;
+    } else {
+      isDaytime = currentHour >= config.lightStart || currentHour < config.lightEnd;
+    }
+
+    return isDaytime ? 'Jour' : 'Nuit';
+  }
+
+  if (theme === 'system') {
+    return THEME_META[resolvedTheme].isDark ? 'Sombre' : 'Clair';
+  }
+
+  return THEME_META[resolvedTheme].labelFr;
 }
 
 function applyTheme(flavor: CatppuccinFlavor): void {
@@ -167,17 +267,35 @@ function applyTheme(flavor: CatppuccinFlavor): void {
 
 interface ThemeProviderProps {
   children: ReactNode;
-  defaultTheme?: Theme;
+  defaultTheme?: ThemeMode;
 }
 
 export function ThemeProvider({ children, defaultTheme }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(() => defaultTheme ?? getStoredTheme());
+  const [theme, setThemeState] = useState<ThemeMode>(() => defaultTheme ?? getStoredTheme());
   const [systemTheme, setSystemTheme] = useState<CatppuccinFlavor>(getSystemTheme);
+  const [autoConfig, setAutoConfigState] = useState<AutoThemeConfig>(getStoredAutoConfig);
+  const [timeBasedTheme, setTimeBasedTheme] = useState<CatppuccinFlavor>(() =>
+    getTimeBasedTheme(autoConfig)
+  );
 
-  // Compute resolved theme using useMemo instead of setState in effect
+  // Compute resolved theme based on mode
   const resolvedTheme = useMemo<CatppuccinFlavor>(() => {
-    return theme === 'system' ? systemTheme : theme;
-  }, [theme, systemTheme]);
+    if (theme === 'auto') {
+      return timeBasedTheme;
+    }
+    if (theme === 'system') {
+      return systemTheme;
+    }
+    return theme;
+  }, [theme, systemTheme, timeBasedTheme]);
+
+  // Mode indicators
+  const isAutoMode = theme === 'auto';
+  const isSystemMode = theme === 'system';
+  const modeIndicator = useMemo(
+    () => getModeIndicator(theme, resolvedTheme, autoConfig),
+    [theme, resolvedTheme, autoConfig]
+  );
 
   // Apply theme on mount and when theme changes
   useEffect(() => {
@@ -197,23 +315,100 @@ export function ThemeProvider({ children, defaultTheme }: ThemeProviderProps) {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  const setTheme = useCallback((newTheme: Theme) => {
+  // Time-based theme updates for auto mode
+  useEffect(() => {
+    if (theme !== 'auto') return;
+
+    const checkTime = () => {
+      const newTheme = getTimeBasedTheme(autoConfig);
+      setTimeBasedTheme(newTheme);
+    };
+
+    // Check immediately
+    checkTime();
+
+    // Check every minute
+    const intervalId = setInterval(checkTime, 60 * 1000);
+
+    // Calculate time until next change and set a timeout
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinutes = now.getMinutes();
+    const currentSeconds = now.getSeconds();
+
+    let nextChangeHour: number;
+    if (autoConfig.lightStart < autoConfig.lightEnd) {
+      if (currentHour < autoConfig.lightStart) {
+        nextChangeHour = autoConfig.lightStart;
+      } else if (currentHour < autoConfig.lightEnd) {
+        nextChangeHour = autoConfig.lightEnd;
+      } else {
+        nextChangeHour = autoConfig.lightStart + 24;
+      }
+    } else {
+      if (currentHour < autoConfig.lightEnd) {
+        nextChangeHour = autoConfig.lightEnd;
+      } else if (currentHour < autoConfig.lightStart) {
+        nextChangeHour = autoConfig.lightStart;
+      } else {
+        nextChangeHour = autoConfig.lightEnd + 24;
+      }
+    }
+
+    const msUntilChange =
+      ((nextChangeHour - currentHour) * 60 * 60 * 1000) -
+      (currentMinutes * 60 * 1000) -
+      (currentSeconds * 1000);
+
+    const timeoutId = setTimeout(checkTime, msUntilChange);
+
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(timeoutId);
+    };
+  }, [theme, autoConfig]);
+
+  const setTheme = useCallback((newTheme: ThemeMode) => {
     setThemeState(newTheme);
+  }, []);
+
+  const setAutoConfig = useCallback((config: Partial<AutoThemeConfig>) => {
+    setAutoConfigState((prev) => {
+      const newConfig = { ...prev, ...config };
+      localStorage.setItem(STORAGE_KEY_AUTO_CONFIG, JSON.stringify(newConfig));
+      return newConfig;
+    });
   }, []);
 
   const cycleTheme = useCallback(() => {
     setThemeState((current) => {
-      const allOptions: Theme[] = [...FLAVORS, 'system'];
+      const allOptions: ThemeMode[] = ['auto', 'system', ...FLAVORS];
       const currentIndex = allOptions.indexOf(current);
       const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % allOptions.length;
-      return allOptions[nextIndex] as Theme;
+      return allOptions[nextIndex] as ThemeMode;
     });
   }, []);
 
   const isDark = THEME_META[resolvedTheme].isDark;
 
+  const value = useMemo<ThemeContextValue>(
+    () => ({
+      theme,
+      resolvedTheme,
+      setTheme,
+      cycleTheme,
+      isDark,
+      isAutoMode,
+      isSystemMode,
+      modeIndicator,
+      autoConfig,
+      setAutoConfig,
+    }),
+    [theme, resolvedTheme, setTheme, cycleTheme, isDark, isAutoMode, isSystemMode, modeIndicator, autoConfig, setAutoConfig]
+  );
+
   return (
-    <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, cycleTheme, isDark }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );

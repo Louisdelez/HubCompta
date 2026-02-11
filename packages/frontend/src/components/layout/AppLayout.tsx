@@ -4,6 +4,7 @@
 
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { clsx } from 'clsx';
 import { GlobalSearchBar } from '@/features/search';
@@ -52,49 +53,51 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { OfflineIndicator } from '@/components/ui/OfflineIndicator';
+import { OfflineIndicator, OfflineBanner } from '@/components/ui/OfflineIndicator';
 import { CurrencyToggle } from '@/components/ui/CurrencyToggle';
+import { InstallPromptBanner, InstallButton } from '@/components/ui/InstallPrompt';
+import { MobileNavigation } from './MobileNavigation';
 
 // ----------------------------------------------------------------------------
 // Navigation Items
 // ----------------------------------------------------------------------------
 
 interface NavItem {
-  name: string;
+  nameKey: string;
   href: string;
   icon: LucideIcon;
   onboardingKey?: string;
 }
 
 const mainNavItems: NavItem[] = [
-  { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Transactions', href: '/transactions', icon: CreditCard, onboardingKey: 'transactions' },
-  { name: 'Comptes', href: '/accounts', icon: Landmark, onboardingKey: 'accounts' },
-  { name: 'Budgets', href: '/budgets', icon: TrendingUp, onboardingKey: 'budgets' },
-  { name: 'Epargne', href: '/savings', icon: Target },
-  { name: 'Prets', href: '/loans', icon: Coins },
-  { name: 'Investissements', href: '/portfolio', icon: LineChart },
-  { name: 'Patrimoine', href: '/networth', icon: Scale },
-  { name: 'Documents', href: '/documents', icon: FileText },
+  { nameKey: 'navigation.dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { nameKey: 'navigation.transactions', href: '/transactions', icon: CreditCard, onboardingKey: 'transactions' },
+  { nameKey: 'navigation.accounts', href: '/accounts', icon: Landmark, onboardingKey: 'accounts' },
+  { nameKey: 'navigation.budgets', href: '/budgets', icon: TrendingUp, onboardingKey: 'budgets' },
+  { nameKey: 'navigation.savings', href: '/savings', icon: Target },
+  { nameKey: 'navigation.loans', href: '/loans', icon: Coins },
+  { nameKey: 'navigation.investments', href: '/portfolio', icon: LineChart },
+  { nameKey: 'navigation.netWorth', href: '/networth', icon: Scale },
+  { nameKey: 'navigation.documents', href: '/documents', icon: FileText },
 ];
 
 const secondaryNavItems: NavItem[] = [
-  { name: 'Banque', href: '/banking', icon: Building2 },
-  { name: 'Recurrences', href: '/recurrences', icon: RefreshCw },
-  { name: 'Programmees', href: '/scheduled', icon: CalendarClock },
-  { name: 'Factures', href: '/bills', icon: Receipt },
-  { name: 'Equilibre', href: '/settlement', icon: Users },
-  { name: 'Previsions', href: '/forecast', icon: BarChart3 },
-  { name: 'Fiscalite', href: '/tax', icon: Calculator },
-  { name: 'Import', href: '/import', icon: Download },
-  { name: 'Export', href: '/export', icon: Upload },
-  { name: 'Regles', href: '/rules', icon: SlidersHorizontal },
-  { name: 'IA', href: '/categorization', icon: Sparkles },
-  { name: 'Rapports', href: '/reports', icon: ClipboardList },
-  { name: 'Devises', href: '/currencies', icon: BadgeDollarSign },
-  { name: 'Recherche', href: '/search', icon: Search },
-  { name: 'Succes', href: '/achievements', icon: Trophy },
-  { name: 'Activite', href: '/activity', icon: Activity },
+  { nameKey: 'navigation.banking', href: '/banking', icon: Building2 },
+  { nameKey: 'navigation.recurrences', href: '/recurrences', icon: RefreshCw },
+  { nameKey: 'navigation.scheduled', href: '/scheduled', icon: CalendarClock },
+  { nameKey: 'navigation.bills', href: '/bills', icon: Receipt },
+  { nameKey: 'navigation.settlement', href: '/settlement', icon: Users },
+  { nameKey: 'navigation.forecast', href: '/forecast', icon: BarChart3 },
+  { nameKey: 'navigation.tax', href: '/tax', icon: Calculator },
+  { nameKey: 'navigation.import', href: '/import', icon: Download },
+  { nameKey: 'navigation.export', href: '/export', icon: Upload },
+  { nameKey: 'navigation.rules', href: '/rules', icon: SlidersHorizontal },
+  { nameKey: 'navigation.ai', href: '/categorization', icon: Sparkles },
+  { nameKey: 'navigation.reports', href: '/reports', icon: ClipboardList },
+  { nameKey: 'navigation.currencies', href: '/currencies', icon: BadgeDollarSign },
+  { nameKey: 'navigation.search', href: '/search', icon: Search },
+  { nameKey: 'navigation.achievements', href: '/achievements', icon: Trophy },
+  { nameKey: 'navigation.activity', href: '/activity', icon: Activity },
 ];
 
 // ----------------------------------------------------------------------------
@@ -110,6 +113,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { prefetchOnHover } = usePrefetch();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     await logout();
@@ -123,6 +127,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
 
@@ -133,6 +138,8 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
           'fixed inset-y-0 left-0 z-50 w-64 bg-ctp-mantle border-r border-ctp-surface0 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:h-screen lg:sticky lg:top-0',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
+        aria-label="Navigation principale"
+        aria-hidden={!isOpen && typeof window !== 'undefined' && window.innerWidth < 1024}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
@@ -144,55 +151,57 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 overflow-y-auto">
-            <div className="space-y-1">
+          <nav className="flex-1 px-3 py-4 overflow-y-auto" aria-label="Menu principal">
+            <ul className="space-y-1" role="list">
               {mainNavItems.map((item) => (
-                <NavLink
-                  key={item.href}
-                  to={item.href}
-                  data-onboarding={item.onboardingKey}
-                  className={({ isActive }) =>
-                    clsx(
-                      'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-ctp-blue/20 text-ctp-blue'
-                        : 'text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text'
-                    )
-                  }
-                  onClick={() => onClose()}
-                  onMouseEnter={() => prefetchOnHover(item.href)}
-                  onFocus={() => prefetchOnHover(item.href)}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.name}</span>
-                </NavLink>
+                <li key={item.href}>
+                  <NavLink
+                    to={item.href}
+                    data-onboarding={item.onboardingKey}
+                    className={({ isActive }) =>
+                      clsx(
+                        'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-blue focus-visible:ring-inset',
+                        isActive
+                          ? 'bg-ctp-blue/20 text-ctp-blue'
+                          : 'text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text'
+                      )
+                    }
+                    onClick={() => onClose()}
+                    onMouseEnter={() => prefetchOnHover(item.href)}
+                    onFocus={() => prefetchOnHover(item.href)}
+                  >
+                    <item.icon className="w-5 h-5" aria-hidden="true" />
+                    <span>{t(item.nameKey)}</span>
+                  </NavLink>
+                </li>
               ))}
-            </div>
+            </ul>
 
-            <div className="my-4 border-t border-ctp-surface0" />
+            <div className="my-4 border-t border-ctp-surface0" role="separator" aria-hidden="true" />
 
-            <div className="space-y-1">
+            <ul className="space-y-1" role="list">
               {secondaryNavItems.map((item) => (
-                <NavLink
-                  key={item.href}
-                  to={item.href}
-                  className={({ isActive }) =>
-                    clsx(
-                      'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-ctp-blue/20 text-ctp-blue'
-                        : 'text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text'
-                    )
-                  }
-                  onClick={() => onClose()}
-                  onMouseEnter={() => prefetchOnHover(item.href)}
-                  onFocus={() => prefetchOnHover(item.href)}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.name}</span>
-                </NavLink>
+                <li key={item.href}>
+                  <NavLink
+                    to={item.href}
+                    className={({ isActive }) =>
+                      clsx(
+                        'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-blue focus-visible:ring-inset',
+                        isActive
+                          ? 'bg-ctp-blue/20 text-ctp-blue'
+                          : 'text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text'
+                      )
+                    }
+                    onClick={() => onClose()}
+                    onMouseEnter={() => prefetchOnHover(item.href)}
+                    onFocus={() => prefetchOnHover(item.href)}
+                  >
+                    <item.icon className="w-5 h-5" aria-hidden="true" />
+                    <span>{t(item.nameKey)}</span>
+                  </NavLink>
+                </li>
               ))}
-            </div>
+            </ul>
           </nav>
 
           {/* User menu */}
@@ -229,7 +238,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                   onFocus={() => prefetchOnHover('/admin')}
                 >
                   <Shield className="w-5 h-5" />
-                  <span>Administration</span>
+                  <span>{t('navigation.administration')}</span>
                 </NavLink>
               )}
               <NavLink
@@ -248,14 +257,14 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
                 onFocus={() => prefetchOnHover('/settings')}
               >
                 <Settings className="w-5 h-5" />
-                <span>Parametres</span>
+                <span>{t('navigation.settings')}</span>
               </NavLink>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-ctp-red hover:bg-ctp-red/10 w-full"
               >
                 <LogOut className="w-5 h-5" />
-                <span>Deconnexion</span>
+                <span>{t('navigation.logout')}</span>
               </button>
             </div>
           </div>
@@ -320,6 +329,9 @@ function Header({ onMenuClick, onCreateWorkspace }: HeaderProps) {
         <div className="flex items-center gap-2">
           {/* Offline Indicator */}
           <OfflineIndicator compact />
+
+          {/* Install Button (PWA) */}
+          <InstallButton className="hidden sm:flex" />
 
           {/* Currency Toggle */}
           {currentWorkspace?.id && <CurrencyToggle workspaceId={currentWorkspace.id} />}
@@ -398,6 +410,7 @@ function AppLayoutContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showCreateWorkspace, setShowCreateWorkspace] = useState(false);
   const { switchWorkspace } = useWorkspace();
+  const { t } = useTranslation();
 
   const handleWorkspaceCreated = (workspaceId: string) => {
     switchWorkspace(workspaceId);
@@ -421,8 +434,11 @@ function AppLayoutContent() {
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-ctp-blue focus:text-ctp-crust focus:rounded-lg focus:font-medium focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-ctp-sapphire focus:ring-offset-2 focus:ring-offset-ctp-base"
         >
-          Aller au contenu principal
+          {t('navigation.skipToMain')}
         </a>
+
+        {/* Offline Banner - shown at top when offline */}
+        <OfflineBanner />
 
         <div className="flex">
           <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -433,11 +449,21 @@ function AppLayoutContent() {
               onCreateWorkspace={() => setShowCreateWorkspace(true)}
             />
 
-            <main id="main-content" className="flex-1 safe-area-inset-bottom" tabIndex={-1}>
+            <main
+              id="main-content"
+              className="flex-1 pb-20 lg:pb-0 safe-area-inset-bottom"
+              tabIndex={-1}
+            >
               <Outlet />
             </main>
           </div>
         </div>
+
+        {/* Mobile Bottom Navigation - shown only on mobile */}
+        <MobileNavigation />
+
+        {/* PWA Install Prompt */}
+        <InstallPromptBanner />
 
         {/* Create Workspace Modal */}
         <CreateWorkspaceModal

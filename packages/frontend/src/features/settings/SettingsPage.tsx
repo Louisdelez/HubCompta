@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   User,
   Monitor,
@@ -13,6 +14,7 @@ import {
   Shield,
   Database,
   FileText,
+  Globe,
   ChevronRight,
   ArrowLeft,
 } from 'lucide-react';
@@ -22,12 +24,13 @@ import { NotificationSettings } from './NotificationSettings';
 import { SecuritySettings } from './SecuritySettings';
 import { DataManagement } from './DataManagement';
 import { AuditLogPage } from './AuditLogPage';
+import { LanguageSettings } from './LanguageSettings';
 
 // ----------------------------------------------------------------------------
 // Types
 // ----------------------------------------------------------------------------
 
-type SettingsSection = 'profile' | 'display' | 'notifications' | 'security' | 'audit' | 'data';
+type SettingsSection = 'profile' | 'display' | 'language' | 'notifications' | 'security' | 'audit' | 'data';
 
 interface NavItem {
   id: SettingsSection;
@@ -44,6 +47,7 @@ interface NavItem {
 const sectionColors: Record<SettingsSection, string> = {
   profile: 'text-ctp-blue',
   display: 'text-ctp-mauve',
+  language: 'text-ctp-green',
   notifications: 'text-ctp-yellow',
   security: 'text-ctp-red',
   audit: 'text-ctp-teal',
@@ -54,47 +58,55 @@ const sectionColors: Record<SettingsSection, string> = {
 const sectionBgColors: Record<SettingsSection, string> = {
   profile: 'bg-ctp-blue/20',
   display: 'bg-ctp-mauve/20',
+  language: 'bg-ctp-green/20',
   notifications: 'bg-ctp-yellow/20',
   security: 'bg-ctp-red/20',
   audit: 'bg-ctp-teal/20',
   data: 'bg-ctp-peach/20',
 };
 
-const navItems: NavItem[] = [
+// Navigation items are now dynamic based on translations
+const getNavItems = (t: (key: string) => string): NavItem[] => [
   {
     id: 'profile',
-    label: 'Profil',
-    description: 'Informations personnelles et preferences',
+    label: t('settings.profile.title'),
+    description: t('settings.profile.description'),
     icon: User,
   },
   {
     id: 'display',
-    label: 'Affichage',
-    description: 'Theme, format et tableau de bord',
+    label: t('settings.display.title'),
+    description: t('settings.display.description'),
     icon: Monitor,
   },
   {
+    id: 'language',
+    label: t('settings.language.title'),
+    description: t('settings.language.description'),
+    icon: Globe,
+  },
+  {
     id: 'notifications',
-    label: 'Notifications',
-    description: 'Email, push et alertes',
+    label: t('settings.notifications.title'),
+    description: t('settings.notifications.description'),
     icon: Bell,
   },
   {
     id: 'security',
-    label: 'Securite',
-    description: 'MFA, appareils et sessions',
+    label: t('settings.security.title'),
+    description: t('settings.security.description'),
     icon: Shield,
   },
   {
     id: 'audit',
-    label: 'Journal d\'audit',
-    description: 'Historique des actions sensibles',
+    label: t('settings.audit.title'),
+    description: t('settings.audit.description'),
     icon: FileText,
   },
   {
     id: 'data',
-    label: 'Donnees',
-    description: 'Export et suppression de compte',
+    label: t('settings.data.title'),
+    description: t('settings.data.description'),
     icon: Database,
   },
 ];
@@ -105,6 +117,8 @@ const navItems: NavItem[] = [
 
 export function SettingsPage() {
   const location = useLocation();
+  const { t } = useTranslation();
+  const navItems = getNavItems(t);
   const [activeSection, setActiveSection] = useState<SettingsSection>(() => {
     const hash = location.hash.replace('#', '') as SettingsSection;
     return navItems.find((item) => item.id === hash)?.id ?? 'profile';
@@ -121,6 +135,8 @@ export function SettingsPage() {
         return <ProfileSettings />;
       case 'display':
         return <DisplaySettings />;
+      case 'language':
+        return <LanguageSettings />;
       case 'notifications':
         return <NotificationSettings />;
       case 'security':
@@ -144,11 +160,11 @@ export function SettingsPage() {
             className="inline-flex items-center gap-2 text-sm text-ctp-subtext0 hover:text-ctp-text mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
-            Retour au tableau de bord
+            {t('settings.backToDashboard')}
           </Link>
-          <h1 className="text-2xl font-bold text-ctp-text">Parametres</h1>
+          <h1 className="text-2xl font-bold text-ctp-text">{t('settings.title')}</h1>
           <p className="text-ctp-subtext0">
-            Gerez votre compte et vos preferences
+            {t('settings.manageAccount')}
           </p>
         </div>
 
@@ -206,16 +222,16 @@ export function SettingsPage() {
             {/* Workspace Settings Link */}
             <div className="mt-6 bg-ctp-mantle rounded-lg shadow p-4">
               <h3 className="text-sm font-medium text-ctp-text mb-2">
-                Parametres workspace
+                {t('settings.workspace.title')}
               </h3>
               <p className="text-xs text-ctp-subtext0 mb-3">
-                Configurez les parametres specifiques a chaque workspace
+                {t('settings.workspace.description')}
               </p>
               <Link
                 to="/workspaces"
                 className="text-sm text-ctp-blue hover:text-ctp-sapphire font-medium"
               >
-                Gerer les workspaces
+                {t('settings.workspace.manage')}
               </Link>
             </div>
           </aside>

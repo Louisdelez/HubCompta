@@ -311,10 +311,16 @@ export function PageLoading({ text, showSkeleton = false }: PageLoadingProps) {
 
 export function FullScreenLoading({ text = 'Loading...' }: { text?: string }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ctp-base/80 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ctp-base/80 backdrop-blur-sm"
+      role="status"
+      aria-label={text}
+      aria-live="polite"
+    >
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="w-12 h-12 animate-spin text-ctp-blue" />
+        <Loader2 className="w-12 h-12 animate-spin text-ctp-blue" aria-hidden="true" />
         <p className="text-lg font-medium text-ctp-text">{text}</p>
+        <span className="sr-only">{text}</span>
       </div>
     </div>
   );

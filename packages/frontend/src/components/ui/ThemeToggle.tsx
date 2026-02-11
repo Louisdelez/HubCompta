@@ -1,22 +1,23 @@
 // ============================================================================
 // THEME TOGGLE - Finance Hub
-// Catppuccin theme selector with light/dark/system options
+// Catppuccin theme selector with auto/system/manual options
 // ============================================================================
 
 import { useState, useRef, useEffect } from 'react';
-import { Sun, Moon, Monitor, Palette, Check, type LucideIcon } from 'lucide-react';
+import { Sun, Moon, Monitor, Palette, Check, Clock, type LucideIcon } from 'lucide-react';
 import { clsx } from 'clsx';
-import { useTheme, THEME_META, type CatppuccinFlavor, type Theme } from '@/providers/ThemeProvider';
+import { useTheme, THEME_META, type CatppuccinFlavor, type ThemeMode } from '@/providers/ThemeProvider';
 
 // ----------------------------------------------------------------------------
 // Types
 // ----------------------------------------------------------------------------
 
 interface ThemeOption {
-  value: Theme;
+  value: ThemeMode;
   label: string;
   description: string;
   icon: LucideIcon;
+  badge?: string;
 }
 
 // ----------------------------------------------------------------------------
@@ -24,6 +25,13 @@ interface ThemeOption {
 // ----------------------------------------------------------------------------
 
 const THEME_OPTIONS: ThemeOption[] = [
+  {
+    value: 'auto',
+    label: 'Automatique',
+    description: 'Clair 7h-19h, sombre la nuit',
+    icon: Clock,
+    badge: 'Nouveau',
+  },
   {
     value: 'system',
     label: 'Systeme',
@@ -74,7 +82,7 @@ export function ThemeToggle({
   variant = 'icon',
   size = 'md',
 }: ThemeToggleProps) {
-  const { theme, setTheme, isDark } = useTheme();
+  const { theme, setTheme, isDark, isAutoMode, isSystemMode, modeIndicator } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -122,7 +130,15 @@ export function ThemeToggle({
 
   // Render the appropriate icon based on theme
   const renderThemeIcon = () => {
-    const iconClass = iconSizeClasses[size];
+    const iconClass = clsx(iconSizeClasses[size], 'transition-transform duration-300');
+    if (theme === 'auto') {
+      return (
+        <div className="relative">
+          {isDark ? <Moon className={iconClass} /> : <Sun className={iconClass} />}
+          <Clock className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 text-ctp-mauve" />
+        </div>
+      );
+    }
     if (theme === 'system') {
       return isDark ? <Moon className={iconClass} /> : <Sun className={iconClass} />;
     }
@@ -160,7 +176,7 @@ export function ThemeToggle({
         <div
           className={clsx(
             'absolute right-0 top-full mt-2 z-50',
-            'w-72 rounded-xl overflow-hidden',
+            'w-80 rounded-xl overflow-hidden',
             'bg-ctp-base border border-ctp-surface1',
             'shadow-lg shadow-black/20',
             'animate-in fade-in-0 zoom-in-95 duration-100'
@@ -168,13 +184,27 @@ export function ThemeToggle({
           role="listbox"
           aria-label="Theme selection"
         >
-          {/* Header */}
+          {/* Header with current mode indicator */}
           <div className="px-4 py-3 border-b border-ctp-surface0">
-            <div className="flex items-center gap-2">
-              <Palette className="w-4 h-4 text-ctp-mauve" />
-              <span className="text-sm font-semibold text-ctp-text">
-                Theme Catppuccin
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Palette className="w-4 h-4 text-ctp-mauve" />
+                <span className="text-sm font-semibold text-ctp-text">
+                  Theme Catppuccin
+                </span>
+              </div>
+              {/* Mode indicator badge */}
+              {(isAutoMode || isSystemMode) && (
+                <span className={clsx(
+                  'text-xs px-2 py-0.5 rounded-full font-medium',
+                  'bg-ctp-surface0 text-ctp-subtext1',
+                  'flex items-center gap-1'
+                )}>
+                  {isAutoMode && <Clock className="w-3 h-3" />}
+                  {isSystemMode && <Monitor className="w-3 h-3" />}
+                  {modeIndicator}
+                </span>
+              )}
             </div>
             <p className="text-xs text-ctp-subtext0 mt-1">
               Choisissez votre palette de couleurs
@@ -182,12 +212,70 @@ export function ThemeToggle({
           </div>
 
           {/* Theme Options */}
-          <div className="p-2">
-            {THEME_OPTIONS.map((option) => {
+          <div className="p-2 space-y-0.5">
+            {/* Auto and System options group */}
+            <div className="pb-2 mb-2 border-b border-ctp-surface0">
+              {THEME_OPTIONS.filter(opt => opt.value === 'auto' || opt.value === 'system').map((option) => {
+                const isSelected = theme === option.value;
+                const OptionIcon = option.icon;
+
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setTheme(option.value);
+                      setIsOpen(false);
+                    }}
+                    className={clsx(
+                      'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg',
+                      'transition-all duration-200',
+                      isSelected
+                        ? 'bg-ctp-mauve/15 text-ctp-mauve'
+                        : 'text-ctp-text hover:bg-ctp-surface0'
+                    )}
+                    role="option"
+                    aria-selected={isSelected}
+                  >
+                    {/* Icon */}
+                    <div
+                      className={clsx(
+                        'flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200',
+                        isSelected
+                          ? 'bg-ctp-mauve/20'
+                          : 'bg-ctp-surface0'
+                      )}
+                    >
+                      <OptionIcon className="w-4 h-4" />
+                    </div>
+
+                    {/* Label and description */}
+                    <div className="flex-1 text-left min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">{option.label}</span>
+                        {option.badge && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-ctp-mauve/20 text-ctp-mauve font-medium">
+                            {option.badge}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-ctp-subtext0 truncate">
+                        {option.description}
+                      </div>
+                    </div>
+
+                    {/* Selected checkmark */}
+                    {isSelected && (
+                      <Check className="w-4 h-4 flex-shrink-0 text-ctp-mauve" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Manual theme options */}
+            {THEME_OPTIONS.filter(opt => opt.value !== 'auto' && opt.value !== 'system').map((option) => {
               const isSelected = theme === option.value;
-              const meta = option.value !== 'system'
-                ? THEME_META[option.value as CatppuccinFlavor]
-                : null;
+              const meta = THEME_META[option.value as CatppuccinFlavor];
               const OptionIcon = option.icon;
 
               return (
@@ -199,7 +287,7 @@ export function ThemeToggle({
                   }}
                   className={clsx(
                     'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg',
-                    'transition-colors duration-100',
+                    'transition-all duration-200',
                     isSelected
                       ? 'bg-ctp-blue/15 text-ctp-blue'
                       : 'text-ctp-text hover:bg-ctp-surface0'
@@ -210,7 +298,7 @@ export function ThemeToggle({
                   {/* Icon */}
                   <div
                     className={clsx(
-                      'flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center',
+                      'flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200',
                       isSelected
                         ? 'bg-ctp-blue/20'
                         : 'bg-ctp-surface0'
@@ -231,28 +319,21 @@ export function ThemeToggle({
                   {meta && (
                     <div className="flex-shrink-0 flex gap-1">
                       <span
-                        className="w-3 h-3 rounded-full ring-1 ring-inset ring-black/10"
+                        className="w-3 h-3 rounded-full ring-1 ring-inset ring-black/10 transition-transform duration-200 hover:scale-125"
                         style={{ backgroundColor: meta.colors.base }}
                         title="Base"
                       />
                       <span
-                        className="w-3 h-3 rounded-full ring-1 ring-inset ring-black/10"
+                        className="w-3 h-3 rounded-full ring-1 ring-inset ring-black/10 transition-transform duration-200 hover:scale-125"
                         style={{ backgroundColor: meta.colors.blue }}
                         title="Accent"
                       />
                       <span
-                        className="w-3 h-3 rounded-full ring-1 ring-inset ring-black/10"
+                        className="w-3 h-3 rounded-full ring-1 ring-inset ring-black/10 transition-transform duration-200 hover:scale-125"
                         style={{ backgroundColor: meta.colors.green }}
                         title="Success"
                       />
                     </div>
-                  )}
-
-                  {/* System indicator */}
-                  {option.value === 'system' && !isSelected && (
-                    <span className="flex-shrink-0 text-xs text-ctp-subtext0 bg-ctp-surface0 px-2 py-0.5 rounded">
-                      Auto
-                    </span>
                   )}
 
                   {/* Selected checkmark */}
@@ -288,7 +369,7 @@ export function ThemeQuickToggle({
   className,
   size = 'md',
 }: ThemeQuickToggleProps) {
-  const { theme, cycleTheme, isDark } = useTheme();
+  const { theme, cycleTheme, isDark, modeIndicator } = useTheme();
 
   const sizeClasses = {
     sm: 'p-1.5',
@@ -306,7 +387,15 @@ export function ThemeQuickToggle({
 
   // Render the appropriate icon based on theme
   const renderThemeIcon = () => {
-    const iconClass = clsx(iconSizeClasses[size], 'transition-transform duration-200');
+    const iconClass = clsx(iconSizeClasses[size], 'transition-transform duration-300');
+    if (theme === 'auto') {
+      return (
+        <div className="relative">
+          {isDark ? <Moon className={iconClass} /> : <Sun className={iconClass} />}
+          <Clock className="absolute -bottom-0.5 -right-0.5 w-2 h-2 text-ctp-mauve" />
+        </div>
+      );
+    }
     if (theme === 'system') {
       return isDark ? <Moon className={iconClass} /> : <Sun className={iconClass} />;
     }
@@ -327,8 +416,8 @@ export function ThemeQuickToggle({
         sizeClasses[size],
         className
       )}
-      aria-label={`Theme: ${currentOption?.label ?? 'Unknown'}. Cliquez pour changer.`}
-      title={`Theme: ${currentOption?.label ?? 'Unknown'}`}
+      aria-label={`Theme: ${currentOption?.label ?? 'Unknown'} (${modeIndicator}). Cliquez pour changer.`}
+      title={`Theme: ${currentOption?.label ?? 'Unknown'} (${modeIndicator})`}
     >
       {renderThemeIcon()}
     </button>

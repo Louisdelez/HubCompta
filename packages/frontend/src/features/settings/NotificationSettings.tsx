@@ -21,6 +21,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { PushNotificationCard } from './PushNotificationCard';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -277,7 +278,10 @@ export function NotificationSettings() {
         )}
       </div>
 
-      {/* Push Notifications */}
+      {/* Push Notifications - Device Subscription */}
+      <PushNotificationCard />
+
+      {/* Push Notification Preferences */}
       <div className="bg-ctp-mantle rounded-lg shadow">
         <div className="px-6 py-4 border-b border-ctp-surface1">
           <div className="flex items-center justify-between">
@@ -285,10 +289,10 @@ export function NotificationSettings() {
               <Smartphone className="h-5 w-5 text-ctp-yellow" />
               <div>
                 <h2 className="text-lg font-semibold text-ctp-text">
-                  Notifications push
+                  Preferences push
                 </h2>
                 <p className="text-sm text-ctp-subtext0">
-                  Recevez des notifications sur votre appareil
+                  Types de notifications push a recevoir
                 </p>
               </div>
             </div>

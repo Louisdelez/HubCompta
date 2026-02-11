@@ -101,70 +101,85 @@ export function CurrencyToggle({ workspaceId, className = '' }: CurrencyTogglePr
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={clsx(
-          'p-2 rounded-lg transition-colors relative',
+          'p-2 rounded-lg transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-blue focus-visible:ring-offset-2',
           'hover:bg-ctp-surface0 text-ctp-subtext1 hover:text-ctp-text',
           isOpen && 'bg-ctp-surface0 text-ctp-text',
           displayMode === 'converted' && 'text-ctp-blue'
         )}
+        aria-label={`Affichage des devises: ${displayMode === 'original' ? 'Devises originales' : `Tout en ${effectiveDisplayCurrency}`}`}
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
         title={`Affichage: ${displayMode === 'original' ? 'Devises originales' : `Tout en ${effectiveDisplayCurrency}`}`}
       >
-        <Coins className="w-5 h-5" />
+        <Coins className="w-5 h-5" aria-hidden="true" />
         {displayMode === 'converted' && (
-          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-ctp-blue rounded-full" />
+          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-ctp-blue rounded-full" aria-hidden="true" />
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-ctp-surface0 border border-ctp-surface1 rounded-xl shadow-lg overflow-hidden z-50">
+        <div
+          className="absolute right-0 mt-2 w-64 bg-ctp-surface0 border border-ctp-surface1 rounded-xl shadow-lg overflow-hidden z-50"
+          role="menu"
+          aria-label="Options d'affichage des devises"
+        >
           {/* Header */}
           <div className="px-4 py-3 border-b border-ctp-surface1 flex items-center justify-between">
-            <span className="font-medium text-sm">Affichage des devises</span>
+            <span className="font-medium text-sm text-ctp-text">Affichage des devises</span>
             <button
               onClick={() => void refetch()}
               disabled={isLoading}
-              className="p-1 rounded hover:bg-ctp-surface1 text-ctp-subtext0"
+              aria-disabled={isLoading}
+              aria-busy={isLoading}
+              className="p-1 rounded hover:bg-ctp-surface1 text-ctp-subtext0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-blue"
+              aria-label="Actualiser les taux de change"
               title="Actualiser les taux"
             >
-              <RefreshCw className={clsx('w-4 h-4', isLoading && 'animate-spin')} />
+              <RefreshCw className={clsx('w-4 h-4', isLoading && 'animate-spin')} aria-hidden="true" />
             </button>
           </div>
 
           {/* Display mode selection */}
-          <div className="p-2">
+          <div className="p-2" role="group" aria-label="Mode d'affichage">
             <button
               onClick={() => setDisplayMode('original')}
               className={clsx(
-                'w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors',
+                'w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-blue',
                 displayMode === 'original'
                   ? 'bg-ctp-blue/10 text-ctp-blue'
-                  : 'hover:bg-ctp-surface1'
+                  : 'hover:bg-ctp-surface1 text-ctp-text'
               )}
+              role="menuitemradio"
+              aria-checked={displayMode === 'original'}
             >
-              <div>
+              <div className="text-left">
                 <p className="font-medium">Devises originales</p>
                 <p className="text-xs text-ctp-subtext0">Chaque compte dans sa devise</p>
               </div>
-              {displayMode === 'original' && <Check className="w-4 h-4" />}
+              {displayMode === 'original' && <Check className="w-4 h-4" aria-hidden="true" />}
             </button>
 
             <button
               onClick={() => setDisplayMode('converted')}
               disabled={!hasMultipleCurrencies}
+              aria-disabled={!hasMultipleCurrencies}
               className={clsx(
-                'w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors mt-1',
+                'w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors mt-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-blue',
                 displayMode === 'converted'
                   ? 'bg-ctp-blue/10 text-ctp-blue'
-                  : 'hover:bg-ctp-surface1',
+                  : 'hover:bg-ctp-surface1 text-ctp-text',
                 !hasMultipleCurrencies && 'opacity-50 cursor-not-allowed'
               )}
+              role="menuitemradio"
+              aria-checked={displayMode === 'converted'}
             >
-              <div>
+              <div className="text-left">
                 <p className="font-medium">Tout convertir</p>
                 <p className="text-xs text-ctp-subtext0">
                   Afficher tout en {currentSymbol} {effectiveDisplayCurrency}
                 </p>
               </div>
-              {displayMode === 'converted' && <Check className="w-4 h-4" />}
+              {displayMode === 'converted' && <Check className="w-4 h-4" aria-hidden="true" />}
             </button>
           </div>
 

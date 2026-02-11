@@ -347,6 +347,8 @@ export function ScanReceiptModal({
                     src={previewUrl}
                     alt="Apercu du ticket"
                     className="w-full h-64 object-contain rounded-lg bg-ctp-surface0"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <button
                     onClick={handleReset}

@@ -8,12 +8,13 @@ import { useForm } from 'react-hook-form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
-import { Sparkles, Zap, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Zap, Check, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { CategorySelector } from './CategorySelector';
 import { TagInput } from './TagInput';
 import { DocumentAttachment } from './DocumentAttachment';
 import { CurrencySelector } from '@/features/currency';
 import { CategoryConfidence } from '@/features/rules/CategoryConfidence';
+import { useFocusTrap } from '@/lib/a11y';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -363,6 +364,14 @@ export function TransactionForm({
 
   const modalTitle = isEditing ? 'Modifier la transaction' : 'Nouvelle transaction';
 
+  // Focus trap for the modal
+  const modalRef = useFocusTrap<HTMLDivElement>({
+    isActive: true,
+    onEscape: onClose,
+    autoFocus: true,
+    restoreFocus: true,
+  });
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
@@ -378,24 +387,36 @@ export function TransactionForm({
       />
 
       {/* Modal */}
-      <div className="relative bg-ctp-mantle rounded-t-xl sm:rounded-xl shadow-xl w-full sm:max-w-lg max-h-[90vh] overflow-auto animate-slide-up sm:animate-scale-in">
+      <div
+        ref={modalRef}
+        className="relative bg-ctp-mantle rounded-t-xl sm:rounded-xl shadow-xl w-full sm:max-w-lg max-h-[90vh] overflow-auto animate-slide-up sm:animate-scale-in"
+      >
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 id="transaction-modal-title" className="text-xl font-bold text-ctp-text">
               {modalTitle}
             </h2>
-            {isEditing && !isTransfer && (
+            <div className="flex items-center gap-2">
+              {isEditing && !isTransfer && (
+                <button
+                  onClick={handleDelete}
+                  disabled={deleteMutation.isPending}
+                  aria-disabled={deleteMutation.isPending}
+                  aria-busy={deleteMutation.isPending}
+                  className="text-ctp-red hover:text-ctp-red/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-red rounded px-2 py-1"
+                  aria-label="Supprimer la transaction"
+                >
+                  Supprimer
+                </button>
+              )}
               <button
-                onClick={handleDelete}
-                disabled={deleteMutation.isPending}
-                aria-disabled={deleteMutation.isPending}
-                aria-busy={deleteMutation.isPending}
-                className="text-ctp-red hover:text-ctp-red/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-red rounded"
-                aria-label="Supprimer la transaction"
+                onClick={onClose}
+                className="p-1 rounded-lg text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-blue"
+                aria-label="Fermer"
               >
-                Supprimer
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
-            )}
+            </div>
           </div>
 
           {error && (
@@ -413,34 +434,45 @@ export function TransactionForm({
               Les virements ne peuvent pas être modifiés directement.
             </p>
           ) : (
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" aria-label="Formulaire de transaction">
               {/* Type Toggle */}
-              <div className="flex rounded-lg overflow-hidden border border-ctp-surface1">
-                <button
-                  type="button"
-                  onClick={() => setValue('type', 'expense')}
-                  className={clsx(
-                    'flex-1 py-3 font-medium transition-colors',
-                    selectedType === 'expense'
-                      ? 'bg-ctp-red text-ctp-base'
-                      : 'bg-ctp-surface0 text-ctp-subtext0 hover:bg-ctp-surface1'
-                  )}
+              <fieldset>
+                <legend className="sr-only">Type de transaction</legend>
+                <div
+                  className="flex rounded-lg overflow-hidden border border-ctp-surface1"
+                  role="radiogroup"
+                  aria-label="Type de transaction"
                 >
-                  Depense
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setValue('type', 'income')}
-                  className={clsx(
-                    'flex-1 py-3 font-medium transition-colors',
-                    selectedType === 'income'
-                      ? 'bg-ctp-green text-ctp-base'
-                      : 'bg-ctp-surface0 text-ctp-subtext0 hover:bg-ctp-surface1'
-                  )}
-                >
-                  Revenu
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    onClick={() => setValue('type', 'expense')}
+                    className={clsx(
+                      'flex-1 py-3 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ctp-blue',
+                      selectedType === 'expense'
+                        ? 'bg-ctp-red text-ctp-base'
+                        : 'bg-ctp-surface0 text-ctp-subtext0 hover:bg-ctp-surface1'
+                    )}
+                    role="radio"
+                    aria-checked={selectedType === 'expense'}
+                  >
+                    Depense
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setValue('type', 'income')}
+                    className={clsx(
+                      'flex-1 py-3 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ctp-blue',
+                      selectedType === 'income'
+                        ? 'bg-ctp-green text-ctp-base'
+                        : 'bg-ctp-surface0 text-ctp-subtext0 hover:bg-ctp-surface1'
+                    )}
+                    role="radio"
+                    aria-checked={selectedType === 'income'}
+                  >
+                    Revenu
+                  </button>
+                </div>
+              </fieldset>
 
               {/* Amount and Currency */}
               <div>
@@ -525,25 +557,27 @@ export function TransactionForm({
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1" role="group" aria-label="Actions pour la suggestion IA">
                       {/* Accept */}
                       <button
                         type="button"
                         onClick={handleAcceptAiSuggestion}
-                        className="p-1.5 rounded-md bg-ctp-green/20 text-ctp-green hover:bg-ctp-green/30 transition-colors"
+                        className="p-1.5 rounded-md bg-ctp-green/20 text-ctp-green hover:bg-ctp-green/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-green"
+                        aria-label={`Accepter la suggestion: ${aiPrediction.categoryName}`}
                         title="Accepter"
                       >
-                        <Check className="w-4 h-4" />
+                        <Check className="w-4 h-4" aria-hidden="true" />
                       </button>
 
                       {/* Reject */}
                       <button
                         type="button"
                         onClick={handleRejectAiSuggestion}
-                        className="p-1.5 rounded-md bg-ctp-red/20 text-ctp-red hover:bg-ctp-red/30 transition-colors"
+                        className="p-1.5 rounded-md bg-ctp-red/20 text-ctp-red hover:bg-ctp-red/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-red"
+                        aria-label="Rejeter la suggestion IA"
                         title="Rejeter"
                       >
-                        <ChevronDown className="w-4 h-4" />
+                        <ChevronDown className="w-4 h-4" aria-hidden="true" />
                       </button>
                     </div>
                   </div>
@@ -551,8 +585,12 @@ export function TransactionForm({
 
                 {/* Loading state for AI prediction */}
                 {!isEditing && predictMutation.isPending && (
-                  <div className="mt-2 flex items-center gap-2 p-2 bg-ctp-surface0 rounded-lg border border-ctp-surface1">
-                    <Sparkles className="w-4 h-4 text-ctp-blue animate-pulse" />
+                  <div
+                    className="mt-2 flex items-center gap-2 p-2 bg-ctp-surface0 rounded-lg border border-ctp-surface1"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <Sparkles className="w-4 h-4 text-ctp-blue animate-pulse" aria-hidden="true" />
                     <span className="text-sm text-ctp-subtext0">Analyse IA en cours...</span>
                   </div>
                 )}
