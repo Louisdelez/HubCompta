@@ -1,0 +1,289 @@
+{
+  "navigation": {
+    "dashboard": "Panel' upravleniya",
+    "transactions": "Tranzakcii",
+    "accounts": "Scheta",
+    "budgets": "Byudzhety",
+    "savings": "Sberezheniya",
+    "loans": "Zajmy",
+    "investments": "Investicii",
+    "netWorth": "Chistyj kapital",
+    "documents": "Dokumenty",
+    "banking": "Banking",
+    "recurrences": "Povtoryayushchiesya",
+    "scheduled": "Zaplanirovannye",
+    "bills": "Scheta k oplate",
+    "settlement": "Raschet",
+    "forecast": "Prognoz",
+    "tax": "Nalogi",
+    "import": "Import",
+    "export": "Eksport",
+    "rules": "Pravila",
+    "ai": "II",
+    "reports": "Otchoty",
+    "currencies": "Valyuty",
+    "search": "Poisk",
+    "achievements": "Dostizheniya",
+    "activity": "Aktivnost'",
+    "settings": "Nastrojki",
+    "administration": "Administrirovanie",
+    "logout": "Vyjti",
+    "skipToMain": "Perejti k osnovnomu soderzhimomu"
+  },
+  "auth": {
+    "login": "Vhod",
+    "register": "Registraciya",
+    "logout": "Vyjti",
+    "email": "Adres elektronnoj pochty",
+    "password": "Parol'",
+    "confirmPassword": "Podtverdit' parol'",
+    "forgotPassword": "Zabyli parol'?",
+    "resetPassword": "Sbrosit' parol'",
+    "rememberMe": "Zapomnit' menya",
+    "signIn": "Vojti",
+    "signUp": "Zaregistrirovat'sya",
+    "createAccount": "Sozdat' akkaunt",
+    "alreadyHaveAccount": "Uzhe est' akkaunt?",
+    "dontHaveAccount": "Net akkaunta?",
+    "displayName": "Imya pol'zovatelya",
+    "authenticating": "Avtorizaciya..."
+  },
+  "dashboard": {
+    "title": "Panel' upravleniya",
+    "welcome": "Dobro pozhalovat'",
+    "overview": "Obzor",
+    "recentTransactions": "Nedavnie tranzakcii",
+    "upcomingBills": "Predstoyashchie platezhi",
+    "budgetStatus": "Status byudzheta",
+    "netWorth": "Chistyj kapital",
+    "monthlyIncome": "Ezhemesyachnyj dohod",
+    "monthlyExpenses": "Ezhemesyachnye rashody",
+    "savings": "Sberezheniya",
+    "thisMonth": "Etot mesyac",
+    "lastMonth": "Proshlyj mesyac",
+    "thisYear": "Etot god",
+    "customRange": "Pol'zovatel'skij diapazon",
+    "income": "Dohod",
+    "expenses": "Rashody",
+    "noUpcomingBills": "Net predstoyashchih platezhej",
+    "viewAll": "Posmotret' vse"
+  },
+  "transactions": {
+    "title": "Tranzakcii",
+    "newTransaction": "Novaya tranzakciya",
+    "addTransaction": "Dobavit' tranzakciyu",
+    "editTransaction": "Redaktirovat' tranzakciyu",
+    "deleteTransaction": "Udalit' tranzakciyu",
+    "transactionDetails": "Detali tranzakcii",
+    "income": "Dohod",
+    "expense": "Rashod",
+    "transfer": "Perevod",
+    "date": "Data",
+    "amount": "Summa",
+    "category": "Kategoriya",
+    "account": "Schot",
+    "payee": "Poluchatel'",
+    "notes": "Zametki",
+    "tags": "Tegi",
+    "recurring": "Povtoryayushchayasya",
+    "pending": "Ozhidaetsya",
+    "cleared": "Provedena",
+    "reconciled": "Sverena",
+    "filterByAccount": "Fil'tr po schotu",
+    "filterByCategory": "Fil'tr po kategorii",
+    "filterByDate": "Fil'tr po date",
+    "noTransactions": "Net tranzakcij",
+    "confirmDelete": "Vy uvereny, chto hotite udalit' etu tranzakciyu?"
+  },
+  "accounts": {
+    "title": "Scheta",
+    "newAccount": "Novyj schot",
+    "addAccount": "Dobavit' schot",
+    "editAccount": "Redaktirovat' schot",
+    "deleteAccount": "Udalit' schot",
+    "accountDetails": "Detali schota",
+    "accountName": "Nazvanie schota",
+    "accountType": "Tip schota",
+    "initialBalance": "Nachal'nyj balans",
+    "currentBalance": "Tekushchij balans",
+    "currency": "Valyuta",
+    "checking": "Raschotnyj",
+    "savings": "Sberegatel'nyj",
+    "creditCard": "Kreditnaya karta",
+    "cash": "Nalichnye",
+    "investment": "Investicionnyj",
+    "loan": "Zajm",
+    "asset": "Aktiv",
+    "liability": "Obyazatel'stvo",
+    "institution": "Uchrezhdenie",
+    "accountNumber": "Nomer schota",
+    "noAccounts": "Net schotov",
+    "confirmDelete": "Vy uvereny, chto hotite udalit' etot schot?",
+    "totalBalance": "Obshchij balans"
+  },
+  "budgets": {
+    "title": "Byudzhety",
+    "newBudget": "Novyj byudzhet",
+    "addBudget": "Dobavit' byudzhet",
+    "editBudget": "Redaktirovat' byudzhet",
+    "deleteBudget": "Udalit' byudzhet",
+    "budgetName": "Nazvanie byudzheta",
+    "budgetAmount": "Summa byudzheta",
+    "spent": "Potracheno",
+    "remaining": "Ostalos'",
+    "overBudget": "Byudzhet prevyshen",
+    "onTrack": "V ramkah byudzheta",
+    "period": "Period",
+    "monthly": "Ezhemesyachno",
+    "weekly": "Ezhenedel'no",
+    "yearly": "Ezhegodno",
+    "categories": "Kategorii",
+    "noBudgets": "Net byudzhetov",
+    "progress": "Progress",
+    "percentUsed": "{{percent}}% ispol'zovano"
+  },
+  "settings": {
+    "title": "Nastrojki",
+    "manageAccount": "Upravlyajte svoim akkauntom i nastrojkami",
+    "backToDashboard": "Nazad na panel' upravleniya",
+    "profile": {
+      "title": "Profil'",
+      "description": "Lichnaya informaciya i nastrojki"
+    },
+    "display": {
+      "title": "Otobrazhenie",
+      "description": "Tema, format i panel' upravleniya",
+      "theme": "Tema",
+      "themeDescription": "Vyberite iz 4 vkusov Catppuccin",
+      "activeTheme": "Aktivnaya tema",
+      "automatic": "avtomaticheski",
+      "systemTheme": "Sistemnaya",
+      "compactMode": "Kompaktnyj rezhim",
+      "compactModeDescription": "Bolee plotnoe otobrazhenie s men'shimi otstupami",
+      "showBalance": "Pokazyvat' balansy",
+      "showBalanceDescription": "Pokazyvat' balansy schotov v spiske",
+      "defaultCurrency": "Valyuta po umolchaniyu",
+      "dateFormat": "Format daty",
+      "numberFormat": "Format chisel",
+      "startOfWeek": "Nachalo nedeli",
+      "monday": "Ponedel'nik",
+      "sunday": "Voskresen'e",
+      "currencies": {
+        "eur": "Evro (EUR)",
+        "usd": "Dollar SShA (USD)",
+        "gbp": "Britanskij funt (GBP)",
+        "chf": "Shvejcarskij frank (CHF)",
+        "cad": "Kanadskij dollar (CAD)"
+      },
+      "dateFormats": {
+        "dmy": "DD/MM/GGGG (31/12/2024)",
+        "mdy": "MM/DD/GGGG (12/31/2024)",
+        "ymd": "GGGG-MM-DD (2024-12-31)"
+      },
+      "numberFormats": {
+        "fr": "Francuzskij (1 234,56)",
+        "en": "Amerikanskij anglijskij (1,234.56)",
+        "de": "Nemeckij (1.234,56)"
+      }
+    },
+    "notifications": {
+      "title": "Uvedomleniya",
+      "description": "Elektronaya pochta, push i opoveshcheniya"
+    },
+    "security": {
+      "title": "Bezopasnost'",
+      "description": "MFA, ustrojstva i sessii"
+    },
+    "audit": {
+      "title": "Zhurnal audita",
+      "description": "Istoriya vazhnyh dejstvij"
+    },
+    "data": {
+      "title": "Dannye",
+      "description": "Eksport i udalenie akkaunta"
+    },
+    "dashboard": {
+      "title": "Panel' upravleniya",
+      "description": "Nastrojte svoyu panel' upravleniya",
+      "defaultPeriod": "Period po umolchaniyu",
+      "periods": {
+        "month": "Mesyac",
+        "quarter": "Kvartal",
+        "year": "God"
+      },
+      "showNetWorth": "Pokazyvat' chistyj kapital",
+      "showNetWorthDescription": "Pokazyvat' aktivy minus obyazatel'stva",
+      "showBudgets": "Pokazyvat' byudzhety",
+      "showBudgetsDescription": "Pokazyvat' status byudzhetov na paneli",
+      "showRecentTransactions": "Pokazyvat' nedavnie tranzakcii",
+      "showRecentTransactionsDescription": "Pokazyvat' poslednie tranzakcii",
+      "showUpcomingBills": "Pokazyvat' predstoyashchie platezhi",
+      "showUpcomingBillsDescription": "Pokazyvat' zaplanirovannye platezhi"
+    },
+    "privacy": {
+      "title": "Konfidencial'nost'",
+      "description": "Nastrojki konfidencial'nosti i bezopasnosti sessii",
+      "hideAmounts": "Skryvat' summy",
+      "hideAmountsDescription": "Skryvat' summy do navedenia myshi",
+      "lockOnInactivity": "Blokirovat' pri neaktivnosti",
+      "lockOnInactivityDescription": "Blokirovat' sessiyu posle perioda neaktivnosti",
+      "inactivityTimeout": "Tajmaut neaktivnosti (minuty)",
+      "sessionTimeout": "Tajmaut sessii (minuty)",
+      "timeouts": {
+        "1min": "1 minuta",
+        "5min": "5 minut",
+        "10min": "10 minut",
+        "15min": "15 minut",
+        "30min": "30 minut",
+        "1hour": "1 chas",
+        "2hours": "2 chasa",
+        "8hours": "8 chasov",
+        "24hours": "24 chasa"
+      }
+    },
+    "help": {
+      "title": "Pomoshch' i rukovodstvo",
+      "description": "Perezapustite obuchayushchij tur, chtoby uvidet' vse funkcii"
+    },
+    "language": {
+      "title": "Yazyk",
+      "description": "Vyberite predpochtitel'nyj yazyk",
+      "select": "Vybrat' yazyk",
+      "current": "Tekushchij yazyk"
+    },
+    "workspace": {
+      "title": "Nastrojki rabochego prostranstva",
+      "description": "Nastrojte parametry rabochego prostranstva",
+      "manage": "Upravlenie rabochimi prostranstvami"
+    }
+  },
+  "workspace": {
+    "title": "Rabochee prostranstvo",
+    "create": "Sozdat' rabochee prostranstvo",
+    "select": "Vybrat' rabochee prostranstvo",
+    "switch": "Smenit' rabochee prostranstvo",
+    "members": "Uchastniki",
+    "settings": "Nastrojki rabochego prostranstva",
+    "noWorkspace": "Net rabochego prostranstva"
+  },
+  "confirmation": {
+    "delete": "Vy uvereny, chto hotite udalit'?",
+    "unsavedChanges": "U vas est' nesohranennye izmeneniya. Vy hotite ujti?",
+    "logout": "Vy uvereny, chto hotite vyjti?"
+  },
+  "time": {
+    "today": "Segodnya",
+    "yesterday": "Vchera",
+    "tomorrow": "Zavtra",
+    "thisWeek": "Eta nedelya",
+    "lastWeek": "Proshlaya nedelya",
+    "thisMonth": "Etot mesyac",
+    "lastMonth": "Proshlyj mesyac",
+    "thisYear": "Etot god",
+    "lastYear": "Proshlyj god"
+  },
+  "notFoundPage": {
+    "title": "404",
+    "message": "Stranica ne najdena"
+  }
+}

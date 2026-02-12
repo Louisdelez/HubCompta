@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import {
   Receipt,
@@ -108,6 +109,7 @@ const CHART_COLORS = [
 // ----------------------------------------------------------------------------
 
 export function TaxSummaryReport() {
+  const { t } = useTranslation();
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear - 1); // Previous year by default
@@ -152,7 +154,7 @@ export function TaxSummaryReport() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Export error:', err);
-      alert("Erreur lors de l'export PDF");
+      alert(t('reports.pdfExport.error'));
     } finally {
       setIsExporting(false);
     }
@@ -161,10 +163,10 @@ export function TaxSummaryReport() {
   // Income breakdown chart data
   const incomeChartData = data
     ? [
-        { name: 'Salaires', value: data.income.salary, color: 'var(--ctp-blue)' },
-        { name: 'Independant', value: data.income.freelance, color: 'var(--ctp-green)' },
-        { name: 'Investissements', value: data.income.investments, color: 'var(--ctp-yellow)' },
-        { name: 'Autres', value: data.income.other, color: 'var(--ctp-mauve)' },
+        { name: t('reports.taxSummaryReport.salaries'), value: data.income.salary, color: 'var(--ctp-blue)' },
+        { name: t('reports.taxSummaryReport.freelance'), value: data.income.freelance, color: 'var(--ctp-green)' },
+        { name: t('reports.taxSummaryReport.investments'), value: data.income.investments, color: 'var(--ctp-yellow)' },
+        { name: t('reports.taxSummaryReport.other'), value: data.income.other, color: 'var(--ctp-mauve)' },
       ].filter((d) => d.value > 0)
     : [];
 
@@ -186,7 +188,7 @@ export function TaxSummaryReport() {
     return (
       <div className="card p-8 text-center">
         <Loader2 className="w-8 h-8 mx-auto animate-spin text-ctp-blue mb-4" />
-        <p className="text-ctp-subtext0">Chargement du resume fiscal...</p>
+        <p className="text-ctp-subtext0">{t('reports.taxSummaryReport.loading')}</p>
       </div>
     );
   }
@@ -195,9 +197,9 @@ export function TaxSummaryReport() {
     return (
       <div className="card p-8 text-center">
         <Receipt className="w-12 h-12 mx-auto text-ctp-overlay1 mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Aucune donnee</h3>
+        <h3 className="text-lg font-semibold mb-2">{t('reports.taxSummaryReport.noData')}</h3>
         <p className="text-ctp-subtext0">
-          Pas assez de transactions pour generer un resume fiscal
+          {t('reports.taxSummaryReport.notEnoughTransactions')}
         </p>
       </div>
     );
@@ -210,9 +212,9 @@ export function TaxSummaryReport() {
       {/* Header with year selector and export */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-lg font-semibold">Resume Fiscal {selectedYear}</h2>
+          <h2 className="text-lg font-semibold">{t('reports.taxSummaryReport.title')} {selectedYear}</h2>
           <p className="text-sm text-ctp-subtext0">
-            {data.country} - A titre indicatif uniquement
+            {data.country} - {t('reports.taxSummaryReport.indicativeOnly')}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -244,7 +246,7 @@ export function TaxSummaryReport() {
             ) : (
               <Download className="w-4 h-4" />
             )}
-            Exporter PDF
+            {t('reports.pdfExport.exportPdf')}
           </button>
         </div>
       </div>
@@ -253,10 +255,9 @@ export function TaxSummaryReport() {
       <div className="flex items-start gap-3 p-4 bg-ctp-yellow/10 border border-ctp-yellow/30 rounded-lg">
         <AlertCircle className="w-5 h-5 text-ctp-yellow flex-shrink-0 mt-0.5" />
         <div className="text-sm">
-          <p className="font-medium text-ctp-yellow">Avertissement</p>
+          <p className="font-medium text-ctp-yellow">{t('reports.taxSummaryReport.warning')}</p>
           <p className="text-ctp-subtext0">
-            Ce resume est fourni a titre indicatif uniquement et ne constitue pas un avis fiscal.
-            Consultez un professionnel pour votre declaration officielle.
+            {t('reports.taxSummaryReport.warningText')}
           </p>
         </div>
       </div>
@@ -267,7 +268,7 @@ export function TaxSummaryReport() {
         <div className="card">
           <div className="flex items-center gap-2 text-ctp-green mb-2">
             <TrendingUp className="w-4 h-4" />
-            <span className="text-sm">Revenu brut</span>
+            <span className="text-sm">{t('reports.taxSummaryReport.grossIncome')}</span>
           </div>
           <p className="text-2xl font-bold text-ctp-text">
             {formatCurrency(data.summary.grossIncome, data.country)}
@@ -278,7 +279,7 @@ export function TaxSummaryReport() {
         <div className="card">
           <div className="flex items-center gap-2 text-ctp-blue mb-2">
             <FileText className="w-4 h-4" />
-            <span className="text-sm">Deductions</span>
+            <span className="text-sm">{t('reports.taxSummaryReport.deductions')}</span>
           </div>
           <p className="text-2xl font-bold text-ctp-text">
             -{formatCurrency(data.summary.totalDeductions, data.country)}
@@ -289,7 +290,7 @@ export function TaxSummaryReport() {
         <div className="card bg-gradient-to-br from-ctp-blue/10 to-ctp-mauve/10">
           <div className="flex items-center gap-2 text-ctp-blue mb-2">
             <Calculator className="w-4 h-4" />
-            <span className="text-sm">Revenu imposable</span>
+            <span className="text-sm">{t('reports.taxSummaryReport.taxableIncome')}</span>
           </div>
           <p className="text-2xl font-bold text-ctp-blue">
             {formatCurrency(data.summary.taxableIncome, data.country)}
@@ -300,7 +301,7 @@ export function TaxSummaryReport() {
         <div className="card">
           <div className="flex items-center gap-2 text-ctp-red mb-2">
             <TrendingDown className="w-4 h-4" />
-            <span className="text-sm">Impot estime</span>
+            <span className="text-sm">{t('reports.taxSummaryReport.estimatedTax')}</span>
           </div>
           <p className="text-2xl font-bold text-ctp-red">
             ~{formatCurrency(data.summary.estimatedTax, data.country)}
@@ -314,7 +315,7 @@ export function TaxSummaryReport() {
         <div className="card">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-ctp-green" />
-            Repartition des revenus
+            {t('reports.taxSummaryReport.incomeBreakdown')}
           </h3>
           {incomeChartData.length > 0 ? (
             <div className="h-64">
@@ -350,7 +351,7 @@ export function TaxSummaryReport() {
             </div>
           ) : (
             <div className="h-64 flex items-center justify-center text-ctp-subtext0">
-              Aucun revenu enregistre
+              {t('reports.taxSummaryReport.noIncomeRecorded')}
             </div>
           )}
         </div>
@@ -359,7 +360,7 @@ export function TaxSummaryReport() {
         <div className="card">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <FileText className="w-5 h-5 text-ctp-blue" />
-            Charges deductibles
+            {t('reports.taxSummaryReport.deductibleExpenses')}
           </h3>
           {deductionsChartData.length > 0 ? (
             <div className="h-64">
@@ -382,7 +383,7 @@ export function TaxSummaryReport() {
                   <Tooltip
                     formatter={(value: number, name: string) => [
                       formatCurrency(value, data.country),
-                      name === 'deductible' ? 'Deductible' : 'Montant',
+                      name === 'deductible' ? t('reports.taxSummaryReport.deductible') : t('reports.taxSummaryReport.amount'),
                     ]}
                     contentStyle={{
                       backgroundColor: 'var(--ctp-surface0)',
@@ -395,7 +396,7 @@ export function TaxSummaryReport() {
             </div>
           ) : (
             <div className="h-64 flex items-center justify-center text-ctp-subtext0">
-              Aucune charge deductible identifiee
+              {t('reports.taxSummaryReport.noDeductibleExpenses')}
             </div>
           )}
         </div>
@@ -405,13 +406,13 @@ export function TaxSummaryReport() {
       <div className="card">
         <h3 className="font-semibold mb-4 flex items-center gap-2">
           <Landmark className="w-5 h-5 text-ctp-green" />
-          Detail des revenus
+          {t('reports.taxSummaryReport.incomeDetails')}
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="p-4 bg-ctp-surface0 rounded-lg">
             <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <Building2 className="w-4 h-4" />
-              <span className="text-xs">Salaires</span>
+              <span className="text-xs">{t('reports.taxSummaryReport.salaries')}</span>
             </div>
             <p className="text-lg font-semibold text-ctp-text">
               {formatCurrency(data.income.salary, data.country)}
@@ -420,7 +421,7 @@ export function TaxSummaryReport() {
           <div className="p-4 bg-ctp-surface0 rounded-lg">
             <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <Briefcase className="w-4 h-4" />
-              <span className="text-xs">Independant</span>
+              <span className="text-xs">{t('reports.taxSummaryReport.freelance')}</span>
             </div>
             <p className="text-lg font-semibold text-ctp-text">
               {formatCurrency(data.income.freelance, data.country)}
@@ -429,7 +430,7 @@ export function TaxSummaryReport() {
           <div className="p-4 bg-ctp-surface0 rounded-lg">
             <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <TrendingUp className="w-4 h-4" />
-              <span className="text-xs">Investissements</span>
+              <span className="text-xs">{t('reports.taxSummaryReport.investments')}</span>
             </div>
             <p className="text-lg font-semibold text-ctp-text">
               {formatCurrency(data.income.investments, data.country)}
@@ -438,7 +439,7 @@ export function TaxSummaryReport() {
           <div className="p-4 bg-ctp-surface0 rounded-lg">
             <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <Receipt className="w-4 h-4" />
-              <span className="text-xs">Autres</span>
+              <span className="text-xs">{t('reports.taxSummaryReport.other')}</span>
             </div>
             <p className="text-lg font-semibold text-ctp-text">
               {formatCurrency(data.income.other, data.country)}
@@ -453,10 +454,10 @@ export function TaxSummaryReport() {
               <thead>
                 <tr className="border-b border-ctp-surface1">
                   <th className="text-left text-xs font-medium text-ctp-subtext0 py-2">
-                    Categorie
+                    {t('reports.taxSummaryReport.category')}
                   </th>
                   <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">
-                    Montant
+                    {t('reports.taxSummaryReport.amount')}
                   </th>
                 </tr>
               </thead>
@@ -480,23 +481,23 @@ export function TaxSummaryReport() {
         <div className="card">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <FileText className="w-5 h-5 text-ctp-blue" />
-            Detail des charges deductibles
+            {t('reports.taxSummaryReport.deductibleExpensesDetails')}
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-ctp-surface1">
                   <th className="text-left text-xs font-medium text-ctp-subtext0 py-2">
-                    Categorie
+                    {t('reports.taxSummaryReport.category')}
                   </th>
                   <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">
-                    Montant
+                    {t('reports.taxSummaryReport.amount')}
                   </th>
                   <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">
-                    Taux
+                    {t('reports.taxSummaryReport.rate')}
                   </th>
                   <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">
-                    Deductible
+                    {t('reports.taxSummaryReport.deductible')}
                   </th>
                 </tr>
               </thead>
@@ -521,7 +522,7 @@ export function TaxSummaryReport() {
                   </tr>
                 ))}
                 <tr className="bg-ctp-surface1">
-                  <td className="py-2 font-medium text-ctp-text">Total</td>
+                  <td className="py-2 font-medium text-ctp-text">{t('reports.taxSummaryReport.total')}</td>
                   <td className="py-2 text-right text-ctp-subtext0">-</td>
                   <td className="py-2 text-right text-ctp-subtext0">-</td>
                   <td className="py-2 text-right font-bold text-ctp-blue">
@@ -539,29 +540,29 @@ export function TaxSummaryReport() {
         <div className="card">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-ctp-yellow" />
-            Revenus de placements
+            {t('reports.taxSummaryReport.investmentIncome')}
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-4 bg-ctp-surface0 rounded-lg">
-              <p className="text-xs text-ctp-subtext0 mb-1">Dividendes</p>
+              <p className="text-xs text-ctp-subtext0 mb-1">{t('reports.taxSummaryReport.dividends')}</p>
               <p className="text-lg font-semibold text-ctp-green">
                 {formatCurrency(data.investments.dividends, data.country)}
               </p>
             </div>
             <div className="p-4 bg-ctp-surface0 rounded-lg">
-              <p className="text-xs text-ctp-subtext0 mb-1">Plus-values</p>
+              <p className="text-xs text-ctp-subtext0 mb-1">{t('reports.taxSummaryReport.capitalGains')}</p>
               <p className="text-lg font-semibold text-ctp-green">
                 {formatCurrency(data.investments.realizedGains, data.country)}
               </p>
             </div>
             <div className="p-4 bg-ctp-surface0 rounded-lg">
-              <p className="text-xs text-ctp-subtext0 mb-1">Moins-values</p>
+              <p className="text-xs text-ctp-subtext0 mb-1">{t('reports.taxSummaryReport.capitalLosses')}</p>
               <p className="text-lg font-semibold text-ctp-red">
                 -{formatCurrency(data.investments.realizedLosses, data.country)}
               </p>
             </div>
             <div className="p-4 bg-ctp-yellow/10 rounded-lg">
-              <p className="text-xs text-ctp-subtext0 mb-1">Net imposable</p>
+              <p className="text-xs text-ctp-subtext0 mb-1">{t('reports.taxSummaryReport.netTaxable')}</p>
               <p className="text-lg font-semibold text-ctp-yellow">
                 {formatCurrency(data.investments.netInvestmentIncome, data.country)}
               </p>
@@ -575,7 +576,7 @@ export function TaxSummaryReport() {
         <div className="card">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Info className="w-5 h-5 text-ctp-subtext0" />
-            Notes importantes
+            {t('reports.taxSummaryReport.importantNotes')}
           </h3>
           <ul className="space-y-2">
             {data.summary.notes.map((note, i) => (
@@ -589,21 +590,21 @@ export function TaxSummaryReport() {
           {/* Country-specific info */}
           <div className="mt-4 p-4 bg-ctp-surface0 rounded-lg">
             <h4 className="text-sm font-medium text-ctp-text mb-2">
-              {isSwitzerland ? 'Informations pour la Suisse' : 'Informations pour la France'}
+              {isSwitzerland ? t('reports.taxSummaryReport.swissInfo') : t('reports.taxSummaryReport.frenchInfo')}
             </h4>
             {isSwitzerland ? (
               <ul className="text-xs text-ctp-subtext0 space-y-1">
-                <li>- Les taux varient selon le canton et la commune de residence</li>
-                <li>- Le 3e pilier A est deductible jusqu'a CHF 7'056 (2024)</li>
-                <li>- Declaraz les revenus de placements etrangers</li>
-                <li>- Utilisez eTax ou Vaudtax pour votre declaration</li>
+                <li>- {t('reports.taxSummaryReport.swissInfo1')}</li>
+                <li>- {t('reports.taxSummaryReport.swissInfo2')}</li>
+                <li>- {t('reports.taxSummaryReport.swissInfo3')}</li>
+                <li>- {t('reports.taxSummaryReport.swissInfo4')}</li>
               </ul>
             ) : (
               <ul className="text-xs text-ctp-subtext0 space-y-1">
-                <li>- Declaration en ligne sur impots.gouv.fr</li>
-                <li>- Les revenus salaries sont pre-remplis (verifiez)</li>
-                <li>- Revenus BNC/BIC: regime micro ou reel selon CA</li>
-                <li>- PFU (flat tax) de 30% sur revenus financiers ou option IR</li>
+                <li>- {t('reports.taxSummaryReport.frenchInfo1')}</li>
+                <li>- {t('reports.taxSummaryReport.frenchInfo2')}</li>
+                <li>- {t('reports.taxSummaryReport.frenchInfo3')}</li>
+                <li>- {t('reports.taxSummaryReport.frenchInfo4')}</li>
               </ul>
             )}
           </div>

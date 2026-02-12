@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { X, Download, FileText, FileJson, File, Loader2 } from 'lucide-react';
 import { useWorkspace } from '@/hooks/useWorkspace';
@@ -42,19 +43,19 @@ interface ExportDialogProps {
   supportsPDF?: boolean;
 }
 
-const exportLabels: Record<ExportType, string> = {
-  transactions: 'Transactions',
-  categories: 'Categories',
-  accounts: 'Comptes',
-  budget_report: 'Rapport budgetaire',
-  cash_flow: 'Flux de tresorerie',
-  profit_loss: 'Compte de resultat',
-  invoices: 'Factures',
-  quotes: 'Devis',
-  net_worth: 'Patrimoine',
-  year_comparison: 'Comparaison annuelle',
-  category_trends: 'Tendances categories',
-  tax_summary: 'Resume fiscal',
+const exportLabelKeys: Record<ExportType, string> = {
+  transactions: 'export.types.transactions',
+  categories: 'export.types.categories',
+  accounts: 'export.types.accounts',
+  budget_report: 'export.types.budgetReport',
+  cash_flow: 'export.types.cashFlow',
+  profit_loss: 'export.types.profitLoss',
+  invoices: 'export.types.invoices',
+  quotes: 'export.types.quotes',
+  net_worth: 'export.types.netWorth',
+  year_comparison: 'export.types.yearComparison',
+  category_trends: 'export.types.categoryTrends',
+  tax_summary: 'export.types.taxSummary',
 };
 
 // Map export types to PDF endpoint types
@@ -82,6 +83,7 @@ export function ExportDialog({
   title,
   supportsPDF = false,
 }: ExportDialogProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
 
   // Determine if PDF is supported for this type
@@ -169,7 +171,7 @@ export function ExportDialog({
       onClose();
     } catch (error) {
       logger.error('Export error', error);
-      alert("Erreur lors de l'export");
+      alert(t('export.error'));
     } finally {
       setIsExporting(false);
     }
@@ -183,7 +185,7 @@ export function ExportDialog({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-ctp-surface1">
           <h2 className="text-lg font-semibold text-ctp-text">
-            {title || `Exporter - ${exportLabels[type]}`}
+            {title || `${t('export.title')} - ${t(exportLabelKeys[type])}`}
           </h2>
           <button
             onClick={onClose}
@@ -199,7 +201,7 @@ export function ExportDialog({
           {dateRange && (
             <div className="p-3 bg-ctp-surface1 rounded-lg">
               <p className="text-sm text-ctp-subtext0">
-                Période:{' '}
+                {t('export.period')}:{' '}
                 <span className="font-medium text-ctp-text">
                   {format(dateRange.from, 'dd/MM/yyyy')} - {format(dateRange.to, 'dd/MM/yyyy')}
                 </span>
@@ -209,7 +211,7 @@ export function ExportDialog({
 
           {/* Format selection */}
           <div>
-            <label className="block text-sm font-medium text-ctp-subtext1 mb-2">Format</label>
+            <label className="block text-sm font-medium text-ctp-subtext1 mb-2">{t('export.format')}</label>
             <div className={cn('grid gap-3', canExportPDF ? 'grid-cols-3' : 'grid-cols-2')}>
               {canExportPDF && (
                 <button
@@ -225,7 +227,7 @@ export function ExportDialog({
                   <File className="h-5 w-5" />
                   <div className="text-left">
                     <p className="font-medium">PDF</p>
-                    <p className="text-xs text-ctp-subtext0">Rapport complet</p>
+                    <p className="text-xs text-ctp-subtext0">{t('export.formats.pdfDescription')}</p>
                   </div>
                 </button>
               )}
@@ -242,7 +244,7 @@ export function ExportDialog({
                 <FileText className="h-5 w-5" />
                 <div className="text-left">
                   <p className="font-medium">CSV</p>
-                  <p className="text-xs text-ctp-subtext0">Excel, tableurs</p>
+                  <p className="text-xs text-ctp-subtext0">{t('export.formats.csvDescription')}</p>
                 </div>
               </button>
               <button
@@ -258,7 +260,7 @@ export function ExportDialog({
                 <FileJson className="h-5 w-5" />
                 <div className="text-left">
                   <p className="font-medium">JSON</p>
-                  <p className="text-xs text-ctp-subtext0">Donnees brutes</p>
+                  <p className="text-xs text-ctp-subtext0">{t('export.formats.jsonDescription')}</p>
                 </div>
               </button>
             </div>
@@ -266,7 +268,7 @@ export function ExportDialog({
 
           {/* Info */}
           <p className="text-xs text-ctp-subtext0">
-            Le fichier sera téléchargé automatiquement après la génération.
+            {t('export.autoDownload')}
           </p>
         </div>
 
@@ -277,7 +279,7 @@ export function ExportDialog({
             onClick={onClose}
             className="px-4 py-2 text-ctp-subtext1 bg-ctp-surface0 border border-ctp-surface1 rounded-lg hover:bg-ctp-surface1"
           >
-            Annuler
+            {t('export.cancel')}
           </button>
           <button
             onClick={handleExport}
@@ -293,7 +295,7 @@ export function ExportDialog({
             ) : (
               <Download className="h-4 w-4" />
             )}
-            Exporter
+            {t('export.export')}
           </button>
         </div>
       </div>

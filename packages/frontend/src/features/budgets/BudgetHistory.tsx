@@ -3,6 +3,7 @@
 // Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { X, BarChart3, Folder } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -54,6 +55,7 @@ function formatCurrency(amount: number): string {
 // ----------------------------------------------------------------------------
 
 export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryProps) {
+  const { t } = useTranslation();
   const months = budget.period === 'monthly' ? 12 : 5;
 
   const { data: history, isLoading } = useQuery({
@@ -88,7 +90,7 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
               <div>
                 <h2 className="text-xl font-bold">{budget.name}</h2>
                 <p className="text-ctp-subtext0 text-sm">
-                  Historique {budget.period === 'monthly' ? 'mensuel' : 'annuel'}
+                  {t('budgets.historyTitle')} {budget.period === 'monthly' ? t('budgets.monthlyHistory') : t('budgets.yearlyHistory')}
                 </p>
               </div>
             </div>
@@ -100,7 +102,7 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
           {isLoading ? (
             <div className="text-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-ctp-blue border-t-transparent rounded-full mx-auto mb-2" />
-              <p className="text-ctp-subtext0">Chargement...</p>
+              <p className="text-ctp-subtext0">{t('budgets.loading')}</p>
             </div>
           ) : history && history.length > 0 ? (
             <>
@@ -152,11 +154,11 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
                 <div className="flex justify-center gap-6 mt-4">
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 bg-ctp-surface1 rounded" />
-                    <span className="text-sm text-ctp-subtext0">Budget</span>
+                    <span className="text-sm text-ctp-subtext0">{t('budgets.totalBudget')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 bg-ctp-blue rounded" />
-                    <span className="text-sm text-ctp-subtext0">Dépensé</span>
+                    <span className="text-sm text-ctp-subtext0">{t('budgets.spent')}</span>
                   </div>
                 </div>
               </div>
@@ -166,11 +168,11 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-ctp-surface1">
-                      <th className="text-left py-2 px-3">Période</th>
-                      <th className="text-right py-2 px-3">Budget</th>
-                      <th className="text-right py-2 px-3">Dépensé</th>
+                      <th className="text-left py-2 px-3">{t('budgets.period')}</th>
+                      <th className="text-right py-2 px-3">{t('budgets.totalBudget')}</th>
+                      <th className="text-right py-2 px-3">{t('budgets.spent')}</th>
                       <th className="text-right py-2 px-3">%</th>
-                      <th className="text-right py-2 px-3">Statut</th>
+                      <th className="text-right py-2 px-3">{t('budgets.progress')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -194,15 +196,15 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
                           <td className="py-2 px-3 text-right">
                             {isOverBudget ? (
                               <span className="px-2 py-0.5 rounded-full text-xs bg-ctp-red/20 text-ctp-red">
-                                Dépassé
+                                {t('budgets.exceeded')}
                               </span>
                             ) : isAtRisk ? (
                               <span className="px-2 py-0.5 rounded-full text-xs bg-ctp-yellow/20 text-ctp-yellow">
-                                Attention
+                                {t('budgets.attention')}
                               </span>
                             ) : (
                               <span className="px-2 py-0.5 rounded-full text-xs bg-ctp-green/20 text-ctp-green">
-                                OK
+                                {t('budgets.onTrack')}
                               </span>
                             )}
                           </td>
@@ -217,7 +219,7 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
               <div className="mt-6 p-4 bg-ctp-surface0 rounded-lg">
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <p className="text-sm text-ctp-subtext0">Moyenne dépensée</p>
+                    <p className="text-sm text-ctp-subtext0">{t('budgets.averageSpent')}</p>
                     <p className="text-lg font-bold">
                       {formatCurrency(
                         history.reduce((sum, h) => sum + h.spent, 0) / history.length
@@ -225,13 +227,13 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-ctp-subtext0">Mois dépassés</p>
+                    <p className="text-sm text-ctp-subtext0">{t('budgets.monthsExceeded')}</p>
                     <p className="text-lg font-bold text-ctp-red">
                       {history.filter((h) => h.spent > h.budgeted).length}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-ctp-subtext0">Taux moyen</p>
+                    <p className="text-sm text-ctp-subtext0">{t('budgets.averageRate')}</p>
                     <p className="text-lg font-bold">
                       {Math.round(
                         history.reduce((sum, h) => sum + h.percentUsed, 0) / history.length
@@ -245,13 +247,13 @@ export function BudgetHistory({ workspaceId, budget, onClose }: BudgetHistoryPro
           ) : (
             <div className="text-center py-12">
               <BarChart3 className="w-10 h-10 mx-auto mb-4 text-ctp-overlay1" />
-              <p className="text-ctp-subtext0">Pas encore d'historique disponible</p>
+              <p className="text-ctp-subtext0">{t('budgets.noHistoryAvailable')}</p>
             </div>
           )}
 
           {/* Close Button */}
           <button onClick={onClose} className="btn-secondary w-full mt-6">
-            Fermer
+            {t('budgets.close')}
           </button>
         </div>
       </div>

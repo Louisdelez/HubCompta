@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import {
@@ -62,7 +63,7 @@ interface ScanReceiptModalProps {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? '/api/v1';
 
-async function scanReceipt(workspaceId: string, file: File): Promise<ScanResult> {
+async function scanReceipt(workspaceId: string, file: File, errorMessage: string): Promise<ScanResult> {
   const formData = new FormData();
   formData.append('file', file);
 
@@ -79,7 +80,7 @@ async function scanReceipt(workspaceId: string, file: File): Promise<ScanResult>
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error?.message || 'Erreur lors du scan');
+    throw new Error(error.error?.message || errorMessage);
   }
 
   const result = await response.json();
@@ -95,6 +96,7 @@ export function ScanReceiptModal({
   onClose,
   onSuccess,
 }: ScanReceiptModalProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   // State
@@ -132,7 +134,7 @@ export function ScanReceiptModal({
 
   // Scan mutation
   const scanMutation = useMutation({
-    mutationFn: (file: File) => scanReceipt(workspaceId, file),
+    mutationFn: (file: File) => scanReceipt(workspaceId, file, t('transactions.scanError')),
     onSuccess: (result) => {
       setScanResult(result);
       setFormData((prev) => ({
@@ -146,7 +148,7 @@ export function ScanReceiptModal({
       setStep('review');
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Erreur lors du scan');
+      setError(err instanceof Error ? err.message : t('transactions.scanError'));
       setStep('upload');
     },
   });
@@ -163,7 +165,7 @@ export function ScanReceiptModal({
         date: formData.date,
         categoryId: formData.categoryId || null,
         notes: scanResult
-          ? `Scanne depuis un ticket de caisse (confiance: ${Math.round(scanResult.confidence * 100)}%)`
+          ? t('transactions.scannedFromReceipt', { confidence: Math.round(scanResult.confidence * 100) })
           : null,
         tags: [],
       }),
@@ -173,7 +175,7 @@ export function ScanReceiptModal({
       onSuccess();
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la creation');
+      setError(err instanceof Error ? err.message : t('transactions.creationErrorSimple'));
     },
   });
 
@@ -182,13 +184,13 @@ export function ScanReceiptModal({
     // Validate file type
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
     if (!validTypes.includes(file.type)) {
-      setError('Type de fichier non supporte. Utilisez JPEG, PNG ou WebP.');
+      setError(t('transactions.fileTypeNotSupported'));
       return;
     }
 
     // Validate file size (15MB max)
     if (file.size > 15 * 1024 * 1024) {
-      setError('Fichier trop volumineux (max 15MB)');
+      setError(t('transactions.fileTooLarge'));
       return;
     }
 
@@ -247,15 +249,15 @@ export function ScanReceiptModal({
 
   const handleCreate = useCallback(() => {
     if (!formData.accountId) {
-      setError('Veuillez selectionner un compte');
+      setError(t('transactions.selectAccountError'));
       return;
     }
     if (!formData.amount || formData.amount <= 0) {
-      setError('Veuillez entrer un montant valide');
+      setError(t('transactions.enterValidAmountError'));
       return;
     }
     if (!formData.description) {
-      setError('Veuillez entrer une description');
+      setError(t('transactions.enterDescriptionError'));
       return;
     }
 
@@ -272,9 +274,9 @@ export function ScanReceiptModal({
   };
 
   const getConfidenceLabel = (confidence: number) => {
-    if (confidence >= 0.8) return 'Haute';
-    if (confidence >= 0.5) return 'Moyenne';
-    return 'Faible';
+    if (confidence >= 0.8) return t('transactions.high');
+    if (confidence >= 0.5) return t('transactions.medium');
+    return t('transactions.low');
   };
 
   // Filter expense categories
@@ -307,20 +309,20 @@ export function ScanReceiptModal({
               </div>
               <div>
                 <h2 id="scan-modal-title" className="text-xl font-bold text-ctp-text">
-                  Scanner un ticket
+                  {t('transactions.scanReceiptTitle')}
                 </h2>
                 <p className="text-sm text-ctp-subtext0">
-                  {step === 'upload' && 'Prenez ou importez une photo'}
-                  {step === 'scanning' && 'Analyse en cours...'}
-                  {step === 'review' && 'Verifiez les informations'}
-                  {step === 'creating' && 'Creation en cours...'}
+                  {step === 'upload' && t('transactions.takeOrImportPhoto')}
+                  {step === 'scanning' && t('transactions.analyzing')}
+                  {step === 'review' && t('transactions.verifyInformation')}
+                  {step === 'creating' && t('transactions.creatingTransaction')}
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
               className="p-2 rounded-lg hover:bg-ctp-surface0 transition-colors"
-              aria-label="Fermer"
+              aria-label={t('transactions.close')}
             >
               <X className="w-5 h-5 text-ctp-subtext0" />
             </button>
@@ -353,7 +355,7 @@ export function ScanReceiptModal({
                   <button
                     onClick={handleReset}
                     className="absolute top-2 right-2 p-2 rounded-lg bg-ctp-mantle/80 hover:bg-ctp-mantle transition-colors"
-                    aria-label="Supprimer l'image"
+                    aria-label={t('transactions.removeImage')}
                   >
                     <RotateCcw className="w-4 h-4 text-ctp-text" />
                   </button>
@@ -367,10 +369,10 @@ export function ScanReceiptModal({
                 >
                   <Upload className="w-12 h-12 text-ctp-subtext0 mx-auto mb-4" />
                   <p className="text-ctp-text font-medium mb-1">
-                    Deposez une image ici
+                    {t('transactions.dropImageHere')}
                   </p>
                   <p className="text-ctp-subtext0 text-sm">
-                    ou cliquez pour parcourir
+                    {t('transactions.orClickToBrowse')}
                   </p>
                 </div>
               )}
@@ -399,15 +401,15 @@ export function ScanReceiptModal({
                   className="flex-1 btn-secondary flex items-center justify-center gap-2"
                 >
                   <Camera className="w-4 h-4" />
-                  <span className="hidden sm:inline">Appareil photo</span>
-                  <span className="sm:hidden">Photo</span>
+                  <span className="hidden sm:inline">{t('transactions.camera')}</span>
+                  <span className="sm:hidden">{t('transactions.photo')}</span>
                 </button>
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="flex-1 btn-secondary flex items-center justify-center gap-2"
                 >
                   <Upload className="w-4 h-4" />
-                  <span>Importer</span>
+                  <span>{t('transactions.import')}</span>
                 </button>
               </div>
 
@@ -419,7 +421,7 @@ export function ScanReceiptModal({
                   className="w-full btn-primary flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-4 h-4" />
-                  Scanner le ticket
+                  {t('transactions.scanTheReceipt')}
                 </button>
               )}
             </div>
@@ -429,9 +431,9 @@ export function ScanReceiptModal({
           {step === 'scanning' && (
             <div className="py-12 text-center">
               <Loader2 className="w-16 h-16 text-ctp-mauve mx-auto mb-4 animate-spin" />
-              <p className="text-ctp-text font-medium mb-2">Analyse du ticket...</p>
+              <p className="text-ctp-text font-medium mb-2">{t('transactions.analyzingReceipt')}</p>
               <p className="text-ctp-subtext0 text-sm">
-                Extraction des informations en cours
+                {t('transactions.extractingInfo')}
               </p>
             </div>
           )}
@@ -444,14 +446,14 @@ export function ScanReceiptModal({
                 <CheckCircle className={clsx('w-5 h-5', getConfidenceColor(scanResult.confidence))} />
                 <div className="flex-1">
                   <p className="text-sm text-ctp-text">
-                    Confiance:{' '}
+                    {t('transactions.confidence')}:{' '}
                     <span className={getConfidenceColor(scanResult.confidence)}>
                       {getConfidenceLabel(scanResult.confidence)} ({Math.round(scanResult.confidence * 100)}%)
                     </span>
                   </p>
                   {scanResult.confidence < 0.5 && (
                     <p className="text-xs text-ctp-subtext0 mt-1">
-                      Verifiez attentivement les informations extraites
+                      {t('transactions.verifyCarefully')}
                     </p>
                   )}
                 </div>
@@ -463,14 +465,14 @@ export function ScanReceiptModal({
                 <div>
                   <label className="label flex items-center gap-2">
                     <Store className="w-4 h-4" />
-                    Commercant / Description
+                    {t('transactions.merchant')}
                   </label>
                   <input
                     type="text"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="input"
-                    placeholder="Ex: Carrefour"
+                    placeholder={t('transactions.merchantPlaceholder')}
                   />
                 </div>
 
@@ -478,7 +480,7 @@ export function ScanReceiptModal({
                 <div>
                   <label className="label flex items-center gap-2">
                     <DollarSign className="w-4 h-4" />
-                    Montant
+                    {t('transactions.amount')}
                   </label>
                   <input
                     type="number"
@@ -496,7 +498,7 @@ export function ScanReceiptModal({
                 <div>
                   <label className="label flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    Date
+                    {t('transactions.date')}
                   </label>
                   <input
                     type="date"
@@ -508,13 +510,13 @@ export function ScanReceiptModal({
 
                 {/* Account */}
                 <div>
-                  <label className="label">Compte</label>
+                  <label className="label">{t('transactions.account')}</label>
                   <select
                     value={formData.accountId}
                     onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
                     className="input"
                   >
-                    <option value="">Selectionner un compte</option>
+                    <option value="">{t('transactions.selectAccount')}</option>
                     {accounts?.map((account) => (
                       <option key={account.id} value={account.id}>
                         {account.name} ({account.currency})
@@ -525,13 +527,13 @@ export function ScanReceiptModal({
 
                 {/* Category */}
                 <div>
-                  <label className="label">Categorie (optionnel)</label>
+                  <label className="label">{t('transactions.categoryOptional')}</label>
                   <select
                     value={formData.categoryId}
                     onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                     className="input"
                   >
-                    <option value="">Selectionner une categorie</option>
+                    <option value="">{t('transactions.selectCategory')}</option>
                     {expenseCategories?.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.icon} {category.name}
@@ -545,7 +547,7 @@ export function ScanReceiptModal({
                   <div>
                     <label className="label flex items-center gap-2">
                       <FileText className="w-4 h-4" />
-                      Articles detectes ({scanResult.items.length})
+                      {t('transactions.detectedItems', { count: scanResult.items.length })}
                     </label>
                     <div className="max-h-32 overflow-auto rounded-lg bg-ctp-surface0 p-2 space-y-1">
                       {scanResult.items.slice(0, 10).map((item, index) => (
@@ -558,7 +560,7 @@ export function ScanReceiptModal({
                       ))}
                       {scanResult.items.length > 10 && (
                         <p className="text-xs text-ctp-subtext0 text-center pt-1">
-                          +{scanResult.items.length - 10} autres articles
+                          {t('transactions.otherItems', { count: scanResult.items.length - 10 })}
                         </p>
                       )}
                     </div>
@@ -570,7 +572,7 @@ export function ScanReceiptModal({
               <div className="flex gap-3 pt-4">
                 <button onClick={handleReset} className="btn-secondary flex-1">
                   <RotateCcw className="w-4 h-4 mr-2" />
-                  Recommencer
+                  {t('transactions.restart')}
                 </button>
                 <button
                   onClick={handleCreate}
@@ -578,7 +580,7 @@ export function ScanReceiptModal({
                   className="btn-primary flex-1"
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Creer la transaction
+                  {t('transactions.createTheTransaction')}
                 </button>
               </div>
             </div>
@@ -588,9 +590,9 @@ export function ScanReceiptModal({
           {step === 'creating' && (
             <div className="py-12 text-center">
               <Loader2 className="w-16 h-16 text-ctp-green mx-auto mb-4 animate-spin" />
-              <p className="text-ctp-text font-medium mb-2">Creation en cours...</p>
+              <p className="text-ctp-text font-medium mb-2">{t('transactions.creatingTransaction')}</p>
               <p className="text-ctp-subtext0 text-sm">
-                La transaction est en cours de creation
+                {t('transactions.transactionCreating')}
               </p>
             </div>
           )}

@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeftRight, CreditCard } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
@@ -52,6 +53,7 @@ function formatDate(date: string): string {
 // ----------------------------------------------------------------------------
 
 export function RecentTransactions({ workspaceId, limit = 10 }: RecentTransactionsProps) {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ['recent-transactions', workspaceId, limit],
     queryFn: () =>
@@ -63,7 +65,7 @@ export function RecentTransactions({ workspaceId, limit = 10 }: RecentTransactio
   if (isLoading) {
     return (
       <div className="bg-ctp-surface0 rounded-xl p-5 border border-ctp-surface1">
-        <h3 className="text-lg font-semibold text-ctp-text mb-4">Transactions recentes</h3>
+        <h3 className="text-lg font-semibold text-ctp-text mb-4">{t('dashboard.recentTransactions')}</h3>
         <div className="animate-pulse space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="flex items-center gap-3 p-2">
@@ -85,20 +87,20 @@ export function RecentTransactions({ workspaceId, limit = 10 }: RecentTransactio
   return (
     <div className="bg-ctp-surface0 rounded-xl p-5 border border-ctp-surface1">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-ctp-text">Transactions recentes</h3>
+        <h3 className="text-lg font-semibold text-ctp-text">{t('dashboard.recentTransactions')}</h3>
         <Link
           to={`/transactions`}
           className="text-sm text-ctp-blue hover:text-ctp-sapphire hover:underline transition-colors"
         >
-          Voir tout
+          {t('dashboard.viewAll')}
         </Link>
       </div>
 
       {transactions.length === 0 ? (
         <div className="text-center py-8 bg-ctp-mantle rounded-lg">
           <CreditCard className="w-10 h-10 mx-auto text-ctp-overlay1 mb-2" />
-          <p className="text-ctp-subtext0">Aucune transaction</p>
-          <p className="text-sm text-ctp-overlay1 mt-1">Ajoutez votre premiere transaction</p>
+          <p className="text-ctp-subtext0">{t('widgets.transactions.noTransactions')}</p>
+          <p className="text-sm text-ctp-overlay1 mt-1">{t('widgets.transactions.addFirst')}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -132,7 +134,7 @@ export function RecentTransactions({ workspaceId, limit = 10 }: RecentTransactio
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-ctp-text truncate">{txn.description}</p>
                 <p className="text-sm text-ctp-subtext0 truncate">
-                  {txn.category?.name ?? 'Non categorise'} • {txn.account.name}
+                  {txn.category?.name ?? t('widgets.transactions.uncategorized')} • {txn.account.name}
                 </p>
               </div>
 

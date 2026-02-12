@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { Download, Loader2 } from 'lucide-react';
 import { useWorkspace } from '@/hooks/useWorkspace';
@@ -55,11 +56,13 @@ export function PDFExportButton({
   className,
   variant = 'secondary',
   size = 'md',
-  label = 'Exporter PDF',
+  label,
   showIcon = true,
 }: PDFExportButtonProps) {
+  const { t } = useTranslation();
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [isExporting, setIsExporting] = useState(false);
+  const buttonLabel = label ?? t('reports.pdfExport.exportPdf');
 
   const handleExport = async () => {
     if (!workspaceId) return;
@@ -141,7 +144,7 @@ export function PDFExportButton({
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       logger.error('PDF export error', error);
-      alert("Erreur lors de l'export PDF");
+      alert(t('reports.pdfExport.error'));
     } finally {
       setIsExporting(false);
     }
@@ -183,7 +186,7 @@ export function PDFExportButton({
       ) : showIcon ? (
         <Download className={iconSizes[size]} />
       ) : null}
-      {label}
+      {buttonLabel}
     </button>
   );
 }

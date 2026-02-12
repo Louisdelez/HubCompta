@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -62,6 +63,7 @@ export function ColumnMappingStep({
   onBack,
   onComplete,
 }: ColumnMappingStepProps) {
+  const { t } = useTranslation();
   const [mapping, setMapping] = useState<ColumnMapping>(() => {
     if (initialMapping) {
       return initialMapping;
@@ -87,21 +89,21 @@ export function ColumnMappingStep({
   const handleSubmit = () => {
     // Validate mapping
     if (!mapping.date) {
-      setError('Sélectionnez la colonne de date');
+      setError(t('import.mapping.selectDateError'));
       return;
     }
     if (!mapping.description) {
-      setError('Sélectionnez la colonne de description');
+      setError(t('import.mapping.selectDescriptionError'));
       return;
     }
     if (useSplitAmount) {
       if (!mapping.credit || !mapping.debit) {
-        setError('Sélectionnez les colonnes crédit et débit');
+        setError(t('import.mapping.selectCreditDebitError'));
         return;
       }
     } else {
       if (!mapping.amount) {
-        setError('Sélectionnez la colonne de montant');
+        setError(t('import.mapping.selectAmountError'));
         return;
       }
     }
@@ -112,15 +114,15 @@ export function ColumnMappingStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold mb-2">Mapper les colonnes</h2>
+        <h2 className="text-lg font-semibold mb-2">{t('import.mapping.title')}</h2>
         {detectedFormat && (
           <div className="p-3 rounded-lg bg-ctp-green/10 text-ctp-green border border-ctp-green/30 text-sm flex items-center gap-2">
-            <Check className="w-4 h-4" /> Format détecté : {detectedFormat.bank}
+            <Check className="w-4 h-4" /> {t('import.mapping.detectedFormat')} : {detectedFormat.bank}
           </div>
         )}
         {!detectedFormat && (
           <p className="text-ctp-subtext0 text-sm">
-            Associez les colonnes de votre fichier aux champs requis.
+            {t('import.mapping.mapColumnsDescription')}
           </p>
         )}
       </div>
@@ -135,14 +137,14 @@ export function ColumnMappingStep({
         {/* Date Column */}
         <div>
           <label className="label">
-            Date <span className="text-ctp-red">*</span>
+            {t('import.mapping.date')} <span className="text-ctp-red">*</span>
           </label>
           <select
             value={mapping.date}
             onChange={(e) => setMapping({ ...mapping, date: e.target.value })}
             className="input"
           >
-            <option value="">Sélectionner une colonne</option>
+            <option value="">{t('import.mapping.selectColumn')}</option>
             {headers.map((header) => (
               <option key={header} value={header}>
                 {header}
@@ -154,14 +156,14 @@ export function ColumnMappingStep({
         {/* Description Column */}
         <div>
           <label className="label">
-            Description / Libellé <span className="text-ctp-red">*</span>
+            {t('import.mapping.description')} <span className="text-ctp-red">*</span>
           </label>
           <select
             value={mapping.description}
             onChange={(e) => setMapping({ ...mapping, description: e.target.value })}
             className="input"
           >
-            <option value="">Sélectionner une colonne</option>
+            <option value="">{t('import.mapping.selectColumn')}</option>
             {headers.map((header) => (
               <option key={header} value={header}>
                 {header}
@@ -180,9 +182,9 @@ export function ColumnMappingStep({
               className="w-5 h-5 rounded border-ctp-surface1"
             />
             <div>
-              <p className="font-medium">Colonnes crédit/débit séparées</p>
+              <p className="font-medium">{t('import.mapping.separateCreditDebit')}</p>
               <p className="text-sm text-ctp-subtext0">
-                Cochez si votre fichier a des colonnes séparées pour les crédits et débits
+                {t('import.mapping.separateCreditDebitDescription')}
               </p>
             </div>
           </label>
@@ -193,14 +195,14 @@ export function ColumnMappingStep({
             {/* Credit Column */}
             <div>
               <label className="label">
-                Crédit <span className="text-ctp-red">*</span>
+                {t('import.mapping.credit')} <span className="text-ctp-red">*</span>
               </label>
               <select
                 value={mapping.credit ?? ''}
                 onChange={(e) => setMapping({ ...mapping, credit: e.target.value })}
                 className="input"
               >
-                <option value="">Sélectionner une colonne</option>
+                <option value="">{t('import.mapping.selectColumn')}</option>
                 {headers.map((header) => (
                   <option key={header} value={header}>
                     {header}
@@ -212,14 +214,14 @@ export function ColumnMappingStep({
             {/* Debit Column */}
             <div>
               <label className="label">
-                Débit <span className="text-ctp-red">*</span>
+                {t('import.mapping.debit')} <span className="text-ctp-red">*</span>
               </label>
               <select
                 value={mapping.debit ?? ''}
                 onChange={(e) => setMapping({ ...mapping, debit: e.target.value })}
                 className="input"
               >
-                <option value="">Sélectionner une colonne</option>
+                <option value="">{t('import.mapping.selectColumn')}</option>
                 {headers.map((header) => (
                   <option key={header} value={header}>
                     {header}
@@ -232,14 +234,14 @@ export function ColumnMappingStep({
           /* Amount Column */
           <div>
             <label className="label">
-              Montant <span className="text-ctp-red">*</span>
+              {t('import.mapping.amount')} <span className="text-ctp-red">*</span>
             </label>
             <select
               value={mapping.amount}
               onChange={(e) => setMapping({ ...mapping, amount: e.target.value })}
               className="input"
             >
-              <option value="">Sélectionner une colonne</option>
+              <option value="">{t('import.mapping.selectColumn')}</option>
               {headers.map((header) => (
                 <option key={header} value={header}>
                   {header}
@@ -247,7 +249,7 @@ export function ColumnMappingStep({
               ))}
             </select>
             <p className="text-xs text-ctp-subtext0 mt-1">
-              Les montants négatifs seront traités comme des dépenses
+              {t('import.mapping.negativeAmountsNote')}
             </p>
           </div>
         )}
@@ -256,7 +258,7 @@ export function ColumnMappingStep({
       {/* Column Preview */}
       {headers.length > 0 && (
         <div className="overflow-x-auto">
-          <p className="text-sm font-medium mb-2">Colonnes disponibles :</p>
+          <p className="text-sm font-medium mb-2">{t('import.mapping.availableColumns')}</p>
           <div className="flex flex-wrap gap-2">
             {headers.map((header) => (
               <span
@@ -282,10 +284,10 @@ export function ColumnMappingStep({
       {/* Actions */}
       <div className="flex gap-3">
         <button onClick={onBack} className="btn-secondary flex-1">
-          Retour
+          {t('import.mapping.back')}
         </button>
         <button onClick={handleSubmit} className="btn-primary flex-1">
-          Continuer
+          {t('import.mapping.continue')}
         </button>
       </div>
     </div>

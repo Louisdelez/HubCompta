@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api/client';
 import { Wallet, CheckCircle } from 'lucide-react';
 
@@ -32,30 +33,12 @@ const PASSWORD_RULES = {
   hasSpecial: /[@$!%*?&]/,
 };
 
-function validatePassword(password: string): string | null {
-  if (password.length < PASSWORD_RULES.minLength) {
-    return `Le mot de passe doit contenir au moins ${PASSWORD_RULES.minLength} caractères`;
-  }
-  if (!PASSWORD_RULES.hasUppercase.test(password)) {
-    return 'Le mot de passe doit contenir au moins une majuscule';
-  }
-  if (!PASSWORD_RULES.hasLowercase.test(password)) {
-    return 'Le mot de passe doit contenir au moins une minuscule';
-  }
-  if (!PASSWORD_RULES.hasNumber.test(password)) {
-    return 'Le mot de passe doit contenir au moins un chiffre';
-  }
-  if (!PASSWORD_RULES.hasSpecial.test(password)) {
-    return 'Le mot de passe doit contenir au moins un caractère spécial (@$!%*?&)';
-  }
-  return null;
-}
-
 // ----------------------------------------------------------------------------
 // Component
 // ----------------------------------------------------------------------------
 
 export function RegisterForm() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,6 +52,25 @@ export function RegisterForm() {
   } = useForm<RegisterFormData>();
 
   const password = watch('password');
+
+  const validatePassword = (password: string): string | null => {
+    if (password.length < PASSWORD_RULES.minLength) {
+      return t('auth.passwordMinLength', { count: PASSWORD_RULES.minLength });
+    }
+    if (!PASSWORD_RULES.hasUppercase.test(password)) {
+      return t('auth.passwordUppercase');
+    }
+    if (!PASSWORD_RULES.hasLowercase.test(password)) {
+      return t('auth.passwordLowercase');
+    }
+    if (!PASSWORD_RULES.hasNumber.test(password)) {
+      return t('auth.passwordNumber');
+    }
+    if (!PASSWORD_RULES.hasSpecial.test(password)) {
+      return t('auth.passwordSpecial');
+    }
+    return null;
+  };
 
   const onSubmit = async (data: RegisterFormData) => {
     setError(null);
@@ -100,9 +102,9 @@ export function RegisterForm() {
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-ctp-green to-ctp-teal flex items-center justify-center mx-auto mb-6 shadow-lg shadow-ctp-green/25">
             <CheckCircle className="w-10 h-10 text-ctp-crust" />
           </div>
-          <h1 className="text-2xl font-bold text-ctp-text">Compte cree !</h1>
+          <h1 className="text-2xl font-bold text-ctp-text">{t('auth.accountCreated')}</h1>
           <p className="text-ctp-subtext0 mt-3">
-            Redirection vers la page de connexion...
+            {t('auth.redirectingToLogin')}
           </p>
           <div className="mt-6 flex justify-center">
             <div className="w-8 h-1 rounded-full bg-ctp-green animate-pulse" />
@@ -121,9 +123,9 @@ export function RegisterForm() {
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-ctp-mauve to-ctp-pink flex items-center justify-center mx-auto shadow-lg">
             <Wallet className="w-10 h-10 text-ctp-crust" />
           </div>
-          <h1 className="text-2xl font-bold mt-6 text-ctp-text">Creer un compte</h1>
+          <h1 className="text-2xl font-bold mt-6 text-ctp-text">{t('auth.createAccount')}</h1>
           <p className="text-ctp-subtext0 mt-2">
-            Commencez a gerer vos finances
+            {t('auth.startManagingFinances')}
           </p>
         </div>
 
@@ -139,7 +141,7 @@ export function RegisterForm() {
 
           <div>
             <label htmlFor="displayName" className="block text-sm font-medium mb-2 text-ctp-subtext1">
-              Nom d'affichage
+              {t('auth.displayName')}
             </label>
             <input
               id="displayName"
@@ -148,14 +150,14 @@ export function RegisterForm() {
               className="w-full px-4 py-3 rounded-xl bg-ctp-mantle border border-ctp-surface1 text-ctp-text placeholder:text-ctp-overlay0 focus:border-ctp-mauve focus:ring-2 focus:ring-ctp-mauve/20 transition-all duration-200"
               placeholder="Jean Dupont"
               {...register('displayName', {
-                required: 'Nom requis',
+                required: t('auth.nameRequired'),
                 minLength: {
                   value: 2,
-                  message: 'Le nom doit contenir au moins 2 caracteres',
+                  message: t('auth.nameTooShort'),
                 },
                 maxLength: {
                   value: 100,
-                  message: 'Le nom ne peut pas depasser 100 caracteres',
+                  message: t('auth.nameTooLong'),
                 },
               })}
             />
@@ -166,19 +168,19 @@ export function RegisterForm() {
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-2 text-ctp-subtext1">
-              Email
+              {t('auth.email')}
             </label>
             <input
               id="email"
               type="email"
               autoComplete="email"
               className="w-full px-4 py-3 rounded-xl bg-ctp-mantle border border-ctp-surface1 text-ctp-text placeholder:text-ctp-overlay0 focus:border-ctp-mauve focus:ring-2 focus:ring-ctp-mauve/20 transition-all duration-200"
-              placeholder="vous@exemple.com"
+              placeholder={t('auth.emailPlaceholder')}
               {...register('email', {
-                required: 'Email requis',
+                required: t('auth.emailRequired'),
                 pattern: {
                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: 'Email invalide',
+                  message: t('auth.invalidEmail'),
                 },
               })}
             />
@@ -189,7 +191,7 @@ export function RegisterForm() {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium mb-2 text-ctp-subtext1">
-              Mot de passe
+              {t('auth.password')}
             </label>
             <input
               id="password"
@@ -198,7 +200,7 @@ export function RegisterForm() {
               className="w-full px-4 py-3 rounded-xl bg-ctp-mantle border border-ctp-surface1 text-ctp-text placeholder:text-ctp-overlay0 focus:border-ctp-mauve focus:ring-2 focus:ring-ctp-mauve/20 transition-all duration-200"
               placeholder="************"
               {...register('password', {
-                required: 'Mot de passe requis',
+                required: t('auth.passwordRequired'),
                 validate: (value) => validatePassword(value) || true,
               })}
             />
@@ -207,13 +209,13 @@ export function RegisterForm() {
             )}
             <p className="text-xs text-ctp-overlay1 mt-2 flex items-center gap-1">
               <span className="w-1 h-1 rounded-full bg-ctp-overlay1" />
-              Min. 12 caracteres avec majuscule, minuscule, chiffre et caractere special
+              {t('auth.passwordRequirements')}
             </p>
           </div>
 
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2 text-ctp-subtext1">
-              Confirmer le mot de passe
+              {t('auth.confirmPassword')}
             </label>
             <input
               id="confirmPassword"
@@ -222,9 +224,9 @@ export function RegisterForm() {
               className="w-full px-4 py-3 rounded-xl bg-ctp-mantle border border-ctp-surface1 text-ctp-text placeholder:text-ctp-overlay0 focus:border-ctp-mauve focus:ring-2 focus:ring-ctp-mauve/20 transition-all duration-200"
               placeholder="************"
               {...register('confirmPassword', {
-                required: 'Confirmation requise',
+                required: t('auth.confirmationRequired'),
                 validate: (value) =>
-                  value === password || 'Les mots de passe ne correspondent pas',
+                  value === password || t('auth.passwordsDoNotMatch'),
               })}
             />
             {errors.confirmPassword && (
@@ -258,19 +260,19 @@ export function RegisterForm() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                   />
                 </svg>
-                Creation...
+                {t('auth.creating')}
               </span>
             ) : (
-              'Creer mon compte'
+              t('auth.createMyAccount')
             )}
           </button>
         </form>
 
         <div className="mt-6 pt-6 border-t border-ctp-surface1">
           <p className="text-center text-sm text-ctp-subtext0">
-            Deja un compte ?{' '}
+            {t('auth.alreadyHaveAccountQuestion')}{' '}
             <a href="/login" className="text-ctp-mauve hover:text-ctp-pink font-medium transition-colors">
-              Se connecter
+              {t('auth.signIn')}
             </a>
           </p>
         </div>

@@ -44,8 +44,8 @@ import { notificationService } from '../notifications/notification.service.js';
 const createMockAchievement = (overrides = {}) => ({
   id: 'ach-123',
   code: 'first_steps',
-  name: 'Premiers Pas',
-  description: 'Ajoutez votre premiere transaction',
+  name: 'First Steps',
+  description: 'Add your first transaction',
   icon: '👣',
   category: 'onboarding',
   threshold: 1,
@@ -206,7 +206,7 @@ describe('AchievementService', () => {
       const result = await achievementService.getUserAchievements('user-123');
 
       expect(result[0]!.name).toBe('???');
-      expect(result[0]!.description).toBe('Achievement secret');
+      expect(result[0]!.description).toBe('Secret achievement');
       expect(result[0]!.icon).toBe('❓');
     });
 
@@ -214,7 +214,7 @@ describe('AchievementService', () => {
       const achievements = [
         createMockAchievement({
           code: 'night_owl',
-          name: 'Hibou Nocturne',
+          name: 'Night Owl',
           isSecret: true,
         }),
       ];
@@ -232,7 +232,8 @@ describe('AchievementService', () => {
 
       const result = await achievementService.getUserAchievements('user-123');
 
-      expect(result[0]!.name).toBe('Hibou Nocturne');
+      // Name comes from i18n translation (default: English)
+      expect(result[0]!.name).toBe('Night Owl');
       expect(result[0]!.isUnlocked).toBe(true);
     });
 
@@ -388,7 +389,7 @@ describe('AchievementService', () => {
       expect(notificationService.create).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'goal_achieved',
-          title: expect.stringContaining('Niveau'),
+          title: expect.stringContaining('Level'),
         })
       );
     });

@@ -1,0 +1,124 @@
+{
+  "title": "Realizari",
+  "secretAchievement": "Realizare secreta",
+  "unlocked": "Deblocata",
+  "progress": "Progres",
+  "xpReward": "{{xp}} XP",
+  "level": "Nivel {{level}}",
+  "levelUp": "Nivel Nou!",
+  "congratulations": "Felicitari! Ai atins nivelul {{level}}!",
+  "categories": {
+    "onboarding": "Primii Pasi",
+    "transactions": "Tranzactii",
+    "budgeting": "Bugetare",
+    "savings": "Economii",
+    "streaks": "Serii",
+    "milestones": "Repere"
+  },
+  "achievements": {
+    "first_steps": {
+      "name": "Primii Pasi",
+      "description": "Adauga prima ta tranzactie"
+    },
+    "first_budget": {
+      "name": "Incepator in Bugetare",
+      "description": "Creeaza primul tau buget"
+    },
+    "first_goal": {
+      "name": "Stabilitor de Obiective",
+      "description": "Creeaza primul tau obiectiv de economii"
+    },
+    "account_setup": {
+      "name": "Bine Echipat",
+      "description": "Adauga 3 conturi"
+    },
+    "tracker_10": {
+      "name": "Urmaritor Regulat",
+      "description": "Inregistreaza 10 tranzactii"
+    },
+    "tracker_50": {
+      "name": "Urmaritor Dedicat",
+      "description": "Inregistreaza 50 de tranzactii"
+    },
+    "tracker_100": {
+      "name": "Maestru al Urmaririi",
+      "description": "Inregistreaza 100 de tranzactii"
+    },
+    "tracker_500": {
+      "name": "Expert in Contabilitate",
+      "description": "Inregistreaza 500 de tranzactii"
+    },
+    "categorizer": {
+      "name": "Organizator",
+      "description": "Categoriseaza 25 de tranzactii"
+    },
+    "budget_keeper": {
+      "name": "Pazitorul Bugetului",
+      "description": "Incheie o luna sub buget"
+    },
+    "budget_master_3": {
+      "name": "Disciplina",
+      "description": "Ramai in buget timp de 3 luni consecutive"
+    },
+    "budget_master_6": {
+      "name": "Maestru al Bugetului",
+      "description": "Ramai in buget timp de 6 luni consecutive"
+    },
+    "multi_budget": {
+      "name": "Multi-Buget",
+      "description": "Gestioneaza 5 bugete simultan"
+    },
+    "saver_first": {
+      "name": "Primul Pas spre Economii",
+      "description": "Atinge 10% din primul tau obiectiv"
+    },
+    "saver_half": {
+      "name": "La Jumatatea Drumului",
+      "description": "Atinge 50% dintr-un obiectiv"
+    },
+    "saver_complete": {
+      "name": "Obiectiv Atins",
+      "description": "Finalizeaza un obiectiv de economii"
+    },
+    "saver_3_goals": {
+      "name": "Triplu Succes",
+      "description": "Finalizeaza 3 obiective de economii"
+    },
+    "saver_1000": {
+      "name": "O Mie Economisiti",
+      "description": "Economiseste 1.000 EUR in total"
+    },
+    "saver_10000": {
+      "name": "Zece Mii",
+      "description": "Economiseste 10.000 EUR in total"
+    },
+    "streak_7": {
+      "name": "Saptamana Activa",
+      "description": "7 zile consecutive de activitate"
+    },
+    "streak_30": {
+      "name": "Luna Completa",
+      "description": "30 de zile consecutive de activitate"
+    },
+    "streak_100": {
+      "name": "Centurion",
+      "description": "100 de zile consecutive de activitate"
+    },
+    "streak_365": {
+      "name": "Maratonist",
+      "description": "365 de zile consecutive de activitate"
+    },
+    "night_owl": {
+      "name": "Bufnita de Noapte",
+      "description": "Adauga o tranzactie dupa miezul noptii"
+    },
+    "early_bird": {
+      "name": "Matinal",
+      "description": "Adauga o tranzactie inainte de ora 6 dimineata"
+    },
+    "perfect_month": {
+      "name": "Luna Perfecta",
+      "description": "Categoriseaza toate tranzactiile pentru o luna"
+    }
+  }
+}

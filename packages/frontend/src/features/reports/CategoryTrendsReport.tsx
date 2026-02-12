@@ -4,9 +4,10 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import {
   Minus,
   Loader2,
@@ -70,6 +71,8 @@ const CHART_COLORS = [
 ];
 
 export function CategoryTrendsReport() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'fr' ? fr : enUS;
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [period, setPeriod] = useState<'6m' | '12m'>('6m');
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
@@ -107,7 +110,7 @@ export function CategoryTrendsReport() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Export error:', err);
-      alert("Erreur lors de l'export PDF");
+      alert(t('reports.pdfExport.error'));
     } finally {
       setIsExporting(false);
     }
@@ -125,7 +128,7 @@ export function CategoryTrendsReport() {
   // Build chart data
   const chartData = data?.months.map((m) => {
     const point: Record<string, number | string> = {
-      name: format(new Date(m.year, m.month - 1), 'MMM yy', { locale: fr }),
+      name: format(new Date(m.year, m.month - 1), 'MMM yy', { locale: dateLocale }),
     };
     data.categories.forEach((cat) => {
       if (selectedCategories.size === 0 || selectedCategories.has(cat.categoryId)) {
@@ -163,7 +166,7 @@ export function CategoryTrendsReport() {
     return (
       <div className="card p-8 text-center">
         <Loader2 className="w-8 h-8 mx-auto animate-spin text-ctp-blue mb-4" />
-        <p className="text-ctp-subtext0">Chargement des tendances...</p>
+        <p className="text-ctp-subtext0">{t('reports.categoryTrendsReport.loading')}</p>
       </div>
     );
   }
@@ -172,9 +175,9 @@ export function CategoryTrendsReport() {
     return (
       <div className="card p-8 text-center">
         <Folder className="w-12 h-12 mx-auto text-ctp-overlay1 mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Aucune donnee</h3>
+        <h3 className="text-lg font-semibold mb-2">{t('reports.categoryTrendsReport.noData')}</h3>
         <p className="text-ctp-subtext0">
-          Pas assez de transactions pour analyser les tendances
+          {t('reports.categoryTrendsReport.notEnoughData')}
         </p>
       </div>
     );
@@ -184,7 +187,7 @@ export function CategoryTrendsReport() {
     <div className="space-y-6">
       {/* Controls */}
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <h2 className="text-lg font-semibold">Tendances par categorie</h2>
+        <h2 className="text-lg font-semibold">{t('reports.categoryTrendsReport.trendsByCategory')}</h2>
         <div className="flex items-center gap-3">
           <button
             onClick={handleExportPDF}
@@ -200,7 +203,7 @@ export function CategoryTrendsReport() {
             ) : (
               <Download className="w-4 h-4" />
             )}
-            Exporter PDF
+            {t('reports.pdfExport.exportPdf')}
           </button>
           <div className="flex gap-1 bg-ctp-surface0 rounded-lg p-1">
             <button
@@ -212,7 +215,7 @@ export function CategoryTrendsReport() {
                   : 'text-ctp-subtext0 hover:text-ctp-text'
               )}
             >
-              6 mois
+              {t('reports.categoryTrendsReport.period6m')}
             </button>
             <button
               onClick={() => setPeriod('12m')}
@@ -223,7 +226,7 @@ export function CategoryTrendsReport() {
                   : 'text-ctp-subtext0 hover:text-ctp-text'
               )}
             >
-              12 mois
+              {t('reports.categoryTrendsReport.period12m')}
             </button>
           </div>
         </div>
@@ -258,7 +261,7 @@ export function CategoryTrendsReport() {
 
       {/* Chart */}
       <div className="card">
-        <h3 className="font-semibold mb-4">Evolution des depenses</h3>
+        <h3 className="font-semibold mb-4">{t('reports.categoryTrendsReport.spendingEvolution')}</h3>
         {chartData && chartData.length > 0 && displayedCategories ? (
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -298,7 +301,7 @@ export function CategoryTrendsReport() {
           </div>
         ) : (
           <div className="h-80 flex items-center justify-center text-ctp-subtext0">
-            Selectionnez des categories
+            {t('reports.categoryTrendsReport.selectCategories')}
           </div>
         )}
       </div>

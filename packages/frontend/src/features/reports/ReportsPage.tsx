@@ -5,9 +5,10 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import {
   BarChart3,
   TrendingUp,
@@ -131,37 +132,37 @@ const CHART_COLORS = [
   'var(--ctp-sky, #89dceb)',
 ];
 
-// Report tabs configuration
-const REPORT_TABS: ReportTabConfig[] = [
+// Report tabs configuration - labels will be translated in component
+const REPORT_TABS_CONFIG: Array<{ id: ReportTab; labelKey: string; descriptionKey: string; icon: React.ReactNode }> = [
   {
     id: 'overview',
-    label: 'Vue d\'ensemble',
+    labelKey: 'reports.overview',
     icon: <BarChart3 className="h-4 w-4" />,
-    description: 'Resume mensuel et tendances',
+    descriptionKey: 'reports.overviewDesc',
   },
   {
     id: 'net-worth',
-    label: 'Patrimoine',
+    labelKey: 'reports.netWorth',
     icon: <Wallet className="h-4 w-4" />,
-    description: 'Evolution de votre patrimoine net',
+    descriptionKey: 'reports.netWorthDesc',
   },
   {
     id: 'year-comparison',
-    label: 'Comparaison annuelle',
+    labelKey: 'reports.yearComparison',
     icon: <Calendar className="h-4 w-4" />,
-    description: 'Comparez annee N vs N-1',
+    descriptionKey: 'reports.yearComparisonDesc',
   },
   {
     id: 'category-trends',
-    label: 'Tendances',
+    labelKey: 'reports.trends',
     icon: <TrendingUp className="h-4 w-4" />,
-    description: 'Evolution par categorie',
+    descriptionKey: 'reports.trendsDesc',
   },
   {
     id: 'tax-summary',
-    label: 'Resume fiscal',
+    labelKey: 'reports.taxSummary',
     icon: <Receipt className="h-4 w-4" />,
-    description: 'Synthese pour vos impots',
+    descriptionKey: 'reports.taxSummaryDesc',
   },
 ];
 
@@ -170,8 +171,18 @@ const REPORT_TABS: ReportTabConfig[] = [
 // ----------------------------------------------------------------------------
 
 export function ReportsPage() {
+  const { t, i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
+  const dateLocale = i18n.language === 'fr' ? fr : enUS;
   const [activeTab, setActiveTab] = useState<ReportTab>('overview');
+
+  // Translated report tabs
+  const REPORT_TABS: ReportTabConfig[] = REPORT_TABS_CONFIG.map((tab) => ({
+    id: tab.id,
+    label: t(tab.labelKey),
+    icon: tab.icon,
+    description: t(tab.descriptionKey, { defaultValue: '' }),
+  }));
   const [dateRange, setDateRange] = useState<DateRange>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
@@ -222,11 +233,11 @@ export function ReportsPage() {
   });
 
   // Format trend data for chart
-  const trendChartData = trends?.trends.map((t) => ({
-    name: format(new Date(t.year, t.month - 1), 'MMM', { locale: fr }),
-    revenus: t.income,
-    depenses: t.expenses,
-    net: t.net,
+  const trendChartData = trends?.trends.map((trend) => ({
+    name: format(new Date(trend.year, trend.month - 1), 'MMM', { locale: dateLocale }),
+    revenus: trend.income,
+    depenses: trend.expenses,
+    net: trend.net,
   }));
 
   // Format category data for pie chart
@@ -284,7 +295,7 @@ export function ReportsPage() {
           <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
             <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <TrendingUp className="h-4 w-4" />
-              <span className="text-sm">Revenus</span>
+              <span className="text-sm">{t('reports.yearComparisonReport.income')}</span>
             </div>
             <p className="text-2xl font-semibold text-ctp-text">
               {formatCurrency(summary.flow.income, 'EUR')}
@@ -293,7 +304,7 @@ export function ReportsPage() {
               {getChangeIcon(summary.comparison.incomeChange)}
               <span className={cn('text-sm', getChangeColor(summary.comparison.incomeChange))}>
                 {summary.comparison.incomeChange >= 0 ? '+' : ''}
-                {formatPercent(summary.comparison.incomeChange)} vs mois prec.
+                {formatPercent(summary.comparison.incomeChange)} {t('reports.yearComparisonReport.vsLastYear')}
               </span>
             </div>
           </div>
@@ -302,7 +313,7 @@ export function ReportsPage() {
           <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
             <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <TrendingDown className="h-4 w-4" />
-              <span className="text-sm">Depenses</span>
+              <span className="text-sm">{t('reports.yearComparisonReport.expenses')}</span>
             </div>
             <p className="text-2xl font-semibold text-ctp-text">
               {formatCurrency(summary.flow.expenses, 'EUR')}
@@ -311,7 +322,7 @@ export function ReportsPage() {
               {getChangeIcon(-summary.comparison.expenseChange)}
               <span className={cn('text-sm', getChangeColor(summary.comparison.expenseChange, true))}>
                 {summary.comparison.expenseChange >= 0 ? '+' : ''}
-                {formatPercent(summary.comparison.expenseChange)} vs mois prec.
+                {formatPercent(summary.comparison.expenseChange)} {t('reports.yearComparisonReport.vsLastYear')}
               </span>
             </div>
           </div>
@@ -320,14 +331,14 @@ export function ReportsPage() {
           <div className={cn('border border-ctp-surface1 rounded-lg p-4', summary.flow.net >= 0 ? 'bg-ctp-green/10' : 'bg-ctp-red/10')}>
             <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <Wallet className="h-4 w-4" />
-              <span className="text-sm">Epargne nette</span>
+              <span className="text-sm">{t('reports.yearComparisonReport.netSavings')}</span>
             </div>
             <p className={cn('text-2xl font-semibold', summary.flow.net >= 0 ? 'text-ctp-green' : 'text-ctp-red')}>
               {summary.flow.net >= 0 ? '+' : ''}
               {formatCurrency(summary.flow.net, 'EUR')}
             </p>
             <p className="text-sm text-ctp-subtext0 mt-1">
-              Taux: {formatPercent(summary.flow.savingsRate)}
+              {t('reports.yearComparisonReport.savingsRate')}: {formatPercent(summary.flow.savingsRate)}
             </p>
           </div>
 
@@ -335,7 +346,7 @@ export function ReportsPage() {
           <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
             <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
               <DollarSign className="h-4 w-4" />
-              <span className="text-sm">Solde total</span>
+              <span className="text-sm">{t('reports.yearComparisonReport.total')}</span>
             </div>
             <p className="text-2xl font-semibold text-ctp-text">
               {formatCurrency(summary.totalBalance, 'EUR')}
@@ -351,13 +362,13 @@ export function ReportsPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-ctp-subtext0" />
-              <h2 className="text-sm font-medium text-ctp-subtext1">Evolution Revenus/Depenses</h2>
+              <h2 className="text-sm font-medium text-ctp-subtext1">{t('reports.netWorthReport.evolution')}</h2>
             </div>
             <button
               onClick={() => setExportType('cash_flow')}
               className="text-xs text-ctp-blue hover:text-ctp-blue/80"
             >
-              Exporter
+              {t('reports.exportDialog.export')}
             </button>
           </div>
           {trendChartData && trendChartData.length > 0 ? (
@@ -369,18 +380,18 @@ export function ReportsPage() {
                   <YAxis tick={{ fontSize: 12 }} className="fill-ctp-subtext0" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                   <Tooltip
                     formatter={(value: number) => formatCurrency(value, 'EUR')}
-                    labelFormatter={(label) => `Mois: ${label}`}
+                    labelFormatter={(label) => `${t('reports.yearComparisonReport.month')}: ${label}`}
                     contentStyle={{ backgroundColor: 'var(--ctp-surface0)', borderColor: 'var(--ctp-surface1)' }}
                   />
                   <Legend />
-                  <Bar dataKey="revenus" name="Revenus" fill="var(--ctp-green, #a6e3a1)" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="depenses" name="Depenses" fill="var(--ctp-red, #f38ba8)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="revenus" name={t('reports.yearComparisonReport.income')} fill="var(--ctp-green, #a6e3a1)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="depenses" name={t('reports.yearComparisonReport.expenses')} fill="var(--ctp-red, #f38ba8)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
             <div className="h-64 flex items-center justify-center text-ctp-subtext0">
-              Pas de donnees disponibles
+              {t('reports.netWorthReport.noData')}
             </div>
           )}
         </div>
@@ -390,13 +401,13 @@ export function ReportsPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <PieChart className="h-4 w-4 text-ctp-subtext0" />
-              <h2 className="text-sm font-medium text-ctp-subtext1">Depenses par categorie</h2>
+              <h2 className="text-sm font-medium text-ctp-subtext1">{t('reports.categoryTrendsReport.trendsByCategory')}</h2>
             </div>
             <button
               onClick={() => setExportType('categories')}
               className="text-xs text-ctp-blue hover:text-ctp-blue/80"
             >
-              Exporter
+              {t('reports.exportDialog.export')}
             </button>
           </div>
           {categoryChartData && categoryChartData.length > 0 ? (
@@ -428,7 +439,7 @@ export function ReportsPage() {
             </div>
           ) : (
             <div className="h-64 flex items-center justify-center text-ctp-subtext0">
-              Pas de donnees disponibles
+              {t('reports.netWorthReport.noData')}
             </div>
           )}
         </div>
@@ -440,24 +451,24 @@ export function ReportsPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Target className="h-4 w-4 text-ctp-subtext0" />
-              <h2 className="text-sm font-medium text-ctp-subtext1">Budget vs Realise</h2>
+              <h2 className="text-sm font-medium text-ctp-subtext1">{t('reports.exportLabels.budgetReport')}</h2>
             </div>
             <button
               onClick={() => setExportType('budget_report')}
               className="text-xs text-ctp-blue hover:text-ctp-blue/80"
             >
-              Exporter
+              {t('reports.exportDialog.export')}
             </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-ctp-surface1">
-                  <th className="text-left text-xs font-medium text-ctp-subtext0 py-2">Categorie</th>
-                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">Budget</th>
-                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">Realise</th>
-                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">Ecart</th>
-                  <th className="text-center text-xs font-medium text-ctp-subtext0 py-2">Statut</th>
+                  <th className="text-left text-xs font-medium text-ctp-subtext0 py-2">{t('transactions.category')}</th>
+                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">{t('budgets.budgetAmount')}</th>
+                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">{t('budgets.spent')}</th>
+                  <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">{t('budgets.remaining')}</th>
+                  <th className="text-center text-xs font-medium text-ctp-subtext0 py-2">{t('budgets.progress')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -491,9 +502,9 @@ export function ReportsPage() {
                           cat.status === 'over' && 'bg-ctp-red/20 text-ctp-red'
                         )}
                       >
-                        {cat.status === 'under' && 'Sous budget'}
-                        {cat.status === 'on_track' && 'Dans les clous'}
-                        {cat.status === 'over' && 'Depasse'}
+                        {cat.status === 'under' && t('budgets.onTrack')}
+                        {cat.status === 'on_track' && t('budgets.onTrack')}
+                        {cat.status === 'over' && t('budgets.exceeded')}
                       </span>
                     </td>
                   </tr>
@@ -501,7 +512,7 @@ export function ReportsPage() {
               </tbody>
               <tfoot>
                 <tr className="bg-ctp-surface1">
-                  <td className="py-3 font-medium text-ctp-text">Total</td>
+                  <td className="py-3 font-medium text-ctp-text">{t('reports.yearComparisonReport.total')}</td>
                   <td className="text-right font-medium text-ctp-text">
                     {formatCurrency(budgetData.totalBudget, 'EUR')}
                   </td>
@@ -531,38 +542,38 @@ export function ReportsPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-ctp-subtext0" />
-              <h2 className="text-sm font-medium text-ctp-subtext1">Flux de tresorerie</h2>
+              <h2 className="text-sm font-medium text-ctp-subtext1">{t('reports.exportLabels.cashFlow', { defaultValue: 'Cash Flow' })}</h2>
             </div>
             <button
               onClick={() => setExportType('cash_flow')}
               className="text-xs text-ctp-blue hover:text-ctp-blue/80"
             >
-              Exporter
+              {t('reports.exportDialog.export')}
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="p-4 bg-ctp-surface1 rounded-lg">
-              <p className="text-xs text-ctp-subtext0 mb-1">Solde d'ouverture</p>
+              <p className="text-xs text-ctp-subtext0 mb-1">{t('reports.openingBalance', { defaultValue: 'Opening Balance' })}</p>
               <p className="text-lg font-semibold text-ctp-text">
                 {formatCurrency(cashFlow.openingBalance, 'EUR')}
               </p>
             </div>
             <div className="p-4 bg-ctp-green/10 rounded-lg">
-              <p className="text-xs text-ctp-subtext0 mb-1">Flux operationnel</p>
+              <p className="text-xs text-ctp-subtext0 mb-1">{t('reports.operatingFlow', { defaultValue: 'Operating Flow' })}</p>
               <p className={cn('text-lg font-semibold', cashFlow.operating.net >= 0 ? 'text-ctp-green' : 'text-ctp-red')}>
                 {cashFlow.operating.net >= 0 ? '+' : ''}
                 {formatCurrency(cashFlow.operating.net, 'EUR')}
               </p>
             </div>
             <div className="p-4 bg-ctp-blue/10 rounded-lg">
-              <p className="text-xs text-ctp-subtext0 mb-1">Flux d'investissement</p>
+              <p className="text-xs text-ctp-subtext0 mb-1">{t('reports.investingFlow', { defaultValue: 'Investing Flow' })}</p>
               <p className={cn('text-lg font-semibold', cashFlow.investing.net >= 0 ? 'text-ctp-blue' : 'text-ctp-blue')}>
                 {cashFlow.investing.net >= 0 ? '+' : ''}
                 {formatCurrency(cashFlow.investing.net, 'EUR')}
               </p>
             </div>
             <div className="p-4 bg-ctp-surface1 rounded-lg">
-              <p className="text-xs text-ctp-subtext0 mb-1">Solde de cloture</p>
+              <p className="text-xs text-ctp-subtext0 mb-1">{t('reports.closingBalance', { defaultValue: 'Closing Balance' })}</p>
               <p className="text-lg font-semibold text-ctp-text">
                 {formatCurrency(cashFlow.closingBalance, 'EUR')}
               </p>
@@ -573,7 +584,7 @@ export function ReportsPage() {
 
       {/* Quick Access to Advanced Reports */}
       <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-4">
-        <h2 className="text-sm font-medium text-ctp-subtext1 mb-4">Rapports avances</h2>
+        <h2 className="text-sm font-medium text-ctp-subtext1 mb-4">{t('reports.advancedReports', { defaultValue: 'Advanced Reports' })}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {REPORT_TABS.filter(tab => tab.id !== 'overview').map((tab) => (
             <button
@@ -601,8 +612,8 @@ export function ReportsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-ctp-text">Rapports</h1>
-          <p className="text-ctp-subtext0">Analysez vos finances en detail</p>
+          <h1 className="text-2xl font-semibold text-ctp-text">{t('reports.title')}</h1>
+          <p className="text-ctp-subtext0">{t('reports.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           {activeTab === 'overview' && (
@@ -613,7 +624,7 @@ export function ReportsPage() {
             className="px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg hover:bg-ctp-blue/90 flex items-center gap-2"
           >
             <Download className="h-4 w-4" />
-            Exporter
+            {t('reports.exportDialog.export')}
           </button>
         </div>
       </div>

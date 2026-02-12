@@ -1,0 +1,84 @@
+{
+  "title": "Notificari",
+  "markAllRead": "Marcheaza toate ca citite",
+  "noNotifications": "Nicio notificare",
+  "viewAll": "Vezi toate notificarile",
+  "budgetExceeded": {
+    "title": "Bugetul \"{{budgetName}}\" a fost depasit",
+    "message": "Bugetul pentru \"{{categoryName}}\" a fost depasit ({{percentUsed}}% utilizat)."
+  },
+  "budgetWarning": {
+    "title": "Bugetul \"{{budgetName}}\" aproape atins",
+    "message": "Bugetul pentru \"{{categoryName}}\" este la {{percentUsed}}% din limita."
+  },
+  "importComplete": {
+    "title": "Import finalizat",
+    "message": "{{imported}} tranzactie/tranzactii importata/importate{{skipped}}{{errors}}.",
+    "skipped": ", {{count}} sarite",
+    "errors": ", {{count}} eroare/erori"
+  },
+  "importCompleteWithErrors": {
+    "title": "Import finalizat cu erori",
+    "message": "{{imported}} tranzactie/tranzactii importata/importate, {{skipped}} sarite, {{errors}} eroare/erori."
+  },
+  "exportReady": {
+    "title": "Export gata",
+    "message": "Exportul {{exportType}} este gata de descarcare."
+  },
+  "invoiceOverdue": {
+    "title": "Factura {{invoiceNumber}} restanta",
+    "message": "Factura {{invoiceNumber}} pentru {{clientName}} ({{amount}} {{currency}}) este restanta."
+  },
+  "invoicePaid": {
+    "title": "Factura {{invoiceNumber}} platita",
+    "message": "Factura {{invoiceNumber}} pentru {{clientName}} ({{amount}} {{currency}}) a fost marcata ca platita."
+  },
+  "quoteAccepted": {
+    "title": "Oferta {{quoteNumber}} acceptata",
+    "message": "Oferta {{quoteNumber}} pentru {{clientName}} ({{amount}} {{currency}}) a fost acceptata."
+  },
+  "quoteExpiring": {
+    "title": "Oferta {{quoteNumber}} expira curand",
+    "message": "Oferta {{quoteNumber}} pentru {{clientName}} expira in {{daysLeft}} zi/zile."
+  },
+  "priceAlert": {
+    "title": "Alerta de pret: {{assetSymbol}}",
+    "messageAbove": "{{assetName}} a depasit {{targetPrice}} {{currency}} (in prezent {{currentPrice}} {{currency}}).",
+    "messageBelow": "{{assetName}} a scazut sub {{targetPrice}} {{currency}} (in prezent {{currentPrice}} {{currency}})."
+  },
+  "billReminder": {
+    "title": "Memento de plata",
+    "message": "\"{{description}}\" ({{amount}} {{currency}}) este scadent in {{daysUntil}} zi/zile."
+  },
+  "unusualSpending": {
+    "title": "Cheltuieli neobisnuite in \"{{categoryName}}\"",
+    "titleGeneric": "Cheltuieli neobisnuite detectate",
+    "message": "{{description}}: {{amount}} {{currency}} ({{percentAboveAverage}}% peste medie)"
+  },
+  "weeklySummary": {
+    "titlePositive": "Rezumat saptamanal: +{{netChange}} {{currency}}",
+    "titleNegative": "Rezumat saptamanal: {{netChange}} {{currency}}"
+  },
+  "monthlyReport": {
+    "title": "Raport lunar - {{month}}",
+    "message": "Cheltuieli: {{totalSpent}} {{currency}} | Venituri: {{totalIncome}} {{currency}}"
+  },
+  "lowBalance": {
+    "title": "Sold scazut: {{accountName}}",
+    "message": "Soldul contului \"{{accountName}}\" este {{balance}} {{currency}} (prag: {{threshold}} {{currency}})"
+  },
+  "billUpcoming": {
+    "titleToday": "Factura scadenta azi",
+    "titleTomorrow": "Factura scadenta maine",
+    "titleDays": "Factura scadenta in {{daysUntilDue}} zile",
+    "message": "\"{{description}}\" - {{amount}} {{currency}}"
+  },
+  "achievementUnlocked": {
+    "title": "{{icon}} Realizare Deblocata!",
+    "message": "Ai obtinut \"{{achievementName}}\" - {{description}}"
+  },
+  "levelUp": {
+    "title": "Nivel Nou!",
+    "message": "Felicitari! Ai atins nivelul {{level}}!"
+  }
+}

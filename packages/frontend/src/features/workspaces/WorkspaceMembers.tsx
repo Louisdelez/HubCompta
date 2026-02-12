@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { X, Users, Loader2, Wallet, Shield, Eye, UserPlus } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { SpendingLimitForm } from './SpendingLimitForm';
@@ -43,13 +44,13 @@ interface WorkspaceMembersProps {
 // Constants
 // ----------------------------------------------------------------------------
 
-const ROLE_LABELS: Record<Member['role'], string> = {
-  owner: 'Proprietaire',
-  admin: 'Administrateur',
-  accountant: 'Comptable',
-  member: 'Membre',
-  family_member: 'Membre famille',
-  readonly: 'Lecture seule',
+const ROLE_LABEL_KEYS: Record<Member['role'], string> = {
+  owner: 'workspaces.members.roles.owner',
+  admin: 'workspaces.members.roles.admin',
+  accountant: 'workspaces.members.roles.accountant',
+  member: 'workspaces.members.roles.member',
+  family_member: 'workspaces.members.roles.family_member',
+  readonly: 'workspaces.members.roles.readonly',
 };
 
 const ROLE_COLORS: Record<Member['role'], string> = {
@@ -85,6 +86,7 @@ export function WorkspaceMembers({
   showInviteButton = true,
   onInviteClick,
 }: WorkspaceMembersProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [editingSpendingLimit, setEditingSpendingLimit] = useState<Member | null>(null);
   const [showFamilyInvite, setShowFamilyInvite] = useState(false);
@@ -134,7 +136,7 @@ export function WorkspaceMembers({
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-ctp-blue" />
             <h3 className="font-semibold text-ctp-text">
-              Membres ({members?.length ?? 0})
+              {t('workspaces.members.title')} ({members?.length ?? 0})
             </h3>
           </div>
           {showInviteButton && canManage && (
@@ -149,7 +151,7 @@ export function WorkspaceMembers({
               className="btn-sm btn-primary"
             >
               <UserPlus className="w-4 h-4 mr-1" />
-              Inviter
+              {t('workspaces.members.invite')}
             </button>
           )}
         </div>
@@ -207,19 +209,19 @@ export function WorkspaceMembers({
                   ROLE_COLORS[member.role]
                 )}
               >
-                {ROLE_LABELS[member.role]}
+                {t(ROLE_LABEL_KEYS[member.role])}
               </span>
 
               {/* Remove button */}
               {isOwner && member.role !== 'owner' && !compact && (
                 <button
                   onClick={() => {
-                    if (confirm(`Retirer ${member.displayName} de l'espace ?`)) {
+                    if (confirm(t('workspaces.members.removeConfirm', { name: member.displayName }))) {
                       void removeMutation.mutateAsync(member.id);
                     }
                   }}
                   className="btn-ghost text-ctp-red hover:bg-ctp-red/10 p-1"
-                  title="Retirer"
+                  title={t('workspaces.members.remove')}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -243,7 +245,7 @@ export function WorkspaceMembers({
                     <Wallet className="w-3 h-3" />
                     {member.spendingLimit !== null
                       ? formatCurrency(member.spendingLimit)
-                      : 'Illimite'}
+                      : t('workspaces.members.unlimited')}
                   </button>
 
                   {/* Spending Progress */}
@@ -286,7 +288,7 @@ export function WorkspaceMembers({
                     )}
                   >
                     <Shield className="w-3 h-3" />
-                    {member.approvalRequired ? 'Approbation' : 'Auto'}
+                    {member.approvalRequired ? t('workspaces.members.approval') : t('workspaces.members.auto')}
                   </button>
 
                   {/* Category count */}

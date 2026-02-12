@@ -1,0 +1,144 @@
+{
+  "title": "Notifications",
+  "markAllRead": "Mark all as read",
+  "noNotifications": "No notifications",
+  "viewAll": "View all notifications",
+  "budgetExceeded": {
+    "title": "Budget \"{{budgetName}}\" exceeded",
+    "message": "The budget for \"{{categoryName}}\" has been exceeded ({{percentUsed}}% used)."
+  },
+  "budgetWarning": {
+    "title": "Budget \"{{budgetName}}\" almost reached",
+    "message": "The budget for \"{{categoryName}}\" is at {{percentUsed}}% of its limit."
+  },
+  "importComplete": {
+    "title": "Import completed",
+    "message": "{{imported}} transaction(s) imported{{skipped}}{{errors}}.",
+    "skipped": ", {{count}} skipped",
+    "errors": ", {{count}} error(s)"
+  },
+  "importCompleteWithErrors": {
+    "title": "Import completed with errors",
+    "message": "{{imported}} transaction(s) imported, {{skipped}} skipped, {{errors}} error(s)."
+  },
+  "exportReady": {
+    "title": "Export ready",
+    "message": "Your {{exportType}} export is ready to download."
+  },
+  "invoiceOverdue": {
+    "title": "Invoice {{invoiceNumber}} overdue",
+    "message": "Invoice {{invoiceNumber}} for {{clientName}} ({{amount}} {{currency}}) is overdue."
+  },
+  "invoicePaid": {
+    "title": "Invoice {{invoiceNumber}} paid",
+    "message": "Invoice {{invoiceNumber}} for {{clientName}} ({{amount}} {{currency}}) has been marked as paid."
+  },
+  "quoteAccepted": {
+    "title": "Quote {{quoteNumber}} accepted",
+    "message": "Quote {{quoteNumber}} for {{clientName}} ({{amount}} {{currency}}) has been accepted."
+  },
+  "quoteExpiring": {
+    "title": "Quote {{quoteNumber}} expiring soon",
+    "message": "Quote {{quoteNumber}} for {{clientName}} expires in {{daysLeft}} day(s)."
+  },
+  "priceAlert": {
+    "title": "Price alert: {{assetSymbol}}",
+    "messageAbove": "{{assetName}} has gone above {{targetPrice}} {{currency}} (currently {{currentPrice}} {{currency}}).",
+    "messageBelow": "{{assetName}} has gone below {{targetPrice}} {{currency}} (currently {{currentPrice}} {{currency}})."
+  },
+  "billReminder": {
+    "title": "Payment reminder",
+    "message": "\"{{description}}\" ({{amount}} {{currency}}) is due in {{daysUntil}} day(s)."
+  },
+  "unusualSpending": {
+    "title": "Unusual spending in \"{{categoryName}}\"",
+    "titleGeneric": "Unusual spending detected",
+    "message": "{{description}}: {{amount}} {{currency}} ({{percentAboveAverage}}% above average)"
+  },
+  "weeklySummary": {
+    "titlePositive": "Weekly summary: +{{netChange}} {{currency}}",
+    "titleNegative": "Weekly summary: {{netChange}} {{currency}}"
+  },
+  "monthlyReport": {
+    "title": "Monthly report - {{month}}",
+    "message": "Expenses: {{totalSpent}} {{currency}} | Income: {{totalIncome}} {{currency}}"
+  },
+  "lowBalance": {
+    "title": "Low balance: {{accountName}}",
+    "message": "Your account \"{{accountName}}\" balance is {{balance}} {{currency}} (threshold: {{threshold}} {{currency}})"
+  },
+  "billUpcoming": {
+    "titleToday": "Bill due today",
+    "titleTomorrow": "Bill due tomorrow",
+    "titleDays": "Bill due in {{daysUntilDue}} days",
+    "message": "\"{{description}}\" - {{amount}} {{currency}}"
+  },
+  "achievementUnlocked": {
+    "title": "{{icon}} Achievement Unlocked!",
+    "message": "You earned \"{{achievementName}}\" - {{description}}"
+  },
+  "levelUp": {
+    "title": "Level Up!",
+    "message": "Congratulations! You reached level {{level}}!"
+  },
+  "anomaly": {
+    "largeTransaction": "Important transaction detected",
+    "categorySpike": "Spending increase",
+    "unusualSpending": "Unusual spending",
+    "newMerchant": "New merchant",
+    "financialAlert": "Financial alert",
+    "largeTransactionMessage": "Unusual transaction: {{amount}} {{currency}} ({{multiplier}}x the average)",
+    "categorySpikeMessage": "High spending in \"{{categoryName}}\": {{percentageAbove}}% above average",
+    "newMerchantMessage": "First transaction with this merchant"
+  },
+  "savingsMilestone": {
+    "title": "{{icon}} {{goalName}}: {{milestone}}% reached!",
+    "messageComplete": "Congratulations! You reached your savings goal!",
+    "messageProgress": "You reached {{milestone}}% of your goal \"{{goalName}}\""
+  },
+  "savingsOffTrack": {
+    "title": "Goal \"{{goalName}}\" behind schedule",
+    "message": "To reach your goal on time, you should save {{required}} {{currency}}/month (currently {{current}} {{currency}}/month)"
+  },
+  "insights": {
+    "spendingUp": "Spending up by {{changePercent}}%",
+    "spendingDown": "Spending down by {{changePercent}}%",
+    "spendingUpMessage": "Your average daily spending is higher than last month.",
+    "spendingDownMessage": "You're spending less than last month. Keep it up!",
+    "savingOpportunity": "Saving opportunity: {{categoryName}}",
+    "savingOpportunityMessage": "You spent {{amount}} {{currency}} on \"{{categoryName}}\" this month. A 10% reduction would save you {{savings}} {{currency}}.",
+    "spentMoreThanUsual": "You spent {{percent}}% more than usual this week.",
+    "spentLessThanUsual": "Great job! You spent {{percent}}% less than usual.",
+    "topCategory": "Your top spending category: {{categoryName}} ({{amount}} {{currency}})",
+    "positiveWeek": "You're in the positive this week: +{{amount}} {{currency}}"
+  },
+  "tips": {
+    "automateSavings": {
+      "title": "Tip: Automate your savings",
+      "message": "Set up automatic transfers to your savings account each month to reach your goals more easily."
+    },
+    "trackSubscriptions": {
+      "title": "Tip: Track your subscriptions",
+      "message": "Review your subscriptions regularly. You could save by canceling ones you no longer use."
+    },
+    "categoryBudgets": {
+      "title": "Tip: Budget by category",
+      "message": "Setting budgets by category helps you control spending and identify areas to optimize."
+    },
+    "emergencyFund": {
+      "title": "Tip: Emergency fund",
+      "message": "Aim to have 3-6 months of expenses in reserve for unexpected situations."
+    }
+  },
+  "actions": {
+    "viewTransaction": "View transaction",
+    "viewDashboard": "View dashboard",
+    "viewReport": "View report",
+    "viewAccount": "View account",
+    "viewSchedule": "View schedule",
+    "viewBudget": "View budget",
+    "viewGoal": "View goal",
+    "viewReports": "View reports",
+    "viewTransactions": "View transactions"
+  }
+}

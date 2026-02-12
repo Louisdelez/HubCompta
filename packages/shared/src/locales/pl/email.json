@@ -1,0 +1,76 @@
+{
+  "greeting": "Witaj {{displayName}},",
+  "footer": "Ta wiadomosc zostala wyslana automatycznie przez HubCompta.",
+  "footerIgnore": "Jesli nie zamawieles tej wiadomosci, mozesz ja bezpiecznie zignorowac.",
+  "welcome": {
+    "subject": "Witamy w HubCompta!",
+    "title": "Witamy w HubCompta",
+    "intro": "Witamy w HubCompta! Twoje konto zostalo pomyslnie utworzone.",
+    "body": "HubCompta pomaga latwiej zarzadzac finansami osobistymi i firmowymi:",
+    "features": {
+      "tracking": "Sledz swoje przychody i wydatki",
+      "budgets": "Tworzenie i zarzadzanie budzetami",
+      "reports": "Generuj szczegolowe raporty",
+      "invoicing": "Fakturowanie klientow (tryb Pro)"
+    },
+    "cta": "Przejdz do panelu",
+    "closing": "Do zobaczenia w HubCompta!"
+  },
+  "passwordReset": {
+    "subject": "Zresetuj swoje haslo HubCompta",
+    "title": "Reset hasla",
+    "intro": "Poprosiles o zresetowanie hasla.",
+    "body": "Kliknij przycisk ponizej, aby wybrac nowe haslo:",
+    "cta": "Zresetuj moje haslo",
+    "expiry": "Wazne: Ten link wygasa za {{expiresIn}}.",
+    "ignoreNote": "Jesli nie zamawieles tego resetu, zignoruj te wiadomosc. Twoje haslo pozostanie niezmienione."
+  },
+  "invoiceOverdue": {
+    "subject": "Faktura {{invoiceNumber}} zalegla",
+    "title": "Zalegla faktura",
+    "alertTitle": "Faktura zalegla",
+    "intro": "Nastepujaca faktura jest zalegla od {{daysOverdue}} dni:",
+    "invoiceNumber": "Numer faktury",
+    "client": "Klient",
+    "amount": "Kwota",
+    "dueDate": "Termin platnosci",
+    "cta": "Zobacz fakture",
+    "recommendation": "Zalecamy skontaktowanie sie z klientem w sprawie platnosci."
+  },
+  "budgetAlert": {
+    "subjectExceeded": "Budzet \"{{budgetName}}\" przekroczony",
+    "subjectWarning": "Budzet \"{{budgetName}}\" na poziomie {{percentUsed}}%",
+    "titleExceeded": "Budzet przekroczony!",
+    "titleWarning": "Budzet prawie osiagniety",
+    "messageExceeded": "Twoj budzet \"{{budgetName}}\" zostal przekroczony.",
+    "messageWarning": "Twoj budzet \"{{budgetName}}\" zbliza sie do swojego limitu.",
+    "budget": "Budzet",
+    "category": "Kategoria",
+    "spent": "Wydane",
+    "limit": "Limit",
+    "usage": "Uzycie",
+    "cta": "Zobacz budzet"
+  },
+  "exportReady": {
+    "subject": "Twoj eksport {{exportType}} jest gotowy",
+    "title": "Eksport gotowy",
+    "alertTitle": "Twoj eksport jest gotowy!",
+    "intro": "Twoj eksport {{exportType}} jest teraz dostepny do pobrania.",
+    "exportType": "Typ eksportu",
+    "filename": "Plik",
+    "expiresAt": "Wygasa",
+    "cta": "Pobierz eksport",
+    "expiryNote": "Ten link do pobrania wygasnie {{expiresAt}}."
+  },
+  "weeklySummary": {
+    "subject": "Podsumowanie tygodniowe - {{weekStart}} do {{weekEnd}}",
+    "title": "Podsumowanie tygodniowe",
+    "intro": "Oto Twoje podsumowanie za tydzien od {{weekStart}} do {{weekEnd}}:",
+    "income": "Przychody",
+    "expenses": "Wydatki",
+    "balance": "Saldo",
+    "topCategories": "Najwazniejsze kategorie wydatkow",
+    "budgetAlerts": "Alerty budzetowe",
+    "cta": "Zobacz panel"
+  }
+}

@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   Bell,
   Mail,
@@ -85,6 +86,7 @@ const defaultNotifications: NotificationPreferences['notifications'] = {
 };
 
 export function NotificationSettings() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<NotificationPreferences['notifications']>(defaultNotifications);
@@ -164,10 +166,10 @@ export function NotificationSettings() {
               <Mail className="h-5 w-5 text-ctp-yellow" />
               <div>
                 <h2 className="text-lg font-semibold text-ctp-text">
-                  Notifications par email
+                  {t('settings.notifications.emailNotifications')}
                 </h2>
                 <p className="text-sm text-ctp-subtext0">
-                  Recevez des notifications par email
+                  {t('settings.notifications.receiveEmailNotifications')}
                 </p>
               </div>
             </div>
@@ -189,10 +191,10 @@ export function NotificationSettings() {
             <label className="flex items-center justify-between cursor-pointer">
               <div>
                 <span className="text-sm font-medium text-ctp-subtext1">
-                  Alertes budget
+                  {t('settings.notifications.budgetAlerts')}
                 </span>
                 <p className="text-xs text-ctp-subtext0">
-                  Soyez prevenu quand vous approchez ou depassez un budget
+                  {t('settings.notifications.budgetAlertsDescription')}
                 </p>
               </div>
               <input
@@ -207,10 +209,10 @@ export function NotificationSettings() {
             <label className="flex items-center justify-between cursor-pointer">
               <div>
                 <span className="text-sm font-medium text-ctp-subtext1">
-                  Import termine
+                  {t('settings.notifications.importComplete')}
                 </span>
                 <p className="text-xs text-ctp-subtext0">
-                  Notification quand un import de transactions est termine
+                  {t('settings.notifications.importCompleteDescription')}
                 </p>
               </div>
               <input
@@ -225,10 +227,10 @@ export function NotificationSettings() {
             <label className="flex items-center justify-between cursor-pointer">
               <div>
                 <span className="text-sm font-medium text-ctp-subtext1">
-                  Alertes securite
+                  {t('settings.notifications.securityAlerts')}
                 </span>
                 <p className="text-xs text-ctp-subtext0">
-                  Connexions suspectes, nouveaux appareils, etc.
+                  {t('settings.notifications.securityAlertsDescription')}
                 </p>
               </div>
               <input
@@ -243,10 +245,10 @@ export function NotificationSettings() {
             <label className="flex items-center justify-between cursor-pointer">
               <div>
                 <span className="text-sm font-medium text-ctp-subtext1">
-                  Resume hebdomadaire
+                  {t('settings.notifications.weeklyDigest')}
                 </span>
                 <p className="text-xs text-ctp-subtext0">
-                  Recevez un resume de votre activite chaque semaine
+                  {t('settings.notifications.weeklyDigestDescription')}
                 </p>
               </div>
               <input
@@ -261,10 +263,10 @@ export function NotificationSettings() {
             <label className="flex items-center justify-between cursor-pointer">
               <div>
                 <span className="text-sm font-medium text-ctp-subtext1">
-                  Rapport mensuel
+                  {t('settings.notifications.monthlyReport')}
                 </span>
                 <p className="text-xs text-ctp-subtext0">
-                  Recevez un rapport detaille de vos finances chaque mois
+                  {t('settings.notifications.monthlyReportDescription')}
                 </p>
               </div>
               <input
@@ -289,10 +291,10 @@ export function NotificationSettings() {
               <Smartphone className="h-5 w-5 text-ctp-yellow" />
               <div>
                 <h2 className="text-lg font-semibold text-ctp-text">
-                  Preferences push
+                  {t('settings.notifications.pushPreferences')}
                 </h2>
                 <p className="text-sm text-ctp-subtext0">
-                  Types de notifications push a recevoir
+                  {t('settings.notifications.pushTypesToReceive')}
                 </p>
               </div>
             </div>
@@ -314,10 +316,10 @@ export function NotificationSettings() {
             <label className="flex items-center justify-between cursor-pointer">
               <div>
                 <span className="text-sm font-medium text-ctp-subtext1">
-                  Alertes budget
+                  {t('settings.notifications.budgetAlerts')}
                 </span>
                 <p className="text-xs text-ctp-subtext0">
-                  Alertes instantanees sur les budgets
+                  {t('settings.notifications.instantBudgetAlerts')}
                 </p>
               </div>
               <input
@@ -332,10 +334,10 @@ export function NotificationSettings() {
             <label className="flex items-center justify-between cursor-pointer">
               <div>
                 <span className="text-sm font-medium text-ctp-subtext1">
-                  Alertes prix
+                  {t('settings.notifications.priceAlerts')}
                 </span>
                 <p className="text-xs text-ctp-subtext0">
-                  Alertes sur les variations de prix (investissements)
+                  {t('settings.notifications.priceAlertsDescription')}
                 </p>
               </div>
               <input
@@ -350,10 +352,10 @@ export function NotificationSettings() {
             <label className="flex items-center justify-between cursor-pointer">
               <div>
                 <span className="text-sm font-medium text-ctp-subtext1">
-                  Rappels de factures
+                  {t('settings.notifications.billReminders')}
                 </span>
                 <p className="text-xs text-ctp-subtext0">
-                  Rappels pour les paiements a venir
+                  {t('settings.notifications.billRemindersDescription')}
                 </p>
               </div>
               <input
@@ -375,10 +377,10 @@ export function NotificationSettings() {
               <TrendingUp className="h-5 w-5 text-ctp-mauve" />
               <div>
                 <h2 className="text-lg font-semibold text-ctp-text">
-                  Notifications intelligentes
+                  {t('settings.notifications.smartNotifications')}
                 </h2>
                 <p className="text-sm text-ctp-subtext0">
-                  Alertes automatiques et analyses de vos finances
+                  {t('settings.notifications.smartNotificationsDescription')}
                 </p>
               </div>
             </div>
@@ -400,17 +402,17 @@ export function NotificationSettings() {
             <div className="pb-4 border-b border-ctp-surface0">
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="h-4 w-4 text-ctp-yellow" />
-                <span className="text-sm font-semibold text-ctp-subtext1">Alertes</span>
+                <span className="text-sm font-semibold text-ctp-subtext1">{t('settings.notifications.alerts')}</span>
               </div>
 
               {/* Unusual Spending */}
               <label className="flex items-center justify-between cursor-pointer mb-3">
                 <div>
                   <span className="text-sm font-medium text-ctp-subtext1">
-                    Depenses inhabituelles
+                    {t('settings.notifications.unusualSpending')}
                   </span>
                   <p className="text-xs text-ctp-subtext0">
-                    Detection de transactions significativement au-dessus de la moyenne
+                    {t('settings.notifications.unusualSpendingDescription')}
                   </p>
                 </div>
                 <input
@@ -427,10 +429,10 @@ export function NotificationSettings() {
                   <Wallet className="h-4 w-4 text-ctp-peach mt-0.5" />
                   <div>
                     <span className="text-sm font-medium text-ctp-subtext1">
-                      Solde bas
+                      {t('settings.notifications.lowBalance')}
                     </span>
                     <p className="text-xs text-ctp-subtext0">
-                      Alerte quand le solde d'un compte est bas
+                      {t('settings.notifications.lowBalanceDescription')}
                     </p>
                   </div>
                 </div>
@@ -448,10 +450,10 @@ export function NotificationSettings() {
                   <Receipt className="h-4 w-4 text-ctp-red mt-0.5" />
                   <div>
                     <span className="text-sm font-medium text-ctp-subtext1">
-                      Factures a venir
+                      {t('settings.notifications.upcomingBills')}
                     </span>
                     <p className="text-xs text-ctp-subtext0">
-                      Alerte 7 jours avant les paiements recurrents
+                      {t('settings.notifications.upcomingBillsDescription')}
                     </p>
                   </div>
                 </div>
@@ -468,7 +470,7 @@ export function NotificationSettings() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <BarChart3 className="h-4 w-4 text-ctp-blue" />
-                <span className="text-sm font-semibold text-ctp-subtext1">Resumes</span>
+                <span className="text-sm font-semibold text-ctp-subtext1">{t('settings.notifications.summaries')}</span>
               </div>
 
               {/* Weekly Summary */}
@@ -477,10 +479,10 @@ export function NotificationSettings() {
                   <Calendar className="h-4 w-4 text-ctp-teal mt-0.5" />
                   <div>
                     <span className="text-sm font-medium text-ctp-subtext1">
-                      Resume hebdomadaire
+                      {t('settings.notifications.weeklySummary')}
                     </span>
                     <p className="text-xs text-ctp-subtext0">
-                      Resume de vos depenses et revenus chaque semaine
+                      {t('settings.notifications.weeklySummaryDescription')}
                     </p>
                   </div>
                 </div>
@@ -498,10 +500,10 @@ export function NotificationSettings() {
                   <BarChart3 className="h-4 w-4 text-ctp-green mt-0.5" />
                   <div>
                     <span className="text-sm font-medium text-ctp-subtext1">
-                      Rapport mensuel
+                      {t('settings.notifications.monthlyReportSmart')}
                     </span>
                     <p className="text-xs text-ctp-subtext0">
-                      Rapport detaille de vos finances chaque mois
+                      {t('settings.notifications.monthlyReportSmartDescription')}
                     </p>
                   </div>
                 </div>
@@ -523,17 +525,17 @@ export function NotificationSettings() {
           <Smartphone className="h-5 w-5 text-ctp-green" />
           <div className="flex-1">
             <h3 className="text-sm font-medium text-ctp-text">
-              Canaux de notification
+              {t('settings.notifications.notificationChannels')}
             </h3>
             <p className="text-xs text-ctp-subtext0">
-              Configurez Email, WhatsApp et Discord pour vos notifications
+              {t('settings.notifications.configureChannels')}
             </p>
           </div>
           <Link
             to="/settings/notification-channels"
             className="text-sm text-ctp-blue hover:text-ctp-sapphire font-medium"
           >
-            Configurer
+            {t('settings.notifications.configure')}
           </Link>
         </div>
       </div>
@@ -544,17 +546,17 @@ export function NotificationSettings() {
           <Bell className="h-5 w-5 text-ctp-yellow" />
           <div className="flex-1">
             <h3 className="text-sm font-medium text-ctp-text">
-              Regles d'alertes personnalisees
+              {t('settings.notifications.customAlertRules')}
             </h3>
             <p className="text-xs text-ctp-subtext0">
-              Configurez des alertes personnalisees (budget, solde, prix, etc.)
+              {t('settings.notifications.customAlertRulesDescription')}
             </p>
           </div>
           <Link
             to="/notifications/alerts"
             className="text-sm text-ctp-blue hover:text-ctp-sapphire font-medium"
           >
-            Configurer
+            {t('settings.notifications.configure')}
           </Link>
         </div>
       </div>
@@ -572,7 +574,7 @@ export function NotificationSettings() {
             }}
             className="px-4 py-2 text-sm font-medium text-ctp-subtext1 hover:bg-ctp-surface0 rounded-lg transition-colors"
           >
-            Annuler
+            {t('settings.notifications.cancel')}
           </button>
           <button
             type="submit"
@@ -584,7 +586,7 @@ export function NotificationSettings() {
             ) : (
               <Save className="h-4 w-4" />
             )}
-            Enregistrer
+            {t('settings.notifications.save')}
           </button>
         </div>
       )}

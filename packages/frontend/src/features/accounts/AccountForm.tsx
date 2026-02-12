@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Landmark, PiggyBank, Banknote, CreditCard, FileText, TrendingUp } from 'lucide-react';
@@ -43,13 +44,14 @@ interface AccountFormProps {
 // Constants
 // ----------------------------------------------------------------------------
 
-const ACCOUNT_TYPES = [
-  { value: 'checking', label: 'Compte courant', icon: Landmark },
-  { value: 'savings', label: 'Épargne', icon: PiggyBank },
-  { value: 'cash', label: 'Espèces', icon: Banknote },
-  { value: 'credit_card', label: 'Carte de crédit', icon: CreditCard },
-  { value: 'loan', label: 'Prêt', icon: FileText },
-  { value: 'investment', label: 'Investissement', icon: TrendingUp },
+// Account types are defined with i18n keys
+const ACCOUNT_TYPE_KEYS = [
+  { value: 'checking', labelKey: 'accounts.checking', icon: Landmark },
+  { value: 'savings', labelKey: 'accounts.savings', icon: PiggyBank },
+  { value: 'cash', labelKey: 'accounts.cash', icon: Banknote },
+  { value: 'credit_card', labelKey: 'accounts.creditCard', icon: CreditCard },
+  { value: 'loan', labelKey: 'accounts.loan', icon: FileText },
+  { value: 'investment', labelKey: 'accounts.investment', icon: TrendingUp },
 ] as const;
 
 // Catppuccin Mocha colors for account customization
@@ -77,6 +79,7 @@ const COLORS = [
 // ----------------------------------------------------------------------------
 
 export function AccountForm({ workspaceId, account, onClose }: AccountFormProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
@@ -119,7 +122,7 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
       onClose();
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la création');
+      setError(err instanceof Error ? err.message : t('accounts.creationError'));
     },
   });
 
@@ -131,7 +134,7 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
       onClose();
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour');
+      setError(err instanceof Error ? err.message : t('accounts.updateError'));
     },
   });
 
@@ -153,7 +156,7 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
-  const modalTitle = isEditing ? 'Modifier le compte' : 'Nouveau compte';
+  const modalTitle = isEditing ? t('accounts.editAccount') : t('accounts.newAccount');
 
   return (
     <div
@@ -186,13 +189,13 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" aria-label="Formulaire de compte">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" aria-label={t('accounts.accountDetails')}>
             {/* Account Type (only for creation) */}
             {!isEditing && (
               <fieldset>
-                <legend className="label">Type de compte</legend>
-                <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Type de compte">
-                  {ACCOUNT_TYPES.map((type) => (
+                <legend className="label">{t('accounts.accountType')}</legend>
+                <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={t('accounts.accountType')}>
+                  {ACCOUNT_TYPE_KEYS.map((type) => (
                     <label
                       key={type.value}
                       className={clsx(
@@ -207,10 +210,10 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
                         value={type.value}
                         {...register('type')}
                         className="sr-only"
-                        aria-label={type.label}
+                        aria-label={t(type.labelKey)}
                       />
                       <type.icon className="w-5 h-5" aria-hidden="true" />
-                      <span className="text-xs mt-1 text-center">{type.label}</span>
+                      <span className="text-xs mt-1 text-center">{t(type.labelKey)}</span>
                     </label>
                   ))}
                 </div>
@@ -219,16 +222,16 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
 
             {/* Name */}
             <div>
-              <label htmlFor="name" className="label">Nom</label>
+              <label htmlFor="name" className="label">{t('accounts.name')}</label>
               <input
                 id="name"
                 type="text"
                 className="input"
-                placeholder="Mon compte"
+                placeholder={t('accounts.myAccount')}
                 aria-invalid={!!errors.name}
                 aria-describedby={errors.name ? 'name-error' : undefined}
                 aria-required="true"
-                {...register('name', { required: 'Nom requis' })}
+                {...register('name', { required: t('accounts.nameRequired') })}
               />
               {errors.name && (
                 <p id="name-error" className="error-text" role="alert">{errors.name.message}</p>
@@ -238,7 +241,7 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
             {/* Currency (only for creation) */}
             {!isEditing && (
               <div>
-                <label htmlFor="currency" className="label">Devise</label>
+                <label htmlFor="currency" className="label">{t('accounts.currency')}</label>
                 <CurrencySelector
                   value={watch('currency')}
                   onChange={(code) => setValue('currency', code)}
@@ -249,7 +252,7 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
             {/* Initial Balance (only for creation) */}
             {!isEditing && (
               <div>
-                <label htmlFor="initialBalance" className="label">Solde initial</label>
+                <label htmlFor="initialBalance" className="label">{t('accounts.initialBalance')}</label>
                 <input
                   id="initialBalance"
                   type="number"
@@ -263,8 +266,8 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
 
             {/* Color */}
             <fieldset>
-              <legend className="label">Couleur</legend>
-              <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Couleur du compte">
+              <legend className="label">{t('accounts.color')}</legend>
+              <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('accounts.color')}>
                 {COLORS.map((color, index) => (
                   <button
                     key={color}
@@ -275,7 +278,7 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
                       selectedColor === color && 'ring-2 ring-offset-2 ring-ctp-blue scale-110'
                     )}
                     style={{ backgroundColor: color }}
-                    aria-label={`Couleur ${index + 1}`}
+                    aria-label={t('accounts.colorNumber', { number: index + 1 })}
                     aria-pressed={selectedColor === color}
                     role="radio"
                     aria-checked={selectedColor === color}
@@ -287,7 +290,7 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
             {/* Actions */}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={onClose} className="btn-secondary flex-1">
-                Annuler
+                {t('accounts.cancel')}
               </button>
               <button
                 type="submit"
@@ -298,10 +301,10 @@ export function AccountForm({ workspaceId, account, onClose }: AccountFormProps)
               >
                 {isPending ? (
                   <>
-                    <span aria-hidden="true">Enregistrement...</span>
-                    <span className="sr-only">Enregistrement en cours</span>
+                    <span aria-hidden="true">{t('accounts.saving')}</span>
+                    <span className="sr-only">{t('accounts.savingInProgress')}</span>
                   </>
-                ) : isEditing ? 'Enregistrer' : 'Creer'}
+                ) : isEditing ? t('accounts.save') : t('accounts.create')}
               </button>
             </div>
           </form>

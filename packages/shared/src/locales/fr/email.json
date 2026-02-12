@@ -1,0 +1,76 @@
+{
+  "greeting": "Bonjour {{displayName}},",
+  "footer": "Cet email a ete envoye automatiquement par HubCompta.",
+  "footerIgnore": "Si vous n'avez pas demande cet email, vous pouvez l'ignorer en toute securite.",
+  "welcome": {
+    "subject": "Bienvenue sur HubCompta !",
+    "title": "Bienvenue sur HubCompta",
+    "intro": "Bienvenue sur HubCompta ! Votre compte a ete cree avec succes.",
+    "body": "HubCompta vous aide a gerer vos finances personnelles et professionnelles en toute simplicite :",
+    "features": {
+      "tracking": "Suivez vos revenus et depenses",
+      "budgets": "Creez et gerez vos budgets",
+      "reports": "Generez des rapports detailles",
+      "invoicing": "Facturez vos clients (mode Pro)"
+    },
+    "cta": "Acceder a mon espace",
+    "closing": "A bientot sur HubCompta !"
+  },
+  "passwordReset": {
+    "subject": "Reinitialisation de votre mot de passe HubCompta",
+    "title": "Reinitialisation de mot de passe",
+    "intro": "Vous avez demande la reinitialisation de votre mot de passe.",
+    "body": "Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe :",
+    "cta": "Reinitialiser mon mot de passe",
+    "expiry": "Important : Ce lien expire dans {{expiresIn}}.",
+    "ignoreNote": "Si vous n'avez pas demande cette reinitialisation, ignorez cet email. Votre mot de passe restera inchange."
+  },
+  "invoiceOverdue": {
+    "subject": "Facture {{invoiceNumber}} en retard de paiement",
+    "title": "Facture en retard",
+    "alertTitle": "Facture en retard de paiement",
+    "intro": "La facture suivante est en retard de {{daysOverdue}} jour(s) :",
+    "invoiceNumber": "Numero de facture",
+    "client": "Client",
+    "amount": "Montant",
+    "dueDate": "Date d'echeance",
+    "cta": "Voir la facture",
+    "recommendation": "Nous vous recommandons de relancer votre client pour le paiement."
+  },
+  "budgetAlert": {
+    "subjectExceeded": "Budget \"{{budgetName}}\" depasse",
+    "subjectWarning": "Budget \"{{budgetName}}\" a {{percentUsed}}%",
+    "titleExceeded": "Budget depasse !",
+    "titleWarning": "Budget bientot atteint",
+    "messageExceeded": "Votre budget \"{{budgetName}}\" a ete depasse.",
+    "messageWarning": "Votre budget \"{{budgetName}}\" approche de sa limite.",
+    "budget": "Budget",
+    "category": "Categorie",
+    "spent": "Depense",
+    "limit": "Limite",
+    "usage": "Utilisation",
+    "cta": "Voir le budget"
+  },
+  "exportReady": {
+    "subject": "Votre export {{exportType}} est pret",
+    "title": "Export pret",
+    "alertTitle": "Votre export est pret !",
+    "intro": "Votre export {{exportType}} est maintenant disponible au telechargement.",
+    "exportType": "Type d'export",
+    "filename": "Fichier",
+    "expiresAt": "Expire le",
+    "cta": "Telecharger l'export",
+    "expiryNote": "Ce lien de telechargement expirera le {{expiresAt}}."
+  },
+  "weeklySummary": {
+    "subject": "Resume de votre semaine - {{weekStart}} au {{weekEnd}}",
+    "title": "Resume hebdomadaire",
+    "intro": "Voici le resume de votre semaine du {{weekStart}} au {{weekEnd}} :",
+    "income": "Revenus",
+    "expenses": "Depenses",
+    "balance": "Solde",
+    "topCategories": "Top categories de depenses",
+    "budgetAlerts": "Alertes budget",
+    "cta": "Voir le tableau de bord"
+  }
+}

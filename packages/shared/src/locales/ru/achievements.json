@@ -1,0 +1,124 @@
+{
+  "title": "Dostizheniya",
+  "secretAchievement": "Sekretnoe dostizhenie",
+  "unlocked": "Razblokirovano",
+  "progress": "Progress",
+  "xpReward": "{{xp}} XP",
+  "level": "Uroven' {{level}}",
+  "levelUp": "Novyj uroven'!",
+  "congratulations": "Pozdravlyaem! Vy dostigli urovnya {{level}}!",
+  "categories": {
+    "onboarding": "Nachalo raboty",
+    "transactions": "Tranzakcii",
+    "budgeting": "Byudzhetirovanie",
+    "savings": "Sberezheniya",
+    "streaks": "Serii",
+    "milestones": "Vekhi"
+  },
+  "achievements": {
+    "first_steps": {
+      "name": "Pervye shagi",
+      "description": "Dobav'te svoyu pervuyu tranzakciyu"
+    },
+    "first_budget": {
+      "name": "Nachinayushchij byudzheter",
+      "description": "Sozdajte svoj pervyj byudzhet"
+    },
+    "first_goal": {
+      "name": "Postanovshchik celej",
+      "description": "Sozdajte svoyu pervuyu cel' sberezhenij"
+    },
+    "account_setup": {
+      "name": "Horosho osnashchon",
+      "description": "Dobav'te 3 schota"
+    },
+    "tracker_10": {
+      "name": "Regulyarnyj otslezhivatel'",
+      "description": "Zapisat' 10 tranzakcij"
+    },
+    "tracker_50": {
+      "name": "Predannyj otslezhivatel'",
+      "description": "Zapisat' 50 tranzakcij"
+    },
+    "tracker_100": {
+      "name": "Master otslezhivaniya",
+      "description": "Zapisat' 100 tranzakcij"
+    },
+    "tracker_500": {
+      "name": "Ekspert po uchotu",
+      "description": "Zapisat' 500 tranzakcij"
+    },
+    "categorizer": {
+      "name": "Organizator",
+      "description": "Kategorizirovat' 25 tranzakcij"
+    },
+    "budget_keeper": {
+      "name": "Hranitel' byudzheta",
+      "description": "Zavershit' mesyac v ramkah byudzheta"
+    },
+    "budget_master_3": {
+      "name": "Disciplina",
+      "description": "Ostavat'sya v ramkah byudzheta 3 mesyaca podryad"
+    },
+    "budget_master_6": {
+      "name": "Masterstvo byudzheta",
+      "description": "Ostavat'sya v ramkah byudzheta 6 mesyacev podryad"
+    },
+    "multi_budget": {
+      "name": "Multi-byudzhet",
+      "description": "Upravlyat' 5 byudzhetami odnovremenno"
+    },
+    "saver_first": {
+      "name": "Pervyj shag k sberezheniyu",
+      "description": "Dostich' 10% ot pervoj celi"
+    },
+    "saver_half": {
+      "name": "Na polputi",
+      "description": "Dostich' 50% ot celi"
+    },
+    "saver_complete": {
+      "name": "Cel' dostignutа",
+      "description": "Zavershit' cel' sberezhenij"
+    },
+    "saver_3_goals": {
+      "name": "Trojnoj uspeh",
+      "description": "Zavershit' 3 celi sberezhenij"
+    },
+    "saver_1000": {
+      "name": "Tysyacha skopleпа",
+      "description": "Skopit' 1 000 EUR vsego"
+    },
+    "saver_10000": {
+      "name": "Desyat' tysyach",
+      "description": "Skopit' 10 000 EUR vsego"
+    },
+    "streak_7": {
+      "name": "Aktivnaya nedelya",
+      "description": "7 dnej aktivnosti podryad"
+    },
+    "streak_30": {
+      "name": "Polnyj mesyac",
+      "description": "30 dnej aktivnosti podryad"
+    },
+    "streak_100": {
+      "name": "Centurion",
+      "description": "100 dnej aktivnosti podryad"
+    },
+    "streak_365": {
+      "name": "Marafonec",
+      "description": "365 dnej aktivnosti podryad"
+    },
+    "night_owl": {
+      "name": "Nochnaya sova",
+      "description": "Dobavit' tranzakciyu posle polunochi"
+    },
+    "early_bird": {
+      "name": "Rannyaya ptashka",
+      "description": "Dobavit' tranzakciyu do 6 utra"
+    },
+    "perfect_month": {
+      "name": "Ideal'nyj mesyac",
+      "description": "Kategorizirovat' vse tranzakcii za mesyac"
+    }
+  }
+}

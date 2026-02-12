@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   TrendingUp,
@@ -68,6 +69,7 @@ export function PositionList({
   onPositionClick,
   onAddTransaction,
 }: PositionListProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const queryClient = useQueryClient();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -100,7 +102,7 @@ export function PositionList({
   });
 
   const handleDelete = (position: Position) => {
-    if (confirm(`Supprimer la position ${position.asset.symbol} ?`)) {
+    if (confirm(t('invest.positionList.confirmDelete', { symbol: position.asset.symbol }))) {
       deleteMutation.mutate(position.id);
     }
     setOpenMenuId(null);
@@ -141,9 +143,9 @@ export function PositionList({
     return (
       <div className="text-center py-12">
         <TrendingUp className="h-12 w-12 mx-auto text-ctp-overlay1 mb-4" />
-        <h3 className="text-lg font-medium text-ctp-text mb-2">Aucune position</h3>
+        <h3 className="text-lg font-medium text-ctp-text mb-2">{t('invest.positionList.noPositions')}</h3>
         <p className="text-ctp-subtext0">
-          Ajoutez votre première position d'investissement pour commencer le suivi.
+          {t('invest.positionList.addFirstPosition')}
         </p>
       </div>
     );
@@ -176,7 +178,7 @@ export function PositionList({
               {/* Quantity and PRU */}
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-ctp-text">
-                  {formatNumber(position.quantity)} unités
+                  {formatNumber(position.quantity)} {t('invest.positionList.units')}
                 </p>
                 <p className="text-xs text-ctp-subtext0">
                   PRU: {formatCurrency(position.averageCost, position.asset.currency)}
@@ -185,7 +187,7 @@ export function PositionList({
 
               {/* Current value */}
               <div className="text-right hidden md:block">
-                <p className="text-sm text-ctp-subtext0">Valeur actuelle</p>
+                <p className="text-sm text-ctp-subtext0">{t('invest.positionList.currentValue')}</p>
                 <p className="font-medium text-ctp-text">
                   {formatCurrency(position.currentValue, 'EUR')}
                 </p>
@@ -234,7 +236,7 @@ export function PositionList({
                         className="w-full px-4 py-2 text-left text-sm text-ctp-text hover:bg-ctp-surface0 flex items-center gap-2"
                       >
                         <Plus className="h-4 w-4" />
-                        Acheter
+                        {t('invest.positionList.buy')}
                       </button>
                       <button
                         onClick={() => {
@@ -244,7 +246,7 @@ export function PositionList({
                         className="w-full px-4 py-2 text-left text-sm text-ctp-text hover:bg-ctp-surface0 flex items-center gap-2"
                       >
                         <Minus className="h-4 w-4" />
-                        Vendre
+                        {t('invest.positionList.sell')}
                       </button>
                       <hr className="my-1 border-ctp-surface1" />
                       <button
@@ -252,7 +254,7 @@ export function PositionList({
                         className="w-full px-4 py-2 text-left text-sm text-ctp-red hover:bg-ctp-red/10 flex items-center gap-2"
                       >
                         <Trash2 className="h-4 w-4" />
-                        Supprimer
+                        {t('invest.positionList.delete')}
                       </button>
                     </div>
                   </>
@@ -263,17 +265,17 @@ export function PositionList({
             {/* Mobile details */}
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-ctp-surface1 sm:hidden">
               <div>
-                <p className="text-xs text-ctp-subtext0">Quantité</p>
+                <p className="text-xs text-ctp-subtext0">{t('invest.positionList.quantity')}</p>
                 <p className="text-sm font-medium text-ctp-text">{formatNumber(position.quantity)}</p>
               </div>
               <div>
-                <p className="text-xs text-ctp-subtext0">PRU</p>
+                <p className="text-xs text-ctp-subtext0">{t('invest.positionList.pru')}</p>
                 <p className="text-sm font-medium text-ctp-text">
                   {formatCurrency(position.averageCost, position.asset.currency)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-ctp-subtext0">Valeur</p>
+                <p className="text-xs text-ctp-subtext0">{t('invest.positionList.value')}</p>
                 <p className="text-sm font-medium text-ctp-text">{formatCurrency(position.currentValue, 'EUR')}</p>
               </div>
             </div>

@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from './AuthProvider';
 import { MfaVerify } from './MfaVerify';
 import { Wallet } from 'lucide-react';
@@ -73,6 +74,7 @@ function getDeviceName(): string {
 // ----------------------------------------------------------------------------
 
 export function LoginForm() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login, verifyMfa } = useAuth();
   const [error, setError] = useState<string | null>(null);
@@ -151,11 +153,11 @@ export function LoginForm() {
           </div>
           <h1 className="text-2xl font-bold mt-6 text-ctp-text">Finance Hub</h1>
           <p className="text-ctp-subtext0 mt-2">
-            Connectez-vous a votre compte
+            {t('auth.connectToAccount')}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" aria-label="Formulaire de connexion">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" aria-label={t('auth.loginForm')}>
           {error && (
             <div
               className="p-4 rounded-xl bg-ctp-red/10 border border-ctp-red/20 text-ctp-red text-sm flex items-center gap-3"
@@ -171,7 +173,7 @@ export function LoginForm() {
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-2 text-ctp-subtext1">
-              Email
+              {t('auth.email')}
             </label>
             <input
               id="email"
@@ -180,12 +182,12 @@ export function LoginForm() {
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? 'email-error' : undefined}
               className="w-full px-4 py-3 rounded-xl bg-ctp-mantle border border-ctp-surface1 text-ctp-text placeholder:text-ctp-overlay0 focus:border-ctp-blue focus:ring-2 focus:ring-ctp-blue/20 transition-all duration-200"
-              placeholder="vous@exemple.com"
+              placeholder={t('auth.emailPlaceholder')}
               {...register('email', {
-                required: 'Email requis',
+                required: t('auth.emailRequired'),
                 pattern: {
                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: 'Email invalide',
+                  message: t('auth.invalidEmail'),
                 },
               })}
             />
@@ -198,7 +200,7 @@ export function LoginForm() {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium mb-2 text-ctp-subtext1">
-              Mot de passe
+              {t('auth.password')}
             </label>
             <input
               id="password"
@@ -209,7 +211,7 @@ export function LoginForm() {
               className="w-full px-4 py-3 rounded-xl bg-ctp-mantle border border-ctp-surface1 text-ctp-text placeholder:text-ctp-overlay0 focus:border-ctp-blue focus:ring-2 focus:ring-ctp-blue/20 transition-all duration-200"
               placeholder="************"
               {...register('password', {
-                required: 'Mot de passe requis',
+                required: t('auth.passwordRequired'),
               })}
             />
             {errors.password && (
@@ -248,20 +250,20 @@ export function LoginForm() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                   />
                 </svg>
-                <span>Connexion...</span>
+                <span>{t('auth.connecting')}</span>
                 <span className="sr-only">en cours</span>
               </span>
             ) : (
-              'Se connecter'
+              t('auth.signIn')
             )}
           </button>
         </form>
 
         <div className="mt-6 pt-6 border-t border-ctp-surface1">
           <p className="text-center text-sm text-ctp-subtext0">
-            Pas encore de compte ?{' '}
+            {t('auth.noAccountYet')}{' '}
             <a href="/register" className="text-ctp-blue hover:text-ctp-sapphire font-medium transition-colors">
-              Creer un compte
+              {t('auth.createAccount')}
             </a>
           </p>
         </div>

@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { Suspense, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, RefreshCw, GripVertical } from 'lucide-react';
 import { clsx } from 'clsx';
 import { WIDGET_REGISTRY, type WidgetConfig, type WidgetProps } from './widgets';
@@ -37,12 +38,13 @@ function WidgetLoading() {
 // ----------------------------------------------------------------------------
 
 function WidgetError({ message }: { message: string }) {
+  const { t } = useTranslation();
   return (
     <div className="h-full flex flex-col items-center justify-center p-4 text-center">
       <div className="w-10 h-10 bg-ctp-red/20 rounded-full flex items-center justify-center mb-2">
         <X className="w-5 h-5 text-ctp-red" />
       </div>
-      <p className="text-sm text-ctp-red font-medium">Erreur</p>
+      <p className="text-sm text-ctp-red font-medium">{t('widgets.error')}</p>
       <p className="text-xs text-ctp-subtext0 mt-1">{message}</p>
     </div>
   );
@@ -59,6 +61,7 @@ export function WidgetWrapper({
   isDragging = false,
   isResizing = false,
 }: WidgetWrapperProps) {
+  const { t } = useTranslation();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -108,7 +111,7 @@ export function WidgetWrapper({
         <div className="flex items-center gap-2 min-w-0">
           <div
             className="widget-drag-handle cursor-grab active:cursor-grabbing p-1 -ml-1 rounded hover:bg-ctp-mantle transition-colors"
-            title="Deplacer"
+            title={t('widgets.move')}
           >
             <GripVertical className="w-4 h-4 text-ctp-overlay1" />
           </div>
@@ -127,8 +130,8 @@ export function WidgetWrapper({
             onClick={handleRefresh}
             disabled={isRefreshing}
             className="p-1 rounded hover:bg-ctp-mantle transition-colors disabled:opacity-50"
-            title="Actualiser"
-            aria-label="Actualiser le widget"
+            title={t('widgets.refresh')}
+            aria-label={t('widgets.refreshWidget')}
           >
             <RefreshCw
               className={clsx(
@@ -142,8 +145,8 @@ export function WidgetWrapper({
           <button
             onClick={handleRemove}
             className="p-1 rounded hover:bg-ctp-red/20 hover:text-ctp-red transition-colors"
-            title="Supprimer"
-            aria-label="Supprimer le widget"
+            title={t('widgets.delete')}
+            aria-label={t('widgets.deleteWidget')}
           >
             <X className="w-3.5 h-3.5" />
           </button>

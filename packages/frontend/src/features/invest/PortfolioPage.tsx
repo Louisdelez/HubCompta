@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import {
   TrendingUp,
@@ -94,6 +95,7 @@ type ViewMode = 'list' | 'detail';
 const REFRESH_INTERVAL = 30000;
 
 export function PortfolioPage() {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [showAddPosition, setShowAddPosition] = useState(false);
   const [showAddTransaction, setShowAddTransaction] = useState(false);
@@ -223,8 +225,8 @@ export function PortfolioPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-ctp-text">Portefeuille</h1>
-          <p className="text-ctp-subtext0">Suivi de vos investissements</p>
+          <h1 className="text-2xl font-semibold text-ctp-text">{t('invest.portfolio.title')}</h1>
+          <p className="text-ctp-subtext0">{t('invest.portfolio.subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -233,14 +235,14 @@ export function PortfolioPage() {
             className="px-3 py-2 text-ctp-subtext0 bg-ctp-surface0 rounded-lg hover:bg-ctp-surface1 flex items-center gap-2 disabled:opacity-50"
           >
             <RefreshCw className={cn('h-4 w-4', (isRefreshing || isFetchingSummary) && 'animate-spin')} />
-            <span className="hidden sm:inline">Actualiser</span>
+            <span className="hidden sm:inline">{t('invest.portfolio.refresh')}</span>
           </button>
           <button
             onClick={() => setShowAddPosition(true)}
             className="px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg hover:bg-ctp-blue/90 flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            Nouvelle position
+            {t('invest.portfolio.newPosition')}
           </button>
         </div>
       </div>
@@ -257,7 +259,7 @@ export function PortfolioPage() {
             <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
               <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
                 <Wallet className="h-4 w-4" />
-                <span className="text-sm">Valeur totale</span>
+                <span className="text-sm">{t('invest.portfolio.totalValue')}</span>
               </div>
               <p className="text-2xl font-semibold text-ctp-text">
                 {formatCurrency(summary.totalValue, baseCurrency)}
@@ -271,7 +273,7 @@ export function PortfolioPage() {
             <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
               <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
                 <TrendingUp className="h-4 w-4" />
-                <span className="text-sm">Montant investi</span>
+                <span className="text-sm">{t('invest.portfolio.investedAmount')}</span>
               </div>
               <p className="text-2xl font-semibold text-ctp-text">
                 {formatCurrency(summary.totalCost, baseCurrency)}
@@ -286,7 +288,7 @@ export function PortfolioPage() {
                 ) : (
                   <TrendingDown className="h-4 w-4 text-ctp-red" />
                 )}
-                <span className="text-sm">P&L latent</span>
+                <span className="text-sm">{t('invest.portfolio.unrealizedPL')}</span>
               </div>
               <p className={cn('text-2xl font-semibold', getPnLColor(summary.totalUnrealizedGain))}>
                 {summary.totalUnrealizedGain >= 0 ? '+' : ''}
@@ -302,7 +304,7 @@ export function PortfolioPage() {
             <div className={cn('border border-ctp-surface1 rounded-lg p-4', getPnLBgColor(summary.totalRealizedGain))}>
               <div className="flex items-center gap-2 text-ctp-subtext0 mb-2">
                 <LineChartIcon className="h-4 w-4" />
-                <span className="text-sm">P&L réalisé</span>
+                <span className="text-sm">{t('invest.portfolio.realizedPL')}</span>
               </div>
               <p className={cn('text-2xl font-semibold', getPnLColor(summary.totalRealizedGain))}>
                 {summary.totalRealizedGain >= 0 ? '+' : ''}
@@ -317,16 +319,16 @@ export function PortfolioPage() {
             <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-4">
                 <PieChartIcon className="h-4 w-4 text-ctp-subtext0" />
-                <h2 className="text-sm font-medium text-ctp-subtext1">Répartition par type</h2>
+                <h2 className="text-sm font-medium text-ctp-subtext1">{t('invest.portfolio.allocationByType')}</h2>
               </div>
               {allocation && allocation.byType.length > 0 ? (
                 <>
                   <AllocationChart
                     data={allocation.byType.map((item) => ({
-                      name: item.type === 'stock' ? 'Actions' :
-                            item.type === 'etf' ? 'ETF' :
-                            item.type === 'crypto' ? 'Crypto' :
-                            item.type === 'bond' ? 'Obligations' : item.type,
+                      name: item.type === 'stock' ? t('invest.assetTypes.stock') :
+                            item.type === 'etf' ? t('invest.assetTypes.etf') :
+                            item.type === 'crypto' ? t('invest.assetTypes.crypto') :
+                            item.type === 'bond' ? t('invest.assetTypes.bond') : item.type,
                       value: item.value,
                       percent: item.percent,
                     }))}
@@ -334,10 +336,10 @@ export function PortfolioPage() {
                   />
                   <AllocationLegend
                     data={allocation.byType.map((item) => ({
-                      name: item.type === 'stock' ? 'Actions' :
-                            item.type === 'etf' ? 'ETF' :
-                            item.type === 'crypto' ? 'Crypto' :
-                            item.type === 'bond' ? 'Obligations' : item.type,
+                      name: item.type === 'stock' ? t('invest.assetTypes.stock') :
+                            item.type === 'etf' ? t('invest.assetTypes.etf') :
+                            item.type === 'crypto' ? t('invest.assetTypes.crypto') :
+                            item.type === 'bond' ? t('invest.assetTypes.bond') : item.type,
                       value: item.value,
                       percent: item.percent,
                     }))}
@@ -346,7 +348,7 @@ export function PortfolioPage() {
                 </>
               ) : (
                 <div className="flex items-center justify-center h-48 text-ctp-subtext0 text-sm">
-                  Aucune donnée
+                  {t('invest.portfolio.noData')}
                 </div>
               )}
             </div>
@@ -356,7 +358,7 @@ export function PortfolioPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <List className="h-4 w-4 text-ctp-subtext0" />
-                  <h2 className="text-sm font-medium text-ctp-subtext1">Positions</h2>
+                  <h2 className="text-sm font-medium text-ctp-subtext1">{t('invest.portfolio.positions')}</h2>
                 </div>
                 <span className="text-xs text-ctp-overlay1">
                   {summary.positionCount} position{summary.positionCount > 1 ? 's' : ''}
@@ -377,7 +379,7 @@ export function PortfolioPage() {
             <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-4">
                 <PieChartIcon className="h-4 w-4 text-ctp-subtext0" />
-                <h2 className="text-sm font-medium text-ctp-subtext1">Répartition par devise</h2>
+                <h2 className="text-sm font-medium text-ctp-subtext1">{t('invest.portfolio.allocationByCurrency')}</h2>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {allocation.byCurrency.map((item) => (
@@ -395,7 +397,7 @@ export function PortfolioPage() {
           <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-4">
               <LineChartIcon className="h-4 w-4 text-ctp-subtext0" />
-              <h2 className="text-sm font-medium text-ctp-subtext1">Performance</h2>
+              <h2 className="text-sm font-medium text-ctp-subtext1">{t('invest.portfolio.performance')}</h2>
             </div>
             {performanceLoading ? (
               <div className="flex items-center justify-center h-64">
@@ -404,9 +406,9 @@ export function PortfolioPage() {
             ) : performanceError ? (
               <div className="flex flex-col items-center justify-center h-64 text-ctp-subtext0">
                 <LineChartIcon className="h-8 w-8 mb-2 text-ctp-red/50" />
-                <p className="text-sm text-ctp-red">Erreur de chargement</p>
+                <p className="text-sm text-ctp-red">{t('invest.portfolio.loadingError')}</p>
                 <p className="text-xs text-ctp-overlay1 mt-1">
-                  Impossible de charger l'historique de performance
+                  {t('invest.portfolio.cannotLoadHistory')}
                 </p>
               </div>
             ) : performance && performance.history.length >= 2 ? (
@@ -418,9 +420,9 @@ export function PortfolioPage() {
             ) : (
               <div className="flex flex-col items-center justify-center h-64 text-ctp-subtext0">
                 <LineChartIcon className="h-8 w-8 mb-2 text-ctp-overlay1" />
-                <p className="text-sm">Historique en cours de construction</p>
+                <p className="text-sm">{t('invest.portfolio.historyBuilding')}</p>
                 <p className="text-xs text-ctp-overlay1 mt-1">
-                  Les données seront disponibles après quelques jours de suivi
+                  {t('invest.portfolio.dataAvailableSoon')}
                 </p>
               </div>
             )}
@@ -429,16 +431,16 @@ export function PortfolioPage() {
       ) : (
         <div className="text-center py-12 bg-ctp-mantle border border-ctp-surface1 rounded-lg">
           <Wallet className="h-12 w-12 mx-auto text-ctp-overlay1 mb-4" />
-          <h3 className="text-lg font-medium text-ctp-text mb-2">Commencez votre portefeuille</h3>
+          <h3 className="text-lg font-medium text-ctp-text mb-2">{t('invest.portfolio.startPortfolio')}</h3>
           <p className="text-ctp-subtext0 mb-4">
-            Ajoutez votre première position pour suivre vos investissements.
+            {t('invest.portfolio.addFirstPosition')}
           </p>
           <button
             onClick={() => setShowAddPosition(true)}
             className="px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg hover:bg-ctp-blue/90 inline-flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            Nouvelle position
+            {t('invest.portfolio.newPosition')}
           </button>
         </div>
       )}

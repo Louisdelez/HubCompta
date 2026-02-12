@@ -1,0 +1,84 @@
+{
+  "title": "Meldingen",
+  "markAllRead": "Alles als gelezen markeren",
+  "noNotifications": "Geen meldingen",
+  "viewAll": "Alle meldingen bekijken",
+  "budgetExceeded": {
+    "title": "Budget \"{{budgetName}}\" overschreden",
+    "message": "Het budget voor \"{{categoryName}}\" is overschreden ({{percentUsed}}% gebruikt)."
+  },
+  "budgetWarning": {
+    "title": "Budget \"{{budgetName}}\" bijna bereikt",
+    "message": "Het budget voor \"{{categoryName}}\" staat op {{percentUsed}}% van de limiet."
+  },
+  "importComplete": {
+    "title": "Import voltooid",
+    "message": "{{imported}} transactie(s) geïmporteerd{{skipped}}{{errors}}.",
+    "skipped": ", {{count}} overgeslagen",
+    "errors": ", {{count}} fout(en)"
+  },
+  "importCompleteWithErrors": {
+    "title": "Import voltooid met fouten",
+    "message": "{{imported}} transactie(s) geïmporteerd, {{skipped}} overgeslagen, {{errors}} fout(en)."
+  },
+  "exportReady": {
+    "title": "Export gereed",
+    "message": "Uw {{exportType}} export is klaar om te downloaden."
+  },
+  "invoiceOverdue": {
+    "title": "Factuur {{invoiceNumber}} achterstallig",
+    "message": "Factuur {{invoiceNumber}} voor {{clientName}} ({{amount}} {{currency}}) is achterstallig."
+  },
+  "invoicePaid": {
+    "title": "Factuur {{invoiceNumber}} betaald",
+    "message": "Factuur {{invoiceNumber}} voor {{clientName}} ({{amount}} {{currency}}) is gemarkeerd als betaald."
+  },
+  "quoteAccepted": {
+    "title": "Offerte {{quoteNumber}} geaccepteerd",
+    "message": "Offerte {{quoteNumber}} voor {{clientName}} ({{amount}} {{currency}}) is geaccepteerd."
+  },
+  "quoteExpiring": {
+    "title": "Offerte {{quoteNumber}} verloopt binnenkort",
+    "message": "Offerte {{quoteNumber}} voor {{clientName}} verloopt over {{daysLeft}} dag(en)."
+  },
+  "priceAlert": {
+    "title": "Prijsalarm: {{assetSymbol}}",
+    "messageAbove": "{{assetName}} is gestegen boven {{targetPrice}} {{currency}} (momenteel {{currentPrice}} {{currency}}).",
+    "messageBelow": "{{assetName}} is gedaald onder {{targetPrice}} {{currency}} (momenteel {{currentPrice}} {{currency}})."
+  },
+  "billReminder": {
+    "title": "Betalingsherinnering",
+    "message": "\"{{description}}\" ({{amount}} {{currency}}) is verschuldigd over {{daysUntil}} dag(en)."
+  },
+  "unusualSpending": {
+    "title": "Ongebruikelijke uitgaven in \"{{categoryName}}\"",
+    "titleGeneric": "Ongebruikelijke uitgaven gedetecteerd",
+    "message": "{{description}}: {{amount}} {{currency}} ({{percentAboveAverage}}% boven gemiddelde)"
+  },
+  "weeklySummary": {
+    "titlePositive": "Wekelijks overzicht: +{{netChange}} {{currency}}",
+    "titleNegative": "Wekelijks overzicht: {{netChange}} {{currency}}"
+  },
+  "monthlyReport": {
+    "title": "Maandrapport - {{month}}",
+    "message": "Uitgaven: {{totalSpent}} {{currency}} | Inkomsten: {{totalIncome}} {{currency}}"
+  },
+  "lowBalance": {
+    "title": "Laag saldo: {{accountName}}",
+    "message": "Uw rekening \"{{accountName}}\" saldo is {{balance}} {{currency}} (drempel: {{threshold}} {{currency}})"
+  },
+  "billUpcoming": {
+    "titleToday": "Rekening vandaag verschuldigd",
+    "titleTomorrow": "Rekening morgen verschuldigd",
+    "titleDays": "Rekening verschuldigd over {{daysUntilDue}} dagen",
+    "message": "\"{{description}}\" - {{amount}} {{currency}}"
+  },
+  "achievementUnlocked": {
+    "title": "{{icon}} Prestatie Ontgrendeld!",
+    "message": "U heeft \"{{achievementName}}\" verdiend - {{description}}"
+  },
+  "levelUp": {
+    "title": "Niveau Omhoog!",
+    "message": "Gefeliciteerd! U heeft niveau {{level}} bereikt!"
+  }
+}

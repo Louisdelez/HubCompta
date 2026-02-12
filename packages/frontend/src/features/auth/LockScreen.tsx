@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from './AuthProvider';
 import { Lock } from 'lucide-react';
 
@@ -21,6 +22,7 @@ interface UnlockFormData {
 // ----------------------------------------------------------------------------
 
 export function LockScreen() {
+  const { t } = useTranslation();
   const { user, unlock, logout } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +63,7 @@ export function LockScreen() {
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-ctp-peach to-ctp-maroon flex items-center justify-center mx-auto mb-6 shadow-lg shadow-ctp-peach/25">
               <Lock className="w-10 h-10 text-ctp-crust" />
             </div>
-            <h1 className="text-2xl font-bold text-ctp-text">Session verrouillee</h1>
+            <h1 className="text-2xl font-bold text-ctp-text">{t('auth.lockScreen.title')}</h1>
             <p className="text-ctp-subtext0 mt-2 flex items-center justify-center gap-2">
               <span className="w-2 h-2 rounded-full bg-ctp-green animate-pulse" />
               {user?.displayName ?? user?.email}
@@ -80,7 +82,7 @@ export function LockScreen() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <label htmlFor="password" className="block text-sm font-medium mb-2 text-ctp-subtext1">
-                Mot de passe
+                {t('auth.password')}
               </label>
               <input
                 id="password"
@@ -90,7 +92,7 @@ export function LockScreen() {
                 className="w-full px-4 py-3 rounded-xl bg-ctp-mantle border border-ctp-surface1 text-ctp-text placeholder:text-ctp-overlay0 focus:border-ctp-peach focus:ring-2 focus:ring-ctp-peach/20 transition-all duration-200"
                 placeholder="************"
                 {...register('password', {
-                  required: 'Mot de passe requis',
+                  required: t('auth.passwordRequired'),
                 })}
               />
               {errors.password && (
@@ -124,10 +126,10 @@ export function LockScreen() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                     />
                   </svg>
-                  Deverrouillage...
+                  {t('auth.lockScreen.unlocking')}
                 </span>
               ) : (
-                'Deverrouiller'
+                t('auth.lockScreen.unlock')
               )}
             </button>
           </form>
@@ -137,14 +139,14 @@ export function LockScreen() {
               onClick={handleLogout}
               className="text-sm text-ctp-subtext0 hover:text-ctp-red transition-colors"
             >
-              Se deconnecter
+              {t('auth.lockScreen.signOut')}
             </button>
           </div>
         </div>
 
         <p className="text-center text-xs text-ctp-overlay0 mt-6 flex items-center justify-center gap-2">
           <Lock className="w-3 h-3" />
-          Session verrouillee apres inactivite pour votre securite
+          {t('auth.lockScreen.lockedForSecurity')}
         </p>
       </div>
     </div>

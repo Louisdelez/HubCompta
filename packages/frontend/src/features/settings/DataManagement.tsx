@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   Download,
   Trash2,
@@ -45,6 +46,7 @@ interface DataSummary {
 // ----------------------------------------------------------------------------
 
 export function DataManagement() {
+  const { t } = useTranslation();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [exportSuccess, setExportSuccess] = useState(false);
@@ -90,8 +92,11 @@ export function DataManagement() {
     },
   });
 
+  // Get the confirmation word based on locale (SUPPRIMER for FR, DELETE for EN)
+  const deleteConfirmWord = t('settings.data.deleteConfirmWord', { defaultValue: 'DELETE' });
+
   const handleDelete = () => {
-    if (deleteConfirmText === 'SUPPRIMER') {
+    if (deleteConfirmText === deleteConfirmWord) {
       deleteMutation.mutate();
     }
   };
@@ -113,10 +118,10 @@ export function DataManagement() {
             <Database className="h-5 w-5 text-ctp-peach" />
             <div>
               <h2 className="text-lg font-semibold text-ctp-text">
-                Resume de vos donnees
+                {t('settings.data.dataSummary')}
               </h2>
               <p className="text-sm text-ctp-subtext0">
-                Apercu des donnees stockees dans votre compte
+                {t('settings.data.dataStoredOverview')}
               </p>
             </div>
           </div>
@@ -128,23 +133,23 @@ export function DataManagement() {
               {/* User info */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-ctp-subtext1 mb-2">
-                  Informations du compte
+                  {t('settings.data.accountInfo')}
                 </h3>
                 <div className="bg-ctp-surface0 rounded-lg p-4 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-ctp-subtext0">Email</span>
+                    <span className="text-ctp-subtext0">{t('settings.data.email')}</span>
                     <span className="text-ctp-text">{summary.user.email}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-ctp-subtext0">Nom</span>
+                    <span className="text-ctp-subtext0">{t('settings.data.name')}</span>
                     <span className="text-ctp-text">
                       {summary.user.displayName || '-'}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-ctp-subtext0">Compte cree le</span>
+                    <span className="text-ctp-subtext0">{t('settings.data.accountCreatedOn')}</span>
                     <span className="text-ctp-text">
-                      {new Date(summary.user.createdAt).toLocaleDateString('fr-FR')}
+                      {new Date(summary.user.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
@@ -154,11 +159,11 @@ export function DataManagement() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {[
                   { label: 'Workspaces', count: summary.counts.workspaces },
-                  { label: 'Appareils', count: summary.counts.devices },
-                  { label: 'Sessions', count: summary.counts.sessions },
-                  { label: 'Methodes MFA', count: summary.counts.mfaMethods },
-                  { label: 'Regles d\'alerte', count: summary.counts.alertRules },
-                  { label: 'Notifications', count: summary.counts.notifications },
+                  { label: t('settings.data.devices'), count: summary.counts.devices },
+                  { label: t('settings.data.sessions'), count: summary.counts.sessions },
+                  { label: t('settings.data.mfaMethods'), count: summary.counts.mfaMethods },
+                  { label: t('settings.data.alertRules'), count: summary.counts.alertRules },
+                  { label: t('settings.notifications.title'), count: summary.counts.notifications },
                 ].map((item) => (
                   <div
                     key={item.label}
@@ -183,10 +188,10 @@ export function DataManagement() {
             <FileJson className="h-5 w-5 text-ctp-peach" />
             <div>
               <h2 className="text-lg font-semibold text-ctp-text">
-                Exporter vos donnees
+                {t('settings.data.exportData')}
               </h2>
               <p className="text-sm text-ctp-subtext0">
-                Telechargez une copie de toutes vos donnees au format JSON
+                {t('settings.data.downloadDataJson')}
               </p>
             </div>
           </div>
@@ -194,22 +199,22 @@ export function DataManagement() {
 
         <div className="p-6">
           <p className="text-sm text-ctp-subtext1 mb-4">
-            Conformement au RGPD, vous pouvez telecharger l'ensemble de vos donnees personnelles.
-            L'export inclut :
+            {t('settings.data.gdprCompliance')}
+            {' '}{t('settings.data.exportIncludes')}
           </p>
           <ul className="text-sm text-ctp-subtext1 space-y-1 mb-6 list-disc list-inside">
-            <li>Informations de profil</li>
-            <li>Workspaces et comptes</li>
-            <li>Transactions et categories</li>
-            <li>Budgets et documents</li>
-            <li>Contacts, devis et factures</li>
-            <li>Regles d'alerte et notifications</li>
+            <li>{t('settings.data.profileInfo')}</li>
+            <li>{t('settings.data.workspacesAndAccounts')}</li>
+            <li>{t('settings.data.transactionsAndCategories')}</li>
+            <li>{t('settings.data.budgetsAndDocuments')}</li>
+            <li>{t('settings.data.contactsQuotesInvoices')}</li>
+            <li>{t('settings.data.alertRulesAndNotifications')}</li>
           </ul>
 
           {exportSuccess && (
             <div className="mb-4 flex items-center gap-2 p-3 bg-ctp-green/20 text-ctp-green rounded-lg">
               <CheckCircle className="h-5 w-5" />
-              <span className="text-sm">Export telecharge avec succes</span>
+              <span className="text-sm">{t('settings.data.exportSuccess')}</span>
             </div>
           )}
 
@@ -223,7 +228,7 @@ export function DataManagement() {
             ) : (
               <Download className="h-4 w-4" />
             )}
-            Telecharger mes donnees
+            {t('settings.data.downloadMyData')}
           </button>
         </div>
       </div>
@@ -235,10 +240,10 @@ export function DataManagement() {
             <AlertTriangle className="h-5 w-5 text-ctp-red" />
             <div>
               <h2 className="text-lg font-semibold text-ctp-red">
-                Zone de danger
+                {t('settings.data.dangerZone')}
               </h2>
               <p className="text-sm text-ctp-red/80">
-                Actions irreversibles sur votre compte
+                {t('settings.data.irreversibleActions')}
               </p>
             </div>
           </div>
@@ -246,17 +251,14 @@ export function DataManagement() {
 
         <div className="p-6">
           <h3 className="text-sm font-medium text-ctp-text mb-2">
-            Supprimer le compte
+            {t('settings.data.deleteAccount')}
           </h3>
-          <p className="text-sm text-ctp-subtext1 mb-4">
-            La suppression de votre compte est <strong>permanente et irreversible</strong>. Toutes
-            vos donnees seront definitivement effacees, y compris :
-          </p>
+          <p className="text-sm text-ctp-subtext1 mb-4" dangerouslySetInnerHTML={{ __html: t('settings.data.deleteAccountWarning') }} />
           <ul className="text-sm text-ctp-subtext1 space-y-1 mb-6 list-disc list-inside">
-            <li>Tous vos workspaces et leurs donnees</li>
-            <li>Toutes les transactions et documents</li>
-            <li>Tous les contacts, devis et factures</li>
-            <li>Historique et preferences</li>
+            <li>{t('settings.data.allWorkspacesData')}</li>
+            <li>{t('settings.data.allTransactionsDocs')}</li>
+            <li>{t('settings.data.allContactsQuotesInvoices')}</li>
+            <li>{t('settings.data.historyAndPreferences')}</li>
           </ul>
 
           {!showDeleteConfirm ? (
@@ -265,18 +267,16 @@ export function DataManagement() {
               className="flex items-center gap-2 px-4 py-2 bg-ctp-red text-ctp-base text-sm font-medium rounded-lg hover:bg-ctp-maroon transition-colors"
             >
               <Trash2 className="h-4 w-4" />
-              Supprimer mon compte
+              {t('settings.data.deleteMyAccount')}
             </button>
           ) : (
             <div className="bg-ctp-red/10 rounded-lg p-4">
-              <p className="text-sm text-ctp-red mb-3">
-                Pour confirmer la suppression, tapez <strong>SUPPRIMER</strong> ci-dessous :
-              </p>
+              <p className="text-sm text-ctp-red mb-3" dangerouslySetInnerHTML={{ __html: t('settings.data.confirmDeleteType') }} />
               <input
                 type="text"
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
-                placeholder="SUPPRIMER"
+                placeholder={deleteConfirmWord}
                 className="w-full px-3 py-2 border border-ctp-red/50 rounded-lg bg-ctp-base text-ctp-text mb-3 focus:ring-2 focus:ring-ctp-red"
               />
               <div className="flex gap-3">
@@ -287,11 +287,11 @@ export function DataManagement() {
                   }}
                   className="flex-1 px-4 py-2 text-sm font-medium text-ctp-subtext1 bg-ctp-surface1 rounded-lg hover:bg-ctp-surface2 transition-colors"
                 >
-                  Annuler
+                  {t('settings.data.cancel')}
                 </button>
                 <button
                   onClick={handleDelete}
-                  disabled={deleteConfirmText !== 'SUPPRIMER' || deleteMutation.isPending}
+                  disabled={deleteConfirmText !== deleteConfirmWord || deleteMutation.isPending}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-ctp-red text-ctp-base text-sm font-medium rounded-lg hover:bg-ctp-maroon disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {deleteMutation.isPending ? (
@@ -299,13 +299,13 @@ export function DataManagement() {
                   ) : (
                     <XCircle className="h-4 w-4" />
                   )}
-                  Supprimer definitivement
+                  {t('settings.data.deletePermanently')}
                 </button>
               </div>
 
               {deleteMutation.isError && (
                 <p className="mt-3 text-sm text-ctp-red">
-                  Une erreur est survenue. Veuillez reessayer.
+                  {t('settings.data.errorOccurred')}
                 </p>
               )}
             </div>

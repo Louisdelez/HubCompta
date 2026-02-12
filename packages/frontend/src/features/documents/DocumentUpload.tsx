@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { Image, BookOpen, Sheet, FileSpreadsheet, FileText, Folder, Clock, Check, X } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -67,6 +68,7 @@ async function calculateHash(file: File): Promise<string> {
 // ----------------------------------------------------------------------------
 
 export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUploadProps) {
+  const { t } = useTranslation();
   const [uploads, setUploads] = useState<FileUpload[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -143,14 +145,14 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
         )
       );
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Erreur lors de l\'upload';
+      const message = error instanceof Error ? error.message : t('documents.upload.uploadError');
       setUploads((prev) =>
         prev.map((u, i) =>
           i === index ? { ...u, status: 'error' as const, error: message } : u
         )
       );
     }
-  }, [requestUploadMutation, confirmUploadMutation]);
+  }, [requestUploadMutation, confirmUploadMutation, t]);
 
   const handleFiles = useCallback((files: FileList | null) => {
     if (!files) return;
@@ -198,7 +200,7 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
       {/* Modal */}
       <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-lg w-full animate-scale-in">
         <div className="p-6">
-          <h2 className="text-xl font-bold mb-4">Ajouter des documents</h2>
+          <h2 className="text-xl font-bold mb-4">{t('documents.addDocuments')}</h2>
 
           {/* Drop Zone */}
           <div
@@ -214,10 +216,10 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
           >
             <Folder className="w-10 h-10 mx-auto mb-3 text-ctp-overlay1" />
             <p className="text-ctp-subtext0 mb-2">
-              Glissez vos fichiers ici ou
+              {t('documents.upload.dragFilesHere')}
             </p>
             <label className="btn-primary cursor-pointer inline-block">
-              Parcourir
+              {t('documents.upload.browse')}
               <input
                 type="file"
                 multiple
@@ -227,7 +229,7 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
               />
             </label>
             <p className="text-xs text-ctp-subtext0 mt-3">
-              PDF, Images, CSV, Excel • Max 10MB par fichier
+              {t('documents.upload.supportedFormats')}
             </p>
           </div>
 
@@ -279,11 +281,11 @@ export function DocumentUpload({ workspaceId, onClose, onComplete }: DocumentUpl
           {/* Actions */}
           <div className="flex gap-3 mt-6">
             <button onClick={onClose} className="btn-secondary flex-1">
-              {allComplete ? 'Fermer' : 'Annuler'}
+              {allComplete ? t('documents.upload.close') : t('documents.upload.cancel')}
             </button>
             {allComplete && hasSuccess && (
               <button onClick={onComplete} className="btn-primary flex-1">
-                Terminé
+                {t('documents.upload.done')}
               </button>
             )}
           </div>

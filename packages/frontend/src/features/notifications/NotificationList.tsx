@@ -6,8 +6,9 @@
 
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import {
   Bell,
   AlertTriangle,
@@ -212,12 +213,12 @@ const notificationTypeConfig: Record<string, NotificationTypeConfig> = {
   },
 };
 
-const categoryLabels: Record<NotificationCategory, string> = {
-  alerts: 'Alertes',
-  savings: 'Epargne',
-  summaries: 'Resumes',
-  recurring: 'Recurrences',
-  other: 'Autres',
+const categoryLabelKeys: Record<NotificationCategory, string> = {
+  alerts: 'notifications.categories.alerts',
+  savings: 'notifications.categories.savings',
+  summaries: 'notifications.categories.summaries',
+  recurring: 'notifications.categories.recurring',
+  other: 'notifications.categories.other',
 };
 
 const categoryOrder: NotificationCategory[] = ['alerts', 'savings', 'recurring', 'summaries', 'other'];
@@ -247,7 +248,9 @@ interface NotificationItemProps {
 }
 
 function NotificationItem({ notification, onRead, onDelete, onClick }: NotificationItemProps) {
+  const { t, i18n } = useTranslation();
   const config = getNotificationConfig(notification.type);
+  const dateLocale = i18n.language === 'fr' ? fr : enUS;
   const Icon = config.icon;
   const actionUrl = config.actionUrl?.(notification.data);
 
@@ -309,7 +312,7 @@ function NotificationItem({ notification, onRead, onDelete, onClick }: Notificat
             <span className="text-xs text-ctp-overlay1">
               {formatDistanceToNow(new Date(notification.createdAt), {
                 addSuffix: true,
-                locale: fr,
+                locale: dateLocale,
               })}
             </span>
             {notification.workspace && (
@@ -323,7 +326,7 @@ function NotificationItem({ notification, onRead, onDelete, onClick }: Notificat
                 onClick={handleActionClick}
                 className="ml-auto flex items-center gap-1 text-xs text-ctp-blue hover:text-ctp-sapphire transition-colors"
               >
-                Voir
+                {t('notifications.view')}
                 <ExternalLink className="h-3 w-3" />
               </button>
             )}
@@ -344,6 +347,7 @@ function NotificationItem({ notification, onRead, onDelete, onClick }: Notificat
 // ----------------------------------------------------------------------------
 
 export function NotificationList({ onNotificationClick, grouped = false }: NotificationListProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   // Fetch notifications
@@ -413,9 +417,9 @@ export function NotificationList({ onNotificationClick, grouped = false }: Notif
     return (
       <div className="text-center py-8 px-4">
         <Bell className="h-10 w-10 mx-auto text-ctp-surface2 mb-3" />
-        <p className="text-sm text-ctp-subtext0">Aucune notification</p>
+        <p className="text-sm text-ctp-subtext0">{t('notifications.empty')}</p>
         <p className="text-xs text-ctp-overlay0 mt-1">
-          Vous serez notifie des evenements importants ici
+          {t('notifications.emptyDescription')}
         </p>
       </div>
     );
@@ -432,7 +436,7 @@ export function NotificationList({ onNotificationClick, grouped = false }: Notif
           return (
             <div key={category}>
               <h3 className="px-4 py-2 text-xs font-semibold text-ctp-subtext0 uppercase tracking-wider bg-ctp-surface0">
-                {categoryLabels[category]} ({categoryNotifications.length})
+                {t(categoryLabelKeys[category])} ({categoryNotifications.length})
               </h3>
               <div className="divide-y divide-ctp-surface1">
                 {categoryNotifications.map((notification) => (

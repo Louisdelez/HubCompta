@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { X, Loader2, Plus, Minus, TrendingUp, RefreshCw } from 'lucide-react';
@@ -60,6 +61,7 @@ export function AddPositionTransaction({
   onClose,
   onSuccess,
 }: AddPositionTransactionProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const queryClient = useQueryClient();
 
@@ -146,14 +148,14 @@ export function AddPositionTransaction({
     }
   };
 
-  const getTypeLabel = (t: TransactionType) => {
-    switch (t) {
+  const getTypeLabel = (txType: TransactionType) => {
+    switch (txType) {
       case 'buy':
-        return 'Achat';
+        return t('invest.addTransaction.buy');
       case 'sell':
-        return 'Vente';
+        return t('invest.addTransaction.sell');
       case 'dividend':
-        return 'Dividende';
+        return t('invest.addTransaction.dividend');
     }
   };
 
@@ -172,7 +174,7 @@ export function AddPositionTransaction({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-ctp-surface1">
           <div>
-            <h2 className="text-lg font-semibold text-ctp-text">Nouvelle transaction</h2>
+            <h2 className="text-lg font-semibold text-ctp-text">{t('invest.addTransaction.title')}</h2>
             <p className="text-sm text-ctp-subtext0">{assetSymbol}</p>
           </div>
           <button
@@ -188,27 +190,27 @@ export function AddPositionTransaction({
           {/* Transaction type */}
           <div>
             <label className="block text-sm font-medium text-ctp-subtext1 mb-2">
-              Type de transaction
+              {t('invest.addTransaction.type')}
             </label>
             <div className="flex gap-2">
-              {(['buy', 'sell', 'dividend'] as TransactionType[]).map((t) => (
+              {(['buy', 'sell', 'dividend'] as TransactionType[]).map((txType) => (
                 <button
-                  key={t}
+                  key={txType}
                   type="button"
-                  onClick={() => setType(t)}
+                  onClick={() => setType(txType)}
                   className={cn(
                     'flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors',
-                    type === t
-                      ? t === 'buy'
+                    type === txType
+                      ? txType === 'buy'
                         ? 'bg-ctp-green/10 border-ctp-green text-ctp-green'
-                        : t === 'sell'
+                        : txType === 'sell'
                         ? 'bg-ctp-red/10 border-ctp-red text-ctp-red'
                         : 'bg-ctp-blue/10 border-ctp-blue text-ctp-blue'
                       : 'bg-ctp-mantle border-ctp-surface1 text-ctp-subtext0 hover:bg-ctp-surface0'
                   )}
                 >
-                  {getTypeIcon(t)}
-                  {getTypeLabel(t)}
+                  {getTypeIcon(txType)}
+                  {getTypeLabel(txType)}
                 </button>
               ))}
             </div>
@@ -217,7 +219,7 @@ export function AddPositionTransaction({
           {/* Quantity */}
           <div>
             <label htmlFor="quantity" className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              {type === 'dividend' ? 'Montant reçu' : 'Quantité'}
+              {type === 'dividend' ? t('invest.addTransaction.amountReceived') : t('invest.addTransaction.quantity')}
             </label>
             <input
               id="quantity"
@@ -227,7 +229,7 @@ export function AddPositionTransaction({
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg focus:outline-none focus:ring-2 focus:ring-ctp-blue focus:border-ctp-blue bg-ctp-mantle text-ctp-text"
-              placeholder={type === 'dividend' ? 'Montant du dividende' : 'Nombre de titres'}
+              placeholder={type === 'dividend' ? t('invest.addTransaction.dividendAmount') : t('invest.addTransaction.numberOfShares')}
               required
             />
           </div>
@@ -236,7 +238,7 @@ export function AddPositionTransaction({
           {type !== 'dividend' && (
             <div>
               <label htmlFor="price" className="block text-sm font-medium text-ctp-subtext1 mb-1">
-                Prix unitaire ({assetCurrency})
+                {t('invest.addTransaction.price')} ({assetCurrency})
               </label>
               <div className="relative">
                 <input
@@ -247,7 +249,7 @@ export function AddPositionTransaction({
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   className="w-full px-3 py-2 pr-20 border border-ctp-surface1 rounded-lg focus:outline-none focus:ring-2 focus:ring-ctp-blue focus:border-ctp-blue bg-ctp-mantle text-ctp-text"
-                  placeholder="Prix par titre"
+                  placeholder={t('invest.addTransaction.pricePerShare')}
                   required
                 />
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -271,7 +273,7 @@ export function AddPositionTransaction({
               </div>
               {currentPrice !== null && (
                 <p className="mt-1 text-xs text-ctp-subtext0">
-                  Prix actuel : {currentPrice.toFixed(2)} {assetCurrency}
+                  {t('invest.priceAlert.currentPrice')} : {currentPrice.toFixed(2)} {assetCurrency}
                   {quoteData?.quote && (
                     <span className={cn(
                       'ml-2',
@@ -289,7 +291,7 @@ export function AddPositionTransaction({
           {/* Fees */}
           <div>
             <label htmlFor="fees" className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Frais ({assetCurrency})
+              {t('invest.addTransaction.fees')} ({assetCurrency})
             </label>
             <input
               id="fees"
@@ -306,7 +308,7 @@ export function AddPositionTransaction({
           {/* Date */}
           <div>
             <label htmlFor="date" className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Date
+              {t('invest.addTransaction.date')}
             </label>
             <input
               id="date"
@@ -321,7 +323,7 @@ export function AddPositionTransaction({
           {/* Notes */}
           <div>
             <label htmlFor="notes" className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Notes (optionnel)
+              {t('invest.addTransaction.notesOptional')}
             </label>
             <textarea
               id="notes"
@@ -329,7 +331,7 @@ export function AddPositionTransaction({
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
               className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg focus:outline-none focus:ring-2 focus:ring-ctp-blue focus:border-ctp-blue bg-ctp-mantle text-ctp-text"
-              placeholder="Notes additionnelles..."
+              placeholder={t('invest.addTransaction.additionalNotes')}
             />
           </div>
 
@@ -337,7 +339,7 @@ export function AddPositionTransaction({
           {type !== 'dividend' && quantity && price && (
             <div className="p-3 bg-ctp-surface0 rounded-lg">
               <div className="flex justify-between text-sm">
-                <span className="text-ctp-subtext0">Total</span>
+                <span className="text-ctp-subtext0">{t('invest.addTransaction.total')}</span>
                 <span className="font-medium text-ctp-text">
                   {calculateTotal().toFixed(2)} {assetCurrency}
                 </span>
@@ -349,7 +351,7 @@ export function AddPositionTransaction({
           {addTransactionMutation.isError && (
             <div className="p-3 bg-ctp-red/10 border border-ctp-red/20 rounded-lg">
               <p className="text-sm text-ctp-red">
-                Erreur lors de l'ajout de la transaction
+                {t('invest.addTransaction.error')}
               </p>
             </div>
           )}
@@ -361,7 +363,7 @@ export function AddPositionTransaction({
               onClick={handleClose}
               className="flex-1 px-4 py-2 text-ctp-subtext1 bg-ctp-surface0 rounded-lg hover:bg-ctp-surface1 font-medium"
             >
-              Annuler
+              {t('invest.addTransaction.cancel')}
             </button>
             <button
               type="submit"
@@ -371,10 +373,10 @@ export function AddPositionTransaction({
               {addTransactionMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Ajout...
+                  {t('invest.addTransaction.adding')}
                 </>
               ) : (
-                'Ajouter'
+                t('invest.addTransaction.add')
               )}
             </button>
           </div>

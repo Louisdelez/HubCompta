@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowLeftRight, CreditCard, Check, ArrowRight, Download, Loader2, Camera } from 'lucide-react';
@@ -164,6 +165,7 @@ interface ConversionRate {
 }
 
 export function TransactionList() {
+  const { t } = useTranslation();
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<TransactionFilters>({});
@@ -234,7 +236,7 @@ export function TransactionList() {
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       logger.error('PDF export error', error);
-      alert("Erreur lors de l'export PDF");
+      alert(t('transactions.pdfExportError'));
     } finally {
       setIsExporting(false);
     }
@@ -370,7 +372,7 @@ export function TransactionList() {
   if (!workspaceId) {
     return (
       <div className="p-6 text-center text-ctp-subtext0">
-        Selectionnez un espace de travail
+        {t('transactions.selectWorkspace')}
       </div>
     );
   }
@@ -380,9 +382,9 @@ export function TransactionList() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-ctp-text">Transactions</h1>
+          <h1 className="text-2xl font-bold text-ctp-text">{t('transactions.title')}</h1>
           <p className="text-ctp-subtext0">
-            {data?.total ?? 0} transaction{(data?.total ?? 0) !== 1 ? 's' : ''}
+            {t('transactions.transactionCount', { count: data?.total ?? 0 })}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -392,10 +394,10 @@ export function TransactionList() {
               'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
               'bg-ctp-mauve/10 text-ctp-mauve hover:bg-ctp-mauve/20'
             )}
-            title="Scanner un ticket de caisse"
+            title={t('transactions.scanReceipt')}
           >
             <Camera className="h-4 w-4" />
-            <span className="hidden sm:inline">Scanner</span>
+            <span className="hidden sm:inline">{t('transactions.scan')}</span>
           </button>
           <button
             onClick={() => void handleExportPDF()}
@@ -411,10 +413,10 @@ export function TransactionList() {
             ) : (
               <Download className="h-4 w-4" />
             )}
-            <span className="hidden sm:inline">Export PDF</span>
+            <span className="hidden sm:inline">{t('transactions.exportPdf')}</span>
           </button>
           <button onClick={() => setShowForm(true)} className="btn-primary">
-            + <span className="hidden sm:inline">Nouvelle transaction</span><span className="sm:hidden">Ajouter</span>
+            + <span className="hidden sm:inline">{t('transactions.newTransaction')}</span><span className="sm:hidden">{t('transactions.add')}</span>
           </button>
         </div>
       </div>
@@ -425,11 +427,11 @@ export function TransactionList() {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Rechercher..."
+          placeholder={t('transactions.search')}
           className="input flex-1 bg-ctp-surface0 border-ctp-surface1"
         />
         <button type="submit" className="btn-secondary">
-          Rechercher
+          {t('transactions.searchButton')}
         </button>
       </form>
 
@@ -448,9 +450,9 @@ export function TransactionList() {
         </div>
       ) : transactions.length === 0 ? (
         <div className="card bg-ctp-mantle text-center py-12">
-          <p className="text-ctp-subtext0 text-lg mb-4">Aucune transaction</p>
+          <p className="text-ctp-subtext0 text-lg mb-4">{t('transactions.noTransactions')}</p>
           <button onClick={() => setShowForm(true)} className="btn-primary">
-            Ajouter une transaction
+            {t('transactions.addTransaction')}
           </button>
         </div>
       ) : (
@@ -562,7 +564,7 @@ export function TransactionList() {
                       </div>
                       <div className="flex items-center gap-2 text-sm text-ctp-subtext0">
                         <span className="truncate">
-                          {txn.category?.name ?? 'Non categorise'}
+                          {txn.category?.name ?? t('transactions.uncategorized')}
                         </span>
                         <span>-</span>
                         <span className="truncate">{txn.account.name}</span>
@@ -629,17 +631,17 @@ export function TransactionList() {
             disabled={page === 1}
             className="btn-secondary"
           >
-            Precedent
+            {t('transactions.previous')}
           </button>
           <span className="text-sm text-ctp-subtext0">
-            Page {meta.page} sur {meta.totalPages}
+            {t('transactions.pageOf', { page: meta.page, total: meta.totalPages })}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
             disabled={page === meta.totalPages}
             className="btn-secondary"
           >
-            Suivant
+            {t('transactions.next')}
           </button>
         </div>
       )}

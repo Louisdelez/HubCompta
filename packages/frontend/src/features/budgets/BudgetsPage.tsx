@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Calendar, CalendarDays, Wallet, LayoutGrid, List, Download, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -71,6 +72,7 @@ function formatCurrency(amount: number): string {
 // ----------------------------------------------------------------------------
 
 export function BudgetsPage() {
+  const { t } = useTranslation();
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
@@ -123,7 +125,7 @@ export function BudgetsPage() {
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       logger.error('PDF export error', error);
-      alert("Erreur lors de l'export PDF");
+      alert(t('budgets.pdfExportError'));
     } finally {
       setIsExporting(false);
     }
@@ -165,7 +167,7 @@ export function BudgetsPage() {
   if (!workspaceId) {
     return (
       <div className="p-6 text-center text-ctp-subtext0">
-        Sélectionnez un espace de travail
+        {t('budgets.selectWorkspace')}
       </div>
     );
   }
@@ -194,9 +196,9 @@ export function BudgetsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Budgets</h1>
+          <h1 className="text-2xl font-bold">{t('budgets.title')}</h1>
           <p className="text-ctp-subtext0">
-            Suivez vos depenses par categorie
+            {t('budgets.trackByCategory')}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -210,7 +212,7 @@ export function BudgetsPage() {
                   ? 'bg-ctp-surface1 text-ctp-text'
                   : 'text-ctp-subtext0 hover:text-ctp-text'
               )}
-              title="Vue liste"
+              title={t('budgets.viewList')}
             >
               <List className="w-4 h-4" />
             </button>
@@ -222,7 +224,7 @@ export function BudgetsPage() {
                   ? 'bg-ctp-surface1 text-ctp-text'
                   : 'text-ctp-subtext0 hover:text-ctp-text'
               )}
-              title="Vue enveloppes"
+              title={t('budgets.viewEnvelopes')}
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
@@ -245,7 +247,7 @@ export function BudgetsPage() {
             Export PDF
           </button>
           <button onClick={() => setShowForm(true)} className="btn-primary">
-            + Nouveau budget
+            + {t('budgets.newBudget')}
           </button>
         </div>
       </div>
@@ -255,33 +257,33 @@ export function BudgetsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="card text-center">
             <p className="text-2xl font-bold">{summary.total}</p>
-            <p className="text-sm text-ctp-subtext0">Budgets actifs</p>
+            <p className="text-sm text-ctp-subtext0">{t('budgets.activeBudgets')}</p>
           </div>
           <div className="card text-center">
             <p className="text-2xl font-bold">{formatCurrency(summary.totalBudgeted)}</p>
-            <p className="text-sm text-ctp-subtext0">Budget total</p>
+            <p className="text-sm text-ctp-subtext0">{t('budgets.totalBudget')}</p>
           </div>
           <div className="card text-center">
             <p className="text-2xl font-bold text-ctp-blue">
               {formatCurrency(summary.totalSpent)}
             </p>
-            <p className="text-sm text-ctp-subtext0">Dépensé</p>
+            <p className="text-sm text-ctp-subtext0">{t('budgets.spent')}</p>
           </div>
           <div className="card text-center">
             {summary.overBudgetCount > 0 ? (
               <>
                 <p className="text-2xl font-bold text-ctp-red">{summary.overBudgetCount}</p>
-                <p className="text-sm text-ctp-red">Dépassés</p>
+                <p className="text-sm text-ctp-red">{t('budgets.exceeded')}</p>
               </>
             ) : summary.alertCount > 0 ? (
               <>
                 <p className="text-2xl font-bold text-ctp-yellow">{summary.alertCount}</p>
-                <p className="text-sm text-ctp-yellow">En alerte</p>
+                <p className="text-sm text-ctp-yellow">{t('budgets.alert')}</p>
               </>
             ) : (
               <>
                 <p className="text-2xl font-bold text-ctp-green">0</p>
-                <p className="text-sm text-ctp-green">Problème</p>
+                <p className="text-sm text-ctp-green">{t('budgets.problem')}</p>
               </>
             )}
           </div>
@@ -298,7 +300,7 @@ export function BudgetsPage() {
               <section>
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
-                  Budgets mensuels
+                  {t('budgets.monthlyBudgets')}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {monthlyBudgets.map((budget) => (
@@ -319,7 +321,7 @@ export function BudgetsPage() {
               <section>
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <CalendarDays className="w-5 h-5" />
-                  Budgets annuels
+                  {t('budgets.yearlyBudgets')}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {yearlyBudgets.map((budget) => (
@@ -339,12 +341,12 @@ export function BudgetsPage() {
       ) : (
         <div className="card text-center py-12">
           <Wallet className="w-12 h-12 mx-auto mb-4 text-ctp-overlay1" />
-          <h2 className="text-xl font-bold mb-2">Aucun budget configuré</h2>
+          <h2 className="text-xl font-bold mb-2">{t('budgets.noBudgetsConfigured')}</h2>
           <p className="text-ctp-subtext0 mb-6">
-            Créez des budgets pour suivre vos dépenses par catégorie
+            {t('budgets.createBudgetsDescription')}
           </p>
           <button onClick={() => setShowForm(true)} className="btn-primary">
-            Créer votre premier budget
+            {t('budgets.createFirstBudget')}
           </button>
         </div>
       )}

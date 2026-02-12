@@ -1,0 +1,76 @@
+{
+  "greeting": "Hallo {{displayName}},",
+  "footer": "Diese E-Mail wurde automatisch von HubCompta gesendet.",
+  "footerIgnore": "Wenn Sie diese E-Mail nicht angefordert haben, konnen Sie sie sicher ignorieren.",
+  "welcome": {
+    "subject": "Willkommen bei HubCompta!",
+    "title": "Willkommen bei HubCompta",
+    "intro": "Willkommen bei HubCompta! Ihr Konto wurde erfolgreich erstellt.",
+    "body": "HubCompta hilft Ihnen, Ihre privaten und geschaftlichen Finanzen mühelos zu verwalten:",
+    "features": {
+      "tracking": "Verfolgen Sie Ihre Einnahmen und Ausgaben",
+      "budgets": "Erstellen und verwalten Sie Ihre Budgets",
+      "reports": "Erstellen Sie detaillierte Berichte",
+      "invoicing": "Rechnungsstellung fur Ihre Kunden (Pro-Modus)"
+    },
+    "cta": "Zu meinem Dashboard",
+    "closing": "Bis bald bei HubCompta!"
+  },
+  "passwordReset": {
+    "subject": "Setzen Sie Ihr HubCompta-Passwort zuruck",
+    "title": "Passwort zurucksetzen",
+    "intro": "Sie haben das Zurucksetzen Ihres Passworts angefordert.",
+    "body": "Klicken Sie auf die Schaltflache unten, um ein neues Passwort zu wahlen:",
+    "cta": "Mein Passwort zurucksetzen",
+    "expiry": "Wichtig: Dieser Link lauft in {{expiresIn}} ab.",
+    "ignoreNote": "Wenn Sie dieses Zurucksetzen nicht angefordert haben, ignorieren Sie diese E-Mail. Ihr Passwort bleibt unverandert."
+  },
+  "invoiceOverdue": {
+    "subject": "Rechnung {{invoiceNumber}} uberfalllig",
+    "title": "Uberfalllige Rechnung",
+    "alertTitle": "Rechnung uberfalllig",
+    "intro": "Die folgende Rechnung ist {{daysOverdue}} Tag(e) uberfalllig:",
+    "invoiceNumber": "Rechnungsnummer",
+    "client": "Kunde",
+    "amount": "Betrag",
+    "dueDate": "Falligkeitsdatum",
+    "cta": "Rechnung anzeigen",
+    "recommendation": "Wir empfehlen, Ihren Kunden wegen der Zahlung zu kontaktieren."
+  },
+  "budgetAlert": {
+    "subjectExceeded": "Budget \"{{budgetName}}\" uberschritten",
+    "subjectWarning": "Budget \"{{budgetName}}\" bei {{percentUsed}}%",
+    "titleExceeded": "Budget uberschritten!",
+    "titleWarning": "Budget fast erreicht",
+    "messageExceeded": "Ihr Budget \"{{budgetName}}\" wurde uberschritten.",
+    "messageWarning": "Ihr Budget \"{{budgetName}}\" nahert sich dem Limit.",
+    "budget": "Budget",
+    "category": "Kategorie",
+    "spent": "Ausgegeben",
+    "limit": "Limit",
+    "usage": "Nutzung",
+    "cta": "Budget anzeigen"
+  },
+  "exportReady": {
+    "subject": "Ihr {{exportType}}-Export ist bereit",
+    "title": "Export bereit",
+    "alertTitle": "Ihr Export ist bereit!",
+    "intro": "Ihr {{exportType}}-Export steht jetzt zum Download bereit.",
+    "exportType": "Exporttyp",
+    "filename": "Datei",
+    "expiresAt": "Lauft ab am",
+    "cta": "Export herunterladen",
+    "expiryNote": "Dieser Download-Link lauft am {{expiresAt}} ab."
+  },
+  "weeklySummary": {
+    "subject": "Wochenzusammenfassung - {{weekStart}} bis {{weekEnd}}",
+    "title": "Wochenzusammenfassung",
+    "intro": "Hier ist Ihre Zusammenfassung fur die Woche vom {{weekStart}} bis {{weekEnd}}:",
+    "income": "Einnahmen",
+    "expenses": "Ausgaben",
+    "balance": "Saldo",
+    "topCategories": "Top-Ausgabenkategorien",
+    "budgetAlerts": "Budget-Warnungen",
+    "cta": "Dashboard anzeigen"
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "title": "Prestaties",
+  "secretAchievement": "Geheime prestatie",
+  "unlocked": "Ontgrendeld",
+  "progress": "Voortgang",
+  "xpReward": "{{xp}} XP",
+  "level": "Niveau {{level}}",
+  "levelUp": "Niveau Omhoog!",
+  "congratulations": "Gefeliciteerd! U heeft niveau {{level}} bereikt!",
+  "categories": {
+    "onboarding": "Aan de Slag",
+    "transactions": "Transacties",
+    "budgeting": "Budgetteren",
+    "savings": "Sparen",
+    "streaks": "Reeksen",
+    "milestones": "Mijlpalen"
+  },
+  "achievements": {
+    "first_steps": {
+      "name": "Eerste Stappen",
+      "description": "Voeg uw eerste transactie toe"
+    },
+    "first_budget": {
+      "name": "Beginnend Budgetteerder",
+      "description": "Maak uw eerste budget"
+    },
+    "first_goal": {
+      "name": "Doelzetter",
+      "description": "Maak uw eerste spaardoel"
+    },
+    "account_setup": {
+      "name": "Goed Uitgerust",
+      "description": "Voeg 3 rekeningen toe"
+    },
+    "tracker_10": {
+      "name": "Regelmatige Volger",
+      "description": "Registreer 10 transacties"
+    },
+    "tracker_50": {
+      "name": "Toegewijde Volger",
+      "description": "Registreer 50 transacties"
+    },
+    "tracker_100": {
+      "name": "Volgmeester",
+      "description": "Registreer 100 transacties"
+    },
+    "tracker_500": {
+      "name": "Boekhoudexpert",
+      "description": "Registreer 500 transacties"
+    },
+    "categorizer": {
+      "name": "Organisator",
+      "description": "Categoriseer 25 transacties"
+    },
+    "budget_keeper": {
+      "name": "Budgetbewaker",
+      "description": "Eindig een maand onder budget"
+    },
+    "budget_master_3": {
+      "name": "Discipline",
+      "description": "Blijf 3 opeenvolgende maanden binnen budget"
+    },
+    "budget_master_6": {
+      "name": "Budgetmeesterschap",
+      "description": "Blijf 6 opeenvolgende maanden binnen budget"
+    },
+    "multi_budget": {
+      "name": "Multi-Budget",
+      "description": "Beheer 5 budgetten tegelijkertijd"
+    },
+    "saver_first": {
+      "name": "Eerste Spaarstap",
+      "description": "Bereik 10% van uw eerste doel"
+    },
+    "saver_half": {
+      "name": "Halverwege",
+      "description": "Bereik 50% van een doel"
+    },
+    "saver_complete": {
+      "name": "Doel Bereikt",
+      "description": "Voltooi een spaardoel"
+    },
+    "saver_3_goals": {
+      "name": "Drievoudig Succes",
+      "description": "Voltooi 3 spaardoelen"
+    },
+    "saver_1000": {
+      "name": "Duizend Gespaard",
+      "description": "Spaar in totaal 1.000 EUR"
+    },
+    "saver_10000": {
+      "name": "Tienduizend",
+      "description": "Spaar in totaal 10.000 EUR"
+    },
+    "streak_7": {
+      "name": "Actieve Week",
+      "description": "7 opeenvolgende dagen activiteit"
+    },
+    "streak_30": {
+      "name": "Volledige Maand",
+      "description": "30 opeenvolgende dagen activiteit"
+    },
+    "streak_100": {
+      "name": "Centurion",
+      "description": "100 opeenvolgende dagen activiteit"
+    },
+    "streak_365": {
+      "name": "Marathonloper",
+      "description": "365 opeenvolgende dagen activiteit"
+    },
+    "night_owl": {
+      "name": "Nachtuil",
+      "description": "Voeg een transactie toe na middernacht"
+    },
+    "early_bird": {
+      "name": "Vroege Vogel",
+      "description": "Voeg een transactie toe voor 6 uur 's ochtends"
+    },
+    "perfect_month": {
+      "name": "Perfecte Maand",
+      "description": "Categoriseer alle transacties voor een maand"
+    }
+  }
+}

@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { XCircle } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -81,6 +82,7 @@ export function PreviewStep({
   onComplete,
   onPreviewData,
 }: PreviewStepProps) {
+  const { t } = useTranslation();
   const [skipDuplicates, setSkipDuplicates] = useState(true);
   const [applyRules, setApplyRules] = useState(true);
 
@@ -104,7 +106,7 @@ export function PreviewStep({
     return (
       <div className="text-center py-12">
         <div className="animate-spin w-12 h-12 border-4 border-ctp-blue border-t-transparent rounded-full mx-auto mb-4" />
-        <p className="text-ctp-subtext0">Analyse des données...</p>
+        <p className="text-ctp-subtext0">{t('import.preview.analyzingData')}</p>
       </div>
     );
   }
@@ -114,10 +116,10 @@ export function PreviewStep({
       <div className="text-center py-12">
         <XCircle className="w-10 h-10 mx-auto mb-4 text-ctp-red" />
         <p className="text-ctp-red mb-4">
-          {error instanceof Error ? error.message : 'Erreur lors de l\'analyse'}
+          {error instanceof Error ? error.message : t('import.preview.analysisError')}
         </p>
         <button onClick={onBack} className="btn-secondary">
-          Retour
+          {t('import.preview.back')}
         </button>
       </div>
     );
@@ -126,9 +128,9 @@ export function PreviewStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold mb-2">Aperçu de l'import</h2>
+        <h2 className="text-lg font-semibold mb-2">{t('import.preview.title')}</h2>
         <p className="text-ctp-subtext0 text-sm">
-          Vérifiez les données avant de lancer l'import.
+          {t('import.preview.description')}
         </p>
       </div>
 
@@ -136,7 +138,7 @@ export function PreviewStep({
       {preview.warnings.length > 0 && (
         <div className="p-4 bg-ctp-yellow/10 border border-ctp-yellow/30 rounded-lg">
           <p className="font-medium text-ctp-yellow mb-2">
-            Avertissements
+            {t('import.preview.warnings')}
           </p>
           <ul className="list-disc list-inside text-sm text-ctp-yellow">
             {preview.warnings.map((warning, i) => (
@@ -150,30 +152,30 @@ export function PreviewStep({
       <div className="grid grid-cols-3 gap-4">
         <div className="p-4 bg-ctp-surface0 rounded-lg text-center">
           <p className="text-2xl font-bold">{preview.totalRows}</p>
-          <p className="text-sm text-ctp-subtext0">Lignes totales</p>
+          <p className="text-sm text-ctp-subtext0">{t('import.preview.totalRows')}</p>
         </div>
         <div className="p-4 bg-ctp-green/10 border border-ctp-green/30 rounded-lg text-center">
           <p className="text-2xl font-bold text-ctp-green">{preview.validRows}</p>
-          <p className="text-sm text-ctp-green">Valides</p>
+          <p className="text-sm text-ctp-green">{t('import.preview.valid')}</p>
         </div>
         <div className="p-4 bg-ctp-yellow/10 border border-ctp-yellow/30 rounded-lg text-center">
           <p className="text-2xl font-bold text-ctp-yellow">{preview.duplicates}</p>
-          <p className="text-sm text-ctp-yellow">Doublons</p>
+          <p className="text-sm text-ctp-yellow">{t('import.preview.duplicates')}</p>
         </div>
       </div>
 
       {/* Sample Transactions */}
       <div>
-        <h3 className="font-medium mb-3">Aperçu des transactions</h3>
+        <h3 className="font-medium mb-3">{t('import.preview.transactionsPreview')}</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-ctp-surface1">
-                <th className="text-left py-2 px-3">Date</th>
-                <th className="text-left py-2 px-3">Description</th>
-                <th className="text-right py-2 px-3">Montant</th>
-                <th className="text-left py-2 px-3">Catégorie</th>
-                <th className="text-center py-2 px-3">Status</th>
+                <th className="text-left py-2 px-3">{t('import.preview.date')}</th>
+                <th className="text-left py-2 px-3">{t('import.preview.description')}</th>
+                <th className="text-right py-2 px-3">{t('import.preview.amount')}</th>
+                <th className="text-left py-2 px-3">{t('import.preview.category')}</th>
+                <th className="text-center py-2 px-3">{t('import.preview.status')}</th>
               </tr>
             </thead>
             <tbody>
@@ -209,11 +211,11 @@ export function PreviewStep({
                   <td className="py-2 px-3 text-center">
                     {txn.isDuplicate ? (
                       <span className="px-2 py-0.5 rounded-full text-xs bg-ctp-yellow/20 text-ctp-yellow">
-                        Doublon
+                        {t('import.preview.duplicate')}
                       </span>
                     ) : (
                       <span className="px-2 py-0.5 rounded-full text-xs bg-ctp-green/20 text-ctp-green">
-                        Nouveau
+                        {t('import.preview.new')}
                       </span>
                     )}
                   </td>
@@ -224,14 +226,14 @@ export function PreviewStep({
         </div>
         {preview.validRows > 10 && (
           <p className="text-xs text-ctp-subtext0 mt-2 text-center">
-            + {preview.validRows - 10} autres transactions
+            {t('import.preview.moreTransactions', { count: preview.validRows - 10 })}
           </p>
         )}
       </div>
 
       {/* Import Options */}
       <div className="space-y-3 p-4 bg-ctp-surface0 rounded-lg">
-        <h3 className="font-medium">Options d'import</h3>
+        <h3 className="font-medium">{t('import.preview.importOptions')}</h3>
 
         <label className="flex items-center gap-3">
           <input
@@ -241,9 +243,9 @@ export function PreviewStep({
             className="w-5 h-5 rounded border-ctp-surface1"
           />
           <div>
-            <p className="font-medium">Ignorer les doublons</p>
+            <p className="font-medium">{t('import.preview.skipDuplicates')}</p>
             <p className="text-sm text-ctp-subtext0">
-              {preview.duplicates} transaction(s) déjà présente(s)
+              {t('import.preview.skipDuplicatesDescription', { count: preview.duplicates })}
             </p>
           </div>
         </label>
@@ -256,9 +258,9 @@ export function PreviewStep({
             className="w-5 h-5 rounded border-ctp-surface1"
           />
           <div>
-            <p className="font-medium">Appliquer les règles de catégorisation</p>
+            <p className="font-medium">{t('import.preview.applyCategorization')}</p>
             <p className="text-sm text-ctp-subtext0">
-              Catégorise automatiquement selon vos règles
+              {t('import.preview.applyCategorizationDescription')}
             </p>
           </div>
         </label>
@@ -267,14 +269,14 @@ export function PreviewStep({
       {/* Actions */}
       <div className="flex gap-3">
         <button onClick={onBack} className="btn-secondary flex-1">
-          Retour
+          {t('import.preview.back')}
         </button>
         <button
           onClick={onComplete}
           disabled={preview.validRows === 0}
           className="btn-primary flex-1"
         >
-          Importer {preview.validRows} transaction{preview.validRows !== 1 ? 's' : ''}
+          {t('import.preview.importCount', { count: preview.validRows })}
         </button>
       </div>
     </div>

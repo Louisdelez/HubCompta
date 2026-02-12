@@ -1,0 +1,76 @@
+{
+  "greeting": "Hola {{displayName}},",
+  "footer": "Este email fue enviado automaticamente por HubCompta.",
+  "footerIgnore": "Si no solicitaste este email, puedes ignorarlo de forma segura.",
+  "welcome": {
+    "subject": "Bienvenido a HubCompta!",
+    "title": "Bienvenido a HubCompta",
+    "intro": "Bienvenido a HubCompta! Tu cuenta ha sido creada exitosamente.",
+    "body": "HubCompta te ayuda a gestionar tus finanzas personales y empresariales con facilidad:",
+    "features": {
+      "tracking": "Controla tus ingresos y gastos",
+      "budgets": "Crea y gestiona tus presupuestos",
+      "reports": "Genera informes detallados",
+      "invoicing": "Factura a tus clientes (modo Pro)"
+    },
+    "cta": "Acceder a mi panel",
+    "closing": "Hasta pronto en HubCompta!"
+  },
+  "passwordReset": {
+    "subject": "Restablece tu contrasena de HubCompta",
+    "title": "Restablecer contrasena",
+    "intro": "Has solicitado restablecer tu contrasena.",
+    "body": "Haz clic en el boton de abajo para elegir una nueva contrasena:",
+    "cta": "Restablecer mi contrasena",
+    "expiry": "Importante: Este enlace expira en {{expiresIn}}.",
+    "ignoreNote": "Si no solicitaste este restablecimiento, ignora este email. Tu contrasena permanecera sin cambios."
+  },
+  "invoiceOverdue": {
+    "subject": "Factura {{invoiceNumber}} vencida",
+    "title": "Factura vencida",
+    "alertTitle": "Factura vencida",
+    "intro": "La siguiente factura tiene {{daysOverdue}} dia(s) de retraso:",
+    "invoiceNumber": "Numero de factura",
+    "client": "Cliente",
+    "amount": "Cantidad",
+    "dueDate": "Fecha de vencimiento",
+    "cta": "Ver factura",
+    "recommendation": "Te recomendamos contactar a tu cliente para el pago."
+  },
+  "budgetAlert": {
+    "subjectExceeded": "Presupuesto \"{{budgetName}}\" excedido",
+    "subjectWarning": "Presupuesto \"{{budgetName}}\" al {{percentUsed}}%",
+    "titleExceeded": "Presupuesto excedido!",
+    "titleWarning": "Presupuesto casi alcanzado",
+    "messageExceeded": "Tu presupuesto \"{{budgetName}}\" ha sido excedido.",
+    "messageWarning": "Tu presupuesto \"{{budgetName}}\" se acerca a su limite.",
+    "budget": "Presupuesto",
+    "category": "Categoria",
+    "spent": "Gastado",
+    "limit": "Limite",
+    "usage": "Uso",
+    "cta": "Ver presupuesto"
+  },
+  "exportReady": {
+    "subject": "Tu exportacion {{exportType}} esta lista",
+    "title": "Exportacion lista",
+    "alertTitle": "Tu exportacion esta lista!",
+    "intro": "Tu exportacion {{exportType}} esta ahora disponible para descargar.",
+    "exportType": "Tipo de exportacion",
+    "filename": "Archivo",
+    "expiresAt": "Expira el",
+    "cta": "Descargar exportacion",
+    "expiryNote": "Este enlace de descarga expirara el {{expiresAt}}."
+  },
+  "weeklySummary": {
+    "subject": "Resumen semanal - {{weekStart}} a {{weekEnd}}",
+    "title": "Resumen semanal",
+    "intro": "Aqui esta tu resumen de la semana del {{weekStart}} al {{weekEnd}}:",
+    "income": "Ingresos",
+    "expenses": "Gastos",
+    "balance": "Saldo",
+    "topCategories": "Principales categorias de gasto",
+    "budgetAlerts": "Alertas de presupuesto",
+    "cta": "Ver panel"
+  }
+}

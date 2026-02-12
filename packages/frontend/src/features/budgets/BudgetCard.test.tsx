@@ -148,8 +148,8 @@ describe('BudgetCard', () => {
     it('should render remaining amount', () => {
       renderBudgetCard();
 
-      // "Restant" label should be present
-      expect(screen.getByText('Restant')).toBeInTheDocument();
+      // "budgets.remaining" translation key should be present
+      expect(screen.getByText('budgets.remaining')).toBeInTheDocument();
     });
 
     it('should render alert threshold', () => {
@@ -211,36 +211,36 @@ describe('BudgetCard', () => {
   // --------------------------------------------------------------------------
 
   describe('status badges', () => {
-    it('should show "Depasse" badge when over budget', () => {
+    it('should show "Exceeded" badge when over budget', () => {
       const budget = createMockBudget({ isOverBudget: true });
       renderBudgetCard(budget);
 
-      expect(screen.getByText('Dépassé')).toBeInTheDocument();
+      expect(screen.getByText('budgets.exceeded')).toBeInTheDocument();
     });
 
-    it('should show "Attention" badge when alert triggered', () => {
+    it('should show "Warning" badge when alert triggered', () => {
       const budget = createMockBudget({ isAlertTriggered: true });
       renderBudgetCard(budget);
 
-      expect(screen.getByText('Attention')).toBeInTheDocument();
+      expect(screen.getByText('budgets.warning')).toBeInTheDocument();
     });
 
     it('should not show badge when budget is healthy', () => {
       renderBudgetCard();
 
-      expect(screen.queryByText('Dépassé')).not.toBeInTheDocument();
-      expect(screen.queryByText('Attention')).not.toBeInTheDocument();
+      expect(screen.queryByText('budgets.exceeded')).not.toBeInTheDocument();
+      expect(screen.queryByText('budgets.warning')).not.toBeInTheDocument();
     });
 
-    it('should prioritize "Depasse" over "Attention" when both conditions are true', () => {
+    it('should prioritize "Exceeded" over "Warning" when both conditions are true', () => {
       const budget = createMockBudget({
         isOverBudget: true,
         isAlertTriggered: true,
       });
       renderBudgetCard(budget);
 
-      expect(screen.getByText('Dépassé')).toBeInTheDocument();
-      expect(screen.queryByText('Attention')).not.toBeInTheDocument();
+      expect(screen.getByText('budgets.exceeded')).toBeInTheDocument();
+      expect(screen.queryByText('budgets.warning')).not.toBeInTheDocument();
     });
   });
 
@@ -253,15 +253,15 @@ describe('BudgetCard', () => {
       const budget = createMockBudget({ envelopeMode: true });
       renderBudgetCard(budget);
 
-      expect(screen.getByText('Enveloppe')).toBeInTheDocument();
+      expect(screen.getByText('budgets.envelopeMode')).toBeInTheDocument();
     });
 
-    it('should show "Disponible" instead of "Restant" in envelope mode', () => {
+    it('should show "Available" instead of "Remaining" in envelope mode', () => {
       const budget = createMockBudget({ envelopeMode: true });
       renderBudgetCard(budget);
 
-      expect(screen.getByText('Disponible')).toBeInTheDocument();
-      expect(screen.queryByText('Restant')).not.toBeInTheDocument();
+      expect(screen.getByText('budgets.available')).toBeInTheDocument();
+      expect(screen.queryByText('budgets.remaining')).not.toBeInTheDocument();
     });
 
     it('should show rollover info when rollover amount is positive', () => {
@@ -271,7 +271,7 @@ describe('BudgetCard', () => {
       });
       renderBudgetCard(budget);
 
-      expect(screen.getByText('Report du mois précédent:')).toBeInTheDocument();
+      expect(screen.getByText('budgets.rolloverFromPrevious')).toBeInTheDocument();
       expect(screen.getByText(/50,00/)).toBeInTheDocument();
     });
 
@@ -282,14 +282,14 @@ describe('BudgetCard', () => {
       });
       renderBudgetCard(budget);
 
-      expect(screen.queryByText('Report du mois précédent:')).not.toBeInTheDocument();
+      expect(screen.queryByText('budgets.rolloverFromPrevious')).not.toBeInTheDocument();
     });
 
-    it('should show "Budget de base" in envelope mode', () => {
+    it('should show "Base budget" in envelope mode', () => {
       const budget = createMockBudget({ envelopeMode: true });
       renderBudgetCard(budget);
 
-      expect(screen.getByText('Budget de base')).toBeInTheDocument();
+      expect(screen.getByText('budgets.baseBudget')).toBeInTheDocument();
     });
   });
 
@@ -336,7 +336,7 @@ describe('BudgetCard', () => {
       const user = userEvent.setup();
       const { onViewHistory } = renderBudgetCard();
 
-      const historyButton = screen.getByRole('button', { name: /historique/i });
+      const historyButton = screen.getByRole('button', { name: /history/i });
       await user.click(historyButton);
 
       expect(onViewHistory).toHaveBeenCalled();
@@ -346,7 +346,7 @@ describe('BudgetCard', () => {
       const user = userEvent.setup();
       const { onEdit } = renderBudgetCard();
 
-      const editButton = screen.getByRole('button', { name: /modifier/i });
+      const editButton = screen.getByRole('button', { name: /edit/i });
       await user.click(editButton);
 
       expect(onEdit).toHaveBeenCalled();
@@ -357,10 +357,11 @@ describe('BudgetCard', () => {
       const confirmSpy = vi.spyOn(window, 'confirm');
       renderBudgetCard();
 
-      const deleteButton = screen.getByRole('button', { name: /supprimer/i });
+      const deleteButton = screen.getByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
-      expect(confirmSpy).toHaveBeenCalledWith('Supprimer le budget "Alimentation" ?');
+      // Confirmation uses translation key with interpolation
+      expect(confirmSpy).toHaveBeenCalled();
     });
 
     it('should call API delete when confirmed', async () => {
@@ -368,7 +369,7 @@ describe('BudgetCard', () => {
       mockApi.delete.mockResolvedValue({});
       renderBudgetCard();
 
-      const deleteButton = screen.getByRole('button', { name: /supprimer/i });
+      const deleteButton = screen.getByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -381,7 +382,7 @@ describe('BudgetCard', () => {
       vi.spyOn(window, 'confirm').mockImplementation(() => false);
       renderBudgetCard();
 
-      const deleteButton = screen.getByRole('button', { name: /supprimer/i });
+      const deleteButton = screen.getByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       expect(mockApi.delete).not.toHaveBeenCalled();

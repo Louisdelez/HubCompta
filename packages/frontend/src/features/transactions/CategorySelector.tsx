@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Folder } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -40,6 +41,7 @@ export function CategorySelector({
   value,
   onChange,
 }: CategorySelectorProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [expandedParents, setExpandedParents] = useState<Set<string>>(new Set());
 
@@ -85,7 +87,7 @@ export function CategorySelector({
 
   return (
     <div>
-      <label className="label">Catégorie</label>
+      <label className="label">{t('transactions.category')}</label>
       <div className="relative">
         <button
           type="button"
@@ -98,7 +100,7 @@ export function CategorySelector({
               <span className="text-ctp-text">{selectedCategory.name}</span>
             </>
           ) : (
-            <span className="text-ctp-overlay1">Sélectionner une catégorie</span>
+            <span className="text-ctp-overlay1">{t('transactions.selectCategory')}</span>
           )}
           <svg
             className={clsx(
@@ -131,7 +133,7 @@ export function CategorySelector({
                 onClick={handleClear}
                 className="w-full px-3 py-2 text-left text-ctp-subtext0 hover:bg-ctp-surface0"
               >
-                Aucune categorie
+                {t('transactions.noCategory')}
               </button>
 
               {/* Categories */}

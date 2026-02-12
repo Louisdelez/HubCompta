@@ -1,0 +1,289 @@
+{
+  "navigation": {
+    "dashboard": "Painel",
+    "transactions": "Transacoes",
+    "accounts": "Contas",
+    "budgets": "Orcamentos",
+    "savings": "Poupancas",
+    "loans": "Emprestimos",
+    "investments": "Investimentos",
+    "netWorth": "Patrimonio Liquido",
+    "documents": "Documentos",
+    "banking": "Banca",
+    "recurrences": "Recorrencias",
+    "scheduled": "Agendados",
+    "bills": "Contas a Pagar",
+    "settlement": "Liquidacao",
+    "forecast": "Previsao",
+    "tax": "Impostos",
+    "import": "Importar",
+    "export": "Exportar",
+    "rules": "Regras",
+    "ai": "IA",
+    "reports": "Relatorios",
+    "currencies": "Moedas",
+    "search": "Pesquisar",
+    "achievements": "Conquistas",
+    "activity": "Atividade",
+    "settings": "Definicoes",
+    "administration": "Administracao",
+    "logout": "Terminar Sessao",
+    "skipToMain": "Saltar para o conteudo principal"
+  },
+  "auth": {
+    "login": "Iniciar Sessao",
+    "register": "Registar",
+    "logout": "Terminar Sessao",
+    "email": "Endereco de email",
+    "password": "Palavra-passe",
+    "confirmPassword": "Confirmar palavra-passe",
+    "forgotPassword": "Esqueceu a palavra-passe?",
+    "resetPassword": "Repor palavra-passe",
+    "rememberMe": "Lembrar-me",
+    "signIn": "Entrar",
+    "signUp": "Registar-se",
+    "createAccount": "Criar conta",
+    "alreadyHaveAccount": "Ja tem uma conta?",
+    "dontHaveAccount": "Nao tem uma conta?",
+    "displayName": "Nome de apresentacao",
+    "authenticating": "A autenticar..."
+  },
+  "dashboard": {
+    "title": "Painel",
+    "welcome": "Bem-vindo",
+    "overview": "Visao Geral",
+    "recentTransactions": "Transacoes recentes",
+    "upcomingBills": "Contas a pagar em breve",
+    "budgetStatus": "Estado do orcamento",
+    "netWorth": "Patrimonio liquido",
+    "monthlyIncome": "Receitas mensais",
+    "monthlyExpenses": "Despesas mensais",
+    "savings": "Poupancas",
+    "thisMonth": "Este mes",
+    "lastMonth": "Mes passado",
+    "thisYear": "Este ano",
+    "customRange": "Periodo personalizado",
+    "income": "Receitas",
+    "expenses": "Despesas",
+    "noUpcomingBills": "Sem contas a pagar em breve",
+    "viewAll": "Ver tudo"
+  },
+  "transactions": {
+    "title": "Transacoes",
+    "newTransaction": "Nova transacao",
+    "addTransaction": "Adicionar transacao",
+    "editTransaction": "Editar transacao",
+    "deleteTransaction": "Eliminar transacao",
+    "transactionDetails": "Detalhes da transacao",
+    "income": "Receita",
+    "expense": "Despesa",
+    "transfer": "Transferencia",
+    "date": "Data",
+    "amount": "Montante",
+    "category": "Categoria",
+    "account": "Conta",
+    "payee": "Beneficiario",
+    "notes": "Notas",
+    "tags": "Etiquetas",
+    "recurring": "Recorrente",
+    "pending": "Pendente",
+    "cleared": "Confirmada",
+    "reconciled": "Reconciliada",
+    "filterByAccount": "Filtrar por conta",
+    "filterByCategory": "Filtrar por categoria",
+    "filterByDate": "Filtrar por data",
+    "noTransactions": "Sem transacoes",
+    "confirmDelete": "Tem a certeza de que pretende eliminar esta transacao?"
+  },
+  "accounts": {
+    "title": "Contas",
+    "newAccount": "Nova conta",
+    "addAccount": "Adicionar conta",
+    "editAccount": "Editar conta",
+    "deleteAccount": "Eliminar conta",
+    "accountDetails": "Detalhes da conta",
+    "accountName": "Nome da conta",
+    "accountType": "Tipo de conta",
+    "initialBalance": "Saldo inicial",
+    "currentBalance": "Saldo atual",
+    "currency": "Moeda",
+    "checking": "Conta a ordem",
+    "savings": "Conta poupanca",
+    "creditCard": "Cartao de credito",
+    "cash": "Dinheiro",
+    "investment": "Investimento",
+    "loan": "Emprestimo",
+    "asset": "Ativo",
+    "liability": "Passivo",
+    "institution": "Instituicao",
+    "accountNumber": "Numero da conta",
+    "noAccounts": "Sem contas",
+    "confirmDelete": "Tem a certeza de que pretende eliminar esta conta?",
+    "totalBalance": "Saldo total"
+  },
+  "budgets": {
+    "title": "Orcamentos",
+    "newBudget": "Novo orcamento",
+    "addBudget": "Adicionar orcamento",
+    "editBudget": "Editar orcamento",
+    "deleteBudget": "Eliminar orcamento",
+    "budgetName": "Nome do orcamento",
+    "budgetAmount": "Montante do orcamento",
+    "spent": "Gasto",
+    "remaining": "Restante",
+    "overBudget": "Acima do orcamento",
+    "onTrack": "Dentro do previsto",
+    "period": "Periodo",
+    "monthly": "Mensal",
+    "weekly": "Semanal",
+    "yearly": "Anual",
+    "categories": "Categorias",
+    "noBudgets": "Sem orcamentos",
+    "progress": "Progresso",
+    "percentUsed": "{{percent}}% utilizado"
+  },
+  "settings": {
+    "title": "Definicoes",
+    "manageAccount": "Gerir a sua conta e preferencias",
+    "backToDashboard": "Voltar ao painel",
+    "profile": {
+      "title": "Perfil",
+      "description": "Informacoes pessoais e preferencias"
+    },
+    "display": {
+      "title": "Apresentacao",
+      "description": "Tema, formato e painel",
+      "theme": "Tema",
+      "themeDescription": "Escolha entre 4 sabores Catppuccin",
+      "activeTheme": "Tema ativo",
+      "automatic": "automatico",
+      "systemTheme": "Sistema",
+      "compactMode": "Modo compacto",
+      "compactModeDescription": "Apresentacao mais densa com menos espacamento",
+      "showBalance": "Mostrar saldos",
+      "showBalanceDescription": "Mostrar saldos das contas na lista",
+      "defaultCurrency": "Moeda predefinida",
+      "dateFormat": "Formato de data",
+      "numberFormat": "Formato de numero",
+      "startOfWeek": "Inicio da semana",
+      "monday": "Segunda-feira",
+      "sunday": "Domingo",
+      "currencies": {
+        "eur": "Euro (EUR)",
+        "usd": "Dolar Americano (USD)",
+        "gbp": "Libra Esterlina (GBP)",
+        "chf": "Franco Suico (CHF)",
+        "cad": "Dolar Canadiano (CAD)"
+      },
+      "dateFormats": {
+        "dmy": "DD/MM/AAAA (31/12/2024)",
+        "mdy": "MM/DD/AAAA (12/31/2024)",
+        "ymd": "AAAA-MM-DD (2024-12-31)"
+      },
+      "numberFormats": {
+        "fr": "Frances (1 234,56)",
+        "en": "Ingles EUA (1,234.56)",
+        "de": "Alemao (1.234,56)"
+      }
+    },
+    "notifications": {
+      "title": "Notificacoes",
+      "description": "Email, push e alertas"
+    },
+    "security": {
+      "title": "Seguranca",
+      "description": "MFA, dispositivos e sessoes"
+    },
+    "audit": {
+      "title": "Registo de auditoria",
+      "description": "Historico de acoes sensiveis"
+    },
+    "data": {
+      "title": "Dados",
+      "description": "Exportacao e eliminacao de conta"
+    },
+    "dashboard": {
+      "title": "Painel",
+      "description": "Configurar o seu painel",
+      "defaultPeriod": "Periodo predefinido",
+      "periods": {
+        "month": "Mes",
+        "quarter": "Trimestre",
+        "year": "Ano"
+      },
+      "showNetWorth": "Mostrar patrimonio liquido",
+      "showNetWorthDescription": "Mostrar total de ativos menos passivos",
+      "showBudgets": "Mostrar orcamentos",
+      "showBudgetsDescription": "Mostrar estado dos orcamentos no painel",
+      "showRecentTransactions": "Mostrar transacoes recentes",
+      "showRecentTransactionsDescription": "Mostrar ultimas transacoes",
+      "showUpcomingBills": "Mostrar contas a pagar",
+      "showUpcomingBillsDescription": "Mostrar pagamentos agendados"
+    },
+    "privacy": {
+      "title": "Privacidade",
+      "description": "Opcoes de privacidade e seguranca da sessao",
+      "hideAmounts": "Ocultar montantes",
+      "hideAmountsDescription": "Ocultar montantes ate passar o rato",
+      "lockOnInactivity": "Bloquear por inatividade",
+      "lockOnInactivityDescription": "Bloquear sessao apos um periodo de inatividade",
+      "inactivityTimeout": "Tempo de inatividade (minutos)",
+      "sessionTimeout": "Tempo de sessao (minutos)",
+      "timeouts": {
+        "1min": "1 minuto",
+        "5min": "5 minutos",
+        "10min": "10 minutos",
+        "15min": "15 minutos",
+        "30min": "30 minutos",
+        "1hour": "1 hora",
+        "2hours": "2 horas",
+        "8hours": "8 horas",
+        "24hours": "24 horas"
+      }
+    },
+    "help": {
+      "title": "Ajuda e tutorial",
+      "description": "Reiniciar a visita guiada para descobrir todas as funcionalidades"
+    },
+    "language": {
+      "title": "Idioma",
+      "description": "Escolha o seu idioma preferido",
+      "select": "Selecionar idioma",
+      "current": "Idioma atual"
+    },
+    "workspace": {
+      "title": "Definicoes do espaco de trabalho",
+      "description": "Configurar definicoes especificas do espaco de trabalho",
+      "manage": "Gerir espacos de trabalho"
+    }
+  },
+  "workspace": {
+    "title": "Espaco de Trabalho",
+    "create": "Criar espaco de trabalho",
+    "select": "Selecionar espaco de trabalho",
+    "switch": "Mudar de espaco de trabalho",
+    "members": "Membros",
+    "settings": "Definicoes do espaco de trabalho",
+    "noWorkspace": "Sem espaco de trabalho"
+  },
+  "confirmation": {
+    "delete": "Tem a certeza de que pretende eliminar?",
+    "unsavedChanges": "Tem alteracoes por guardar. Pretende sair?",
+    "logout": "Tem a certeza de que pretende terminar a sessao?"
+  },
+  "time": {
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "tomorrow": "Amanha",
+    "thisWeek": "Esta semana",
+    "lastWeek": "Semana passada",
+    "thisMonth": "Este mes",
+    "lastMonth": "Mes passado",
+    "thisYear": "Este ano",
+    "lastYear": "Ano passado"
+  },
+  "notFoundPage": {
+    "title": "404",
+    "message": "Pagina nao encontrada"
+  }
+}

@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { User, Save, Loader2, Globe, Info } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -35,6 +36,7 @@ const COUNTRY_OPTIONS = [
 // ----------------------------------------------------------------------------
 
 export function ProfileSettings() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     displayName: '',
@@ -111,10 +113,10 @@ export function ProfileSettings() {
       <div className="px-6 py-4 border-b border-ctp-surface1">
         <div className="flex items-center gap-3">
           <User className="h-5 w-5 text-ctp-blue" />
-          <h2 className="text-lg font-semibold text-ctp-text">Profil</h2>
+          <h2 className="text-lg font-semibold text-ctp-text">{t('settings.profile.title')}</h2>
         </div>
         <p className="mt-1 text-sm text-ctp-subtext0">
-          Gerez vos informations personnelles
+          {t('settings.profile.manageInfo')}
         </p>
       </div>
 
@@ -122,7 +124,7 @@ export function ProfileSettings() {
         {/* Email (read-only) */}
         <div>
           <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-            Email
+            {t('settings.profile.email')}
           </label>
           <input
             type="email"
@@ -130,13 +132,13 @@ export function ProfileSettings() {
             disabled
             className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-surface0 text-ctp-subtext0 cursor-not-allowed"
           />
-          <p className="mt-1 text-xs text-ctp-subtext0">L'email ne peut pas etre modifie</p>
+          <p className="mt-1 text-xs text-ctp-subtext0">{t('settings.profile.emailCannotChange')}</p>
         </div>
 
         {/* Display Name */}
         <div>
           <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-            Nom d'affichage
+            {t('settings.profile.displayName')}
           </label>
           <input
             type="text"
@@ -145,7 +147,7 @@ export function ProfileSettings() {
               setFormData({ ...formData, displayName: e.target.value });
               setIsEditing(true);
             }}
-            placeholder="Votre nom"
+            placeholder={t('settings.profile.yourName')}
             className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
           />
         </div>
@@ -155,7 +157,7 @@ export function ProfileSettings() {
           <div className="flex items-center gap-2 mb-3">
             <Globe className="h-5 w-5 text-ctp-blue" />
             <label className="text-sm font-medium text-ctp-text">
-              Pays de residence fiscale
+              {t('settings.profile.taxResidenceCountry')}
             </label>
           </div>
 
@@ -189,17 +191,17 @@ export function ProfileSettings() {
               <div className="flex items-start gap-2">
                 <Info className="h-4 w-4 text-ctp-yellow mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-ctp-yellow">
-                  <p className="font-medium mb-1">Changement de pays</p>
+                  <p className="font-medium mb-1">{t('settings.profile.countryChange')}</p>
                   <p className="text-ctp-subtext0">
-                    Cela affectera les calculs fiscaux, les taux de TVA et les categories de deductions.
+                    {t('settings.profile.countryChangeDescription')}
                     {selectedCountry?.code === 'CH' && (
                       <span className="block mt-1">
-                        <strong>Suisse:</strong> TVA 8.1%, Pilier 3a, QR-facture
+                        <strong>{t('settings.profile.switzerland')}:</strong> TVA 8.1%, Pilier 3a, QR-facture
                       </span>
                     )}
                     {selectedCountry?.code === 'FR' && (
                       <span className="block mt-1">
-                        <strong>France:</strong> TVA 20%, Bareme progressif, SEPA
+                        <strong>{t('settings.profile.france')}:</strong> TVA 20%, Bareme progressif, SEPA
                       </span>
                     )}
                   </p>
@@ -212,7 +214,7 @@ export function ProfileSettings() {
         {/* Locale */}
         <div>
           <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-            Langue
+            {t('settings.profile.locale')}
           </label>
           <select
             value={formData.locale}
@@ -236,7 +238,7 @@ export function ProfileSettings() {
         {/* Timezone */}
         <div>
           <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-            Fuseau horaire
+            {t('settings.profile.timezone')}
           </label>
           <select
             value={formData.timezone}
@@ -259,7 +261,7 @@ export function ProfileSettings() {
         {/* Theme */}
         <div>
           <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-            Theme
+            {t('settings.profile.theme')}
           </label>
           <select
             value={formData.theme}
@@ -269,16 +271,16 @@ export function ProfileSettings() {
             }}
             className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
           >
-            <option value="system">Systeme</option>
-            <option value="light">Clair</option>
-            <option value="dark">Sombre</option>
+            <option value="system">{t('settings.profile.themeSystem')}</option>
+            <option value="light">{t('settings.profile.themeLight')}</option>
+            <option value="dark">{t('settings.profile.themeDark')}</option>
           </select>
         </div>
 
         {/* Account created */}
         <div className="pt-4 border-t border-ctp-surface1">
           <p className="text-sm text-ctp-subtext0">
-            Compte cree le{' '}
+            {t('settings.profile.accountCreatedOn')}{' '}
             {profile?.createdAt
               ? new Date(profile.createdAt).toLocaleDateString('fr-FR', {
                   day: 'numeric',
@@ -307,7 +309,7 @@ export function ProfileSettings() {
               }}
               className="px-4 py-2 text-sm font-medium text-ctp-subtext1 hover:bg-ctp-surface0 rounded-lg transition-colors"
             >
-              Annuler
+              {t('settings.profile.cancel')}
             </button>
             <button
               type="submit"
@@ -319,7 +321,7 @@ export function ProfileSettings() {
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              Enregistrer
+              {t('settings.profile.save')}
             </button>
           </div>
         )}

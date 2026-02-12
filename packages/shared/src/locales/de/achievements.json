@@ -1,0 +1,124 @@
+{
+  "title": "Erfolge",
+  "secretAchievement": "Geheimer Erfolg",
+  "unlocked": "Freigeschaltet",
+  "progress": "Fortschritt",
+  "xpReward": "{{xp}} XP",
+  "level": "Level {{level}}",
+  "levelUp": "Level aufgestiegen!",
+  "congratulations": "Herzlichen Gluckwunsch! Sie haben Level {{level}} erreicht!",
+  "categories": {
+    "onboarding": "Erste Schritte",
+    "transactions": "Transaktionen",
+    "budgeting": "Budgetierung",
+    "savings": "Sparen",
+    "streaks": "Serien",
+    "milestones": "Meilensteine"
+  },
+  "achievements": {
+    "first_steps": {
+      "name": "Erste Schritte",
+      "description": "Fugen Sie Ihre erste Transaktion hinzu"
+    },
+    "first_budget": {
+      "name": "Budget-Anfanger",
+      "description": "Erstellen Sie Ihr erstes Budget"
+    },
+    "first_goal": {
+      "name": "Ziel gesetzt",
+      "description": "Erstellen Sie Ihr erstes Sparziel"
+    },
+    "account_setup": {
+      "name": "Gut ausgestattet",
+      "description": "Fugen Sie 3 Konten hinzu"
+    },
+    "tracker_10": {
+      "name": "Regelmasiger Tracker",
+      "description": "Erfassen Sie 10 Transaktionen"
+    },
+    "tracker_50": {
+      "name": "Fleisiger Tracker",
+      "description": "Erfassen Sie 50 Transaktionen"
+    },
+    "tracker_100": {
+      "name": "Tracking-Meister",
+      "description": "Erfassen Sie 100 Transaktionen"
+    },
+    "tracker_500": {
+      "name": "Buchhaltungsexperte",
+      "description": "Erfassen Sie 500 Transaktionen"
+    },
+    "categorizer": {
+      "name": "Organisator",
+      "description": "Kategorisieren Sie 25 Transaktionen"
+    },
+    "budget_keeper": {
+      "name": "Budget-Halter",
+      "description": "Beenden Sie einen Monat unter dem Budget"
+    },
+    "budget_master_3": {
+      "name": "Disziplin",
+      "description": "Halten Sie Ihr Budget 3 aufeinanderfolgende Monate ein"
+    },
+    "budget_master_6": {
+      "name": "Budget-Meisterschaft",
+      "description": "Halten Sie Ihr Budget 6 aufeinanderfolgende Monate ein"
+    },
+    "multi_budget": {
+      "name": "Multi-Budget",
+      "description": "Verwalten Sie 5 Budgets gleichzeitig"
+    },
+    "saver_first": {
+      "name": "Erster Sparschritt",
+      "description": "Erreichen Sie 10% Ihres ersten Ziels"
+    },
+    "saver_half": {
+      "name": "Auf halbem Weg",
+      "description": "Erreichen Sie 50% eines Ziels"
+    },
+    "saver_complete": {
+      "name": "Ziel erreicht",
+      "description": "Schliessen Sie ein Sparziel ab"
+    },
+    "saver_3_goals": {
+      "name": "Dreifacher Erfolg",
+      "description": "Schliessen Sie 3 Sparziele ab"
+    },
+    "saver_1000": {
+      "name": "Tausend gespart",
+      "description": "Sparen Sie insgesamt 1.000 EUR"
+    },
+    "saver_10000": {
+      "name": "Zehntausend",
+      "description": "Sparen Sie insgesamt 10.000 EUR"
+    },
+    "streak_7": {
+      "name": "Aktive Woche",
+      "description": "7 aufeinanderfolgende Tage Aktivitat"
+    },
+    "streak_30": {
+      "name": "Voller Monat",
+      "description": "30 aufeinanderfolgende Tage Aktivitat"
+    },
+    "streak_100": {
+      "name": "Zenturio",
+      "description": "100 aufeinanderfolgende Tage Aktivitat"
+    },
+    "streak_365": {
+      "name": "Marathonlaufer",
+      "description": "365 aufeinanderfolgende Tage Aktivitat"
+    },
+    "night_owl": {
+      "name": "Nachteule",
+      "description": "Fugen Sie eine Transaktion nach Mitternacht hinzu"
+    },
+    "early_bird": {
+      "name": "Fruhaufsteher",
+      "description": "Fugen Sie eine Transaktion vor 6 Uhr hinzu"
+    },
+    "perfect_month": {
+      "name": "Perfekter Monat",
+      "description": "Kategorisieren Sie alle Transaktionen eines Monats"
+    }
+  }
+}

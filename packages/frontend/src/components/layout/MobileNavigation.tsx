@@ -5,6 +5,7 @@
 
 import { NavLink, useLocation } from 'react-router-dom';
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { clsx } from 'clsx';
 import {
   LayoutDashboard,
@@ -27,7 +28,7 @@ import {
 // ----------------------------------------------------------------------------
 
 interface NavItem {
-  name: string;
+  nameKey: string;
   href: string;
   icon: LucideIcon;
 }
@@ -44,18 +45,18 @@ interface MobileNavigationProps {
 // ----------------------------------------------------------------------------
 
 const mainNavItems: NavItem[] = [
-  { name: 'Accueil', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Transactions', href: '/transactions', icon: CreditCard },
-  { name: 'Comptes', href: '/accounts', icon: Landmark },
-  { name: 'Budgets', href: '/budgets', icon: TrendingUp },
+  { nameKey: 'mobile.home', href: '/dashboard', icon: LayoutDashboard },
+  { nameKey: 'navigation.transactions', href: '/transactions', icon: CreditCard },
+  { nameKey: 'navigation.accounts', href: '/accounts', icon: Landmark },
+  { nameKey: 'navigation.budgets', href: '/budgets', icon: TrendingUp },
 ];
 
 const moreNavItems: NavItem[] = [
-  { name: 'Epargne', href: '/savings', icon: Target },
-  { name: 'Investissements', href: '/portfolio', icon: LineChart },
-  { name: 'Documents', href: '/documents', icon: FileText },
-  { name: 'Recherche', href: '/search', icon: Search },
-  { name: 'Parametres', href: '/settings', icon: Settings },
+  { nameKey: 'navigation.savings', href: '/savings', icon: Target },
+  { nameKey: 'navigation.investments', href: '/portfolio', icon: LineChart },
+  { nameKey: 'navigation.documents', href: '/documents', icon: FileText },
+  { nameKey: 'navigation.search', href: '/search', icon: Search },
+  { nameKey: 'navigation.settings', href: '/settings', icon: Settings },
 ];
 
 // ----------------------------------------------------------------------------
@@ -63,6 +64,7 @@ const moreNavItems: NavItem[] = [
 // ----------------------------------------------------------------------------
 
 export function MobileNavigation({ onFabClick, className }: MobileNavigationProps) {
+  const { t } = useTranslation();
   const [showMore, setShowMore] = useState(false);
   const location = useLocation();
 
@@ -94,11 +96,11 @@ export function MobileNavigation({ onFabClick, className }: MobileNavigationProp
           <div className="fixed bottom-20 left-4 right-4 bg-ctp-surface0 border border-ctp-surface1 rounded-2xl shadow-lg z-50 lg:hidden safe-area-inset-bottom">
             <div className="p-2">
               <div className="flex items-center justify-between px-3 py-2 mb-1">
-                <span className="text-sm font-medium text-ctp-text">Plus</span>
+                <span className="text-sm font-medium text-ctp-text">{t('mobile.more')}</span>
                 <button
                   onClick={handleCloseMore}
                   className="p-1.5 rounded-lg text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface1 transition-colors"
-                  aria-label="Fermer"
+                  aria-label={t('common.close')}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -120,7 +122,7 @@ export function MobileNavigation({ onFabClick, className }: MobileNavigationProp
                   >
                     <item.icon className="w-5 h-5" />
                     <span className="text-xs font-medium truncate max-w-full">
-                      {item.name}
+                      {t(item.nameKey)}
                     </span>
                   </NavLink>
                 ))}
@@ -139,7 +141,7 @@ export function MobileNavigation({ onFabClick, className }: MobileNavigationProp
           className
         )}
         role="navigation"
-        aria-label="Navigation principale mobile"
+        aria-label={t('mobile.mainNavigation')}
       >
         <div className="flex items-center justify-around px-2 py-1">
           {/* Main nav items */}
@@ -166,7 +168,7 @@ export function MobileNavigation({ onFabClick, className }: MobileNavigationProp
                   >
                     <item.icon className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-medium">{item.name}</span>
+                  <span className="text-[10px] font-medium">{t(item.nameKey)}</span>
                 </>
               )}
             </NavLink>
@@ -185,7 +187,7 @@ export function MobileNavigation({ onFabClick, className }: MobileNavigationProp
                 : 'text-ctp-subtext0 hover:text-ctp-subtext1'
             )}
             aria-expanded={showMore}
-            aria-label="Plus d'options"
+            aria-label={t('mobile.moreOptions')}
           >
             <div
               className={clsx(
@@ -195,7 +197,7 @@ export function MobileNavigation({ onFabClick, className }: MobileNavigationProp
             >
               <Menu className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-medium">Plus</span>
+            <span className="text-[10px] font-medium">{t('mobile.more')}</span>
           </button>
         </div>
       </nav>
@@ -215,24 +217,25 @@ interface MobileFABProps {
 }
 
 function MobileFAB({ onClick }: MobileFABProps) {
+  const { t } = useTranslation();
   const location = useLocation();
 
   // Determine action based on current page
   const getAction = () => {
     if (location.pathname.includes('/transactions')) {
-      return { label: 'Nouvelle transaction', href: '/transactions?action=new' };
+      return { labelKey: 'mobile.newTransaction', href: '/transactions?action=new' };
     }
     if (location.pathname.includes('/accounts')) {
-      return { label: 'Nouveau compte', href: '/accounts?action=new' };
+      return { labelKey: 'mobile.newAccount', href: '/accounts?action=new' };
     }
     if (location.pathname.includes('/budgets')) {
-      return { label: 'Nouveau budget', href: '/budgets?action=new' };
+      return { labelKey: 'mobile.newBudget', href: '/budgets?action=new' };
     }
     if (location.pathname.includes('/documents')) {
-      return { label: 'Nouveau document', href: '/documents?action=new' };
+      return { labelKey: 'mobile.newDocument', href: '/documents?action=new' };
     }
     // Default action
-    return { label: 'Nouvelle transaction', href: '/transactions?action=new' };
+    return { labelKey: 'mobile.newTransaction', href: '/transactions?action=new' };
   };
 
   const action = getAction();
@@ -259,7 +262,7 @@ function MobileFAB({ onClick }: MobileFABProps) {
         'transition-all duration-200',
         'touch-target'
       )}
-      aria-label={action.label}
+      aria-label={t(action.labelKey)}
     >
       <Plus className="w-6 h-6" />
     </button>
@@ -279,12 +282,13 @@ export function MobileNavigationWithExpandedFAB({
   onFabClick,
   className,
 }: MobileNavigationWithFABProps) {
+  const { t } = useTranslation();
   const [fabExpanded, setFabExpanded] = useState(false);
 
   const quickActions = [
-    { name: 'Transaction', href: '/transactions?action=new', icon: CreditCard },
-    { name: 'Compte', href: '/accounts?action=new', icon: Landmark },
-    { name: 'Document', href: '/documents?action=new', icon: FileText },
+    { nameKey: 'mobile.transaction', href: '/transactions?action=new', icon: CreditCard },
+    { nameKey: 'mobile.account', href: '/accounts?action=new', icon: Landmark },
+    { nameKey: 'mobile.document', href: '/documents?action=new', icon: FileText },
   ];
 
   return (
@@ -310,7 +314,7 @@ export function MobileNavigationWithExpandedFAB({
             >
               <action.icon className="w-4 h-4 text-ctp-blue" />
               <span className="text-sm font-medium text-ctp-text">
-                {action.name}
+                {t(action.nameKey)}
               </span>
             </NavLink>
           ))}

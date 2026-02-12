@@ -6,6 +6,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Bell, Check, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -16,6 +17,7 @@ import { NotificationList } from './NotificationList';
 // ----------------------------------------------------------------------------
 
 export function NotificationBell() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -54,8 +56,8 @@ export function NotificationBell() {
   }, []);
 
   const bellLabel = unreadCount > 0
-    ? `Notifications (${unreadCount} non lue${unreadCount > 1 ? 's' : ''})`
-    : 'Notifications';
+    ? `${t('notifications.title')} (${t('notifications.unreadCount', { count: unreadCount })})`
+    : t('notifications.title');
 
   return (
     <div ref={containerRef} className="relative">
@@ -96,7 +98,7 @@ export function NotificationBell() {
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-ctp-surface1">
             <h3 className="font-medium text-ctp-text" id="notification-panel-title">
-              Notifications
+              {t('notifications.title')}
             </h3>
             {unreadCount > 0 && (
               <button
@@ -111,7 +113,7 @@ export function NotificationBell() {
                 ) : (
                   <Check className="h-3 w-3" aria-hidden="true" />
                 )}
-                <span>Tout marquer comme lu</span>
+                <span>{t('notifications.markAllRead')}</span>
               </button>
             )}
           </div>
@@ -127,7 +129,7 @@ export function NotificationBell() {
               href="/settings/notifications"
               className="text-xs text-ctp-subtext0 hover:text-ctp-text"
             >
-              Gérer les paramètres de notification
+              {t('notifications.manageSettings')}
             </a>
           </div>
         </div>

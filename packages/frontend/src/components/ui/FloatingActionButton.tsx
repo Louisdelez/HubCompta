@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -35,6 +36,7 @@ export function FloatingActionButton({
   mainColor = 'bg-ctp-blue hover:bg-ctp-sapphire',
   mainLabel,
 }: FloatingActionButtonProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleAction = (action: FloatingAction) => {
@@ -62,7 +64,7 @@ export function FloatingActionButton({
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-40" role="group" aria-label="Actions rapides">
+    <div className="fixed bottom-6 right-6 z-40" role="group" aria-label={t('mobile.quickActions')}>
       {/* Backdrop */}
       {isOpen && (
         <div
@@ -120,7 +122,7 @@ export function FloatingActionButton({
           mainColor,
           isOpen && 'rotate-45'
         )}
-        aria-label={mainLabel ?? (isOpen ? 'Fermer le menu actions' : 'Ouvrir le menu actions')}
+        aria-label={mainLabel ?? (isOpen ? t('mobile.closeActionsMenu') : t('mobile.openActionsMenu'))}
         aria-expanded={isOpen}
         aria-haspopup="menu"
       >

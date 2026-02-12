@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { User, Users, Home, Building2, Folder, Plus } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
@@ -38,11 +39,11 @@ const WORKSPACE_ICONS: Record<Workspace['type'], typeof User> = {
   company: Building2,
 };
 
-const WORKSPACE_LABELS: Record<Workspace['type'], string> = {
-  personal: 'Personnel',
-  family: 'Famille',
-  flatshare: 'Colocation',
-  company: 'Entreprise',
+const WORKSPACE_LABEL_KEYS: Record<Workspace['type'], string> = {
+  personal: 'workspaces.types.personal',
+  family: 'workspaces.types.family',
+  flatshare: 'workspaces.types.flatshare',
+  company: 'workspaces.types.company',
 };
 
 // ----------------------------------------------------------------------------
@@ -54,6 +55,7 @@ export function WorkspaceSelector({
   onSelect,
   onCreateNew,
 }: WorkspaceSelectorProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const { data: workspaces, isLoading } = useQuery({
@@ -80,8 +82,8 @@ export function WorkspaceSelector({
         )}
         <span className="flex-1 text-left truncate">
           {isLoading
-            ? 'Chargement...'
-            : currentWorkspace?.name ?? 'Sélectionner un espace'}
+            ? t('workspaces.selector.loading')
+            : currentWorkspace?.name ?? t('workspaces.selector.selectWorkspace')}
         </span>
         <svg
           className={clsx(
@@ -132,8 +134,7 @@ export function WorkspaceSelector({
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{workspace.name}</p>
                   <p className="text-xs text-ctp-subtext0">
-                    {WORKSPACE_LABELS[workspace.type]} • {workspace.memberCount} membre
-                    {workspace.memberCount > 1 ? 's' : ''}
+                    {t(WORKSPACE_LABEL_KEYS[workspace.type])} • {t('workspaces.selector.memberCount', { count: workspace.memberCount })}
                   </p>
                 </div>
                 {workspace.id === currentWorkspaceId && (
@@ -161,7 +162,7 @@ export function WorkspaceSelector({
                 className="w-full flex items-center gap-3 px-3 py-2 text-left text-ctp-blue hover:bg-ctp-surface0"
               >
                 <Plus className="w-5 h-5" />
-                <span>Créer un espace</span>
+                <span>{t('workspaces.selector.createNew')}</span>
               </button>
             </div>
           </div>

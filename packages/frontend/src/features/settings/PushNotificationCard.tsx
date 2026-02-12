@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Bell,
   BellOff,
@@ -22,6 +23,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 // ----------------------------------------------------------------------------
 
 export function PushNotificationCard() {
+  const { t } = useTranslation();
   const {
     isSupported,
     permission,
@@ -63,7 +65,7 @@ export function PushNotificationCard() {
       setTestSent(true);
       setTimeout(() => setTestSent(false), 3000);
     } else {
-      setTestError('Erreur lors de l\'envoi');
+      setTestError(t('settings.notifications.push.testError'));
       setTimeout(() => setTestError(null), 3000);
     }
   };
@@ -78,10 +80,10 @@ export function PushNotificationCard() {
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-medium text-ctp-text">
-              Notifications push
+              {t('settings.notifications.push.title')}
             </h3>
             <p className="text-xs text-ctp-subtext0">
-              Les notifications push ne sont pas supportees sur ce navigateur
+              {t('settings.notifications.push.notSupported')}
             </p>
           </div>
         </div>
@@ -99,10 +101,10 @@ export function PushNotificationCard() {
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-medium text-ctp-text">
-              Notifications push
+              {t('settings.notifications.push.title')}
             </h3>
             <p className="text-xs text-ctp-subtext0">
-              Le service de notifications push n'est pas configure sur le serveur
+              {t('settings.notifications.push.notConfigured')}
             </p>
           </div>
         </div>
@@ -120,11 +122,10 @@ export function PushNotificationCard() {
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-medium text-ctp-text">
-              Notifications push bloquees
+              {t('settings.notifications.push.blocked')}
             </h3>
             <p className="text-xs text-ctp-subtext0 mt-1">
-              Les notifications sont bloquees dans les parametres de votre navigateur.
-              Pour les activer, modifiez les permissions du site dans les parametres de votre navigateur.
+              {t('settings.notifications.push.blockedDescription')}
             </p>
           </div>
         </div>
@@ -143,10 +144,10 @@ export function PushNotificationCard() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-ctp-text">
-                Notifications push
+                {t('settings.notifications.push.title')}
               </h2>
               <p className="text-sm text-ctp-subtext0">
-                Recevez des alertes sur cet appareil
+                {t('settings.notifications.push.receiveAlerts')}
               </p>
             </div>
           </div>
@@ -172,14 +173,14 @@ export function PushNotificationCard() {
           {/* Status */}
           <div className="flex items-center gap-2 text-sm text-ctp-green">
             <CheckCircle2 className="h-4 w-4" />
-            <span>Notifications actives sur {subscriptions.length} appareil(s)</span>
+            <span>{t('settings.notifications.push.activeOn', { count: subscriptions.length })}</span>
           </div>
 
           {/* Device List */}
           {subscriptions.length > 0 && (
             <div className="space-y-2">
               <h4 className="text-xs font-medium text-ctp-subtext0 uppercase tracking-wider">
-                Appareils enregistres
+                {t('settings.notifications.push.registeredDevices')}
               </h4>
               <div className="space-y-2">
                 {subscriptions.map((sub) => (
@@ -191,11 +192,11 @@ export function PushNotificationCard() {
                       <Smartphone className="h-4 w-4 text-ctp-subtext0" />
                       <div>
                         <p className="text-sm font-medium text-ctp-text">
-                          {sub.deviceName ?? 'Appareil inconnu'}
+                          {sub.deviceName ?? t('settings.notifications.push.unknownDevice')}
                         </p>
                         {sub.lastUsedAt && (
                           <p className="text-xs text-ctp-subtext0">
-                            Derniere utilisation: {new Date(sub.lastUsedAt).toLocaleDateString('fr-FR')}
+                            {t('settings.notifications.push.lastUsed')}: {new Date(sub.lastUsedAt).toLocaleDateString()}
                           </p>
                         )}
                       </div>
@@ -204,7 +205,7 @@ export function PushNotificationCard() {
                       onClick={() => unsubscribeDevice(sub.id)}
                       disabled={isUnsubscribing}
                       className="p-2 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1 rounded-lg transition-colors disabled:opacity-50"
-                      title="Supprimer cet appareil"
+                      title={t('settings.notifications.push.deleteDevice')}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -228,7 +229,7 @@ export function PushNotificationCard() {
               ) : (
                 <Send className="h-4 w-4" />
               )}
-              {testSent ? 'Notification envoyee !' : 'Envoyer une notification test'}
+              {testSent ? t('settings.notifications.push.testSent') : t('settings.notifications.push.sendTest')}
             </button>
             {testError && (
               <p className="mt-2 text-xs text-ctp-red">{testError}</p>

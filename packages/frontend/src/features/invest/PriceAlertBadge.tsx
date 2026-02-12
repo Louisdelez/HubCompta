@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Bell } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useWorkspace } from '@/hooks/useWorkspace';
@@ -38,6 +39,7 @@ export function PriceAlertBadge({
   showCount = true,
   className,
 }: PriceAlertBadgeProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
 
   const { data: alerts } = useQuery({
@@ -80,10 +82,10 @@ export function PriceAlertBadge({
   const countBgColor = hasTriggered ? 'bg-ctp-yellow' : 'bg-ctp-blue';
 
   const title = activeCount > 0 && triggeredCount > 0
-    ? `${activeCount} alerte(s) active(s), ${triggeredCount} declenchee(s)`
+    ? t('invest.priceAlertBadge.activeAndTriggered', { active: activeCount, triggered: triggeredCount })
     : activeCount > 0
-      ? `${activeCount} alerte(s) active(s)`
-      : `${triggeredCount} alerte(s) declenchee(s)`;
+      ? t('invest.priceAlertBadge.activeAlerts', { count: activeCount })
+      : t('invest.priceAlertBadge.triggeredAlerts', { count: triggeredCount });
 
   return (
     <div className={cn('relative inline-flex', className)} title={title}>
@@ -128,6 +130,8 @@ export function StaticPriceAlertBadge({
   size = 'sm',
   className,
 }: StaticPriceAlertBadgeProps) {
+  const { t } = useTranslation();
+
   if (alertCount === 0) return null;
 
   const sizeClasses = {
@@ -148,7 +152,7 @@ export function StaticPriceAlertBadge({
   return (
     <div
       className={cn('relative inline-flex', className)}
-      title={`${alertCount} alerte(s)`}
+      title={t('invest.priceAlertBadge.alerts', { count: alertCount })}
     >
       <Bell className={cn(sizeClasses[size], iconColor)} />
       {alertCount > 1 && (

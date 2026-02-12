@@ -5,6 +5,8 @@
 
 import { prisma } from '@/core/database/client.js';
 import { notificationService } from '../notifications/notification.service.js';
+import { getAchievementString, DEFAULT_LANGUAGE } from '@/core/i18n/index.js';
+import type { LanguageCode } from '@finance-hub/shared';
 
 // ----------------------------------------------------------------------------
 // Types
@@ -12,13 +14,51 @@ import { notificationService } from '../notifications/notification.service.js';
 
 export interface AchievementDefinition {
   code: string;
-  name: string;
-  description: string;
   icon: string;
   category: 'onboarding' | 'transactions' | 'budgeting' | 'savings' | 'streaks' | 'milestones';
   threshold: number;
   xpReward: number;
   isSecret?: boolean;
+}
+
+/**
+ * Helper to extract locale code from user locale string (e.g., "fr-FR" -> "fr")
+ */
+function extractLanguageCode(locale: string): LanguageCode {
+  const langCode = locale.split('-')[0]?.toLowerCase() ?? 'en';
+  // Validate it's a supported language, otherwise fall back to default
+  const supportedLocales: LanguageCode[] = ['en', 'fr', 'de', 'es', 'it', 'pt', 'nl', 'pl', 'ro', 'ru'];
+  return supportedLocales.includes(langCode as LanguageCode) ? (langCode as LanguageCode) : DEFAULT_LANGUAGE;
+}
+
+/**
+ * Get user's locale from their profile
+ */
+async function getUserLocale(userId: string): Promise<LanguageCode> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { locale: true },
+    });
+    return extractLanguageCode(user?.locale ?? 'en');
+  } catch {
+    // Fallback to default language if user lookup fails (e.g., in tests)
+    return DEFAULT_LANGUAGE;
+  }
+}
+
+/**
+ * Get achievement name translated
+ */
+function getAchievementName(locale: LanguageCode, code: string): string {
+  return getAchievementString(locale, `achievements.${code}.name`);
+}
+
+/**
+ * Get achievement description translated
+ */
+function getAchievementDescription(locale: LanguageCode, code: string): string {
+  return getAchievementString(locale, `achievements.${code}.description`);
 }
 
 export interface UserAchievementWithDetails {
@@ -56,42 +96,42 @@ export interface UserStatsWithLevel {
 
 const ACHIEVEMENTS: AchievementDefinition[] = [
   // Onboarding
-  { code: 'first_steps', name: 'Premiers Pas', description: 'Ajoutez votre premiere transaction', icon: '👣', category: 'onboarding', threshold: 1, xpReward: 50 },
-  { code: 'first_budget', name: 'Budgeteur Debutant', description: 'Creez votre premier budget', icon: '📊', category: 'onboarding', threshold: 1, xpReward: 100 },
-  { code: 'first_goal', name: 'Objectif Fixe', description: "Creez votre premier objectif d'epargne", icon: '🎯', category: 'onboarding', threshold: 1, xpReward: 100 },
-  { code: 'account_setup', name: 'Bien Equipe', description: 'Ajoutez 3 comptes', icon: '🏦', category: 'onboarding', threshold: 3, xpReward: 75 },
+  { code: 'first_steps', icon: '👣', category: 'onboarding', threshold: 1, xpReward: 50 },
+  { code: 'first_budget', icon: '📊', category: 'onboarding', threshold: 1, xpReward: 100 },
+  { code: 'first_goal', icon: '🎯', category: 'onboarding', threshold: 1, xpReward: 100 },
+  { code: 'account_setup', icon: '🏦', category: 'onboarding', threshold: 3, xpReward: 75 },
 
   // Transactions
-  { code: 'tracker_10', name: 'Suivi Regulier', description: 'Enregistrez 10 transactions', icon: '📝', category: 'transactions', threshold: 10, xpReward: 50 },
-  { code: 'tracker_50', name: 'Traceur Assidu', description: 'Enregistrez 50 transactions', icon: '📋', category: 'transactions', threshold: 50, xpReward: 150 },
-  { code: 'tracker_100', name: 'Maitre du Suivi', description: 'Enregistrez 100 transactions', icon: '📚', category: 'transactions', threshold: 100, xpReward: 300 },
-  { code: 'tracker_500', name: 'Expert Comptable', description: 'Enregistrez 500 transactions', icon: '🏆', category: 'transactions', threshold: 500, xpReward: 500 },
-  { code: 'categorizer', name: 'Organisateur', description: 'Categorisez 25 transactions', icon: '🗂️', category: 'transactions', threshold: 25, xpReward: 100 },
+  { code: 'tracker_10', icon: '📝', category: 'transactions', threshold: 10, xpReward: 50 },
+  { code: 'tracker_50', icon: '📋', category: 'transactions', threshold: 50, xpReward: 150 },
+  { code: 'tracker_100', icon: '📚', category: 'transactions', threshold: 100, xpReward: 300 },
+  { code: 'tracker_500', icon: '🏆', category: 'transactions', threshold: 500, xpReward: 500 },
+  { code: 'categorizer', icon: '🗂️', category: 'transactions', threshold: 25, xpReward: 100 },
 
   // Budgeting
-  { code: 'budget_keeper', name: 'Budget Respecte', description: 'Terminez un mois sous le budget', icon: '✅', category: 'budgeting', threshold: 1, xpReward: 200 },
-  { code: 'budget_master_3', name: 'Discipline', description: 'Respectez vos budgets 3 mois consecutifs', icon: '🏅', category: 'budgeting', threshold: 3, xpReward: 400 },
-  { code: 'budget_master_6', name: 'Maitrise Budgetaire', description: 'Respectez vos budgets 6 mois consecutifs', icon: '🥇', category: 'budgeting', threshold: 6, xpReward: 750 },
-  { code: 'multi_budget', name: 'Multi-Budgets', description: 'Gerez 5 budgets simultanement', icon: '📈', category: 'budgeting', threshold: 5, xpReward: 200 },
+  { code: 'budget_keeper', icon: '✅', category: 'budgeting', threshold: 1, xpReward: 200 },
+  { code: 'budget_master_3', icon: '🏅', category: 'budgeting', threshold: 3, xpReward: 400 },
+  { code: 'budget_master_6', icon: '🥇', category: 'budgeting', threshold: 6, xpReward: 750 },
+  { code: 'multi_budget', icon: '📈', category: 'budgeting', threshold: 5, xpReward: 200 },
 
   // Savings
-  { code: 'saver_first', name: 'Premier Pas Epargne', description: 'Atteignez 10% de votre premier objectif', icon: '🌱', category: 'savings', threshold: 10, xpReward: 50 },
-  { code: 'saver_half', name: 'Mi-Parcours', description: 'Atteignez 50% d\'un objectif', icon: '🌿', category: 'savings', threshold: 50, xpReward: 150 },
-  { code: 'saver_complete', name: 'Objectif Atteint', description: 'Completez un objectif d\'epargne', icon: '🌳', category: 'savings', threshold: 1, xpReward: 300 },
-  { code: 'saver_3_goals', name: 'Triple Succes', description: 'Completez 3 objectifs d\'epargne', icon: '🏆', category: 'savings', threshold: 3, xpReward: 500 },
-  { code: 'saver_1000', name: 'Millier Epargne', description: 'Epargnez 1000 EUR au total', icon: '💰', category: 'savings', threshold: 1000, xpReward: 250 },
-  { code: 'saver_10000', name: 'Dixieme de Millier', description: 'Epargnez 10000 EUR au total', icon: '💎', category: 'savings', threshold: 10000, xpReward: 1000 },
+  { code: 'saver_first', icon: '🌱', category: 'savings', threshold: 10, xpReward: 50 },
+  { code: 'saver_half', icon: '🌿', category: 'savings', threshold: 50, xpReward: 150 },
+  { code: 'saver_complete', icon: '🌳', category: 'savings', threshold: 1, xpReward: 300 },
+  { code: 'saver_3_goals', icon: '🏆', category: 'savings', threshold: 3, xpReward: 500 },
+  { code: 'saver_1000', icon: '💰', category: 'savings', threshold: 1000, xpReward: 250 },
+  { code: 'saver_10000', icon: '💎', category: 'savings', threshold: 10000, xpReward: 1000 },
 
   // Streaks
-  { code: 'streak_7', name: 'Semaine Active', description: '7 jours consecutifs d\'activite', icon: '🔥', category: 'streaks', threshold: 7, xpReward: 100 },
-  { code: 'streak_30', name: 'Mois Complet', description: '30 jours consecutifs d\'activite', icon: '⚡', category: 'streaks', threshold: 30, xpReward: 300 },
-  { code: 'streak_100', name: 'Centenaire', description: '100 jours consecutifs d\'activite', icon: '🌟', category: 'streaks', threshold: 100, xpReward: 750 },
-  { code: 'streak_365', name: 'Marathonien', description: '365 jours consecutifs d\'activite', icon: '👑', category: 'streaks', threshold: 365, xpReward: 2000 },
+  { code: 'streak_7', icon: '🔥', category: 'streaks', threshold: 7, xpReward: 100 },
+  { code: 'streak_30', icon: '⚡', category: 'streaks', threshold: 30, xpReward: 300 },
+  { code: 'streak_100', icon: '🌟', category: 'streaks', threshold: 100, xpReward: 750 },
+  { code: 'streak_365', icon: '👑', category: 'streaks', threshold: 365, xpReward: 2000 },
 
   // Milestones (secret)
-  { code: 'night_owl', name: 'Hibou Nocturne', description: 'Ajoutez une transaction apres minuit', icon: '🦉', category: 'milestones', threshold: 1, xpReward: 50, isSecret: true },
-  { code: 'early_bird', name: 'Leve-Tot', description: 'Ajoutez une transaction avant 6h', icon: '🐦', category: 'milestones', threshold: 1, xpReward: 50, isSecret: true },
-  { code: 'perfect_month', name: 'Mois Parfait', description: 'Categorisez toutes les transactions du mois', icon: '✨', category: 'milestones', threshold: 1, xpReward: 200, isSecret: true },
+  { code: 'night_owl', icon: '🦉', category: 'milestones', threshold: 1, xpReward: 50, isSecret: true },
+  { code: 'early_bird', icon: '🐦', category: 'milestones', threshold: 1, xpReward: 50, isSecret: true },
+  { code: 'perfect_month', icon: '✨', category: 'milestones', threshold: 1, xpReward: 200, isSecret: true },
 ];
 
 // ----------------------------------------------------------------------------
@@ -137,17 +177,22 @@ function calculateLevelProgress(totalXp: number): { xpToNextLevel: number; level
 export const achievementService = {
   /**
    * Initialize achievements in database (run on startup)
+   * Stores English as the canonical language in the database
    */
   async initializeAchievements(): Promise<number> {
     let created = 0;
+    const defaultLocale: LanguageCode = 'en';
 
     for (const achievement of ACHIEVEMENTS) {
+      const name = getAchievementName(defaultLocale, achievement.code);
+      const description = getAchievementDescription(defaultLocale, achievement.code);
+
       await prisma.achievement.upsert({
         where: { code: achievement.code },
         create: {
           code: achievement.code,
-          name: achievement.name,
-          description: achievement.description,
+          name,
+          description,
           icon: achievement.icon,
           category: achievement.category,
           threshold: achievement.threshold,
@@ -155,8 +200,8 @@ export const achievementService = {
           isSecret: achievement.isSecret ?? false,
         },
         update: {
-          name: achievement.name,
-          description: achievement.description,
+          name,
+          description,
           icon: achievement.icon,
           category: achievement.category,
           threshold: achievement.threshold,
@@ -201,9 +246,12 @@ export const achievementService = {
   },
 
   /**
-   * Get user achievements with progress
+   * Get user achievements with progress (translated to user's locale)
    */
   async getUserAchievements(userId: string): Promise<UserAchievementWithDetails[]> {
+    // Get user's locale for translations
+    const locale = await getUserLocale(userId);
+
     const allAchievements = await prisma.achievement.findMany({
       orderBy: [{ category: 'asc' }, { threshold: 'asc' }],
     });
@@ -227,7 +275,7 @@ export const achievementService = {
           achievementId: a.id,
           code: a.code,
           name: '???',
-          description: 'Achievement secret',
+          description: getAchievementString(locale, 'secretAchievement'),
           icon: '❓',
           category: a.category,
           threshold: a.threshold,
@@ -239,12 +287,16 @@ export const achievementService = {
         };
       }
 
+      // Get translated name and description
+      const translatedName = getAchievementName(locale, a.code);
+      const translatedDescription = getAchievementDescription(locale, a.code);
+
       return {
         id: userAchievement?.id ?? '',
         achievementId: a.id,
         code: a.code,
-        name: a.name,
-        description: a.description,
+        name: translatedName,
+        description: translatedDescription,
         icon: a.icon,
         category: a.category,
         threshold: a.threshold,
@@ -315,12 +367,18 @@ export const achievementService = {
       // Award XP
       await this.awardXp(userId, achievement.xpReward);
 
-      // Send notification
+      // Get user's locale for translated notification
+      const locale = await getUserLocale(userId);
+      const translatedName = getAchievementName(locale, achievement.code);
+      const translatedDescription = getAchievementDescription(locale, achievement.code);
+      const unlockedText = getAchievementString(locale, 'unlocked');
+
+      // Send notification with translated content
       await notificationService.create({
         userId,
         type: 'goal_achieved',
-        title: `${achievement.icon} Achievement Debloque !`,
-        message: `Vous avez obtenu "${achievement.name}" - ${achievement.description}`,
+        title: `${achievement.icon} ${unlockedText}!`,
+        message: `${translatedName} - ${translatedDescription}`,
         data: {
           achievementCode: achievement.code,
           xpReward: achievement.xpReward,
@@ -333,8 +391,8 @@ export const achievementService = {
           id: userAchievement.id,
           achievementId: achievement.id,
           code: achievement.code,
-          name: achievement.name,
-          description: achievement.description,
+          name: translatedName,
+          description: translatedDescription,
           icon: achievement.icon,
           category: achievement.category,
           threshold: achievement.threshold,
@@ -369,12 +427,17 @@ export const achievementService = {
         data: { level: newLevel },
       });
 
-      // Send level up notification
+      // Get user's locale for translated notification
+      const locale = await getUserLocale(userId);
+      const levelUpTitle = getAchievementString(locale, 'levelUp');
+      const congratsMessage = getAchievementString(locale, 'congratulations', { level: newLevel });
+
+      // Send level up notification with translated content
       await notificationService.create({
         userId,
         type: 'goal_achieved',
-        title: '🎉 Niveau Superieur !',
-        message: `Felicitations ! Vous avez atteint le niveau ${newLevel} !`,
+        title: `🎉 ${levelUpTitle}`,
+        message: congratsMessage,
         data: { level: newLevel },
       });
     }

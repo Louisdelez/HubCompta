@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Wallet,
@@ -45,6 +46,7 @@ function formatCurrency(amount: number): string {
 }
 
 export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showReallocate, setShowReallocate] = useState(false);
   const [sourceEnvelope, setSourceEnvelope] = useState<string | null>(null);
@@ -100,7 +102,7 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
     return (
       <div className="card p-8 text-center">
         <Loader2 className="w-8 h-8 mx-auto animate-spin text-ctp-blue mb-4" />
-        <p className="text-ctp-subtext0">Chargement des enveloppes...</p>
+        <p className="text-ctp-subtext0">{t('budgets.loadingEnvelopes')}</p>
       </div>
     );
   }
@@ -109,9 +111,9 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
     return (
       <div className="card p-8 text-center">
         <Wallet className="w-12 h-12 mx-auto text-ctp-overlay1 mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Mode Enveloppes</h3>
+        <h3 className="text-lg font-semibold mb-2">{t('budgets.envelopeModeTitle')}</h3>
         <p className="text-ctp-subtext0 mb-4">
-          Activez le mode enveloppes sur vos budgets pour voir cette vue.
+          {t('budgets.enableEnvelopeModeDescription')}
         </p>
       </div>
     );
@@ -125,26 +127,26 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
           <p className="text-2xl font-bold text-ctp-text">
             {formatCurrency(totalBudgeted)}
           </p>
-          <p className="text-sm text-ctp-subtext0">Budget total</p>
+          <p className="text-sm text-ctp-subtext0">{t('budgets.totalBudgeted')}</p>
         </div>
         <div className="card text-center">
           <p className="text-2xl font-bold text-ctp-blue">
             {formatCurrency(totalSpent)}
           </p>
-          <p className="text-sm text-ctp-subtext0">Depense</p>
+          <p className="text-sm text-ctp-subtext0">{t('budgets.spent')}</p>
         </div>
         <div className="card text-center">
           <p className="text-2xl font-bold text-ctp-green">
             {formatCurrency(totalAvailable)}
           </p>
-          <p className="text-sm text-ctp-subtext0">Disponible</p>
+          <p className="text-sm text-ctp-subtext0">{t('budgets.available')}</p>
         </div>
         {totalRollover > 0 && (
           <div className="card text-center">
             <p className="text-2xl font-bold text-ctp-mauve">
               {formatCurrency(totalRollover)}
             </p>
-            <p className="text-sm text-ctp-subtext0">Report</p>
+            <p className="text-sm text-ctp-subtext0">{t('budgets.rollover')}</p>
           </div>
         )}
       </div>
@@ -156,25 +158,25 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
           className="btn-secondary flex items-center gap-2"
         >
           <RefreshCcw className="w-4 h-4" />
-          Reallouer
+          {t('budgets.reallocate')}
         </button>
       </div>
 
       {/* Reallocate Modal */}
       {showReallocate && (
         <div className="card p-4 bg-ctp-surface0">
-          <h4 className="font-medium mb-4">Reallouer des fonds</h4>
+          <h4 className="font-medium mb-4">{t('budgets.reallocateFunds')}</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             <div>
               <label className="block text-sm text-ctp-subtext0 mb-1">
-                De l'enveloppe
+                {t('budgets.fromEnvelope')}
               </label>
               <select
                 value={sourceEnvelope ?? ''}
                 onChange={(e) => setSourceEnvelope(e.target.value || null)}
                 className="input-select w-full"
               >
-                <option value="">Selectionner...</option>
+                <option value="">{t('budgets.select')}</option>
                 {envelopes
                   .filter((e) => e.available > 0)
                   .map((e) => (
@@ -189,7 +191,7 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
             </div>
             <div>
               <label className="block text-sm text-ctp-subtext0 mb-1">
-                Vers l'enveloppe
+                {t('budgets.toEnvelope')}
               </label>
               <select
                 value={targetEnvelope ?? ''}
@@ -197,7 +199,7 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
                 className="input-select w-full"
                 disabled={!sourceEnvelope}
               >
-                <option value="">Selectionner...</option>
+                <option value="">{t('budgets.select')}</option>
                 {envelopes
                   .filter((e) => e.id !== sourceEnvelope)
                   .map((e) => (
@@ -211,7 +213,7 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
           <div className="mt-4 flex gap-4 items-end">
             <div className="flex-1">
               <label className="block text-sm text-ctp-subtext0 mb-1">
-                Montant
+                {t('budgets.amount')}
               </label>
               <input
                 type="number"
@@ -226,7 +228,7 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
               />
               {sourceEnvelope && maxTransferAmount > 0 && (
                 <p className="text-xs text-ctp-subtext0 mt-1">
-                  Max: {formatCurrency(maxTransferAmount)}
+                  {t('budgets.max')}: {formatCurrency(maxTransferAmount)}
                 </p>
               )}
             </div>
@@ -245,7 +247,7 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
               {reallocateMutation.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
               ) : null}
-              Transferer
+              {t('budgets.transfer')}
             </button>
           </div>
         </div>
@@ -326,7 +328,7 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
               {/* Stats */}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p className="text-ctp-subtext0">Disponible</p>
+                  <p className="text-ctp-subtext0">{t('budgets.available')}</p>
                   <p
                     className={clsx(
                       'font-medium',
@@ -342,7 +344,7 @@ export function EnvelopeOverview({ workspaceId }: EnvelopeOverviewProps) {
                   <div>
                     <p className="text-ctp-subtext0 flex items-center gap-1">
                       <TrendingUp className="w-3 h-3" />
-                      Report
+                      {t('budgets.rollover')}
                     </p>
                     <p className="font-medium text-ctp-mauve">
                       +{formatCurrency(envelope.rolloverAmount)}

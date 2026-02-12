@@ -1,0 +1,76 @@
+{
+  "greeting": "Hallo {{displayName}},",
+  "footer": "Deze e-mail is automatisch verzonden door HubCompta.",
+  "footerIgnore": "Als u deze e-mail niet heeft aangevraagd, kunt u deze veilig negeren.",
+  "welcome": {
+    "subject": "Welkom bij HubCompta!",
+    "title": "Welkom bij HubCompta",
+    "intro": "Welkom bij HubCompta! Uw account is succesvol aangemaakt.",
+    "body": "HubCompta helpt u bij het eenvoudig beheren van uw persoonlijke en zakelijke financiën:",
+    "features": {
+      "tracking": "Volg uw inkomsten en uitgaven",
+      "budgets": "Maak en beheer uw budgetten",
+      "reports": "Genereer gedetailleerde rapporten",
+      "invoicing": "Factureer uw klanten (Pro-modus)"
+    },
+    "cta": "Naar mijn dashboard",
+    "closing": "Tot snel op HubCompta!"
+  },
+  "passwordReset": {
+    "subject": "Stel uw HubCompta wachtwoord opnieuw in",
+    "title": "Wachtwoord Resetten",
+    "intro": "U heeft verzocht om uw wachtwoord opnieuw in te stellen.",
+    "body": "Klik op de onderstaande knop om een nieuw wachtwoord te kiezen:",
+    "cta": "Mijn wachtwoord resetten",
+    "expiry": "Belangrijk: Deze link verloopt over {{expiresIn}}.",
+    "ignoreNote": "Als u dit niet heeft aangevraagd, negeer dan deze e-mail. Uw wachtwoord blijft ongewijzigd."
+  },
+  "invoiceOverdue": {
+    "subject": "Factuur {{invoiceNumber}} achterstallig",
+    "title": "Achterstallige Factuur",
+    "alertTitle": "Factuur achterstallig",
+    "intro": "De volgende factuur is {{daysOverdue}} dag(en) achterstallig:",
+    "invoiceNumber": "Factuurnummer",
+    "client": "Klant",
+    "amount": "Bedrag",
+    "dueDate": "Vervaldatum",
+    "cta": "Factuur bekijken",
+    "recommendation": "Wij raden aan om contact op te nemen met uw klant voor betaling."
+  },
+  "budgetAlert": {
+    "subjectExceeded": "Budget \"{{budgetName}}\" overschreden",
+    "subjectWarning": "Budget \"{{budgetName}}\" op {{percentUsed}}%",
+    "titleExceeded": "Budget overschreden!",
+    "titleWarning": "Budget bijna bereikt",
+    "messageExceeded": "Uw budget \"{{budgetName}}\" is overschreden.",
+    "messageWarning": "Uw budget \"{{budgetName}}\" nadert de limiet.",
+    "budget": "Budget",
+    "category": "Categorie",
+    "spent": "Uitgegeven",
+    "limit": "Limiet",
+    "usage": "Gebruik",
+    "cta": "Budget bekijken"
+  },
+  "exportReady": {
+    "subject": "Uw {{exportType}} export is gereed",
+    "title": "Export Gereed",
+    "alertTitle": "Uw export is gereed!",
+    "intro": "Uw {{exportType}} export is nu beschikbaar om te downloaden.",
+    "exportType": "Exporttype",
+    "filename": "Bestand",
+    "expiresAt": "Verloopt op",
+    "cta": "Export downloaden",
+    "expiryNote": "Deze downloadlink verloopt op {{expiresAt}}."
+  },
+  "weeklySummary": {
+    "subject": "Wekelijks overzicht - {{weekStart}} tot {{weekEnd}}",
+    "title": "Wekelijks Overzicht",
+    "intro": "Hier is uw overzicht voor de week van {{weekStart}} tot {{weekEnd}}:",
+    "income": "Inkomsten",
+    "expenses": "Uitgaven",
+    "balance": "Saldo",
+    "topCategories": "Top uitgavencategorieën",
+    "budgetAlerts": "Budgetwaarschuwingen",
+    "cta": "Dashboard bekijken"
+  }
+}

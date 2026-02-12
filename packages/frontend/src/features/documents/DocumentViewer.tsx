@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Image, FileText, X, EyeOff, Eye, Download, Inbox, Link2, Archive, Lock } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -77,6 +78,7 @@ function formatCurrency(amount: number): string {
 // ----------------------------------------------------------------------------
 
 export function DocumentViewer({ workspaceId, document, onClose, onLink }: DocumentViewerProps) {
+  const { t } = useTranslation();
   const [showPreview, setShowPreview] = useState(false);
 
   // Fetch download URL
@@ -137,7 +139,7 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
                 onClick={() => setShowPreview(!showPreview)}
                 className="btn-secondary w-full"
               >
-                {showPreview ? <><EyeOff className="w-4 h-4 inline mr-2" />Masquer l'aperçu</> : <><Eye className="w-4 h-4 inline mr-2" />Afficher l'aperçu</>}
+                {showPreview ? <><EyeOff className="w-4 h-4 inline mr-2" />{t('documents.viewer.hidePreview')}</> : <><Eye className="w-4 h-4 inline mr-2" />{t('documents.viewer.showPreview')}</>}
               </button>
 
               {showPreview && (
@@ -165,27 +167,27 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
           {/* Metadata */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
-              <p className="text-sm text-ctp-subtext0">Ajouté le</p>
+              <p className="text-sm text-ctp-subtext0">{t('documents.viewer.addedOn')}</p>
               <p className="font-medium">{formatDate(document.createdAt)}</p>
             </div>
             <div>
-              <p className="text-sm text-ctp-subtext0">Par</p>
+              <p className="text-sm text-ctp-subtext0">{t('documents.viewer.by')}</p>
               <p className="font-medium">
                 {document.uploader.displayName || document.uploader.email}
               </p>
             </div>
             <div>
-              <p className="text-sm text-ctp-subtext0">Statut</p>
+              <p className="text-sm text-ctp-subtext0">{t('documents.viewer.status')}</p>
               <p className="font-medium flex items-center gap-1">
-                {document.status === 'inbox' && <><Inbox className="w-4 h-4" /> À traiter</>}
-                {document.status === 'linked' && <><Link2 className="w-4 h-4" /> Lié</>}
-                {document.status === 'archived' && <><Archive className="w-4 h-4" /> Archivé</>}
+                {document.status === 'inbox' && <><Inbox className="w-4 h-4" /> {t('documents.viewer.toProcess')}</>}
+                {document.status === 'linked' && <><Link2 className="w-4 h-4" /> {t('documents.viewer.linked')}</>}
+                {document.status === 'archived' && <><Archive className="w-4 h-4" /> {t('documents.viewer.archived')}</>}
               </p>
             </div>
             <div>
-              <p className="text-sm text-ctp-subtext0">Sécurité</p>
+              <p className="text-sm text-ctp-subtext0">{t('documents.viewer.security')}</p>
               <p className="font-medium flex items-center gap-1">
-                {document.isVault ? <><Lock className="w-4 h-4" /> Chiffré (Vault)</> : <><FileText className="w-4 h-4" /> Standard</>}
+                {document.isVault ? <><Lock className="w-4 h-4" /> {t('documents.viewer.encrypted')}</> : <><FileText className="w-4 h-4" /> {t('documents.viewer.standard')}</>}
               </p>
             </div>
           </div>
@@ -193,9 +195,9 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
           {/* Linked Transactions */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold">Transactions liées</h3>
+              <h3 className="font-semibold">{t('documents.viewer.linkedTransactions')}</h3>
               <button onClick={onLink} className="text-sm text-ctp-blue hover:underline">
-                + Ajouter
+                {t('documents.viewer.add')}
               </button>
             </div>
 
@@ -224,9 +226,9 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
               </div>
             ) : (
               <div className="text-center py-6 bg-ctp-surface0 rounded-lg">
-                <p className="text-ctp-subtext0 mb-2">Aucune transaction liée</p>
+                <p className="text-ctp-subtext0 mb-2">{t('documents.viewer.noLinkedTransaction')}</p>
                 <button onClick={onLink} className="btn-primary text-sm">
-                  Lier à une transaction
+                  {t('documents.viewer.linkToTransaction')}
                 </button>
               </div>
             )}
@@ -235,14 +237,14 @@ export function DocumentViewer({ workspaceId, document, onClose, onLink }: Docum
           {/* Actions */}
           <div className="flex gap-3">
             <button onClick={onClose} className="btn-secondary flex-1">
-              Fermer
+              {t('documents.viewer.close')}
             </button>
             <button
               onClick={handleDownload}
               disabled={isLoadingUrl}
               className="btn-primary flex-1"
             >
-              {isLoadingUrl ? 'Chargement...' : <><Download className="w-4 h-4 inline mr-2" />Télécharger</>}
+              {isLoadingUrl ? t('documents.viewer.loading') : <><Download className="w-4 h-4 inline mr-2" />{t('documents.viewer.download')}</>}
             </button>
           </div>
         </div>

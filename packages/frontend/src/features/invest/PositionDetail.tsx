@@ -5,9 +5,10 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import {
   ArrowLeft,
   TrendingUp,
@@ -96,6 +97,8 @@ interface PositionDetailProps {
 // ----------------------------------------------------------------------------
 
 export function PositionDetail({ positionId, onBack, onAddTransaction }: PositionDetailProps) {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'fr' ? fr : enUS;
   const { currentWorkspace } = useWorkspace();
   const queryClient = useQueryClient();
   // Note: These state variables are prepared for future transaction modal implementation
@@ -162,11 +165,11 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
   const getTransactionLabel = (type: string) => {
     switch (type) {
       case 'buy':
-        return 'Achat';
+        return t('invest.addTransaction.buy');
       case 'sell':
-        return 'Vente';
+        return t('invest.addTransaction.sell');
       case 'dividend':
-        return 'Dividende';
+        return t('invest.addTransaction.dividend');
       default:
         return type;
     }
@@ -189,9 +192,9 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
   if (!position) {
     return (
       <div className="text-center py-12">
-        <p className="text-ctp-subtext0">Position introuvable</p>
+        <p className="text-ctp-subtext0">{t('invest.positionDetail.notFound')}</p>
         <button onClick={onBack} className="mt-4 text-ctp-blue hover:text-ctp-blue/80">
-          Retour
+          {t('invest.positionDetail.back')}
         </button>
       </div>
     );
@@ -224,21 +227,21 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
             className="px-3 py-2 text-ctp-subtext0 bg-ctp-surface0 rounded-lg hover:bg-ctp-surface1 flex items-center gap-2"
           >
             <RefreshCw className={cn('h-4 w-4', refreshMutation.isPending && 'animate-spin')} />
-            Actualiser
+            {t('invest.portfolio.refresh')}
           </button>
           <button
             onClick={() => setShowPriceAlertModal(true)}
             className="px-3 py-2 text-ctp-subtext0 bg-ctp-surface0 rounded-lg hover:bg-ctp-surface1 flex items-center gap-2"
           >
             <Bell className="h-4 w-4" />
-            Definir une alerte
+            {t('invest.positionDetail.setAlert')}
           </button>
           <button
             onClick={onAddTransaction}
             className="px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg hover:bg-ctp-blue/90 flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            Transaction
+            {t('invest.positionDetail.transaction')}
           </button>
         </div>
       </div>
@@ -247,16 +250,16 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Current value */}
         <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
-          <p className="text-sm text-ctp-subtext0">Valeur actuelle</p>
+          <p className="text-sm text-ctp-subtext0">{t('invest.positionDetail.currentValue')}</p>
           <p className="text-2xl font-semibold text-ctp-text">
             {formatCurrency(position.currentValue, 'EUR')}
           </p>
           {position.asset.lastPrice && (
             <p className="text-xs text-ctp-overlay1 mt-1">
-              Prix: {formatCurrency(position.asset.lastPrice, position.asset.currency)}
+              {t('invest.positions.currentPrice')}: {formatCurrency(position.asset.lastPrice, position.asset.currency)}
               {position.asset.lastPriceAt && (
                 <span className="ml-1">
-                  ({format(new Date(position.asset.lastPriceAt), 'HH:mm', { locale: fr })})
+                  ({format(new Date(position.asset.lastPriceAt), 'HH:mm', { locale: dateLocale })})
                 </span>
               )}
             </p>
@@ -265,7 +268,7 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
 
         {/* Quantity */}
         <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
-          <p className="text-sm text-ctp-subtext0">Quantité</p>
+          <p className="text-sm text-ctp-subtext0">{t('invest.positions.quantity')}</p>
           <p className="text-2xl font-semibold text-ctp-text">{formatNumber(position.quantity)}</p>
           <p className="text-xs text-ctp-overlay1 mt-1">
             PRU: {formatCurrency(position.averageCost, position.asset.currency)}
@@ -274,7 +277,7 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
 
         {/* Unrealized P&L */}
         <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
-          <p className="text-sm text-ctp-subtext0">P&L latent</p>
+          <p className="text-sm text-ctp-subtext0">{t('invest.positionDetail.latentPL')}</p>
           <p className={cn('text-2xl font-semibold', getPnLColor(position.unrealizedPnL))}>
             {position.unrealizedPnL >= 0 ? '+' : ''}
             {formatCurrency(position.unrealizedPnL, 'EUR')}
@@ -294,13 +297,13 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
 
         {/* Realized P&L */}
         <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
-          <p className="text-sm text-ctp-subtext0">P&L réalisé</p>
+          <p className="text-sm text-ctp-subtext0">{t('invest.portfolio.realizedPL')}</p>
           <p className={cn('text-2xl font-semibold', getPnLColor(position.realizedPnL))}>
             {position.realizedPnL >= 0 ? '+' : ''}
             {formatCurrency(position.realizedPnL, 'EUR')}
           </p>
           <p className="text-xs text-ctp-overlay1 mt-1">
-            Coût total: {formatCurrency(position.totalCost, 'EUR')}
+            {t('invest.positionDetail.totalCost')}: {formatCurrency(position.totalCost, 'EUR')}
           </p>
         </div>
       </div>
@@ -309,31 +312,31 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Asset info */}
         <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-ctp-subtext1 mb-3">Informations de l'actif</h3>
+          <h3 className="text-sm font-medium text-ctp-subtext1 mb-3">{t('invest.positionDetail.assetInfo')}</h3>
           <dl className="space-y-2">
             <div className="flex justify-between">
-              <dt className="text-sm text-ctp-subtext0">Type</dt>
+              <dt className="text-sm text-ctp-subtext0">{t('invest.positionDetail.type')}</dt>
               <dd className="text-sm font-medium text-ctp-text">
-                {position.asset.type === 'stock' && 'Action'}
-                {position.asset.type === 'etf' && 'ETF'}
-                {position.asset.type === 'crypto' && 'Crypto-monnaie'}
-                {position.asset.type === 'bond' && 'Obligation'}
+                {position.asset.type === 'stock' && t('invest.assetSearch.types.stock')}
+                {position.asset.type === 'etf' && t('invest.assetSearch.types.etf')}
+                {position.asset.type === 'crypto' && t('invest.assetSearch.types.crypto')}
+                {position.asset.type === 'bond' && t('invest.assetSearch.types.bond')}
               </dd>
             </div>
             {position.asset.exchange && (
               <div className="flex justify-between">
-                <dt className="text-sm text-ctp-subtext0">Bourse</dt>
+                <dt className="text-sm text-ctp-subtext0">{t('invest.positionDetail.exchange')}</dt>
                 <dd className="text-sm font-medium text-ctp-text">{position.asset.exchange}</dd>
               </div>
             )}
             <div className="flex justify-between">
-              <dt className="text-sm text-ctp-subtext0">Devise</dt>
+              <dt className="text-sm text-ctp-subtext0">{t('invest.positionDetail.currency')}</dt>
               <dd className="text-sm font-medium text-ctp-text">{position.asset.currency}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-sm text-ctp-subtext0">Position ouverte le</dt>
+              <dt className="text-sm text-ctp-subtext0">{t('invest.positionDetail.openedOn')}</dt>
               <dd className="text-sm font-medium text-ctp-text">
-                {format(new Date(position.openedAt), 'dd/MM/yyyy', { locale: fr })}
+                {format(new Date(position.openedAt), 'dd/MM/yyyy', { locale: dateLocale })}
               </dd>
             </div>
           </dl>
@@ -346,7 +349,7 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
               rel="noopener noreferrer"
               className="text-sm text-ctp-blue hover:text-ctp-blue/80 flex items-center gap-1"
             >
-              Voir sur Yahoo Finance
+              {t('invest.positionDetail.viewOnYahoo')}
               <ExternalLink className="h-3 w-3" />
             </a>
           </div>
@@ -355,8 +358,8 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
         {/* Transaction history */}
         <div className="bg-ctp-mantle border border-ctp-surface1 rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-ctp-subtext1">Historique des transactions</h3>
-            <span className="text-xs text-ctp-overlay1">{position.transactions?.length || 0} transactions</span>
+            <h3 className="text-sm font-medium text-ctp-subtext1">{t('invest.positionDetail.transactions')}</h3>
+            <span className="text-xs text-ctp-overlay1">{position.transactions?.length || 0} {t('transactions.title').toLowerCase()}</span>
           </div>
 
           {position.transactions && position.transactions.length > 0 ? (
@@ -373,7 +376,7 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
                         {getTransactionLabel(tx.type)}
                       </p>
                       <p className="text-xs text-ctp-subtext0">
-                        {format(new Date(tx.date), 'dd/MM/yyyy', { locale: fr })}
+                        {format(new Date(tx.date), 'dd/MM/yyyy', { locale: dateLocale })}
                       </p>
                     </div>
                   </div>
@@ -383,7 +386,7 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
                     </p>
                     <p className="text-xs text-ctp-subtext0">
                       {formatCurrency(tx.quantity * tx.price + tx.fees, 'EUR')}
-                      {tx.fees > 0 && ` (frais: ${formatCurrency(tx.fees, 'EUR')})`}
+                      {tx.fees > 0 && ` (${t('invest.addPosition.fees').toLowerCase()}: ${formatCurrency(tx.fees, 'EUR')})`}
                     </p>
                   </div>
                 </div>
@@ -392,7 +395,7 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
           ) : (
             <div className="text-center py-8 text-ctp-subtext0">
               <Calendar className="h-8 w-8 mx-auto text-ctp-overlay1 mb-2" />
-              <p className="text-sm">Aucune transaction</p>
+              <p className="text-sm">{t('invest.positionDetail.noTransactions')}</p>
             </div>
           )}
         </div>
@@ -403,14 +406,14 @@ export function PositionDetail({ positionId, onBack, onAddTransaction }: Positio
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Bell className="h-4 w-4 text-ctp-blue" />
-            <h3 className="text-sm font-medium text-ctp-subtext1">Alertes de prix</h3>
+            <h3 className="text-sm font-medium text-ctp-subtext1">{t('invest.priceAlertList.title')}</h3>
           </div>
           <button
             onClick={() => setShowPriceAlertModal(true)}
             className="text-xs text-ctp-blue hover:text-ctp-blue/80 flex items-center gap-1"
           >
             <Plus className="h-3 w-3" />
-            Ajouter
+            {t('invest.positionDetail.addAlert')}
           </button>
         </div>
         <PriceAlertList positionId={position.id} compact />

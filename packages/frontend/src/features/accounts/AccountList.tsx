@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Landmark, PiggyBank, Banknote, CreditCard, FileText, TrendingUp, ArrowRightLeft } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -99,14 +100,7 @@ const ACCOUNT_TYPE_COLORS: Record<Account['type'], string> = {
   investment: 'text-ctp-mauve',
 };
 
-const ACCOUNT_TYPE_LABELS: Record<Account['type'], string> = {
-  checking: 'Compte courant',
-  savings: 'Épargne',
-  cash: 'Espèces',
-  credit_card: 'Carte de crédit',
-  loan: 'Prêt',
-  investment: 'Investissement',
-};
+// Account type labels are now handled via i18n in the component
 
 
 // ----------------------------------------------------------------------------
@@ -114,9 +108,20 @@ const ACCOUNT_TYPE_LABELS: Record<Account['type'], string> = {
 // ----------------------------------------------------------------------------
 
 export function AccountList({ workspaceId, compact = false }: AccountListProps) {
+  const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const { mode, displayCurrency } = useCurrencyDisplayMode();
+
+  // Account type labels using i18n
+  const ACCOUNT_TYPE_LABELS: Record<Account['type'], string> = {
+    checking: t('accounts.checking'),
+    savings: t('accounts.savings'),
+    cash: t('accounts.cash'),
+    credit_card: t('accounts.creditCard'),
+    loan: t('accounts.loan'),
+    investment: t('accounts.investment'),
+  };
 
   const { data: accounts, isLoading } = useQuery({
     queryKey: ['accounts', workspaceId],
@@ -168,12 +173,12 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
     return (
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Comptes</h3>
+          <h3 className="text-lg font-semibold">{t('accounts.title')}</h3>
           <button
             onClick={() => setShowForm(true)}
             className="text-sm text-ctp-blue hover:underline"
           >
-            + Ajouter
+            + {t('accounts.addAccount')}
           </button>
         </div>
 
@@ -218,7 +223,7 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
         </div>
 
         <div className="mt-4 pt-4 border-t border-ctp-surface1 flex justify-between">
-          <span className="font-medium">Total</span>
+          <span className="font-medium">{t('accounts.totalBalance')}</span>
           <CurrencyDisplay
             amount={totalBalance}
             currency={totalCurrency}
@@ -242,23 +247,23 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Comptes</h1>
+          <h1 className="text-2xl font-bold">{t('accounts.title')}</h1>
           <p className="text-ctp-subtext0">
-            {accounts?.length ?? 0} compte{(accounts?.length ?? 0) > 1 ? 's' : ''}
+            {t('accounts.accountCount', { count: accounts?.length ?? 0 })}
           </p>
         </div>
         <button onClick={() => setShowForm(true)} className="btn-primary">
-          + Nouveau compte
+          + {t('accounts.newAccount')}
         </button>
       </div>
 
       {/* Total Balance Card */}
       <div className="card bg-gradient-to-r from-ctp-blue to-ctp-sapphire">
         <div className="flex items-center justify-between">
-          <p className="text-ctp-crust/70">Solde total</p>
+          <p className="text-ctp-crust/70">{t('accounts.totalBalance')}</p>
           {mode === 'converted' && (
             <span className="text-xs text-ctp-crust/50 bg-ctp-crust/10 px-2 py-0.5 rounded">
-              En {displayCurrency}
+              {t('accounts.inCurrency', { currency: displayCurrency })}
             </span>
           )}
         </div>
@@ -308,8 +313,7 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
                   <div>
                     <p className="font-medium">{account.name}</p>
                     <p className="text-sm text-ctp-subtext0">
-                      {account.transactionCount} transaction
-                      {account.transactionCount !== 1 ? 's' : ''}
+                      {t('accounts.transactionCount', { count: account.transactionCount })}
                     </p>
                   </div>
                 </div>
@@ -340,9 +344,9 @@ export function AccountList({ workspaceId, compact = false }: AccountListProps) 
       {/* Empty State */}
       {(accounts?.length ?? 0) === 0 && (
         <div className="card text-center py-12">
-          <p className="text-ctp-overlay1 text-lg mb-4">Aucun compte</p>
+          <p className="text-ctp-overlay1 text-lg mb-4">{t('accounts.noAccounts')}</p>
           <button onClick={() => setShowForm(true)} className="btn-primary">
-            Créer votre premier compte
+            {t('accounts.createFirstAccount')}
           </button>
         </div>
       )}

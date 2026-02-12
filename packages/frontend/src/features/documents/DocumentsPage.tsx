@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Inbox, Link2, Archive, FileText } from 'lucide-react';
@@ -85,6 +86,7 @@ function useGridColumns() {
 // ----------------------------------------------------------------------------
 
 export function DocumentsPage() {
+  const { t } = useTranslation();
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
   const columns = useGridColumns();
@@ -186,7 +188,7 @@ export function DocumentsPage() {
   if (!workspaceId) {
     return (
       <div className="p-6 text-center text-ctp-subtext0">
-        Selectionnez un espace de travail
+        {t('documents.selectWorkspace')}
       </div>
     );
   }
@@ -196,13 +198,13 @@ export function DocumentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Documents</h1>
+          <h1 className="text-2xl font-bold">{t('documents.title')}</h1>
           <p className="text-ctp-subtext0">
-            Gerez vos justificatifs et pieces jointes
+            {t('documents.description')}
           </p>
         </div>
         <button onClick={() => setShowUpload(true)} className="btn-primary">
-          + Ajouter un document
+          {t('documents.addDocument')}
         </button>
       </div>
 
@@ -213,17 +215,17 @@ export function DocumentsPage() {
             <Inbox className="w-6 h-6 text-ctp-yellow" />
             <div className="flex-1">
               <p className="font-medium text-ctp-yellow">
-                {inboxCount.count} document{inboxCount.count > 1 ? 's' : ''} a traiter
+                {t('documents.inbox.alert', { count: inboxCount.count })}
               </p>
               <p className="text-sm text-ctp-yellow/80">
-                Ces documents n'ont pas encore ete lies a une transaction
+                {t('documents.inbox.description')}
               </p>
             </div>
             <button
               onClick={() => setFilterStatus('inbox')}
               className="btn-secondary text-sm"
             >
-              Voir
+              {t('documents.inbox.view')}
             </button>
           </div>
         </div>
@@ -244,10 +246,10 @@ export function DocumentsPage() {
                   : 'bg-ctp-base text-ctp-subtext0 hover:bg-ctp-surface0'
               )}
             >
-              {status === 'all' && 'Tous'}
-              {status === 'inbox' && <><Inbox className="w-4 h-4 inline mr-1" />A traiter</>}
-              {status === 'linked' && <><Link2 className="w-4 h-4 inline mr-1" />Lies</>}
-              {status === 'archived' && <><Archive className="w-4 h-4 inline mr-1" />Archives</>}
+              {status === 'all' && t('documents.filter.all')}
+              {status === 'inbox' && <><Inbox className="w-4 h-4 inline mr-1" />{t('documents.filter.toProcess')}</>}
+              {status === 'linked' && <><Link2 className="w-4 h-4 inline mr-1" />{t('documents.filter.linked')}</>}
+              {status === 'archived' && <><Archive className="w-4 h-4 inline mr-1" />{t('documents.filter.archived')}</>}
             </button>
           ))}
         </div>
@@ -256,7 +258,7 @@ export function DocumentsPage() {
         <div className="flex-1 min-w-[200px]">
           <input
             type="text"
-            placeholder="Rechercher un document..."
+            placeholder={t('documents.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-4 py-2 rounded-lg bg-ctp-surface0 border border-ctp-surface1 text-ctp-text placeholder-ctp-overlay0 focus:border-ctp-blue focus:ring-2 focus:ring-ctp-blue/20 outline-none transition-colors"
@@ -279,7 +281,7 @@ export function DocumentsPage() {
           onKeyDown={handleKeyDown}
           tabIndex={0}
           role="grid"
-          aria-label="Grille de documents"
+          aria-label={t('documents.documentsGrid')}
           aria-rowcount={rows.length}
         >
           <div
@@ -339,14 +341,14 @@ export function DocumentsPage() {
       ) : (
         <div className="card text-center py-12">
           <FileText className="w-12 h-12 mx-auto mb-4 text-ctp-overlay1" />
-          <h2 className="text-xl font-bold mb-2">Aucun document</h2>
+          <h2 className="text-xl font-bold mb-2">{t('documents.noDocuments')}</h2>
           <p className="text-ctp-subtext0 mb-6">
             {filterStatus !== 'all'
-              ? 'Aucun document dans cette categorie'
-              : 'Commencez par ajouter vos premiers justificatifs'}
+              ? t('documents.noDocumentsInCategory')
+              : t('documents.startAddingDocuments')}
           </p>
           <button onClick={() => setShowUpload(true)} className="btn-primary">
-            Ajouter un document
+            {t('documents.addDocument')}
           </button>
         </div>
       )}

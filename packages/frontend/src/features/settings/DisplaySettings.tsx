@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Monitor, LayoutDashboard, Save, Loader2, RotateCcw, Palette, Check, HelpCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useTheme, THEME_META, type CatppuccinFlavor } from '@/providers/ThemeProvider';
@@ -118,7 +119,11 @@ interface SystemThemeCardProps {
   onClick: () => void;
 }
 
-function SystemThemeCard({ isSelected, onClick }: SystemThemeCardProps) {
+interface SystemThemeCardPropsWithT extends SystemThemeCardProps {
+  label: string;
+}
+
+function SystemThemeCard({ isSelected, onClick, label }: SystemThemeCardPropsWithT) {
   return (
     <button
       type="button"
@@ -168,7 +173,7 @@ function SystemThemeCard({ isSelected, onClick }: SystemThemeCardProps) {
 
       {/* Label */}
       <p className="text-sm font-medium text-center text-ctp-subtext1">
-        Systeme
+        {label}
       </p>
     </button>
   );
@@ -179,6 +184,7 @@ function SystemThemeCard({ isSelected, onClick }: SystemThemeCardProps) {
 // ----------------------------------------------------------------------------
 
 export function DisplaySettings() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
@@ -251,10 +257,10 @@ export function DisplaySettings() {
         <div className="px-6 py-4 border-b border-ctp-surface1">
           <div className="flex items-center gap-3">
             <Palette className="h-5 w-5 text-ctp-mauve" />
-            <h2 className="text-lg font-semibold text-ctp-text">Theme Catppuccin</h2>
+            <h2 className="text-lg font-semibold text-ctp-text">{t('settings.display.catppuccinTheme')}</h2>
           </div>
           <p className="mt-1 text-sm text-ctp-subtext0">
-            Choisissez parmi les 4 saveurs Catppuccin
+            {t('settings.display.themeDescription')}
           </p>
         </div>
 
@@ -293,15 +299,16 @@ export function DisplaySettings() {
             <SystemThemeCard
               isSelected={theme === 'system'}
               onClick={() => setTheme('system')}
+              label={t('settings.display.systemTheme')}
             />
           </div>
 
           {/* Current theme info */}
           <div className="mt-4 p-3 bg-ctp-surface0 rounded-lg">
             <p className="text-sm text-ctp-subtext1">
-              Theme actif : <span className="font-medium text-ctp-text">{THEME_META[resolvedTheme].label}</span>
+              {t('settings.display.activeTheme')} : <span className="font-medium text-ctp-text">{THEME_META[resolvedTheme].label}</span>
               {theme === 'system' && (
-                <span className="ml-1 text-ctp-overlay1">(automatique)</span>
+                <span className="ml-1 text-ctp-overlay1">({t('settings.display.automatic')})</span>
               )}
             </p>
           </div>
@@ -313,10 +320,10 @@ export function DisplaySettings() {
         <div className="px-6 py-4 border-b border-ctp-surface1">
           <div className="flex items-center gap-3">
             <Monitor className="h-5 w-5 text-ctp-mauve" />
-            <h2 className="text-lg font-semibold text-ctp-text">Affichage</h2>
+            <h2 className="text-lg font-semibold text-ctp-text">{t('settings.display.displaySettings')}</h2>
           </div>
           <p className="mt-1 text-sm text-ctp-subtext0">
-            Personnalisez l'apparence de l'application
+            {t('settings.display.customizeAppearance')}
           </p>
         </div>
 
@@ -325,10 +332,10 @@ export function DisplaySettings() {
           <label className="flex items-center justify-between cursor-pointer">
             <div>
               <span className="text-sm font-medium text-ctp-subtext1">
-                Mode compact
+                {t('settings.display.compactMode')}
               </span>
               <p className="text-xs text-ctp-subtext0">
-                Affichage plus dense avec moins d'espacement
+                {t('settings.display.compactModeDescription')}
               </p>
             </div>
             <input
@@ -343,10 +350,10 @@ export function DisplaySettings() {
           <label className="flex items-center justify-between cursor-pointer">
             <div>
               <span className="text-sm font-medium text-ctp-subtext1">
-                Afficher les soldes
+                {t('settings.display.showBalance')}
               </span>
               <p className="text-xs text-ctp-subtext0">
-                Afficher les soldes des comptes dans la liste
+                {t('settings.display.showBalanceDescription')}
               </p>
             </div>
             <input
@@ -360,65 +367,65 @@ export function DisplaySettings() {
           {/* Default Currency */}
           <div>
             <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Devise par defaut
+              {t('settings.display.defaultCurrency')}
             </label>
             <select
               value={formData.display?.defaultCurrency ?? 'EUR'}
               onChange={(e) => handleChange('display', 'defaultCurrency', e.target.value)}
               className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
             >
-              <option value="EUR">Euro (EUR)</option>
-              <option value="USD">Dollar US (USD)</option>
-              <option value="GBP">Livre Sterling (GBP)</option>
-              <option value="CHF">Franc Suisse (CHF)</option>
-              <option value="CAD">Dollar Canadien (CAD)</option>
+              <option value="EUR">{t('settings.display.currencies.eur')}</option>
+              <option value="USD">{t('settings.display.currencies.usd')}</option>
+              <option value="GBP">{t('settings.display.currencies.gbp')}</option>
+              <option value="CHF">{t('settings.display.currencies.chf')}</option>
+              <option value="CAD">{t('settings.display.currencies.cad')}</option>
             </select>
           </div>
 
           {/* Date Format */}
           <div>
             <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Format de date
+              {t('settings.display.dateFormat')}
             </label>
             <select
               value={formData.display?.dateFormat ?? 'DD/MM/YYYY'}
               onChange={(e) => handleChange('display', 'dateFormat', e.target.value)}
               className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
             >
-              <option value="DD/MM/YYYY">DD/MM/YYYY (31/12/2024)</option>
-              <option value="MM/DD/YYYY">MM/DD/YYYY (12/31/2024)</option>
-              <option value="YYYY-MM-DD">YYYY-MM-DD (2024-12-31)</option>
+              <option value="DD/MM/YYYY">{t('settings.display.dateFormats.dmy')}</option>
+              <option value="MM/DD/YYYY">{t('settings.display.dateFormats.mdy')}</option>
+              <option value="YYYY-MM-DD">{t('settings.display.dateFormats.ymd')}</option>
             </select>
           </div>
 
           {/* Number Format */}
           <div>
             <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Format des nombres
+              {t('settings.display.numberFormat')}
             </label>
             <select
               value={formData.display?.numberFormat ?? 'fr-FR'}
               onChange={(e) => handleChange('display', 'numberFormat', e.target.value)}
               className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
             >
-              <option value="fr-FR">Francais (1 234,56)</option>
-              <option value="en-US">Anglais US (1,234.56)</option>
-              <option value="de-DE">Allemand (1.234,56)</option>
+              <option value="fr-FR">{t('settings.display.numberFormats.fr')}</option>
+              <option value="en-US">{t('settings.display.numberFormats.en')}</option>
+              <option value="de-DE">{t('settings.display.numberFormats.de')}</option>
             </select>
           </div>
 
           {/* Start of Week */}
           <div>
             <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Premier jour de la semaine
+              {t('settings.display.startOfWeek')}
             </label>
             <select
               value={formData.display?.startOfWeek ?? 1}
               onChange={(e) => handleChange('display', 'startOfWeek', parseInt(e.target.value))}
               className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
             >
-              <option value={1}>Lundi</option>
-              <option value={0}>Dimanche</option>
+              <option value={1}>{t('settings.display.monday')}</option>
+              <option value={0}>{t('settings.display.sunday')}</option>
             </select>
           </div>
         </div>
@@ -430,11 +437,11 @@ export function DisplaySettings() {
           <div className="flex items-center gap-3">
             <LayoutDashboard className="h-5 w-5 text-ctp-mauve" />
             <h2 className="text-lg font-semibold text-ctp-text">
-              Tableau de bord
+              {t('settings.dashboard.title')}
             </h2>
           </div>
           <p className="mt-1 text-sm text-ctp-subtext0">
-            Configurez votre tableau de bord
+            {t('settings.dashboard.description')}
           </p>
         </div>
 
@@ -442,7 +449,7 @@ export function DisplaySettings() {
           {/* Default Period */}
           <div>
             <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Periode par defaut
+              {t('settings.dashboard.defaultPeriod')}
             </label>
             <select
               value={formData.dashboard?.defaultPeriod ?? 'month'}
@@ -451,9 +458,9 @@ export function DisplaySettings() {
               }
               className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
             >
-              <option value="month">Mois</option>
-              <option value="quarter">Trimestre</option>
-              <option value="year">Annee</option>
+              <option value="month">{t('settings.dashboard.periods.month')}</option>
+              <option value="quarter">{t('settings.dashboard.periods.quarter')}</option>
+              <option value="year">{t('settings.dashboard.periods.year')}</option>
             </select>
           </div>
 
@@ -461,10 +468,10 @@ export function DisplaySettings() {
           <label className="flex items-center justify-between cursor-pointer">
             <div>
               <span className="text-sm font-medium text-ctp-subtext1">
-                Afficher le patrimoine net
+                {t('settings.dashboard.showNetWorth')}
               </span>
               <p className="text-xs text-ctp-subtext0">
-                Afficher le total de vos actifs moins vos dettes
+                {t('settings.dashboard.showNetWorthDescription')}
               </p>
             </div>
             <input
@@ -479,10 +486,10 @@ export function DisplaySettings() {
           <label className="flex items-center justify-between cursor-pointer">
             <div>
               <span className="text-sm font-medium text-ctp-subtext1">
-                Afficher les budgets
+                {t('settings.dashboard.showBudgets')}
               </span>
               <p className="text-xs text-ctp-subtext0">
-                Afficher l'etat de vos budgets sur le dashboard
+                {t('settings.dashboard.showBudgetsDescription')}
               </p>
             </div>
             <input
@@ -497,10 +504,10 @@ export function DisplaySettings() {
           <label className="flex items-center justify-between cursor-pointer">
             <div>
               <span className="text-sm font-medium text-ctp-subtext1">
-                Afficher les transactions recentes
+                {t('settings.dashboard.showRecentTransactions')}
               </span>
               <p className="text-xs text-ctp-subtext0">
-                Afficher les dernieres transactions
+                {t('settings.dashboard.showRecentTransactionsDescription')}
               </p>
             </div>
             <input
@@ -517,10 +524,10 @@ export function DisplaySettings() {
           <label className="flex items-center justify-between cursor-pointer">
             <div>
               <span className="text-sm font-medium text-ctp-subtext1">
-                Afficher les factures a venir
+                {t('settings.dashboard.showUpcomingBills')}
               </span>
               <p className="text-xs text-ctp-subtext0">
-                Afficher les paiements prevus
+                {t('settings.dashboard.showUpcomingBillsDescription')}
               </p>
             </div>
             <input
@@ -538,10 +545,10 @@ export function DisplaySettings() {
         <div className="px-6 py-4 border-b border-ctp-surface1">
           <div className="flex items-center gap-3">
             <HelpCircle className="h-5 w-5 text-ctp-mauve" />
-            <h2 className="text-lg font-semibold text-ctp-text">Aide et tutoriel</h2>
+            <h2 className="text-lg font-semibold text-ctp-text">{t('settings.help.title')}</h2>
           </div>
           <p className="mt-1 text-sm text-ctp-subtext0">
-            Relancez la visite guidee pour decouvrir toutes les fonctionnalites
+            {t('settings.help.description')}
           </p>
         </div>
 
@@ -553,9 +560,9 @@ export function DisplaySettings() {
       {/* Privacy Settings */}
       <div className="bg-ctp-mantle rounded-lg shadow">
         <div className="px-6 py-4 border-b border-ctp-surface1">
-          <h2 className="text-lg font-semibold text-ctp-text">Confidentialite</h2>
+          <h2 className="text-lg font-semibold text-ctp-text">{t('settings.privacy.title')}</h2>
           <p className="mt-1 text-sm text-ctp-subtext0">
-            Options de confidentialite et de securite de session
+            {t('settings.privacy.description')}
           </p>
         </div>
 
@@ -564,10 +571,10 @@ export function DisplaySettings() {
           <label className="flex items-center justify-between cursor-pointer">
             <div>
               <span className="text-sm font-medium text-ctp-subtext1">
-                Masquer les montants
+                {t('settings.privacy.hideAmounts')}
               </span>
               <p className="text-xs text-ctp-subtext0">
-                Cacher les montants jusqu'au survol de la souris
+                {t('settings.privacy.hideAmountsDescription')}
               </p>
             </div>
             <input
@@ -582,10 +589,10 @@ export function DisplaySettings() {
           <label className="flex items-center justify-between cursor-pointer">
             <div>
               <span className="text-sm font-medium text-ctp-subtext1">
-                Verrouiller apres inactivite
+                {t('settings.privacy.lockOnInactivity')}
               </span>
               <p className="text-xs text-ctp-subtext0">
-                Verrouiller la session apres une periode d'inactivite
+                {t('settings.privacy.lockOnInactivityDescription')}
               </p>
             </div>
             <input
@@ -600,7 +607,7 @@ export function DisplaySettings() {
           {formData.privacy?.lockOnInactivity && (
             <div>
               <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-                Delai d'inactivite (minutes)
+                {t('settings.privacy.inactivityTimeout')}
               </label>
               <select
                 value={formData.privacy?.inactivityTimeout ?? 5}
@@ -609,11 +616,11 @@ export function DisplaySettings() {
                 }
                 className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
               >
-                <option value={1}>1 minute</option>
-                <option value={5}>5 minutes</option>
-                <option value={10}>10 minutes</option>
-                <option value={15}>15 minutes</option>
-                <option value={30}>30 minutes</option>
+                <option value={1}>{t('settings.privacy.timeouts.1min')}</option>
+                <option value={5}>{t('settings.privacy.timeouts.5min')}</option>
+                <option value={10}>{t('settings.privacy.timeouts.10min')}</option>
+                <option value={15}>{t('settings.privacy.timeouts.15min')}</option>
+                <option value={30}>{t('settings.privacy.timeouts.30min')}</option>
               </select>
             </div>
           )}
@@ -621,7 +628,7 @@ export function DisplaySettings() {
           {/* Session Timeout */}
           <div>
             <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Expiration de session (minutes)
+              {t('settings.privacy.sessionTimeout')}
             </label>
             <select
               value={formData.privacy?.sessionTimeout ?? 60}
@@ -630,11 +637,11 @@ export function DisplaySettings() {
               }
               className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg bg-ctp-base text-ctp-text focus:ring-2 focus:ring-ctp-blue focus:border-transparent"
             >
-              <option value={30}>30 minutes</option>
-              <option value={60}>1 heure</option>
-              <option value={120}>2 heures</option>
-              <option value={480}>8 heures</option>
-              <option value={1440}>24 heures</option>
+              <option value={30}>{t('settings.privacy.timeouts.30min')}</option>
+              <option value={60}>{t('settings.privacy.timeouts.1hour')}</option>
+              <option value={120}>{t('settings.privacy.timeouts.2hours')}</option>
+              <option value={480}>{t('settings.privacy.timeouts.8hours')}</option>
+              <option value={1440}>{t('settings.privacy.timeouts.24hours')}</option>
             </select>
           </div>
         </div>
@@ -649,7 +656,7 @@ export function DisplaySettings() {
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-ctp-subtext1 hover:bg-ctp-surface0 rounded-lg transition-colors"
         >
           <RotateCcw className="h-4 w-4" />
-          Reinitialiser
+          {t('settings.display.reset')}
         </button>
 
         {isEditing && (
@@ -668,7 +675,7 @@ export function DisplaySettings() {
               }}
               className="px-4 py-2 text-sm font-medium text-ctp-subtext1 hover:bg-ctp-surface0 rounded-lg transition-colors"
             >
-              Annuler
+              {t('settings.display.cancel')}
             </button>
             <button
               type="submit"
@@ -680,7 +687,7 @@ export function DisplaySettings() {
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              Enregistrer
+              {t('settings.display.save')}
             </button>
           </div>
         )}

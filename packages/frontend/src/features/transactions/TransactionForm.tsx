@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
@@ -94,6 +95,7 @@ export function TransactionForm({
   onClose,
   onSuccess,
 }: TransactionFormProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>(
@@ -306,7 +308,7 @@ export function TransactionForm({
       onSuccess();
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la création');
+      setError(err instanceof Error ? err.message : t('transactions.creationError'));
     },
   });
 
@@ -328,7 +330,7 @@ export function TransactionForm({
       onSuccess();
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour');
+      setError(err instanceof Error ? err.message : t('transactions.updateError'));
     },
   });
 
@@ -341,7 +343,7 @@ export function TransactionForm({
       onSuccess();
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+      setError(err instanceof Error ? err.message : t('transactions.deleteError'));
     },
   });
 
@@ -355,14 +357,14 @@ export function TransactionForm({
   };
 
   const handleDelete = () => {
-    if (confirm('Supprimer cette transaction ?')) {
+    if (confirm(t('transactions.confirmDeleteSimple'))) {
       deleteMutation.mutate();
     }
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
-  const modalTitle = isEditing ? 'Modifier la transaction' : 'Nouvelle transaction';
+  const modalTitle = isEditing ? t('transactions.editTransaction') : t('transactions.newTransaction');
 
   // Focus trap for the modal
   const modalRef = useFocusTrap<HTMLDivElement>({
@@ -404,15 +406,15 @@ export function TransactionForm({
                   aria-disabled={deleteMutation.isPending}
                   aria-busy={deleteMutation.isPending}
                   className="text-ctp-red hover:text-ctp-red/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-red rounded px-2 py-1"
-                  aria-label="Supprimer la transaction"
+                  aria-label={t('transactions.deleteTransaction')}
                 >
-                  Supprimer
+                  {t('transactions.delete')}
                 </button>
               )}
               <button
                 onClick={onClose}
                 className="p-1 rounded-lg text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-blue"
-                aria-label="Fermer"
+                aria-label={t('transactions.close')}
               >
                 <X className="w-5 h-5" aria-hidden="true" />
               </button>
@@ -431,17 +433,17 @@ export function TransactionForm({
 
           {isTransfer ? (
             <p className="text-ctp-subtext0 mb-4">
-              Les virements ne peuvent pas être modifiés directement.
+              {t('transactions.transferCannotEdit')}
             </p>
           ) : (
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" aria-label="Formulaire de transaction">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" aria-label={t('transactions.transactionDetails')}>
               {/* Type Toggle */}
               <fieldset>
-                <legend className="sr-only">Type de transaction</legend>
+                <legend className="sr-only">{t('transactions.accountType')}</legend>
                 <div
                   className="flex rounded-lg overflow-hidden border border-ctp-surface1"
                   role="radiogroup"
-                  aria-label="Type de transaction"
+                  aria-label={t('transactions.accountType')}
                 >
                   <button
                     type="button"
@@ -455,7 +457,7 @@ export function TransactionForm({
                     role="radio"
                     aria-checked={selectedType === 'expense'}
                   >
-                    Depense
+                    {t('transactions.expense')}
                   </button>
                   <button
                     type="button"
@@ -469,14 +471,14 @@ export function TransactionForm({
                     role="radio"
                     aria-checked={selectedType === 'income'}
                   >
-                    Revenu
+                    {t('transactions.income')}
                   </button>
                 </div>
               </fieldset>
 
               {/* Amount and Currency */}
               <div>
-                <label htmlFor="amount" className="label">Montant</label>
+                <label htmlFor="amount" className="label">{t('transactions.amount')}</label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     <input
@@ -489,9 +491,9 @@ export function TransactionForm({
                       aria-invalid={!!errors.amount}
                       aria-describedby={errors.amount ? 'amount-error' : undefined}
                       {...register('amount', {
-                        required: 'Montant requis',
+                        required: t('transactions.amountRequired'),
                         valueAsNumber: true,
-                        min: { value: 0.01, message: 'Montant invalide' },
+                        min: { value: 0.01, message: t('transactions.invalidAmount') },
                       })}
                     />
                   </div>
@@ -507,22 +509,22 @@ export function TransactionForm({
                 )}
                 {selectedAccount && selectedCurrency !== selectedAccount.currency && (
                   <p className="text-xs text-ctp-yellow mt-1">
-                    Le compte utilise {selectedAccount.currency}, le montant sera converti
+                    {t('transactions.accountUsesX', { currency: selectedAccount.currency })}
                   </p>
                 )}
               </div>
 
               {/* Description */}
               <div>
-                <label htmlFor="description" className="label">Description</label>
+                <label htmlFor="description" className="label">{t('transactions.payee')}</label>
                 <input
                   id="description"
                   type="text"
                   className="input"
-                  placeholder="Ex: Courses supermarché"
+                  placeholder={t('transactions.descriptionPlaceholder')}
                   aria-invalid={!!errors.description}
                   aria-describedby={errors.description ? 'description-error' : undefined}
-                  {...register('description', { required: 'Description requise' })}
+                  {...register('description', { required: t('transactions.descriptionRequired') })}
                 />
                 {errors.description && (
                   <p id="description-error" className="error-text" role="alert">{errors.description.message}</p>
@@ -552,19 +554,19 @@ export function TransactionForm({
                         </span>
                       </div>
                       <p className="text-xs text-ctp-subtext0">
-                        Suggestion IA
+                        {t('transactions.aiSuggestion')}
                       </p>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-1" role="group" aria-label="Actions pour la suggestion IA">
+                    <div className="flex items-center gap-1" role="group" aria-label={t('transactions.aiSuggestion')}>
                       {/* Accept */}
                       <button
                         type="button"
                         onClick={handleAcceptAiSuggestion}
                         className="p-1.5 rounded-md bg-ctp-green/20 text-ctp-green hover:bg-ctp-green/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-green"
-                        aria-label={`Accepter la suggestion: ${aiPrediction.categoryName}`}
-                        title="Accepter"
+                        aria-label={`${t('transactions.accept')}: ${aiPrediction.categoryName}`}
+                        title={t('transactions.accept')}
                       >
                         <Check className="w-4 h-4" aria-hidden="true" />
                       </button>
@@ -574,8 +576,8 @@ export function TransactionForm({
                         type="button"
                         onClick={handleRejectAiSuggestion}
                         className="p-1.5 rounded-md bg-ctp-red/20 text-ctp-red hover:bg-ctp-red/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-red"
-                        aria-label="Rejeter la suggestion IA"
-                        title="Rejeter"
+                        aria-label={t('transactions.reject')}
+                        title={t('transactions.reject')}
                       >
                         <ChevronDown className="w-4 h-4" aria-hidden="true" />
                       </button>
@@ -591,20 +593,20 @@ export function TransactionForm({
                     aria-live="polite"
                   >
                     <Sparkles className="w-4 h-4 text-ctp-blue animate-pulse" aria-hidden="true" />
-                    <span className="text-sm text-ctp-subtext0">Analyse IA en cours...</span>
+                    <span className="text-sm text-ctp-subtext0">{t('transactions.aiAnalyzing')}</span>
                   </div>
                 )}
               </div>
 
               {/* Account */}
               <div>
-                <label htmlFor="accountId" className="label">Compte</label>
+                <label htmlFor="accountId" className="label">{t('transactions.account')}</label>
                 <select
                   id="accountId"
                   className="input"
                   aria-invalid={!!errors.accountId}
                   aria-describedby={errors.accountId ? 'account-error' : undefined}
-                  {...register('accountId', { required: 'Compte requis' })}
+                  {...register('accountId', { required: t('transactions.accountRequired') })}
                   onChange={(e) => {
                     const accountId = e.target.value;
                     setValue('accountId', accountId);
@@ -614,7 +616,7 @@ export function TransactionForm({
                     }
                   }}
                 >
-                  <option value="">Selectionner un compte</option>
+                  <option value="">{t('transactions.selectAccount')}</option>
                   {accounts?.map((account) => (
                     <option key={account.id} value={account.id}>
                       {account.name} ({account.currency})
@@ -628,12 +630,12 @@ export function TransactionForm({
 
               {/* Date */}
               <div>
-                <label htmlFor="date" className="label">Date</label>
+                <label htmlFor="date" className="label">{t('transactions.date')}</label>
                 <input
                   id="date"
                   type="date"
                   className="input"
-                  {...register('date', { required: 'Date requise' })}
+                  {...register('date', { required: t('transactions.dateRequired') })}
                 />
               </div>
 
@@ -663,7 +665,7 @@ export function TransactionForm({
                   >
                     <Sparkles className="w-4 h-4" />
                     <span>
-                      {suggestions.length} suggestion{suggestions.length > 1 ? 's' : ''} de categorie
+                      {t('transactions.categorySuggestions', { count: suggestions.length })}
                     </span>
                     {showSuggestions ? (
                       <ChevronUp className="w-4 h-4" />
@@ -692,8 +694,8 @@ export function TransactionForm({
                               <CategoryConfidence confidence={suggestion.confidence} size="sm" />
                             </div>
                             <p className="text-xs text-ctp-subtext0 truncate">
-                              {suggestion.source === 'pattern' && 'Pattern: '}
-                              {suggestion.source === 'rule' && 'Regle: '}
+                              {suggestion.source === 'pattern' && `${t('transactions.pattern')}: `}
+                              {suggestion.source === 'rule' && `${t('transactions.rule')}: `}
                               {suggestion.source === 'similar' && ''}
                               {suggestion.pattern}
                             </p>
@@ -703,7 +705,7 @@ export function TransactionForm({
                             type="button"
                             onClick={() => handleApplySuggestion(suggestion, false)}
                             className="btn-ghost p-1.5 text-ctp-green hover:bg-ctp-green/10"
-                            title="Appliquer"
+                            title={t('transactions.apply')}
                           >
                             <Check className="w-4 h-4" />
                           </button>
@@ -719,7 +721,7 @@ export function TransactionForm({
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-ctp-green/10 border border-ctp-green/20 text-sm">
                   <Sparkles className="w-4 h-4 text-ctp-green" />
                   <span className="text-ctp-green">
-                    Categorie suggeree appliquee
+                    {t('transactions.suggestedCategoryApplied')}
                   </span>
                   <span className="text-ctp-subtext0">({appliedPattern})</span>
                 </div>
@@ -734,7 +736,7 @@ export function TransactionForm({
                   className="flex items-center gap-2 p-2 rounded-lg bg-ctp-mauve/10 border border-ctp-mauve/20 text-sm text-ctp-mauve hover:bg-ctp-mauve/20 transition-colors w-full justify-center"
                 >
                   <Zap className="w-4 h-4" />
-                  {learnMutation.isPending ? 'Apprentissage...' : 'Apprendre ce pattern'}
+                  {learnMutation.isPending ? t('transactions.learning') : t('transactions.learnPattern')}
                 </button>
               )}
 
@@ -755,12 +757,12 @@ export function TransactionForm({
 
               {/* Notes */}
               <div>
-                <label htmlFor="notes" className="label">Notes (optionnel)</label>
+                <label htmlFor="notes" className="label">{t('transactions.notesOptional')}</label>
                 <textarea
                   id="notes"
                   className="input"
                   rows={2}
-                  placeholder="Notes additionnelles..."
+                  placeholder={t('transactions.additionalNotes')}
                   {...register('notes')}
                 />
               </div>
@@ -768,10 +770,10 @@ export function TransactionForm({
               {/* Actions */}
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={onClose} className="btn-secondary flex-1">
-                  Annuler
+                  {t('transactions.cancel')}
                 </button>
                 <button type="submit" disabled={isPending} className="btn-primary flex-1">
-                  {isPending ? 'Enregistrement...' : isEditing ? 'Enregistrer' : 'Créer'}
+                  {isPending ? t('transactions.saving') : isEditing ? t('transactions.save') : t('transactions.create')}
                 </button>
               </div>
             </form>

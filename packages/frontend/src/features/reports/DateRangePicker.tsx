@@ -5,8 +5,9 @@
 // ============================================================================
 
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import { Calendar, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -34,13 +35,13 @@ interface Preset {
 }
 
 // ----------------------------------------------------------------------------
-// Presets
+// Presets - labels will be translated in component
 // ----------------------------------------------------------------------------
 
-const presets: Preset[] = [
+const presetConfigs: Array<{ key: PresetKey; labelKey: string; getRange: () => DateRange }> = [
   {
     key: 'this_month',
-    label: 'Ce mois',
+    labelKey: 'reports.dateRange.thisMonth',
     getRange: () => ({
       from: startOfMonth(new Date()),
       to: endOfMonth(new Date()),
@@ -48,7 +49,7 @@ const presets: Preset[] = [
   },
   {
     key: 'last_month',
-    label: 'Mois dernier',
+    labelKey: 'reports.dateRange.lastMonth',
     getRange: () => {
       const lastMonth = subMonths(new Date(), 1);
       return {
@@ -59,7 +60,7 @@ const presets: Preset[] = [
   },
   {
     key: 'last_3_months',
-    label: '3 derniers mois',
+    labelKey: 'reports.dateRange.last3Months',
     getRange: () => ({
       from: startOfMonth(subMonths(new Date(), 2)),
       to: endOfMonth(new Date()),
@@ -67,7 +68,7 @@ const presets: Preset[] = [
   },
   {
     key: 'last_6_months',
-    label: '6 derniers mois',
+    labelKey: 'reports.dateRange.last6Months',
     getRange: () => ({
       from: startOfMonth(subMonths(new Date(), 5)),
       to: endOfMonth(new Date()),
@@ -75,7 +76,7 @@ const presets: Preset[] = [
   },
   {
     key: 'this_year',
-    label: 'Cette année',
+    labelKey: 'reports.dateRange.thisYear',
     getRange: () => ({
       from: startOfYear(new Date()),
       to: endOfYear(new Date()),
@@ -83,7 +84,7 @@ const presets: Preset[] = [
   },
   {
     key: 'last_year',
-    label: 'Année dernière',
+    labelKey: 'reports.dateRange.lastYear',
     getRange: () => {
       const lastYear = subYears(new Date(), 1);
       return {
@@ -99,20 +100,32 @@ const presets: Preset[] = [
 // ----------------------------------------------------------------------------
 
 export function DateRangePicker({ value, onChange, className }: DateRangePickerProps) {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'fr' ? fr : enUS;
   const [isOpen, setIsOpen] = useState(false);
   const [isCustom, setIsCustom] = useState(false);
   const [customFrom, setCustomFrom] = useState(format(value.from, 'yyyy-MM-dd'));
   const [customTo, setCustomTo] = useState(format(value.to, 'yyyy-MM-dd'));
 
+  // Translated presets
+  const presets: Preset[] = useMemo(() =>
+    presetConfigs.map((config) => ({
+      key: config.key,
+      label: t(config.labelKey),
+      getRange: config.getRange,
+    })),
+    [t]
+  );
+
   // Detect current preset
   const currentPreset = useMemo(() => {
-    for (const preset of presets) {
-      const range = preset.getRange();
+    for (const config of presetConfigs) {
+      const range = config.getRange();
       if (
         format(range.from, 'yyyy-MM-dd') === format(value.from, 'yyyy-MM-dd') &&
         format(range.to, 'yyyy-MM-dd') === format(value.to, 'yyyy-MM-dd')
       ) {
-        return preset.key;
+        return config.key;
       }
     }
     return 'custom';
@@ -138,8 +151,8 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
     if (preset) {
       return preset.label;
     }
-    return `${format(value.from, 'dd MMM yyyy', { locale: fr })} - ${format(value.to, 'dd MMM yyyy', { locale: fr })}`;
-  }, [currentPreset, value]);
+    return `${format(value.from, 'dd MMM yyyy', { locale: dateLocale })} - ${format(value.to, 'dd MMM yyyy', { locale: dateLocale })}`;
+  }, [currentPreset, value, presets, dateLocale]);
 
   return (
     <div className={cn('relative', className)}>
@@ -181,7 +194,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
                     : 'hover:bg-ctp-surface1 text-ctp-subtext1'
                 )}
               >
-                Personnalisé
+                {t('reports.dateRange.customRange')}
               </button>
             </div>
 
@@ -189,7 +202,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
             {(isCustom || currentPreset === 'custom') && (
               <div className="border-t border-ctp-surface1 pt-4 space-y-3">
                 <div>
-                  <label className="block text-xs text-ctp-subtext0 mb-1">Du</label>
+                  <label className="block text-xs text-ctp-subtext0 mb-1">{t('reports.dateRange.startDate')}</label>
                   <input
                     type="date"
                     value={customFrom}
@@ -198,7 +211,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-ctp-subtext0 mb-1">Au</label>
+                  <label className="block text-xs text-ctp-subtext0 mb-1">{t('reports.dateRange.endDate')}</label>
                   <input
                     type="date"
                     value={customTo}
@@ -210,7 +223,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
                   onClick={handleCustomApply}
                   className="w-full px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg text-sm hover:bg-ctp-blue/90"
                 >
-                  Appliquer
+                  {t('reports.dateRange.apply')}
                 </button>
               </div>
             )}

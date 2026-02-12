@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   Shield,
   Smartphone,
@@ -90,7 +91,7 @@ function getDeviceIcon(deviceType: string | null, os: string | null) {
   return Monitor;
 }
 
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, translate: (key: string, options?: Record<string, unknown>) => string): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -98,13 +99,13 @@ function formatRelativeTime(dateStr: string): string {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return 'A l\'instant';
-  if (diffMins < 60) return `Il y a ${diffMins} min`;
-  if (diffHours < 24) return `Il y a ${diffHours}h`;
-  if (diffDays === 1) return 'Hier';
-  if (diffDays < 7) return `Il y a ${diffDays} jours`;
+  if (diffMins < 1) return translate('settings.security.justNow');
+  if (diffMins < 60) return translate('settings.security.minutesAgo', { count: diffMins });
+  if (diffHours < 24) return translate('settings.security.hoursAgo', { count: diffHours });
+  if (diffDays === 1) return translate('settings.security.yesterday');
+  if (diffDays < 7) return translate('settings.security.daysAgo', { count: diffDays });
 
-  return date.toLocaleDateString('fr-FR', {
+  return date.toLocaleDateString(undefined, {
     day: 'numeric',
     month: 'short',
   });
@@ -115,6 +116,7 @@ function formatRelativeTime(dateStr: string): string {
 // ----------------------------------------------------------------------------
 
 export function SecuritySettings() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showRevokeConfirm, setShowRevokeConfirm] = useState<string | null>(null);
   const [showRevokeAllConfirm, setShowRevokeAllConfirm] = useState(false);
@@ -190,7 +192,7 @@ export function SecuritySettings() {
   });
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('fr-FR', {
+    return new Date(date).toLocaleDateString(undefined, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -201,16 +203,16 @@ export function SecuritySettings() {
 
   const getActionLabel = (action: string) => {
     const labels: Record<string, string> = {
-      'auth.login.succeeded': 'Connexion reussie',
-      'auth.login.failed': 'Tentative de connexion echouee',
-      'auth.logout': 'Deconnexion',
-      'auth.mfa.setup': 'MFA configure',
-      'auth.mfa.removed': 'MFA supprime',
-      'auth.device.revoked': 'Appareil revoque',
-      'auth.session.locked': 'Session verrouillee',
-      'auth.session.revoked': 'Session revoquee',
-      'auth.sessions.revoked_all': 'Toutes les sessions revoquees',
-      'auth.password.changed': 'Mot de passe modifie',
+      'auth.login.succeeded': t('settings.security.loginSuccess'),
+      'auth.login.failed': t('settings.security.loginFailed'),
+      'auth.logout': t('settings.security.logout'),
+      'auth.mfa.setup': t('settings.security.mfaSetup'),
+      'auth.mfa.removed': t('settings.security.mfaRemoved'),
+      'auth.device.revoked': t('settings.security.deviceRevoked'),
+      'auth.session.locked': t('settings.security.sessionLocked'),
+      'auth.session.revoked': t('settings.security.sessionRevoked'),
+      'auth.sessions.revoked_all': t('settings.security.allSessionsRevoked'),
+      'auth.password.changed': t('settings.security.passwordChanged'),
     };
     return labels[action] || action;
   };
@@ -237,15 +239,15 @@ export function SecuritySettings() {
               <Key className="h-5 w-5 text-ctp-red" />
               <div>
                 <h2 className="text-lg font-semibold text-ctp-text">
-                  Authentification a deux facteurs
+                  {t('settings.security.twoFactorAuth')}
                 </h2>
                 <p className="text-sm text-ctp-subtext0">
-                  Securisez votre compte avec une verification supplementaire
+                  {t('settings.security.secureAccount')}
                 </p>
               </div>
             </div>
             <button className="px-4 py-2 text-sm font-medium text-ctp-blue hover:bg-ctp-surface0 rounded-lg transition-colors">
-              Ajouter une methode
+              {t('settings.security.addMethod')}
             </button>
           </div>
         </div>
@@ -255,10 +257,10 @@ export function SecuritySettings() {
             <div className="p-6 text-center">
               <Shield className="h-12 w-12 text-ctp-overlay0 mx-auto mb-3" />
               <p className="text-ctp-subtext0">
-                Aucune methode MFA configuree
+                {t('settings.security.noMfaConfigured')}
               </p>
               <p className="text-sm text-ctp-overlay1 mt-1">
-                Nous recommandons d'activer le MFA pour securiser votre compte
+                {t('settings.security.recommendMfa')}
               </p>
             </div>
           ) : (
@@ -286,15 +288,15 @@ export function SecuritySettings() {
                         {method.name}
                       </p>
                       <p className="text-xs text-ctp-subtext0">
-                        {method.type === 'totp' ? 'Application Authenticator' : method.type}
+                        {method.type === 'totp' ? t('settings.security.authenticatorApp') : method.type}
                         {method.lastUsedAt && (
-                          <> - Derniere utilisation: {formatDate(method.lastUsedAt)}</>
+                          <> - {t('settings.security.lastUsed')}: {formatDate(method.lastUsedAt)}</>
                         )}
                       </p>
                     </div>
                   </div>
                   <button className="text-sm text-ctp-red hover:text-ctp-maroon font-medium">
-                    Supprimer
+                    {t('settings.security.delete')}
                   </button>
                 </div>
               </div>
@@ -310,10 +312,10 @@ export function SecuritySettings() {
             <Smartphone className="h-5 w-5 text-ctp-red" />
             <div>
               <h2 className="text-lg font-semibold text-ctp-text">
-                Appareils de confiance
+                {t('settings.security.trustedDevices')}
               </h2>
               <p className="text-sm text-ctp-subtext0">
-                Appareils autorises a acceder a votre compte
+                {t('settings.security.authorizedDevices')}
               </p>
             </div>
           </div>
@@ -322,7 +324,7 @@ export function SecuritySettings() {
         <div className="divide-y divide-ctp-surface1">
           {devices.length === 0 ? (
             <div className="p-6 text-center text-ctp-subtext0">
-              Aucun appareil enregistre
+              {t('settings.security.noDevices')}
             </div>
           ) : (
             devices.map((device) => (
@@ -352,7 +354,7 @@ export function SecuritySettings() {
                         {device.isTrusted && (
                           <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-ctp-green/20 text-ctp-green rounded-full">
                             <CheckCircle className="h-3 w-3 mr-1" />
-                            Confiance
+                            {t('settings.security.trust')}
                           </span>
                         )}
                       </div>
@@ -377,14 +379,14 @@ export function SecuritySettings() {
                         onClick={() => setShowRevokeConfirm(null)}
                         className="px-3 py-1 text-sm text-ctp-subtext0"
                       >
-                        Annuler
+                        {t('settings.security.cancel')}
                       </button>
                       <button
                         onClick={() => revokeDeviceMutation.mutate(device.id)}
                         disabled={revokeDeviceMutation.isPending}
                         className="px-3 py-1 text-sm font-medium text-ctp-base bg-ctp-red rounded hover:bg-ctp-maroon"
                       >
-                        {revokeDeviceMutation.isPending ? 'Suppression...' : 'Confirmer'}
+                        {revokeDeviceMutation.isPending ? t('settings.security.deleting') : t('settings.security.confirm')}
                       </button>
                     </div>
                   ) : (
@@ -411,18 +413,18 @@ export function SecuritySettings() {
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-lg font-semibold text-ctp-text">
-                    Sessions actives
+                    {t('settings.security.activeSessions')}
                   </h2>
                   <Link
                     to="/settings/sessions"
                     className="text-ctp-blue hover:text-ctp-sapphire"
-                    title="Voir les details des sessions"
+                    title={t('settings.security.sessions.title')}
                   >
                     <ExternalLink className="h-4 w-4" />
                   </Link>
                 </div>
                 <p className="text-sm text-ctp-subtext0">
-                  {sessions.length} session{sessions.length > 1 ? 's' : ''} active{sessions.length > 1 ? 's' : ''}
+                  {t('settings.security.sessionCount', { count: sessions.length })}
                 </p>
               </div>
             </div>
@@ -433,14 +435,14 @@ export function SecuritySettings() {
                     onClick={() => setShowRevokeAllConfirm(false)}
                     className="px-3 py-1 text-sm text-ctp-subtext0"
                   >
-                    Annuler
+                    {t('settings.security.cancel')}
                   </button>
                   <button
                     onClick={() => revokeAllSessionsMutation.mutate()}
                     disabled={revokeAllSessionsMutation.isPending}
                     className="px-3 py-1 text-sm font-medium text-ctp-base bg-ctp-red rounded hover:bg-ctp-maroon"
                   >
-                    {revokeAllSessionsMutation.isPending ? 'Deconnexion...' : 'Confirmer'}
+                    {revokeAllSessionsMutation.isPending ? t('settings.security.disconnecting') : t('settings.security.confirm')}
                   </button>
                 </div>
               ) : (
@@ -449,7 +451,7 @@ export function SecuritySettings() {
                   className="px-4 py-2 text-sm font-medium text-ctp-red hover:bg-ctp-surface0 rounded-lg transition-colors flex items-center gap-2"
                 >
                   <LogOut className="h-4 w-4" />
-                  Deconnecter tout ({otherSessions.length})
+                  {t('settings.security.disconnectAll')} ({otherSessions.length})
                 </button>
               )
             )}
@@ -459,7 +461,7 @@ export function SecuritySettings() {
         <div className="divide-y divide-ctp-surface1">
           {sessions.length === 0 ? (
             <div className="p-6 text-center text-ctp-subtext0">
-              Aucune session active
+              {t('settings.security.noSessions')}
             </div>
           ) : (
             sessions.map((session) => {
@@ -490,20 +492,20 @@ export function SecuritySettings() {
                           </p>
                           {session.os && (
                             <span className="text-xs text-ctp-subtext0">
-                              sur {session.os}
+                              {t('settings.security.on')} {session.os}
                             </span>
                           )}
                           {session.isCurrent && (
                             <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-ctp-green/20 text-ctp-green rounded-full">
                               <CheckCircle className="h-3 w-3 mr-1" />
-                              Session actuelle
+                              {t('settings.security.currentSession')}
                             </span>
                           )}
                         </div>
                         <div className="flex items-center gap-3 text-xs text-ctp-subtext0 mt-1 flex-wrap">
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3 flex-shrink-0" />
-                            {formatRelativeTime(session.lastActiveAt)}
+                            {formatRelativeTime(session.lastActiveAt, t as (key: string, options?: Record<string, unknown>) => string)}
                           </span>
                           {session.ipAddress && (
                             <span className="flex items-center gap-1">
@@ -528,21 +530,21 @@ export function SecuritySettings() {
                             onClick={() => setShowRevokeConfirm(null)}
                             className="px-3 py-1 text-sm text-ctp-subtext0"
                           >
-                            Annuler
+                            {t('settings.security.cancel')}
                           </button>
                           <button
                             onClick={() => revokeSessionMutation.mutate(session.id)}
                             disabled={revokeSessionMutation.isPending}
                             className="px-3 py-1 text-sm font-medium text-ctp-base bg-ctp-red rounded hover:bg-ctp-maroon"
                           >
-                            {revokeSessionMutation.isPending ? 'Deconnexion...' : 'Confirmer'}
+                            {revokeSessionMutation.isPending ? t('settings.security.disconnecting') : t('settings.security.confirm')}
                           </button>
                         </div>
                       ) : (
                         <button
                           onClick={() => setShowRevokeConfirm(`session-${session.id}`)}
                           className="text-sm text-ctp-red hover:text-ctp-maroon flex-shrink-0"
-                          title="Deconnecter cette session"
+                          title={t('settings.security.disconnectThisSession')}
                         >
                           <LogOut className="h-4 w-4" />
                         </button>
@@ -563,10 +565,10 @@ export function SecuritySettings() {
             <AlertTriangle className="h-5 w-5 text-ctp-red" />
             <div>
               <h2 className="text-lg font-semibold text-ctp-text">
-                Historique de securite
+                {t('settings.security.securityHistory')}
               </h2>
               <p className="text-sm text-ctp-subtext0">
-                Evenements de securite recents
+                {t('settings.security.recentSecurityEvents')}
               </p>
             </div>
           </div>
@@ -575,7 +577,7 @@ export function SecuritySettings() {
         <div className="divide-y divide-ctp-surface1 max-h-80 overflow-y-auto">
           {securityEvents.length === 0 ? (
             <div className="p-6 text-center text-ctp-subtext0">
-              Aucun evenement de securite
+              {t('settings.security.noSecurityEvents')}
             </div>
           ) : (
             securityEvents.map((event) => (
@@ -586,7 +588,7 @@ export function SecuritySettings() {
                       {getActionLabel(event.action)}
                     </p>
                     <p className="text-xs text-ctp-subtext0">
-                      {event.ipAddress || 'IP inconnue'} - {formatDate(event.createdAt)}
+                      {event.ipAddress || t('settings.security.unknownIP')} - {formatDate(event.createdAt)}
                     </p>
                   </div>
                   <div
@@ -613,15 +615,15 @@ export function SecuritySettings() {
               <Key className="h-5 w-5 text-ctp-red" />
               <div>
                 <h3 className="text-sm font-medium text-ctp-text">
-                  Changer le mot de passe
+                  {t('settings.security.changePassword')}
                 </h3>
                 <p className="text-xs text-ctp-subtext0">
-                  Il est recommande de changer regulierement votre mot de passe
+                  {t('settings.security.changePasswordRecommendation')}
                 </p>
               </div>
             </div>
             <button className="px-4 py-2 text-sm font-medium text-ctp-blue hover:bg-ctp-surface0 rounded-lg transition-colors">
-              Modifier
+              {t('settings.security.modify')}
             </button>
           </div>
         </div>

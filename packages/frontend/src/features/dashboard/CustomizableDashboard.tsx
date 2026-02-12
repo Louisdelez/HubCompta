@@ -5,6 +5,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Plus, Settings, RotateCcw, Save, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
@@ -29,6 +30,7 @@ interface DashboardLayoutResponse {
 // ----------------------------------------------------------------------------
 
 export function CustomizableDashboard() {
+  const { t } = useTranslation();
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -126,10 +128,10 @@ export function CustomizableDashboard() {
 
   // Handle reset
   const handleReset = useCallback(() => {
-    if (confirm('Reinitialiser le tableau de bord a la disposition par defaut ?')) {
+    if (confirm(t('dashboardCustom.resetConfirm'))) {
       resetMutation.mutate();
     }
-  }, [resetMutation]);
+  }, [resetMutation, t]);
 
   // Auto-save on edit mode exit
   const handleToggleEdit = useCallback(() => {
@@ -143,7 +145,7 @@ export function CustomizableDashboard() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <p className="text-ctp-subtext0">Selectionnez un espace de travail</p>
+          <p className="text-ctp-subtext0">{t('dashboardCustom.selectWorkspace')}</p>
         </div>
       </div>
     );
@@ -171,11 +173,11 @@ export function CustomizableDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-ctp-text">Tableau de bord</h1>
+          <h1 className="text-2xl font-bold text-ctp-text">{t('dashboardCustom.title')}</h1>
           <p className="text-ctp-subtext1">
             {isEditing
-              ? 'Mode edition - Glissez et redimensionnez les widgets'
-              : 'Vue d\'ensemble de vos finances'}
+              ? t('dashboardCustom.editMode')
+              : t('dashboardCustom.overview')}
           </p>
         </div>
 
@@ -185,7 +187,7 @@ export function CustomizableDashboard() {
           {hasUnsavedChanges && (
             <span className="text-sm text-ctp-yellow flex items-center gap-1">
               <span className="w-2 h-2 bg-ctp-yellow rounded-full animate-pulse" />
-              Modifications non enregistrees
+              {t('dashboardCustom.unsavedChanges')}
             </span>
           )}
 
@@ -196,7 +198,7 @@ export function CustomizableDashboard() {
               className="flex items-center gap-2 px-4 py-2 bg-ctp-green text-ctp-crust rounded-lg hover:bg-ctp-green/90 transition-colors"
             >
               <Plus className="w-4 h-4" />
-              Ajouter
+              {t('dashboardCustom.add')}
             </button>
           )}
 
@@ -212,7 +214,7 @@ export function CustomizableDashboard() {
               ) : (
                 <RotateCcw className="w-4 h-4" />
               )}
-              Reinitialiser
+              {t('dashboardCustom.reset')}
             </button>
           )}
 
@@ -228,7 +230,7 @@ export function CustomizableDashboard() {
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              Enregistrer
+              {t('dashboardCustom.save')}
             </button>
           )}
 
@@ -243,7 +245,7 @@ export function CustomizableDashboard() {
             )}
           >
             <Settings className={clsx('w-4 h-4', isEditing && 'animate-spin-slow')} />
-            {isEditing ? 'Terminer' : 'Personnaliser'}
+            {isEditing ? t('dashboardCustom.finish') : t('dashboardCustom.customize')}
           </button>
         </div>
       </div>
@@ -258,10 +260,10 @@ export function CustomizableDashboard() {
               <Plus className="w-8 h-8 text-ctp-overlay1" />
             </div>
             <h3 className="text-lg font-medium text-ctp-text mb-2">
-              Aucun widget
+              {t('dashboardCustom.noWidgets')}
             </h3>
             <p className="text-ctp-subtext0 mb-4 text-center max-w-md">
-              Votre tableau de bord est vide. Ajoutez des widgets pour suivre vos finances.
+              {t('dashboardCustom.emptyDashboard')}
             </p>
             <button
               onClick={() => {
@@ -271,7 +273,7 @@ export function CustomizableDashboard() {
               className="flex items-center gap-2 px-4 py-2 bg-ctp-blue text-ctp-crust rounded-lg hover:bg-ctp-sapphire transition-colors"
             >
               <Plus className="w-4 h-4" />
-              Ajouter un widget
+              {t('dashboardCustom.addWidget')}
             </button>
           </div>
         ) : (

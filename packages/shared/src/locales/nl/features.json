@@ -1,0 +1,289 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "transactions": "Transacties",
+    "accounts": "Rekeningen",
+    "budgets": "Budgetten",
+    "savings": "Sparen",
+    "loans": "Leningen",
+    "investments": "Beleggingen",
+    "netWorth": "Nettovermogen",
+    "documents": "Documenten",
+    "banking": "Bankieren",
+    "recurrences": "Terugkerend",
+    "scheduled": "Gepland",
+    "bills": "Rekeningen",
+    "settlement": "Afrekening",
+    "forecast": "Voorspelling",
+    "tax": "Belasting",
+    "import": "Importeren",
+    "export": "Exporteren",
+    "rules": "Regels",
+    "ai": "AI",
+    "reports": "Rapporten",
+    "currencies": "Valuta's",
+    "search": "Zoeken",
+    "achievements": "Prestaties",
+    "activity": "Activiteit",
+    "settings": "Instellingen",
+    "administration": "Beheer",
+    "logout": "Uitloggen",
+    "skipToMain": "Naar hoofdinhoud gaan"
+  },
+  "auth": {
+    "login": "Inloggen",
+    "register": "Registreren",
+    "logout": "Uitloggen",
+    "email": "E-mailadres",
+    "password": "Wachtwoord",
+    "confirmPassword": "Bevestig wachtwoord",
+    "forgotPassword": "Wachtwoord vergeten?",
+    "resetPassword": "Wachtwoord resetten",
+    "rememberMe": "Onthoud mij",
+    "signIn": "Aanmelden",
+    "signUp": "Registreren",
+    "createAccount": "Account aanmaken",
+    "alreadyHaveAccount": "Heeft u al een account?",
+    "dontHaveAccount": "Heeft u geen account?",
+    "displayName": "Weergavenaam",
+    "authenticating": "Authenticeren..."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welkom",
+    "overview": "Overzicht",
+    "recentTransactions": "Recente transacties",
+    "upcomingBills": "Aankomende rekeningen",
+    "budgetStatus": "Budgetstatus",
+    "netWorth": "Nettovermogen",
+    "monthlyIncome": "Maandelijks inkomen",
+    "monthlyExpenses": "Maandelijkse uitgaven",
+    "savings": "Sparen",
+    "thisMonth": "Deze maand",
+    "lastMonth": "Vorige maand",
+    "thisYear": "Dit jaar",
+    "customRange": "Aangepast bereik",
+    "income": "Inkomsten",
+    "expenses": "Uitgaven",
+    "noUpcomingBills": "Geen aankomende rekeningen",
+    "viewAll": "Alles bekijken"
+  },
+  "transactions": {
+    "title": "Transacties",
+    "newTransaction": "Nieuwe transactie",
+    "addTransaction": "Transactie toevoegen",
+    "editTransaction": "Transactie bewerken",
+    "deleteTransaction": "Transactie verwijderen",
+    "transactionDetails": "Transactiedetails",
+    "income": "Inkomsten",
+    "expense": "Uitgave",
+    "transfer": "Overboeking",
+    "date": "Datum",
+    "amount": "Bedrag",
+    "category": "Categorie",
+    "account": "Rekening",
+    "payee": "Begunstigde",
+    "notes": "Notities",
+    "tags": "Labels",
+    "recurring": "Terugkerend",
+    "pending": "In behandeling",
+    "cleared": "Verwerkt",
+    "reconciled": "Afgestemd",
+    "filterByAccount": "Filteren op rekening",
+    "filterByCategory": "Filteren op categorie",
+    "filterByDate": "Filteren op datum",
+    "noTransactions": "Geen transacties",
+    "confirmDelete": "Weet u zeker dat u deze transactie wilt verwijderen?"
+  },
+  "accounts": {
+    "title": "Rekeningen",
+    "newAccount": "Nieuwe rekening",
+    "addAccount": "Rekening toevoegen",
+    "editAccount": "Rekening bewerken",
+    "deleteAccount": "Rekening verwijderen",
+    "accountDetails": "Rekeningdetails",
+    "accountName": "Rekeningnaam",
+    "accountType": "Rekeningtype",
+    "initialBalance": "Beginsaldo",
+    "currentBalance": "Huidig saldo",
+    "currency": "Valuta",
+    "checking": "Betaalrekening",
+    "savings": "Spaarrekening",
+    "creditCard": "Creditcard",
+    "cash": "Contant",
+    "investment": "Belegging",
+    "loan": "Lening",
+    "asset": "Activa",
+    "liability": "Passiva",
+    "institution": "Instelling",
+    "accountNumber": "Rekeningnummer",
+    "noAccounts": "Geen rekeningen",
+    "confirmDelete": "Weet u zeker dat u deze rekening wilt verwijderen?",
+    "totalBalance": "Totaal saldo"
+  },
+  "budgets": {
+    "title": "Budgetten",
+    "newBudget": "Nieuw budget",
+    "addBudget": "Budget toevoegen",
+    "editBudget": "Budget bewerken",
+    "deleteBudget": "Budget verwijderen",
+    "budgetName": "Budgetnaam",
+    "budgetAmount": "Budgetbedrag",
+    "spent": "Uitgegeven",
+    "remaining": "Resterend",
+    "overBudget": "Over budget",
+    "onTrack": "Op schema",
+    "period": "Periode",
+    "monthly": "Maandelijks",
+    "weekly": "Wekelijks",
+    "yearly": "Jaarlijks",
+    "categories": "Categorieën",
+    "noBudgets": "Geen budgetten",
+    "progress": "Voortgang",
+    "percentUsed": "{{percent}}% gebruikt"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "manageAccount": "Beheer uw account en voorkeuren",
+    "backToDashboard": "Terug naar dashboard",
+    "profile": {
+      "title": "Profiel",
+      "description": "Persoonlijke informatie en voorkeuren"
+    },
+    "display": {
+      "title": "Weergave",
+      "description": "Thema, formaat en dashboard",
+      "theme": "Thema",
+      "themeDescription": "Kies uit 4 Catppuccin smaken",
+      "activeTheme": "Actief thema",
+      "automatic": "automatisch",
+      "systemTheme": "Systeem",
+      "compactMode": "Compacte modus",
+      "compactModeDescription": "Dichtere weergave met minder ruimte",
+      "showBalance": "Saldo's tonen",
+      "showBalanceDescription": "Toon rekeningsaldo's in de lijst",
+      "defaultCurrency": "Standaardvaluta",
+      "dateFormat": "Datumformaat",
+      "numberFormat": "Getalformaat",
+      "startOfWeek": "Begin van de week",
+      "monday": "Maandag",
+      "sunday": "Zondag",
+      "currencies": {
+        "eur": "Euro (EUR)",
+        "usd": "Amerikaanse Dollar (USD)",
+        "gbp": "Britse Pond (GBP)",
+        "chf": "Zwitserse Frank (CHF)",
+        "cad": "Canadese Dollar (CAD)"
+      },
+      "dateFormats": {
+        "dmy": "DD/MM/JJJJ (31/12/2024)",
+        "mdy": "MM/DD/JJJJ (12/31/2024)",
+        "ymd": "JJJJ-MM-DD (2024-12-31)"
+      },
+      "numberFormats": {
+        "fr": "Frans (1 234,56)",
+        "en": "Amerikaans Engels (1,234.56)",
+        "de": "Duits (1.234,56)"
+      }
+    },
+    "notifications": {
+      "title": "Meldingen",
+      "description": "E-mail, push en waarschuwingen"
+    },
+    "security": {
+      "title": "Beveiliging",
+      "description": "MFA, apparaten en sessies"
+    },
+    "audit": {
+      "title": "Auditlogboek",
+      "description": "Geschiedenis van gevoelige acties"
+    },
+    "data": {
+      "title": "Gegevens",
+      "description": "Exporteren en accountverwijdering"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Configureer uw dashboard",
+      "defaultPeriod": "Standaardperiode",
+      "periods": {
+        "month": "Maand",
+        "quarter": "Kwartaal",
+        "year": "Jaar"
+      },
+      "showNetWorth": "Nettovermogen tonen",
+      "showNetWorthDescription": "Toon totale activa minus passiva",
+      "showBudgets": "Budgetten tonen",
+      "showBudgetsDescription": "Toon budgetstatus op dashboard",
+      "showRecentTransactions": "Recente transacties tonen",
+      "showRecentTransactionsDescription": "Toon laatste transacties",
+      "showUpcomingBills": "Aankomende rekeningen tonen",
+      "showUpcomingBillsDescription": "Toon geplande betalingen"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "description": "Privacy- en sessie-beveiligingsopties",
+      "hideAmounts": "Bedragen verbergen",
+      "hideAmountsDescription": "Verberg bedragen tot muisaanwijzer eroverheen gaat",
+      "lockOnInactivity": "Vergrendelen bij inactiviteit",
+      "lockOnInactivityDescription": "Vergrendel sessie na periode van inactiviteit",
+      "inactivityTimeout": "Inactiviteits-timeout (minuten)",
+      "sessionTimeout": "Sessie-timeout (minuten)",
+      "timeouts": {
+        "1min": "1 minuut",
+        "5min": "5 minuten",
+        "10min": "10 minuten",
+        "15min": "15 minuten",
+        "30min": "30 minuten",
+        "1hour": "1 uur",
+        "2hours": "2 uur",
+        "8hours": "8 uur",
+        "24hours": "24 uur"
+      }
+    },
+    "help": {
+      "title": "Hulp en handleiding",
+      "description": "Herstart de rondleiding om alle functies te ontdekken"
+    },
+    "language": {
+      "title": "Taal",
+      "description": "Kies uw voorkeurstaal",
+      "select": "Selecteer taal",
+      "current": "Huidige taal"
+    },
+    "workspace": {
+      "title": "Werkruimte-instellingen",
+      "description": "Configureer werkruimte-specifieke instellingen",
+      "manage": "Werkruimtes beheren"
+    }
+  },
+  "workspace": {
+    "title": "Werkruimte",
+    "create": "Werkruimte aanmaken",
+    "select": "Werkruimte selecteren",
+    "switch": "Werkruimte wisselen",
+    "members": "Leden",
+    "settings": "Werkruimte-instellingen",
+    "noWorkspace": "Geen werkruimte"
+  },
+  "confirmation": {
+    "delete": "Weet u zeker dat u wilt verwijderen?",
+    "unsavedChanges": "U heeft niet-opgeslagen wijzigingen. Wilt u de pagina verlaten?",
+    "logout": "Weet u zeker dat u wilt uitloggen?"
+  },
+  "time": {
+    "today": "Vandaag",
+    "yesterday": "Gisteren",
+    "tomorrow": "Morgen",
+    "thisWeek": "Deze week",
+    "lastWeek": "Vorige week",
+    "thisMonth": "Deze maand",
+    "lastMonth": "Vorige maand",
+    "thisYear": "Dit jaar",
+    "lastYear": "Vorig jaar"
+  },
+  "notFoundPage": {
+    "title": "404",
+    "message": "Pagina niet gevonden"
+  }
+}

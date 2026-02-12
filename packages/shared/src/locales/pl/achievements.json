@@ -1,0 +1,124 @@
+{
+  "title": "Osiagniecia",
+  "secretAchievement": "Tajne osiagniecie",
+  "unlocked": "Odblokowane",
+  "progress": "Postep",
+  "xpReward": "{{xp}} XP",
+  "level": "Poziom {{level}}",
+  "levelUp": "Awans na wyzszy poziom!",
+  "congratulations": "Gratulacje! Osiagnales poziom {{level}}!",
+  "categories": {
+    "onboarding": "Pierwsze kroki",
+    "transactions": "Transakcje",
+    "budgeting": "Budzetowanie",
+    "savings": "Oszczednosci",
+    "streaks": "Serie",
+    "milestones": "Kamienie milowe"
+  },
+  "achievements": {
+    "first_steps": {
+      "name": "Pierwsze kroki",
+      "description": "Dodaj swoja pierwsza transakcje"
+    },
+    "first_budget": {
+      "name": "Poczatkujacy w budzetowaniu",
+      "description": "Utworz swoj pierwszy budzet"
+    },
+    "first_goal": {
+      "name": "Wyznaczanie celow",
+      "description": "Utworz swoj pierwszy cel oszczednosciowy"
+    },
+    "account_setup": {
+      "name": "Dobrze wyposazony",
+      "description": "Dodaj 3 konta"
+    },
+    "tracker_10": {
+      "name": "Regularny uzytkownik",
+      "description": "Zarejestruj 10 transakcji"
+    },
+    "tracker_50": {
+      "name": "Oddany uzytkownik",
+      "description": "Zarejestruj 50 transakcji"
+    },
+    "tracker_100": {
+      "name": "Mistrz sledzenia",
+      "description": "Zarejestruj 100 transakcji"
+    },
+    "tracker_500": {
+      "name": "Ekspert ksiegowosci",
+      "description": "Zarejestruj 500 transakcji"
+    },
+    "categorizer": {
+      "name": "Organizator",
+      "description": "Skategoryzuj 25 transakcji"
+    },
+    "budget_keeper": {
+      "name": "Straznik budzetu",
+      "description": "Zakoncz miesiac ponizej budzetu"
+    },
+    "budget_master_3": {
+      "name": "Dyscyplina",
+      "description": "Utrzymaj budzet przez 3 kolejne miesiace"
+    },
+    "budget_master_6": {
+      "name": "Mistrzostwo budzetu",
+      "description": "Utrzymaj budzet przez 6 kolejnych miesiecy"
+    },
+    "multi_budget": {
+      "name": "Multi-budzet",
+      "description": "Zarzadzaj 5 budzetami jednoczesnie"
+    },
+    "saver_first": {
+      "name": "Pierwszy krok oszczednosci",
+      "description": "Osiagnij 10% swojego pierwszego celu"
+    },
+    "saver_half": {
+      "name": "W polowie drogi",
+      "description": "Osiagnij 50% celu"
+    },
+    "saver_complete": {
+      "name": "Cel osiagniety",
+      "description": "Ukonczony cel oszczednosciowy"
+    },
+    "saver_3_goals": {
+      "name": "Potrojny sukces",
+      "description": "Ukoncz 3 cele oszczednosciowe"
+    },
+    "saver_1000": {
+      "name": "Tysiac zaoszczedzone",
+      "description": "Zaoszczedz lacznie 1 000 EUR"
+    },
+    "saver_10000": {
+      "name": "Dziesiec tysiecy",
+      "description": "Zaoszczedz lacznie 10 000 EUR"
+    },
+    "streak_7": {
+      "name": "Aktywny tydzien",
+      "description": "7 kolejnych dni aktywnosci"
+    },
+    "streak_30": {
+      "name": "Pelny miesiac",
+      "description": "30 kolejnych dni aktywnosci"
+    },
+    "streak_100": {
+      "name": "Centurion",
+      "description": "100 kolejnych dni aktywnosci"
+    },
+    "streak_365": {
+      "name": "Maratonczyk",
+      "description": "365 kolejnych dni aktywnosci"
+    },
+    "night_owl": {
+      "name": "Nocna sowa",
+      "description": "Dodaj transakcje po polnocy"
+    },
+    "early_bird": {
+      "name": "Ranny ptaszek",
+      "description": "Dodaj transakcje przed 6 rano"
+    },
+    "perfect_month": {
+      "name": "Idealny miesiac",
+      "description": "Skategoryzuj wszystkie transakcje w miesiacu"
+    }
+  }
+}

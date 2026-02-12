@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   LineChart,
   Line,
@@ -16,7 +17,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { format, parseISO, subDays, subMonths, subYears } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS, type Locale } from 'date-fns/locale';
 import { formatCurrency, cn } from '@/lib/utils';
 import { useTheme } from '@/providers/ThemeProvider';
 import { CATPPUCCIN } from '@/lib/catppuccin-colors';
@@ -103,12 +104,16 @@ function CustomTooltip({
   label,
   currency = 'EUR',
   showInvested = false,
+  t,
+  dateLocale,
 }: {
   active?: boolean;
   payload?: { value: number; dataKey: string; color: string }[];
   label?: string;
   currency?: string;
   showInvested?: boolean;
+  t: (key: string) => string;
+  dateLocale: Locale;
 }) {
   if (!active || !payload || !payload.length) return null;
 
@@ -118,11 +123,11 @@ function CustomTooltip({
   return (
     <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg shadow-lg p-3">
       <p className="text-sm text-ctp-overlay1 mb-2">
-        {label ? format(parseISO(label), 'dd MMM yyyy', { locale: fr }) : ''}
+        {label ? format(parseISO(label), 'dd MMM yyyy', { locale: dateLocale }) : ''}
       </p>
       {valueData && (
         <p className="text-sm">
-          <span className="text-ctp-subtext0">Valeur: </span>
+          <span className="text-ctp-subtext0">{t('invest.performanceChart.value')}: </span>
           <span className="font-medium text-ctp-text">
             {formatCurrency(valueData.value, currency)}
           </span>
@@ -130,7 +135,7 @@ function CustomTooltip({
       )}
       {showInvested && investedData && (
         <p className="text-sm">
-          <span className="text-ctp-subtext0">Investi: </span>
+          <span className="text-ctp-subtext0">{t('invest.performanceChart.invested')}: </span>
           <span className="font-medium text-ctp-overlay1">
             {formatCurrency(investedData.value, currency)}
           </span>
@@ -165,6 +170,8 @@ export function PerformanceChart({
   height = 300,
   className,
 }: PerformanceChartProps) {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'fr' ? fr : enUS;
   const [timeRange, setTimeRange] = useState<TimeRange>('3M');
   const colors = useCatppuccinChartColors();
 
@@ -224,7 +231,7 @@ export function PerformanceChart({
   if (data.length === 0) {
     return (
       <div className={cn('flex items-center justify-center text-ctp-overlay1', className)} style={{ height }}>
-        Aucune donnée de performance disponible
+        {t('invest.performanceChart.noData')}
       </div>
     );
   }
@@ -283,7 +290,7 @@ export function PerformanceChart({
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: colors.subtext0 }}
-              tickFormatter={(value) => format(parseISO(value), 'dd/MM', { locale: fr })}
+              tickFormatter={(value) => format(parseISO(value), 'dd/MM', { locale: dateLocale })}
               minTickGap={50}
             />
             <YAxis
@@ -294,7 +301,7 @@ export function PerformanceChart({
               tickFormatter={(value) => formatCurrency(value, currency, { compact: true })}
               width={60}
             />
-            <Tooltip content={<CustomTooltip currency={currency} showInvested={showInvested} />} />
+            <Tooltip content={<CustomTooltip currency={currency} showInvested={showInvested} t={t} dateLocale={dateLocale} />} />
 
             {/* Reference line at invested amount (if available) */}
             {showInvested && filteredData.length > 0 && filteredData[0]?.invested !== undefined && (
@@ -336,11 +343,11 @@ export function PerformanceChart({
         <div className="flex items-center justify-center gap-6 mt-4">
           <div className="flex items-center gap-2">
             <span className="w-4 h-0.5" style={{ backgroundColor: chartColor }} />
-            <span className="text-xs text-ctp-subtext0">Valeur du portefeuille</span>
+            <span className="text-xs text-ctp-subtext0">{t('invest.performanceChart.portfolioValue')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-4 h-0.5 border-t border-dashed border-ctp-overlay1" />
-            <span className="text-xs text-ctp-subtext0">Montant investi</span>
+            <span className="text-xs text-ctp-subtext0">{t('invest.performanceChart.amountInvested')}</span>
           </div>
         </div>
       )}

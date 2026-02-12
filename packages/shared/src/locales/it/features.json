@@ -1,0 +1,289 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "transactions": "Transazioni",
+    "accounts": "Conti",
+    "budgets": "Budget",
+    "savings": "Risparmi",
+    "loans": "Prestiti",
+    "investments": "Investimenti",
+    "netWorth": "Patrimonio netto",
+    "documents": "Documenti",
+    "banking": "Banca",
+    "recurrences": "Ricorrenze",
+    "scheduled": "Programmati",
+    "bills": "Bollette",
+    "settlement": "Regolamento",
+    "forecast": "Previsione",
+    "tax": "Tasse",
+    "import": "Importa",
+    "export": "Esporta",
+    "rules": "Regole",
+    "ai": "IA",
+    "reports": "Report",
+    "currencies": "Valute",
+    "search": "Cerca",
+    "achievements": "Successi",
+    "activity": "Attivita",
+    "settings": "Impostazioni",
+    "administration": "Amministrazione",
+    "logout": "Esci",
+    "skipToMain": "Vai al contenuto principale"
+  },
+  "auth": {
+    "login": "Accedi",
+    "register": "Registrati",
+    "logout": "Esci",
+    "email": "Indirizzo email",
+    "password": "Password",
+    "confirmPassword": "Conferma password",
+    "forgotPassword": "Password dimenticata?",
+    "resetPassword": "Reimposta password",
+    "rememberMe": "Ricordami",
+    "signIn": "Accedi",
+    "signUp": "Registrati",
+    "createAccount": "Crea account",
+    "alreadyHaveAccount": "Hai gia un account?",
+    "dontHaveAccount": "Non hai un account?",
+    "displayName": "Nome visualizzato",
+    "authenticating": "Autenticazione in corso..."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Benvenuto",
+    "overview": "Panoramica",
+    "recentTransactions": "Transazioni recenti",
+    "upcomingBills": "Bollette in scadenza",
+    "budgetStatus": "Stato budget",
+    "netWorth": "Patrimonio netto",
+    "monthlyIncome": "Entrate mensili",
+    "monthlyExpenses": "Spese mensili",
+    "savings": "Risparmi",
+    "thisMonth": "Questo mese",
+    "lastMonth": "Mese scorso",
+    "thisYear": "Quest'anno",
+    "customRange": "Intervallo personalizzato",
+    "income": "Entrate",
+    "expenses": "Spese",
+    "noUpcomingBills": "Nessuna bolletta in scadenza",
+    "viewAll": "Visualizza tutto"
+  },
+  "transactions": {
+    "title": "Transazioni",
+    "newTransaction": "Nuova transazione",
+    "addTransaction": "Aggiungi transazione",
+    "editTransaction": "Modifica transazione",
+    "deleteTransaction": "Elimina transazione",
+    "transactionDetails": "Dettagli transazione",
+    "income": "Entrata",
+    "expense": "Spesa",
+    "transfer": "Trasferimento",
+    "date": "Data",
+    "amount": "Importo",
+    "category": "Categoria",
+    "account": "Conto",
+    "payee": "Beneficiario",
+    "notes": "Note",
+    "tags": "Tag",
+    "recurring": "Ricorrente",
+    "pending": "In attesa",
+    "cleared": "Verificato",
+    "reconciled": "Riconciliato",
+    "filterByAccount": "Filtra per conto",
+    "filterByCategory": "Filtra per categoria",
+    "filterByDate": "Filtra per data",
+    "noTransactions": "Nessuna transazione",
+    "confirmDelete": "Sei sicuro di voler eliminare questa transazione?"
+  },
+  "accounts": {
+    "title": "Conti",
+    "newAccount": "Nuovo conto",
+    "addAccount": "Aggiungi conto",
+    "editAccount": "Modifica conto",
+    "deleteAccount": "Elimina conto",
+    "accountDetails": "Dettagli conto",
+    "accountName": "Nome conto",
+    "accountType": "Tipo di conto",
+    "initialBalance": "Saldo iniziale",
+    "currentBalance": "Saldo attuale",
+    "currency": "Valuta",
+    "checking": "Conto corrente",
+    "savings": "Conto risparmio",
+    "creditCard": "Carta di credito",
+    "cash": "Contanti",
+    "investment": "Investimento",
+    "loan": "Prestito",
+    "asset": "Attivo",
+    "liability": "Passivo",
+    "institution": "Istituto",
+    "accountNumber": "Numero conto",
+    "noAccounts": "Nessun conto",
+    "confirmDelete": "Sei sicuro di voler eliminare questo conto?",
+    "totalBalance": "Saldo totale"
+  },
+  "budgets": {
+    "title": "Budget",
+    "newBudget": "Nuovo budget",
+    "addBudget": "Aggiungi budget",
+    "editBudget": "Modifica budget",
+    "deleteBudget": "Elimina budget",
+    "budgetName": "Nome budget",
+    "budgetAmount": "Importo budget",
+    "spent": "Speso",
+    "remaining": "Rimanente",
+    "overBudget": "Budget superato",
+    "onTrack": "In linea",
+    "period": "Periodo",
+    "monthly": "Mensile",
+    "weekly": "Settimanale",
+    "yearly": "Annuale",
+    "categories": "Categorie",
+    "noBudgets": "Nessun budget",
+    "progress": "Progresso",
+    "percentUsed": "{{percent}}% utilizzato"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "manageAccount": "Gestisci il tuo account e le preferenze",
+    "backToDashboard": "Torna alla dashboard",
+    "profile": {
+      "title": "Profilo",
+      "description": "Informazioni personali e preferenze"
+    },
+    "display": {
+      "title": "Visualizzazione",
+      "description": "Tema, formato e dashboard",
+      "theme": "Tema",
+      "themeDescription": "Scegli tra 4 varianti Catppuccin",
+      "activeTheme": "Tema attivo",
+      "automatic": "automatico",
+      "systemTheme": "Sistema",
+      "compactMode": "Modalita compatta",
+      "compactModeDescription": "Visualizzazione piu densa con meno spazio",
+      "showBalance": "Mostra saldi",
+      "showBalanceDescription": "Mostra i saldi dei conti nella lista",
+      "defaultCurrency": "Valuta predefinita",
+      "dateFormat": "Formato data",
+      "numberFormat": "Formato numeri",
+      "startOfWeek": "Inizio settimana",
+      "monday": "Lunedi",
+      "sunday": "Domenica",
+      "currencies": {
+        "eur": "Euro (EUR)",
+        "usd": "Dollaro USA (USD)",
+        "gbp": "Sterlina britannica (GBP)",
+        "chf": "Franco svizzero (CHF)",
+        "cad": "Dollaro canadese (CAD)"
+      },
+      "dateFormats": {
+        "dmy": "GG/MM/AAAA (31/12/2024)",
+        "mdy": "MM/GG/AAAA (12/31/2024)",
+        "ymd": "AAAA-MM-GG (2024-12-31)"
+      },
+      "numberFormats": {
+        "fr": "Francese (1 234,56)",
+        "en": "Inglese USA (1,234.56)",
+        "de": "Tedesco (1.234,56)"
+      }
+    },
+    "notifications": {
+      "title": "Notifiche",
+      "description": "Email, push e avvisi"
+    },
+    "security": {
+      "title": "Sicurezza",
+      "description": "MFA, dispositivi e sessioni"
+    },
+    "audit": {
+      "title": "Registro audit",
+      "description": "Storico delle azioni sensibili"
+    },
+    "data": {
+      "title": "Dati",
+      "description": "Esportazione e cancellazione account"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Configura la tua dashboard",
+      "defaultPeriod": "Periodo predefinito",
+      "periods": {
+        "month": "Mese",
+        "quarter": "Trimestre",
+        "year": "Anno"
+      },
+      "showNetWorth": "Mostra patrimonio netto",
+      "showNetWorthDescription": "Mostra totale attivi meno passivi",
+      "showBudgets": "Mostra budget",
+      "showBudgetsDescription": "Mostra lo stato dei budget sulla dashboard",
+      "showRecentTransactions": "Mostra transazioni recenti",
+      "showRecentTransactionsDescription": "Mostra le ultime transazioni",
+      "showUpcomingBills": "Mostra bollette in scadenza",
+      "showUpcomingBillsDescription": "Mostra i pagamenti programmati"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "description": "Opzioni di privacy e sicurezza della sessione",
+      "hideAmounts": "Nascondi importi",
+      "hideAmountsDescription": "Nascondi gli importi fino al passaggio del mouse",
+      "lockOnInactivity": "Blocca per inattivita",
+      "lockOnInactivityDescription": "Blocca la sessione dopo un periodo di inattivita",
+      "inactivityTimeout": "Timeout inattivita (minuti)",
+      "sessionTimeout": "Timeout sessione (minuti)",
+      "timeouts": {
+        "1min": "1 minuto",
+        "5min": "5 minuti",
+        "10min": "10 minuti",
+        "15min": "15 minuti",
+        "30min": "30 minuti",
+        "1hour": "1 ora",
+        "2hours": "2 ore",
+        "8hours": "8 ore",
+        "24hours": "24 ore"
+      }
+    },
+    "help": {
+      "title": "Aiuto e tutorial",
+      "description": "Riavvia il tour guidato per scoprire tutte le funzionalita"
+    },
+    "language": {
+      "title": "Lingua",
+      "description": "Scegli la tua lingua preferita",
+      "select": "Seleziona lingua",
+      "current": "Lingua corrente"
+    },
+    "workspace": {
+      "title": "Impostazioni workspace",
+      "description": "Configura le impostazioni specifiche del workspace",
+      "manage": "Gestisci workspace"
+    }
+  },
+  "workspace": {
+    "title": "Workspace",
+    "create": "Crea workspace",
+    "select": "Seleziona workspace",
+    "switch": "Cambia workspace",
+    "members": "Membri",
+    "settings": "Impostazioni workspace",
+    "noWorkspace": "Nessun workspace"
+  },
+  "confirmation": {
+    "delete": "Sei sicuro di voler eliminare?",
+    "unsavedChanges": "Hai modifiche non salvate. Vuoi uscire?",
+    "logout": "Sei sicuro di voler uscire?"
+  },
+  "time": {
+    "today": "Oggi",
+    "yesterday": "Ieri",
+    "tomorrow": "Domani",
+    "thisWeek": "Questa settimana",
+    "lastWeek": "Settimana scorsa",
+    "thisMonth": "Questo mese",
+    "lastMonth": "Mese scorso",
+    "thisYear": "Quest'anno",
+    "lastYear": "Anno scorso"
+  },
+  "notFoundPage": {
+    "title": "404",
+    "message": "Pagina non trovata"
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "title": "Powiadomienia",
+  "markAllRead": "Oznacz wszystkie jako przeczytane",
+  "noNotifications": "Brak powiadomien",
+  "viewAll": "Zobacz wszystkie powiadomienia",
+  "budgetExceeded": {
+    "title": "Budzet \"{{budgetName}}\" przekroczony",
+    "message": "Budzet dla \"{{categoryName}}\" zostal przekroczony ({{percentUsed}}% wykorzystane)."
+  },
+  "budgetWarning": {
+    "title": "Budzet \"{{budgetName}}\" prawie osiagniety",
+    "message": "Budzet dla \"{{categoryName}}\" wynosi {{percentUsed}}% swojego limitu."
+  },
+  "importComplete": {
+    "title": "Import zakonczony",
+    "message": "{{imported}} transakcja(e) zaimportowana(e){{skipped}}{{errors}}.",
+    "skipped": ", {{count}} pominiete",
+    "errors": ", {{count}} blad(ow)"
+  },
+  "importCompleteWithErrors": {
+    "title": "Import zakonczony z bledami",
+    "message": "{{imported}} transakcja(e) zaimportowana(e), {{skipped}} pominiete, {{errors}} blad(ow)."
+  },
+  "exportReady": {
+    "title": "Eksport gotowy",
+    "message": "Twoj eksport {{exportType}} jest gotowy do pobrania."
+  },
+  "invoiceOverdue": {
+    "title": "Faktura {{invoiceNumber}} zalegla",
+    "message": "Faktura {{invoiceNumber}} dla {{clientName}} ({{amount}} {{currency}}) jest zalegla."
+  },
+  "invoicePaid": {
+    "title": "Faktura {{invoiceNumber}} oplacona",
+    "message": "Faktura {{invoiceNumber}} dla {{clientName}} ({{amount}} {{currency}}) zostala oznaczona jako oplacona."
+  },
+  "quoteAccepted": {
+    "title": "Oferta {{quoteNumber}} zaakceptowana",
+    "message": "Oferta {{quoteNumber}} dla {{clientName}} ({{amount}} {{currency}}) zostala zaakceptowana."
+  },
+  "quoteExpiring": {
+    "title": "Oferta {{quoteNumber}} wkrotce wygasa",
+    "message": "Oferta {{quoteNumber}} dla {{clientName}} wygasa za {{daysLeft}} dzien/dni."
+  },
+  "priceAlert": {
+    "title": "Alert cenowy: {{assetSymbol}}",
+    "messageAbove": "{{assetName}} przekroczyl {{targetPrice}} {{currency}} (obecnie {{currentPrice}} {{currency}}).",
+    "messageBelow": "{{assetName}} spadl ponizej {{targetPrice}} {{currency}} (obecnie {{currentPrice}} {{currency}})."
+  },
+  "billReminder": {
+    "title": "Przypomnienie o platnosci",
+    "message": "\"{{description}}\" ({{amount}} {{currency}}) jest wymagalne za {{daysUntil}} dzien/dni."
+  },
+  "unusualSpending": {
+    "title": "Nietypowe wydatki w \"{{categoryName}}\"",
+    "titleGeneric": "Wykryto nietypowe wydatki",
+    "message": "{{description}}: {{amount}} {{currency}} ({{percentAboveAverage}}% powyzej sredniej)"
+  },
+  "weeklySummary": {
+    "titlePositive": "Podsumowanie tygodniowe: +{{netChange}} {{currency}}",
+    "titleNegative": "Podsumowanie tygodniowe: {{netChange}} {{currency}}"
+  },
+  "monthlyReport": {
+    "title": "Raport miesieczny - {{month}}",
+    "message": "Wydatki: {{totalSpent}} {{currency}} | Przychody: {{totalIncome}} {{currency}}"
+  },
+  "lowBalance": {
+    "title": "Niskie saldo: {{accountName}}",
+    "message": "Saldo Twojego konta \"{{accountName}}\" wynosi {{balance}} {{currency}} (prog: {{threshold}} {{currency}})"
+  },
+  "billUpcoming": {
+    "titleToday": "Rachunek wymagalny dzisiaj",
+    "titleTomorrow": "Rachunek wymagalny jutro",
+    "titleDays": "Rachunek wymagalny za {{daysUntilDue}} dni",
+    "message": "\"{{description}}\" - {{amount}} {{currency}}"
+  },
+  "achievementUnlocked": {
+    "title": "{{icon}} Osiagniecie odblokowane!",
+    "message": "Zdobyles \"{{achievementName}}\" - {{description}}"
+  },
+  "levelUp": {
+    "title": "Awans na wyzszy poziom!",
+    "message": "Gratulacje! Osiagnales poziom {{level}}!"
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "title": "Conquistas",
+  "secretAchievement": "Conquista secreta",
+  "unlocked": "Desbloqueada",
+  "progress": "Progresso",
+  "xpReward": "{{xp}} XP",
+  "level": "Nivel {{level}}",
+  "levelUp": "Subiu de Nivel!",
+  "congratulations": "Parabens! Atingiu o nivel {{level}}!",
+  "categories": {
+    "onboarding": "Primeiros Passos",
+    "transactions": "Transacoes",
+    "budgeting": "Orcamentos",
+    "savings": "Poupancas",
+    "streaks": "Sequencias",
+    "milestones": "Marcos"
+  },
+  "achievements": {
+    "first_steps": {
+      "name": "Primeiros Passos",
+      "description": "Adicione a sua primeira transacao"
+    },
+    "first_budget": {
+      "name": "Iniciante em Orcamentos",
+      "description": "Crie o seu primeiro orcamento"
+    },
+    "first_goal": {
+      "name": "Definidor de Objetivos",
+      "description": "Crie o seu primeiro objetivo de poupanca"
+    },
+    "account_setup": {
+      "name": "Bem Equipado",
+      "description": "Adicione 3 contas"
+    },
+    "tracker_10": {
+      "name": "Registador Regular",
+      "description": "Registe 10 transacoes"
+    },
+    "tracker_50": {
+      "name": "Registador Dedicado",
+      "description": "Registe 50 transacoes"
+    },
+    "tracker_100": {
+      "name": "Mestre do Registo",
+      "description": "Registe 100 transacoes"
+    },
+    "tracker_500": {
+      "name": "Especialista em Contabilidade",
+      "description": "Registe 500 transacoes"
+    },
+    "categorizer": {
+      "name": "Organizador",
+      "description": "Categorize 25 transacoes"
+    },
+    "budget_keeper": {
+      "name": "Guardiao do Orcamento",
+      "description": "Termine um mes dentro do orcamento"
+    },
+    "budget_master_3": {
+      "name": "Disciplina",
+      "description": "Mantenha-se dentro do orcamento durante 3 meses consecutivos"
+    },
+    "budget_master_6": {
+      "name": "Mestria em Orcamentos",
+      "description": "Mantenha-se dentro do orcamento durante 6 meses consecutivos"
+    },
+    "multi_budget": {
+      "name": "Multi-Orcamento",
+      "description": "Gira 5 orcamentos simultaneamente"
+    },
+    "saver_first": {
+      "name": "Primeiro Passo de Poupanca",
+      "description": "Atinja 10% do seu primeiro objetivo"
+    },
+    "saver_half": {
+      "name": "A Meio Caminho",
+      "description": "Atinja 50% de um objetivo"
+    },
+    "saver_complete": {
+      "name": "Objetivo Alcancado",
+      "description": "Complete um objetivo de poupanca"
+    },
+    "saver_3_goals": {
+      "name": "Triplo Sucesso",
+      "description": "Complete 3 objetivos de poupanca"
+    },
+    "saver_1000": {
+      "name": "Mil Poupados",
+      "description": "Poupe 1.000 EUR no total"
+    },
+    "saver_10000": {
+      "name": "Dez Mil",
+      "description": "Poupe 10.000 EUR no total"
+    },
+    "streak_7": {
+      "name": "Semana Ativa",
+      "description": "7 dias consecutivos de atividade"
+    },
+    "streak_30": {
+      "name": "Mes Completo",
+      "description": "30 dias consecutivos de atividade"
+    },
+    "streak_100": {
+      "name": "Centuriao",
+      "description": "100 dias consecutivos de atividade"
+    },
+    "streak_365": {
+      "name": "Maratonista",
+      "description": "365 dias consecutivos de atividade"
+    },
+    "night_owl": {
+      "name": "Coruja Noturna",
+      "description": "Adicione uma transacao apos a meia-noite"
+    },
+    "early_bird": {
+      "name": "Madrugador",
+      "description": "Adicione uma transacao antes das 6h"
+    },
+    "perfect_month": {
+      "name": "Mes Perfeito",
+      "description": "Categorize todas as transacoes de um mes"
+    }
+  }
+}

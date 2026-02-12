@@ -10,6 +10,23 @@ import type { NotificationPayload } from '@/core/websocket/types.js';
 import { emailService, notificationPreferencesService } from '@/core/email/index.js';
 import { logger } from '@/core/middleware/logger.js';
 import { notificationDispatcherService } from './dispatcher.service.js';
+import {
+  getNotificationMessage,
+  DEFAULT_LANGUAGE,
+} from '@/core/i18n/index.js';
+import type { LanguageCode } from '@finance-hub/shared';
+
+// ----------------------------------------------------------------------------
+// Helper to get user locale
+// ----------------------------------------------------------------------------
+
+async function getUserLocale(userId: string): Promise<LanguageCode> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { locale: true },
+  });
+  return (user?.locale as LanguageCode) || DEFAULT_LANGUAGE;
+}
 
 // ----------------------------------------------------------------------------
 // Types
@@ -225,13 +242,18 @@ export const notificationService = {
     isExceeded: boolean,
     options?: { currency?: string; budgetUrl?: string }
   ) {
+    const locale = await getUserLocale(userId);
     const type = isExceeded ? 'budget_alert' : 'budget_warning';
-    const title = isExceeded
-      ? `Budget "${budget.name}" dépassé`
-      : `Budget "${budget.name}" bientôt atteint`;
-    const message = isExceeded
-      ? `Le budget pour "${budget.categoryName}" a été dépassé (${percentUsed.toFixed(0)}% utilisé).`
-      : `Le budget pour "${budget.categoryName}" est à ${percentUsed.toFixed(0)}% de sa limite.`;
+    const titleKey = isExceeded ? 'budgetExceeded.title' : 'budgetWarning.title';
+    const messageKey = isExceeded ? 'budgetExceeded.message' : 'budgetWarning.message';
+
+    const title = getNotificationMessage(locale, titleKey, {
+      budgetName: budget.name,
+    });
+    const message = getNotificationMessage(locale, messageKey, {
+      categoryName: budget.categoryName,
+      percentUsed: percentUsed.toFixed(0),
+    });
 
     // Create in-app notification
     const notification = await this.create({
@@ -279,14 +301,30 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Import Complete
   // --------------------------------------------------------------------------
-  notifyImportComplete(
+  async notifyImportComplete(
     userId: string,
     workspaceId: string,
     result: { imported: number; skipped: number; errors: number }
   ) {
+    const locale = await getUserLocale(userId);
     const hasErrors = result.errors > 0;
-    const title = hasErrors ? 'Import terminé avec des erreurs' : 'Import terminé';
-    const message = `${result.imported} transaction(s) importée(s)${result.skipped > 0 ? `, ${result.skipped} ignorée(s)` : ''}${hasErrors ? `, ${result.errors} erreur(s)` : ''}.`;
+
+    const titleKey = hasErrors ? 'importCompleteWithErrors.title' : 'importComplete.title';
+    const title = getNotificationMessage(locale, titleKey);
+
+    // Build skipped and errors parts
+    const skippedPart = result.skipped > 0
+      ? getNotificationMessage(locale, 'importComplete.skipped', { count: result.skipped })
+      : '';
+    const errorsPart = hasErrors
+      ? getNotificationMessage(locale, 'importComplete.errors', { count: result.errors })
+      : '';
+
+    const message = getNotificationMessage(locale, 'importComplete.message', {
+      imported: result.imported,
+      skipped: skippedPart,
+      errors: errorsPart,
+    });
 
     return this.create({
       userId,
@@ -306,13 +344,19 @@ export const notificationService = {
     workspaceId: string,
     exportInfo: { type: string; filename: string; downloadUrl?: string; expiresAt?: string }
   ) {
+    const locale = await getUserLocale(userId);
+    const title = getNotificationMessage(locale, 'exportReady.title');
+    const message = getNotificationMessage(locale, 'exportReady.message', {
+      exportType: exportInfo.type,
+    });
+
     // Create in-app notification
     const notification = await this.create({
       userId,
       workspaceId,
       type: 'export_ready',
-      title: 'Export prêt',
-      message: `Votre export ${exportInfo.type} est prêt à être téléchargé.`,
+      title,
+      message,
       data: exportInfo,
     });
 
@@ -322,12 +366,13 @@ export const notificationService = {
       if (preferences.emailEnabled && exportInfo.downloadUrl) {
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (user) {
+          const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-US';
           await emailService.sendExportReadyEmail(user.email, {
             displayName: user.displayName,
             exportType: exportInfo.type,
             filename: exportInfo.filename,
             downloadUrl: exportInfo.downloadUrl,
-            expiresAt: exportInfo.expiresAt ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'),
+            expiresAt: exportInfo.expiresAt ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toLocaleDateString(dateLocale),
           });
         }
       }
@@ -354,13 +399,26 @@ export const notificationService = {
     },
     options?: { currency?: string; invoiceUrl?: string }
   ) {
+    const locale = await getUserLocale(userId);
+    const currency = options?.currency ?? 'EUR';
+
+    const title = getNotificationMessage(locale, 'invoiceOverdue.title', {
+      invoiceNumber: invoice.number,
+    });
+    const message = getNotificationMessage(locale, 'invoiceOverdue.message', {
+      invoiceNumber: invoice.number,
+      clientName: invoice.contactName,
+      amount: invoice.amount.toFixed(2),
+      currency,
+    });
+
     // Create in-app notification
     const notification = await this.create({
       userId,
       workspaceId,
       type: 'invoice_overdue',
-      title: `Facture ${invoice.number} en retard`,
-      message: `La facture ${invoice.number} pour ${invoice.contactName} (${invoice.amount.toFixed(2)} €) est en retard de paiement.`,
+      title,
+      message,
       data: { invoiceId: invoice.id },
     });
 
@@ -370,10 +428,10 @@ export const notificationService = {
       if (shouldSendEmail) {
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (user) {
-          const currency = options?.currency ?? 'EUR';
           const invoiceUrl = options?.invoiceUrl ?? `${process.env.FRONTEND_URL}/invoices/${invoice.id}`;
           const dueDate = invoice.dueDate ?? new Date();
           const daysOverdue = invoice.daysOverdue ?? Math.floor((Date.now() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+          const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-US';
 
           await emailService.sendInvoiceOverdueEmail(user.email, {
             displayName: user.displayName,
@@ -381,7 +439,7 @@ export const notificationService = {
             clientName: invoice.contactName,
             amount: invoice.amount.toFixed(2),
             currency,
-            dueDate: dueDate.toLocaleDateString('fr-FR'),
+            dueDate: dueDate.toLocaleDateString(dateLocale),
             daysOverdue: Math.max(1, daysOverdue),
             invoiceUrl,
           });
@@ -397,17 +455,31 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Invoice Paid
   // --------------------------------------------------------------------------
-  notifyInvoicePaid(
+  async notifyInvoicePaid(
     userId: string,
     workspaceId: string,
-    invoice: { id: string; number: string; contactName: string; amount: number }
+    invoice: { id: string; number: string; contactName: string; amount: number },
+    options?: { currency?: string }
   ) {
+    const locale = await getUserLocale(userId);
+    const currency = options?.currency ?? 'EUR';
+
+    const title = getNotificationMessage(locale, 'invoicePaid.title', {
+      invoiceNumber: invoice.number,
+    });
+    const message = getNotificationMessage(locale, 'invoicePaid.message', {
+      invoiceNumber: invoice.number,
+      clientName: invoice.contactName,
+      amount: invoice.amount.toFixed(2),
+      currency,
+    });
+
     return this.create({
       userId,
       workspaceId,
       type: 'invoice_paid',
-      title: `Facture ${invoice.number} payée`,
-      message: `La facture ${invoice.number} pour ${invoice.contactName} (${invoice.amount.toFixed(2)} €) a été marquée comme payée.`,
+      title,
+      message,
       data: { invoiceId: invoice.id },
     });
   },
@@ -415,17 +487,31 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Quote Accepted
   // --------------------------------------------------------------------------
-  notifyQuoteAccepted(
+  async notifyQuoteAccepted(
     userId: string,
     workspaceId: string,
-    quote: { id: string; number: string; contactName: string; amount: number }
+    quote: { id: string; number: string; contactName: string; amount: number },
+    options?: { currency?: string }
   ) {
+    const locale = await getUserLocale(userId);
+    const currency = options?.currency ?? 'EUR';
+
+    const title = getNotificationMessage(locale, 'quoteAccepted.title', {
+      quoteNumber: quote.number,
+    });
+    const message = getNotificationMessage(locale, 'quoteAccepted.message', {
+      quoteNumber: quote.number,
+      clientName: quote.contactName,
+      amount: quote.amount.toFixed(2),
+      currency,
+    });
+
     return this.create({
       userId,
       workspaceId,
       type: 'quote_accepted',
-      title: `Devis ${quote.number} accepté`,
-      message: `Le devis ${quote.number} pour ${quote.contactName} (${quote.amount.toFixed(2)} €) a été accepté.`,
+      title,
+      message,
       data: { quoteId: quote.id },
     });
   },
@@ -433,17 +519,28 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Quote Expiring
   // --------------------------------------------------------------------------
-  notifyQuoteExpiring(
+  async notifyQuoteExpiring(
     userId: string,
     workspaceId: string,
     quote: { id: string; number: string; contactName: string; daysLeft: number }
   ) {
+    const locale = await getUserLocale(userId);
+
+    const title = getNotificationMessage(locale, 'quoteExpiring.title', {
+      quoteNumber: quote.number,
+    });
+    const message = getNotificationMessage(locale, 'quoteExpiring.message', {
+      quoteNumber: quote.number,
+      clientName: quote.contactName,
+      daysLeft: quote.daysLeft,
+    });
+
     return this.create({
       userId,
       workspaceId,
       type: 'quote_expiring',
-      title: `Devis ${quote.number} expire bientôt`,
-      message: `Le devis ${quote.number} pour ${quote.contactName} expire dans ${quote.daysLeft} jour(s).`,
+      title,
+      message,
       data: { quoteId: quote.id },
     });
   },
@@ -451,7 +548,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Price Alert
   // --------------------------------------------------------------------------
-  notifyPriceAlert(
+  async notifyPriceAlert(
     userId: string,
     workspaceId: string,
     alert: {
@@ -460,15 +557,29 @@ export const notificationService = {
       currentPrice: number;
       targetPrice: number;
       direction: 'above' | 'below';
-    }
+    },
+    options?: { currency?: string }
   ) {
-    const direction = alert.direction === 'above' ? 'au-dessus de' : 'en-dessous de';
+    const locale = await getUserLocale(userId);
+    const currency = options?.currency ?? 'EUR';
+
+    const title = getNotificationMessage(locale, 'priceAlert.title', {
+      assetSymbol: alert.assetSymbol,
+    });
+    const messageKey = alert.direction === 'above' ? 'priceAlert.messageAbove' : 'priceAlert.messageBelow';
+    const message = getNotificationMessage(locale, messageKey, {
+      assetName: alert.assetName,
+      targetPrice: alert.targetPrice.toFixed(2),
+      currentPrice: alert.currentPrice.toFixed(2),
+      currency,
+    });
+
     return this.create({
       userId,
       workspaceId,
       type: 'price_alert',
-      title: `Alerte prix: ${alert.assetSymbol}`,
-      message: `${alert.assetName} est passé ${direction} ${alert.targetPrice.toFixed(2)} € (actuellement ${alert.currentPrice.toFixed(2)} €).`,
+      title,
+      message,
       data: alert,
     });
   },
@@ -476,17 +587,29 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Bill Reminder
   // --------------------------------------------------------------------------
-  notifyBillReminder(
+  async notifyBillReminder(
     userId: string,
     workspaceId: string,
-    bill: { description: string; amount: number; dueDate: Date; daysUntil: number }
+    bill: { description: string; amount: number; dueDate: Date; daysUntil: number },
+    options?: { currency?: string }
   ) {
+    const locale = await getUserLocale(userId);
+    const currency = options?.currency ?? 'EUR';
+
+    const title = getNotificationMessage(locale, 'billReminder.title');
+    const message = getNotificationMessage(locale, 'billReminder.message', {
+      description: bill.description,
+      amount: bill.amount.toFixed(2),
+      currency,
+      daysUntil: bill.daysUntil,
+    });
+
     return this.create({
       userId,
       workspaceId,
       type: 'bill_reminder',
-      title: 'Rappel de paiement',
-      message: `"${bill.description}" (${bill.amount.toFixed(2)} €) est dû dans ${bill.daysUntil} jour(s).`,
+      title,
+      message,
       data: bill,
     });
   },
@@ -511,7 +634,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Unusual Spending Alert
   // --------------------------------------------------------------------------
-  notifyUnusualSpending(
+  async notifyUnusualSpending(
     userId: string,
     workspaceId: string,
     data: {
@@ -520,12 +643,21 @@ export const notificationService = {
       categoryName?: string;
       percentAboveAverage: number;
       description: string;
-    }
+    },
+    options?: { currency?: string }
   ) {
+    const locale = await getUserLocale(userId);
+    const currency = options?.currency ?? 'EUR';
+
     const title = data.categoryName
-      ? `Depense inhabituelle dans "${data.categoryName}"`
-      : 'Depense inhabituelle detectee';
-    const message = `${data.description}: ${data.amount.toFixed(2)} EUR (${data.percentAboveAverage}% au-dessus de la moyenne)`;
+      ? getNotificationMessage(locale, 'unusualSpending.title', { categoryName: data.categoryName })
+      : getNotificationMessage(locale, 'unusualSpending.titleGeneric');
+    const message = getNotificationMessage(locale, 'unusualSpending.message', {
+      description: data.description,
+      amount: data.amount.toFixed(2),
+      currency,
+      percentAboveAverage: data.percentAboveAverage,
+    });
 
     return this.create({
       userId,
@@ -540,7 +672,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Weekly Summary
   // --------------------------------------------------------------------------
-  notifyWeeklySummary(
+  async notifyWeeklySummary(
     userId: string,
     workspaceId: string,
     summary: {
@@ -550,11 +682,17 @@ export const notificationService = {
       comparedToAverage: number;
       topCategories: string[];
       insights: string[];
-    }
+    },
+    options?: { currency?: string }
   ) {
-    const title = summary.netChange >= 0
-      ? `Resume hebdomadaire: +${summary.netChange.toFixed(0)} EUR`
-      : `Resume hebdomadaire: ${summary.netChange.toFixed(0)} EUR`;
+    const locale = await getUserLocale(userId);
+    const currency = options?.currency ?? 'EUR';
+
+    const titleKey = summary.netChange >= 0 ? 'weeklySummary.titlePositive' : 'weeklySummary.titleNegative';
+    const title = getNotificationMessage(locale, titleKey, {
+      netChange: summary.netChange >= 0 ? summary.netChange.toFixed(0) : summary.netChange.toFixed(0),
+      currency,
+    });
 
     return this.create({
       userId,
@@ -569,7 +707,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Monthly Report
   // --------------------------------------------------------------------------
-  notifyMonthlyReport(
+  async notifyMonthlyReport(
     userId: string,
     workspaceId: string,
     report: {
@@ -581,10 +719,20 @@ export const notificationService = {
       topCategories: Array<{ name: string; amount: number }>;
       savingsRate: number;
       insights: string[];
-    }
+    },
+    options?: { currency?: string }
   ) {
-    const title = `Rapport mensuel - ${report.month}`;
-    const message = report.insights[0] ?? `Depenses: ${report.totalSpent.toFixed(0)} EUR | Revenus: ${report.totalIncome.toFixed(0)} EUR`;
+    const locale = await getUserLocale(userId);
+    const currency = options?.currency ?? 'EUR';
+
+    const title = getNotificationMessage(locale, 'monthlyReport.title', {
+      month: report.month,
+    });
+    const message = report.insights[0] ?? getNotificationMessage(locale, 'monthlyReport.message', {
+      totalSpent: report.totalSpent.toFixed(0),
+      totalIncome: report.totalIncome.toFixed(0),
+      currency,
+    });
 
     return this.create({
       userId,
@@ -599,7 +747,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Low Balance Warning
   // --------------------------------------------------------------------------
-  notifyLowBalance(
+  async notifyLowBalance(
     userId: string,
     workspaceId: string,
     account: {
@@ -607,14 +755,28 @@ export const notificationService = {
       name: string;
       balance: number;
       threshold: number;
-    }
+    },
+    options?: { currency?: string }
   ) {
+    const locale = await getUserLocale(userId);
+    const currency = options?.currency ?? 'EUR';
+
+    const title = getNotificationMessage(locale, 'lowBalance.title', {
+      accountName: account.name,
+    });
+    const message = getNotificationMessage(locale, 'lowBalance.message', {
+      accountName: account.name,
+      balance: account.balance.toFixed(2),
+      threshold: account.threshold.toFixed(2),
+      currency,
+    });
+
     return this.create({
       userId,
       workspaceId,
       type: 'low_balance_warning',
-      title: `Solde bas: ${account.name}`,
-      message: `Le solde de votre compte "${account.name}" est de ${account.balance.toFixed(2)} EUR (seuil: ${account.threshold.toFixed(2)} EUR)`,
+      title,
+      message,
       data: {
         accountId: account.id,
         accountName: account.name,
@@ -627,7 +789,7 @@ export const notificationService = {
   // --------------------------------------------------------------------------
   // Bill Upcoming
   // --------------------------------------------------------------------------
-  notifyBillUpcoming(
+  async notifyBillUpcoming(
     userId: string,
     workspaceId: string,
     bill: {
@@ -636,20 +798,36 @@ export const notificationService = {
       amount: number;
       dueDate: Date;
       daysUntilDue: number;
-    }
+    },
+    options?: { currency?: string }
   ) {
-    const title = bill.daysUntilDue === 0
-      ? `Facture due aujourd'hui`
-      : bill.daysUntilDue === 1
-      ? `Facture due demain`
-      : `Facture due dans ${bill.daysUntilDue} jours`;
+    const locale = await getUserLocale(userId);
+    const currency = options?.currency ?? 'EUR';
+
+    let titleKey: string;
+    if (bill.daysUntilDue === 0) {
+      titleKey = 'billUpcoming.titleToday';
+    } else if (bill.daysUntilDue === 1) {
+      titleKey = 'billUpcoming.titleTomorrow';
+    } else {
+      titleKey = 'billUpcoming.titleDays';
+    }
+
+    const title = getNotificationMessage(locale, titleKey, {
+      daysUntilDue: bill.daysUntilDue,
+    });
+    const message = getNotificationMessage(locale, 'billUpcoming.message', {
+      description: bill.description,
+      amount: bill.amount.toFixed(2),
+      currency,
+    });
 
     return this.create({
       userId,
       workspaceId,
       type: 'bill_upcoming',
       title,
-      message: `"${bill.description}" - ${bill.amount.toFixed(2)} EUR`,
+      message,
       data: {
         recurrenceId: bill.recurrenceId,
         description: bill.description,

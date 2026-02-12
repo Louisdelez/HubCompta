@@ -5,6 +5,23 @@
 
 import { prisma } from '@/core/database/client.js';
 import { logger } from '@/core/middleware/logger.js';
+import {
+  getNotificationMessage,
+  DEFAULT_LANGUAGE,
+} from '@/core/i18n/index.js';
+import type { LanguageCode } from '@finance-hub/shared';
+
+// ----------------------------------------------------------------------------
+// Helper to get user locale
+// ----------------------------------------------------------------------------
+
+async function getUserLocale(userId: string): Promise<LanguageCode> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { locale: true },
+  });
+  return (user?.locale as LanguageCode) || DEFAULT_LANGUAGE;
+}
 
 // ----------------------------------------------------------------------------
 // Types
@@ -78,6 +95,8 @@ export const insightsService = {
     limit: number = 10
   ): Promise<Insight[]> {
     try {
+      const locale = await getUserLocale(userId);
+
       // Get recent smart notifications for this workspace
       const notifications = await prisma.notification.findMany({
         where: {
@@ -117,7 +136,7 @@ export const insightsService = {
           impact: data?.amount as number | undefined,
           category: data?.categoryName as string | undefined,
           actionUrl: this.getActionUrl(notificationType, data),
-          actionLabel: this.getActionLabel(notificationType),
+          actionLabel: this.getActionLabel(notificationType, locale),
           severity: notificationToSeverity[notificationType] ?? 'info',
           createdAt: notification.createdAt.toISOString(),
           data: data ?? undefined,
@@ -148,23 +167,24 @@ export const insightsService = {
   ): Promise<Insight[]> {
     if (limit <= 0) return [];
 
+    const locale = await getUserLocale(userId);
     const insights: Insight[] = [];
 
     try {
       // Check for spending trends
-      const spendingTrend = await this.analyzeSpendingTrend(workspaceId);
+      const spendingTrend = await this.analyzeSpendingTrend(workspaceId, locale);
       if (spendingTrend) {
         insights.push(spendingTrend);
       }
 
       // Check for saving opportunities
-      const savingOpportunity = await this.findSavingOpportunity(workspaceId);
+      const savingOpportunity = await this.findSavingOpportunity(workspaceId, locale);
       if (savingOpportunity) {
         insights.push(savingOpportunity);
       }
 
       // Add tips based on user activity
-      const tip = this.generateTip(workspaceId);
+      const tip = this.generateTip(workspaceId, locale);
       if (tip) {
         insights.push(tip);
       }
@@ -178,7 +198,7 @@ export const insightsService = {
   /**
    * Analyze spending trend for the current month vs previous months
    */
-  async analyzeSpendingTrend(workspaceId: string): Promise<Insight | null> {
+  async analyzeSpendingTrend(workspaceId: string, locale: LanguageCode = DEFAULT_LANGUAGE): Promise<Insight | null> {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -223,29 +243,29 @@ export const insightsService = {
 
     const isIncreased = changePercent > 0;
 
+    const titleKey = isIncreased ? 'insights.spendingUp' : 'insights.spendingDown';
+    const messageKey = isIncreased ? 'insights.spendingUpMessage' : 'insights.spendingDownMessage';
+
     return {
       id: `trend-${Date.now()}`,
       type: 'trend',
-      title: isIncreased
-        ? `Depenses en hausse de ${changePercent}%`
-        : `Depenses en baisse de ${Math.abs(changePercent)}%`,
-      message: isIncreased
-        ? `Vos depenses quotidiennes moyennes sont plus elevees que le mois dernier.`
-        : `Vous depensez moins que le mois dernier. Continuez !`,
+      title: getNotificationMessage(locale, titleKey, { changePercent: Math.abs(changePercent) }),
+      message: getNotificationMessage(locale, messageKey),
       impact: currentTotal,
       severity: isIncreased ? 'warning' : 'success',
       createdAt: new Date().toISOString(),
       actionUrl: '/reports',
-      actionLabel: 'Voir les rapports',
+      actionLabel: getNotificationMessage(locale, 'actions.viewReports'),
     };
   },
 
   /**
    * Find potential saving opportunities
    */
-  async findSavingOpportunity(workspaceId: string): Promise<Insight | null> {
+  async findSavingOpportunity(workspaceId: string, locale: LanguageCode = DEFAULT_LANGUAGE): Promise<Insight | null> {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const currency = 'EUR';
 
     // Find categories with recurring similar expenses
     const categorySpending = await prisma.transaction.groupBy({
@@ -283,47 +303,40 @@ export const insightsService = {
     return {
       id: `saving-${Date.now()}`,
       type: 'saving_opportunity',
-      title: `Opportunite d'epargne: ${category.name}`,
-      message: `Vous avez depense ${amount.toFixed(0)} EUR en "${category.name}" ce mois-ci. Une reduction de 10% vous ferait economiser ${potentialSavings} EUR.`,
+      title: getNotificationMessage(locale, 'insights.savingOpportunity', { categoryName: category.name }),
+      message: getNotificationMessage(locale, 'insights.savingOpportunityMessage', {
+        amount: amount.toFixed(0),
+        categoryName: category.name,
+        savings: potentialSavings,
+        currency,
+      }),
       impact: -potentialSavings,
       category: category.name,
       severity: 'info',
       createdAt: new Date().toISOString(),
       actionUrl: '/transactions',
-      actionLabel: 'Voir les transactions',
+      actionLabel: getNotificationMessage(locale, 'actions.viewTransactions'),
     };
   },
 
   /**
    * Generate a helpful tip
    */
-  generateTip(_workspaceId: string): Insight {
-    const tips = [
-      {
-        title: 'Conseil: Automatisez votre epargne',
-        message: 'Configurez un virement automatique vers votre compte epargne chaque mois pour atteindre vos objectifs plus facilement.',
-      },
-      {
-        title: 'Conseil: Suivez vos abonnements',
-        message: 'Passez en revue vos abonnements regulierement. Vous pourriez economiser en annulant ceux que vous n\'utilisez plus.',
-      },
-      {
-        title: 'Conseil: Budget par categorie',
-        message: 'Definir des budgets par categorie vous aide a controler vos depenses et a identifier les postes a optimiser.',
-      },
-      {
-        title: 'Conseil: Fonds d\'urgence',
-        message: 'Visez a avoir 3 a 6 mois de depenses en reserve pour faire face aux imprevu.',
-      },
+  generateTip(_workspaceId: string, locale: LanguageCode = DEFAULT_LANGUAGE): Insight {
+    const tipKeys = [
+      'automateSavings',
+      'trackSubscriptions',
+      'categoryBudgets',
+      'emergencyFund',
     ];
 
-    const randomTip = tips[Math.floor(Math.random() * tips.length)]!;
+    const randomTipKey = tipKeys[Math.floor(Math.random() * tipKeys.length)]!;
 
     return {
       id: `tip-${Date.now()}`,
       type: 'tip',
-      title: randomTip.title,
-      message: randomTip.message,
+      title: getNotificationMessage(locale, `tips.${randomTipKey}.title`),
+      message: getNotificationMessage(locale, `tips.${randomTipKey}.message`),
       severity: 'info',
       createdAt: new Date().toISOString(),
     };
@@ -358,24 +371,24 @@ export const insightsService = {
   /**
    * Get action label for a notification type
    */
-  getActionLabel(notificationType: string): string | undefined {
+  getActionLabel(notificationType: string, locale: LanguageCode = DEFAULT_LANGUAGE): string | undefined {
     switch (notificationType) {
       case 'unusual_spending':
-        return 'Voir la transaction';
+        return getNotificationMessage(locale, 'actions.viewTransaction');
       case 'weekly_summary':
-        return 'Voir le tableau de bord';
+        return getNotificationMessage(locale, 'actions.viewDashboard');
       case 'monthly_report':
-        return 'Voir le rapport';
+        return getNotificationMessage(locale, 'actions.viewReport');
       case 'low_balance_warning':
-        return 'Voir le compte';
+        return getNotificationMessage(locale, 'actions.viewAccount');
       case 'bill_upcoming':
-        return 'Voir les echeances';
+        return getNotificationMessage(locale, 'actions.viewSchedule');
       case 'budget_alert':
       case 'budget_warning':
-        return 'Voir le budget';
+        return getNotificationMessage(locale, 'actions.viewBudget');
       case 'savings_milestone':
       case 'savings_off_track':
-        return 'Voir l\'objectif';
+        return getNotificationMessage(locale, 'actions.viewGoal');
       default:
         return undefined;
     }

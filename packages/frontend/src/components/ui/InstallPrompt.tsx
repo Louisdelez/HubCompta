@@ -5,6 +5,7 @@
 
 import { clsx } from 'clsx';
 import { X, Download, Smartphone, Zap, WifiOff, Bell } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useSmartInstallPrompt } from '@/hooks/useInstallPrompt';
 
 // ----------------------------------------------------------------------------
@@ -21,6 +22,7 @@ interface InstallPromptProps {
 // ----------------------------------------------------------------------------
 
 export function InstallPromptBanner({ className }: InstallPromptProps) {
+  const { t } = useTranslation();
   const { state, actions, shouldShowPrompt } = useSmartInstallPrompt();
 
   if (!shouldShowPrompt || state.isInstalled || state.isDismissed) {
@@ -43,7 +45,7 @@ export function InstallPromptBanner({ className }: InstallPromptProps) {
       <button
         onClick={actions.dismissPrompt}
         className="absolute top-2 right-2 p-1.5 rounded-lg text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface1 transition-colors touch-target"
-        aria-label="Fermer"
+        aria-label={t('common.close')}
       >
         <X className="w-5 h-5" />
       </button>
@@ -61,14 +63,13 @@ export function InstallPromptBanner({ className }: InstallPromptProps) {
             id="install-prompt-title"
             className="text-base font-semibold text-ctp-text"
           >
-            Installer HubCompta
+            {t('pwa.installTitle')}
           </h3>
           <p
             id="install-prompt-description"
             className="text-sm text-ctp-subtext1 mt-1"
           >
-            Installez l'application pour un acces plus rapide et une experience
-            hors ligne.
+            {t('pwa.installDescription')}
           </p>
         </div>
       </div>
@@ -77,15 +78,15 @@ export function InstallPromptBanner({ className }: InstallPromptProps) {
       <div className="flex items-center gap-4 mt-3 text-xs text-ctp-subtext0">
         <span className="flex items-center gap-1">
           <Zap className="w-3.5 h-3.5" />
-          Rapide
+          {t('pwa.featureFast')}
         </span>
         <span className="flex items-center gap-1">
           <WifiOff className="w-3.5 h-3.5" />
-          Hors ligne
+          {t('pwa.featureOffline')}
         </span>
         <span className="flex items-center gap-1">
           <Bell className="w-3.5 h-3.5" />
-          Notifications
+          {t('pwa.featureNotifications')}
         </span>
       </div>
 
@@ -97,13 +98,13 @@ export function InstallPromptBanner({ className }: InstallPromptProps) {
           }}
           className="flex-1 px-4 py-2.5 bg-ctp-blue text-ctp-crust rounded-lg font-medium text-sm hover:bg-ctp-blue/90 transition-colors touch-target"
         >
-          Installer
+          {t('pwa.install')}
         </button>
         <button
           onClick={actions.dismissPrompt}
           className="px-4 py-2.5 text-ctp-subtext1 hover:text-ctp-text text-sm font-medium transition-colors touch-target"
         >
-          Plus tard
+          {t('pwa.later')}
         </button>
       </div>
     </div>
@@ -126,6 +127,7 @@ export function InstallPromptModal({
   onClose,
   className,
 }: InstallPromptModalProps) {
+  const { t } = useTranslation();
   const { state, actions } = useSmartInstallPrompt();
 
   if (!isOpen || state.isInstalled) {
@@ -172,7 +174,7 @@ export function InstallPromptModal({
           <button
             onClick={onClose}
             className="absolute top-3 right-3 p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors touch-target"
-            aria-label="Fermer"
+            aria-label={t('common.close')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -189,28 +191,28 @@ export function InstallPromptModal({
             id="install-modal-title"
             className="text-xl font-bold text-ctp-text text-center"
           >
-            Installer HubCompta
+            {t('pwa.installTitle')}
           </h2>
           <p className="text-ctp-subtext1 text-center mt-2">
-            Profitez d'une experience optimale avec l'application installee.
+            {t('pwa.installModalDescription')}
           </p>
 
           {/* Features list */}
           <div className="mt-6 space-y-3">
             <FeatureItem
               icon={<Zap className="w-5 h-5" />}
-              title="Acces rapide"
-              description="Lancez l'app directement depuis votre ecran d'accueil"
+              title={t('pwa.fastAccess')}
+              description={t('pwa.fastAccessDescription')}
             />
             <FeatureItem
               icon={<WifiOff className="w-5 h-5" />}
-              title="Mode hors ligne"
-              description="Consultez vos donnees meme sans connexion internet"
+              title={t('pwa.offlineMode')}
+              description={t('pwa.offlineModeDescription')}
             />
             <FeatureItem
               icon={<Bell className="w-5 h-5" />}
-              title="Notifications"
-              description="Recevez des alertes pour vos budgets et echeances"
+              title={t('pwa.notificationsTitle')}
+              description={t('pwa.notificationsDescription')}
             />
           </div>
 
@@ -226,13 +228,13 @@ export function InstallPromptModal({
                   : 'bg-ctp-surface1 text-ctp-subtext0 cursor-not-allowed'
               )}
             >
-              {state.canInstall ? 'Installer maintenant' : 'Installation non disponible'}
+              {state.canInstall ? t('pwa.installNow') : t('pwa.installNotAvailable')}
             </button>
             <button
               onClick={handleDismiss}
               className="w-full px-4 py-3 text-ctp-subtext1 hover:text-ctp-text text-sm font-medium transition-colors touch-target"
             >
-              Me rappeler plus tard
+              {t('pwa.remindLater')}
             </button>
           </div>
         </div>
@@ -270,6 +272,7 @@ function FeatureItem({ icon, title, description }: FeatureItemProps) {
 // ----------------------------------------------------------------------------
 
 export function InstallButton({ className }: InstallPromptProps) {
+  const { t } = useTranslation();
   const { state, actions } = useSmartInstallPrompt();
 
   if (!state.canInstall || state.isInstalled || state.isStandalone) {
@@ -287,10 +290,10 @@ export function InstallButton({ className }: InstallPromptProps) {
         'text-sm font-medium transition-colors touch-target',
         className
       )}
-      aria-label="Installer l'application"
+      aria-label={t('pwa.installApp')}
     >
       <Download className="w-4 h-4" />
-      <span className="hidden sm:inline">Installer</span>
+      <span className="hidden sm:inline">{t('pwa.install')}</span>
     </button>
   );
 }

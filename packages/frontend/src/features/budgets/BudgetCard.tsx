@@ -3,6 +3,7 @@
 // Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { BarChart3, Pencil, Trash2, Folder, TrendingUp, Wallet } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -66,30 +67,14 @@ function getProgressColor(
   return 'bg-ctp-green';
 }
 
-function getStatusBadge(
-  isOverBudget: boolean,
-  isAlertTriggered: boolean
-): { text: string; className: string } | null {
-  if (isOverBudget) {
-    return {
-      text: 'Dépassé',
-      className: 'bg-ctp-red/20 text-ctp-red',
-    };
-  }
-  if (isAlertTriggered) {
-    return {
-      text: 'Attention',
-      className: 'bg-ctp-yellow/20 text-ctp-yellow',
-    };
-  }
-  return null;
-}
+// Status badge is handled in the component with i18n
 
 // ----------------------------------------------------------------------------
 // Component
 // ----------------------------------------------------------------------------
 
 export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: BudgetCardProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
@@ -100,7 +85,7 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
   });
 
   const handleDelete = () => {
-    if (confirm(`Supprimer le budget "${budget.name}" ?`)) {
+    if (confirm(t('budgets.confirmDeleteBudget', { name: budget.name }))) {
       deleteMutation.mutate();
     }
   };
@@ -110,7 +95,24 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
     budget.isOverBudget,
     budget.isAlertTriggered
   );
-  const statusBadge = getStatusBadge(budget.isOverBudget, budget.isAlertTriggered);
+
+  // Status badge with i18n
+  const getStatusBadge = (): { text: string; className: string } | null => {
+    if (budget.isOverBudget) {
+      return {
+        text: t('budgets.exceeded'),
+        className: 'bg-ctp-red/20 text-ctp-red',
+      };
+    }
+    if (budget.isAlertTriggered) {
+      return {
+        text: t('budgets.attention'),
+        className: 'bg-ctp-yellow/20 text-ctp-yellow',
+      };
+    }
+    return null;
+  };
+  const statusBadge = getStatusBadge();
   const progressWidth = Math.min(budget.percentUsed, 100);
 
   return (
@@ -138,7 +140,7 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
           {budget.envelopeMode && (
             <span className="text-xs px-2 py-1 rounded-full font-medium bg-ctp-mauve/20 text-ctp-mauve flex items-center gap-1">
               <Wallet className="w-3 h-3" />
-              Enveloppe
+              {t('budgets.envelope')}
             </span>
           )}
           {statusBadge && (
@@ -154,7 +156,7 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
         <div className="mb-3 p-2 rounded-lg bg-ctp-mauve/10 border border-ctp-mauve/20">
           <div className="flex items-center gap-2 text-sm">
             <TrendingUp className="w-4 h-4 text-ctp-mauve" />
-            <span className="text-ctp-subtext0">Report du mois précédent:</span>
+            <span className="text-ctp-subtext0">{t('budgets.rolloverFromPrevious')}:</span>
             <span className="font-medium text-ctp-mauve">
               +{formatCurrency(budget.rolloverFromPrevious)}
             </span>
@@ -186,7 +188,7 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
       <div className="flex justify-between text-sm">
         <div>
           <p className="text-ctp-subtext0">
-            {budget.envelopeMode ? 'Disponible' : 'Restant'}
+            {budget.envelopeMode ? t('budgets.available') : t('budgets.remaining')}
           </p>
           <p
             className={clsx(
@@ -200,12 +202,12 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
         </div>
         {budget.envelopeMode ? (
           <div className="text-right">
-            <p className="text-ctp-subtext0">Budget de base</p>
+            <p className="text-ctp-subtext0">{t('budgets.baseBudget')}</p>
             <p className="font-medium text-ctp-text">{formatCurrency(Number(budget.amount))}</p>
           </div>
         ) : (
           <div className="text-right">
-            <p className="text-ctp-subtext0">Alerte à</p>
+            <p className="text-ctp-subtext0">{t('budgets.alertAt')}</p>
             <p className="font-medium text-ctp-text">{budget.alertThreshold}%</p>
           </div>
         )}
@@ -216,12 +218,12 @@ export function BudgetCard({ budget, workspaceId, onEdit, onViewHistory }: Budge
         <button
           onClick={onViewHistory}
           className="btn-ghost text-sm flex-1 flex items-center justify-center gap-1"
-          title="Voir l'historique"
+          title={t('budgets.history')}
         >
-          <BarChart3 className="w-4 h-4" /> Historique
+          <BarChart3 className="w-4 h-4" /> {t('budgets.history')}
         </button>
         <button onClick={onEdit} className="btn-ghost text-sm flex-1 flex items-center justify-center gap-1">
-          <Pencil className="w-4 h-4" /> Modifier
+          <Pencil className="w-4 h-4" /> {t('budgets.edit')}
         </button>
         <button
           onClick={handleDelete}

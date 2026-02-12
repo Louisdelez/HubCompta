@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { XCircle } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -57,6 +58,7 @@ export function ImportProgress({
   dateFormat,
   onComplete,
 }: ImportProgressProps) {
+  const { t } = useTranslation();
   const [started, setStarted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,7 +78,7 @@ export function ImportProgress({
       onComplete(result);
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Erreur lors de l\'import');
+      setError(err instanceof Error ? err.message : t('import.progress.importError'));
     },
   });
 
@@ -113,9 +115,9 @@ export function ImportProgress({
       });
     }
     if (jobStatus?.status === 'failed') {
-      setError(jobStatus.error ?? 'Import échoué');
+      setError(jobStatus.error ?? t('import.progress.importFailed'));
     }
-  }, [jobStatus, onComplete]);
+  }, [jobStatus, onComplete, t]);
 
   const progress = jobStatus
     ? jobStatus.totalRows > 0
@@ -127,7 +129,7 @@ export function ImportProgress({
     return (
       <div className="text-center py-12">
         <XCircle className="w-12 h-12 mx-auto mb-4 text-ctp-red" />
-        <h2 className="text-xl font-bold mb-2 text-ctp-red">Erreur</h2>
+        <h2 className="text-xl font-bold mb-2 text-ctp-red">{t('import.progress.error')}</h2>
         <p className="text-ctp-subtext0 mb-6">{error}</p>
         <button
           onClick={() => {
@@ -136,7 +138,7 @@ export function ImportProgress({
           }}
           className="btn-secondary"
         >
-          Réessayer
+          {t('import.progress.retry')}
         </button>
       </div>
     );
@@ -175,11 +177,11 @@ export function ImportProgress({
         </div>
       </div>
 
-      <h2 className="text-xl font-bold mb-2">Import en cours...</h2>
+      <h2 className="text-xl font-bold mb-2">{t('import.progress.title')}</h2>
       <p className="text-ctp-subtext0">
         {jobStatus
-          ? `${jobStatus.processedRows} / ${jobStatus.totalRows} lignes traitées`
-          : 'Préparation de l\'import...'}
+          ? t('import.progress.rowsProcessed', { processed: jobStatus.processedRows, total: jobStatus.totalRows })
+          : t('import.progress.preparingImport')}
       </p>
 
       {/* Live Stats */}
@@ -187,23 +189,23 @@ export function ImportProgress({
         <div className="flex justify-center gap-6 mt-6 text-sm">
           <div>
             <span className="font-medium text-ctp-green">{jobStatus.importedRows}</span>
-            <span className="text-ctp-subtext0 ml-1">importées</span>
+            <span className="text-ctp-subtext0 ml-1">{t('import.progress.imported')}</span>
           </div>
           <div>
             <span className="font-medium text-ctp-subtext0">{jobStatus.skippedRows}</span>
-            <span className="text-ctp-subtext0 ml-1">ignorées</span>
+            <span className="text-ctp-subtext0 ml-1">{t('import.progress.skipped')}</span>
           </div>
           {jobStatus.errorRows > 0 && (
             <div>
               <span className="font-medium text-ctp-red">{jobStatus.errorRows}</span>
-              <span className="text-ctp-subtext0 ml-1">erreurs</span>
+              <span className="text-ctp-subtext0 ml-1">{t('import.progress.errors')}</span>
             </div>
           )}
         </div>
       )}
 
       <p className="text-xs text-ctp-overlay1 mt-4">
-        Ne fermez pas cette fenêtre
+        {t('import.progress.doNotClose')}
       </p>
     </div>
   );

@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { BarChart3 } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
@@ -54,6 +55,7 @@ function formatCurrency(amount: number): string {
 // ----------------------------------------------------------------------------
 
 export function SpendingWidget({ workspaceId }: WidgetProps) {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ['spending-widget', workspaceId],
     queryFn: () =>
@@ -92,7 +94,7 @@ export function SpendingWidget({ workspaceId }: WidgetProps) {
   if (otherTotal > 0) {
     topCategories.push({
       categoryId: 'other',
-      categoryName: 'Autres',
+      categoryName: t('widgets.spending.other'),
       total: otherTotal,
     });
   }
@@ -107,7 +109,7 @@ export function SpendingWidget({ workspaceId }: WidgetProps) {
       {categories.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center">
           <BarChart3 className="w-10 h-10 text-ctp-overlay1 mb-2" />
-          <p className="text-sm text-ctp-subtext0">Aucune donnee</p>
+          <p className="text-sm text-ctp-subtext0">{t('widgets.spending.noData')}</p>
         </div>
       ) : (
         <>
@@ -158,7 +160,7 @@ export function SpendingWidget({ workspaceId }: WidgetProps) {
 
           {/* Total */}
           <div className="mt-2 pt-2 border-t border-ctp-surface1 flex justify-between items-center">
-            <span className="text-sm font-medium text-ctp-text">Total</span>
+            <span className="text-sm font-medium text-ctp-text">{t('widgets.spending.total')}</span>
             <span className="font-bold text-ctp-red">{formatCurrency(total)}</span>
           </div>
         </>
@@ -169,7 +171,7 @@ export function SpendingWidget({ workspaceId }: WidgetProps) {
         to="/reports"
         className="mt-2 text-center text-xs text-ctp-blue hover:text-ctp-sapphire transition-colors"
       >
-        Voir les rapports
+        {t('widgets.spending.viewReports')}
       </Link>
     </div>
   );

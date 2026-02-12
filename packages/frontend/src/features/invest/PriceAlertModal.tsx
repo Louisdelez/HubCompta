@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, TrendingUp, TrendingDown, Bell, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -51,6 +52,7 @@ export function PriceAlertModal({
   positionId,
   existingAlert,
 }: PriceAlertModalProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const queryClient = useQueryClient();
 
@@ -154,7 +156,7 @@ export function PriceAlertModal({
             </div>
             <div>
               <h2 className="text-lg font-semibold text-ctp-text">
-                {existingAlert ? 'Modifier l\'alerte' : 'Alerte de prix'}
+                {existingAlert ? t('invest.priceAlert.editAlert') : t('invest.priceAlert.title')}
               </h2>
               <p className="text-sm text-ctp-subtext0">{asset.symbol} - {asset.name}</p>
             </div>
@@ -170,7 +172,7 @@ export function PriceAlertModal({
         {/* Current Price */}
         {asset.lastPrice && (
           <div className="px-4 py-3 bg-ctp-surface0 border-b border-ctp-surface1">
-            <p className="text-sm text-ctp-subtext0">Prix actuel</p>
+            <p className="text-sm text-ctp-subtext0">{t('invest.priceAlert.currentPrice')}</p>
             <p className="text-xl font-bold text-ctp-text">{formatCurrency(asset.lastPrice, asset.currency)}</p>
           </div>
         )}
@@ -180,7 +182,7 @@ export function PriceAlertModal({
           {/* Direction */}
           <div>
             <label className="block text-sm font-medium text-ctp-subtext1 mb-2">
-              M'alerter quand le prix passe
+              {t('invest.priceAlert.alertWhen')}
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -194,7 +196,7 @@ export function PriceAlertModal({
                 )}
               >
                 <TrendingUp className="h-5 w-5" />
-                <span className="font-medium">Au-dessus</span>
+                <span className="font-medium">{t('invest.priceAlert.above')}</span>
               </button>
               <button
                 type="button"
@@ -207,7 +209,7 @@ export function PriceAlertModal({
                 )}
               >
                 <TrendingDown className="h-5 w-5" />
-                <span className="font-medium">En-dessous</span>
+                <span className="font-medium">{t('invest.priceAlert.below')}</span>
               </button>
             </div>
           </div>
@@ -215,7 +217,7 @@ export function PriceAlertModal({
           {/* Target Price */}
           <div>
             <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Prix cible ({asset.currency})
+              {t('invest.priceAlert.targetPrice')} ({asset.currency})
             </label>
             <input
               type="number"
@@ -232,7 +234,7 @@ export function PriceAlertModal({
                 'text-xs mt-1',
                 percentChange >= 0 ? 'text-ctp-green' : 'text-ctp-red'
               )}>
-                {percentChange >= 0 ? '+' : ''}{percentChange.toFixed(2)}% par rapport au prix actuel
+                {percentChange >= 0 ? '+' : ''}{percentChange.toFixed(2)}% {t('invest.priceAlert.vsCurrentPrice')}
               </p>
             )}
           </div>
@@ -242,9 +244,9 @@ export function PriceAlertModal({
             <div className="flex items-center gap-2">
               <RefreshCw className="h-4 w-4 text-ctp-subtext0" />
               <div>
-                <p className="text-sm font-medium text-ctp-text">Alerte recurrente</p>
+                <p className="text-sm font-medium text-ctp-text">{t('invest.priceAlert.recurringAlert')}</p>
                 <p className="text-xs text-ctp-subtext0">
-                  Se reactive apres declenchement
+                  {t('invest.priceAlert.reactivatesAfterTrigger')}
                 </p>
               </div>
             </div>
@@ -268,10 +270,12 @@ export function PriceAlertModal({
           {/* Info */}
           <div className="bg-ctp-blue/10 border border-ctp-blue/20 rounded-lg p-3 text-sm text-ctp-blue">
             <p>
-              Vous recevrez une notification lorsque le prix de {asset.symbol}{' '}
-              {direction === 'above' ? 'depassera' : 'passera en-dessous de'}{' '}
-              {targetPrice ? formatCurrency(parseFloat(targetPrice), asset.currency) : '...'}.
-              {isRecurring && ' L\'alerte se reactivera automatiquement apres chaque declenchement.'}
+              {t('invest.priceAlert.notificationInfo', {
+                symbol: asset.symbol,
+                direction: direction === 'above' ? t('invest.priceAlert.exceeds') : t('invest.priceAlert.fallsBelow'),
+                price: targetPrice ? formatCurrency(parseFloat(targetPrice), asset.currency) : '...'
+              })}
+              {isRecurring && ` ${t('invest.priceAlert.recurringInfo')}`}
             </p>
           </div>
 
@@ -279,7 +283,7 @@ export function PriceAlertModal({
           {isError && (
             <div className="p-3 bg-ctp-red/10 border border-ctp-red/20 rounded-lg">
               <p className="text-sm text-ctp-red">
-                Erreur lors de {existingAlert ? 'la mise a jour' : 'la creation'} de l'alerte
+                {existingAlert ? t('invest.priceAlert.updateError') : t('invest.priceAlert.error')}
               </p>
             </div>
           )}
@@ -291,7 +295,7 @@ export function PriceAlertModal({
               onClick={onClose}
               className="flex-1 px-4 py-2 text-ctp-subtext1 bg-ctp-surface0 rounded-lg hover:bg-ctp-surface1 font-medium"
             >
-              Annuler
+              {t('invest.priceAlert.cancel')}
             </button>
             <button
               type="submit"
@@ -299,8 +303,8 @@ export function PriceAlertModal({
               className="flex-1 px-4 py-2 bg-ctp-blue text-ctp-base rounded-lg hover:bg-ctp-blue/90 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending
-                ? (existingAlert ? 'Mise a jour...' : 'Creation...')
-                : (existingAlert ? 'Mettre a jour' : 'Creer l\'alerte')}
+                ? (existingAlert ? t('invest.priceAlert.updating') : t('invest.priceAlert.creating'))
+                : (existingAlert ? t('invest.priceAlert.update') : t('invest.priceAlert.createAlert'))}
             </button>
           </div>
         </form>

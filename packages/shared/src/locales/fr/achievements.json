@@ -1,0 +1,124 @@
+{
+  "title": "Succes",
+  "secretAchievement": "Achievement secret",
+  "unlocked": "Debloque",
+  "progress": "Progression",
+  "xpReward": "{{xp}} XP",
+  "level": "Niveau {{level}}",
+  "levelUp": "Niveau Superieur !",
+  "congratulations": "Felicitations ! Vous avez atteint le niveau {{level}} !",
+  "categories": {
+    "onboarding": "Demarrage",
+    "transactions": "Transactions",
+    "budgeting": "Budgets",
+    "savings": "Epargne",
+    "streaks": "Series",
+    "milestones": "Jalons"
+  },
+  "achievements": {
+    "first_steps": {
+      "name": "Premiers Pas",
+      "description": "Ajoutez votre premiere transaction"
+    },
+    "first_budget": {
+      "name": "Budgeteur Debutant",
+      "description": "Creez votre premier budget"
+    },
+    "first_goal": {
+      "name": "Objectif Fixe",
+      "description": "Creez votre premier objectif d'epargne"
+    },
+    "account_setup": {
+      "name": "Bien Equipe",
+      "description": "Ajoutez 3 comptes"
+    },
+    "tracker_10": {
+      "name": "Suivi Regulier",
+      "description": "Enregistrez 10 transactions"
+    },
+    "tracker_50": {
+      "name": "Traceur Assidu",
+      "description": "Enregistrez 50 transactions"
+    },
+    "tracker_100": {
+      "name": "Maitre du Suivi",
+      "description": "Enregistrez 100 transactions"
+    },
+    "tracker_500": {
+      "name": "Expert Comptable",
+      "description": "Enregistrez 500 transactions"
+    },
+    "categorizer": {
+      "name": "Organisateur",
+      "description": "Categorisez 25 transactions"
+    },
+    "budget_keeper": {
+      "name": "Budget Respecte",
+      "description": "Terminez un mois sous le budget"
+    },
+    "budget_master_3": {
+      "name": "Discipline",
+      "description": "Respectez vos budgets 3 mois consecutifs"
+    },
+    "budget_master_6": {
+      "name": "Maitrise Budgetaire",
+      "description": "Respectez vos budgets 6 mois consecutifs"
+    },
+    "multi_budget": {
+      "name": "Multi-Budgets",
+      "description": "Gerez 5 budgets simultanement"
+    },
+    "saver_first": {
+      "name": "Premier Pas Epargne",
+      "description": "Atteignez 10% de votre premier objectif"
+    },
+    "saver_half": {
+      "name": "Mi-Parcours",
+      "description": "Atteignez 50% d'un objectif"
+    },
+    "saver_complete": {
+      "name": "Objectif Atteint",
+      "description": "Completez un objectif d'epargne"
+    },
+    "saver_3_goals": {
+      "name": "Triple Succes",
+      "description": "Completez 3 objectifs d'epargne"
+    },
+    "saver_1000": {
+      "name": "Millier Epargne",
+      "description": "Epargnez 1000 EUR au total"
+    },
+    "saver_10000": {
+      "name": "Dixieme de Millier",
+      "description": "Epargnez 10000 EUR au total"
+    },
+    "streak_7": {
+      "name": "Semaine Active",
+      "description": "7 jours consecutifs d'activite"
+    },
+    "streak_30": {
+      "name": "Mois Complet",
+      "description": "30 jours consecutifs d'activite"
+    },
+    "streak_100": {
+      "name": "Centenaire",
+      "description": "100 jours consecutifs d'activite"
+    },
+    "streak_365": {
+      "name": "Marathonien",
+      "description": "365 jours consecutifs d'activite"
+    },
+    "night_owl": {
+      "name": "Hibou Nocturne",
+      "description": "Ajoutez une transaction apres minuit"
+    },
+    "early_bird": {
+      "name": "Leve-Tot",
+      "description": "Ajoutez une transaction avant 6h"
+    },
+    "perfect_month": {
+      "name": "Mois Parfait",
+      "description": "Categorisez toutes les transactions du mois"
+    }
+  }
+}

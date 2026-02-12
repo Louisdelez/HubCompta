@@ -6,21 +6,24 @@
 import { useState } from 'react';
 import { clsx } from 'clsx';
 import { WifiOff, CloudOff, RefreshCw, Check, AlertCircle, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useOfflineStatus } from '@/hooks/useOnlineStatus';
 
 // ----------------------------------------------------------------------------
 // Helper
 // ----------------------------------------------------------------------------
 
-function formatTimestamp(timestamp: number | null, now: number): string {
-  if (!timestamp) return 'Jamais';
+type TranslateFn = ReturnType<typeof useTranslation>['t'];
+
+function formatTimestamp(timestamp: number | null, now: number, t: TranslateFn): string {
+  if (!timestamp) return t('offline.never');
 
   const diff = now - timestamp;
 
-  if (diff < 60000) return 'Il y a quelques secondes';
-  if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
-  if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)} h`;
-  return new Date(timestamp).toLocaleDateString('fr-FR');
+  if (diff < 60000) return t('offline.fewSecondsAgo');
+  if (diff < 3600000) return t('offline.minutesAgo', { count: Math.floor(diff / 60000) });
+  if (diff < 86400000) return t('offline.hoursAgo', { count: Math.floor(diff / 3600000) });
+  return new Date(timestamp).toLocaleDateString();
 }
 
 // ----------------------------------------------------------------------------
@@ -39,6 +42,7 @@ interface OfflineIndicatorProps {
 // ----------------------------------------------------------------------------
 
 export function OfflineIndicator({ className, compact = false }: OfflineIndicatorProps) {
+  const { t } = useTranslation();
   const { isOnline, isSyncing, pendingCount, lastSyncAt, lastError, sync } = useOfflineStatus();
   const [showDetails, setShowDetails] = useState(false);
   // Store current time snapshot to avoid impure Date.now() during render
@@ -53,7 +57,7 @@ export function OfflineIndicator({ className, compact = false }: OfflineIndicato
 
   // Compute formatted time with stored current time snapshot
   const formatLastSync = (timestamp: number | null): string => {
-    return formatTimestamp(timestamp, currentTime);
+    return formatTimestamp(timestamp, currentTime, t);
   };
 
   // Don't render anything if online and no pending mutations
@@ -77,8 +81,8 @@ export function OfflineIndicator({ className, compact = false }: OfflineIndicato
         )}
         aria-label={
           !isOnline
-            ? 'Hors ligne'
-            : `${pendingCount} modifications en attente de synchronisation`
+            ? t('offline.offline')
+            : t('offline.pendingSyncLabel', { count: pendingCount })
         }
       >
         {!isOnline ? (
@@ -148,12 +152,12 @@ export function OfflineIndicator({ className, compact = false }: OfflineIndicato
             !isOnline ? 'text-ctp-yellow' : 'text-ctp-peach'
           )}
         >
-          {!isOnline ? 'Hors ligne' : isSyncing ? 'Synchronisation...' : 'En attente'}
+          {!isOnline ? t('offline.offline') : isSyncing ? t('offline.syncing') : t('offline.pending')}
         </p>
         <p className="text-xs text-ctp-subtext0 truncate">
           {pendingCount > 0
-            ? `${pendingCount} modification${pendingCount > 1 ? 's' : ''} en attente`
-            : 'Dernière sync: ' + formatLastSync(lastSyncAt)}
+            ? t('offline.pendingChanges', { count: pendingCount })
+            : t('offline.lastSync') + ': ' + formatLastSync(lastSyncAt)}
         </p>
       </div>
 
@@ -162,7 +166,7 @@ export function OfflineIndicator({ className, compact = false }: OfflineIndicato
         <button
           onClick={handleSync}
           className="flex-shrink-0 p-2 rounded-lg bg-ctp-peach/20 text-ctp-peach hover:bg-ctp-peach/30 transition-colors"
-          aria-label="Synchroniser maintenant"
+          aria-label={t('offline.syncNow')}
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -196,6 +200,7 @@ function OfflineDetailsPopup({
   onClose,
   formatLastSync,
 }: OfflineDetailsPopupProps) {
+  const { t } = useTranslation();
   return (
     <>
       {/* Backdrop */}
@@ -218,19 +223,19 @@ function OfflineDetailsPopup({
             {!isOnline ? (
               <>
                 <WifiOff className="w-4 h-4 text-ctp-yellow" />
-                <span className="text-sm font-medium text-ctp-yellow">Hors ligne</span>
+                <span className="text-sm font-medium text-ctp-yellow">{t('offline.offline')}</span>
               </>
             ) : (
               <>
                 <Check className="w-4 h-4 text-ctp-green" />
-                <span className="text-sm font-medium text-ctp-green">En ligne</span>
+                <span className="text-sm font-medium text-ctp-green">{t('offline.online')}</span>
               </>
             )}
           </div>
           <button
             onClick={onClose}
             className="p-1 rounded hover:bg-ctp-surface1 text-ctp-subtext0 hover:text-ctp-text transition-colors"
-            aria-label="Fermer"
+            aria-label={t('common.close')}
           >
             <X className="w-4 h-4" />
           </button>
@@ -240,20 +245,20 @@ function OfflineDetailsPopup({
         <div className="p-3 space-y-3">
           {/* Pending count */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-ctp-subtext1">En attente</span>
+            <span className="text-sm text-ctp-subtext1">{t('offline.pending')}</span>
             <span
               className={clsx(
                 'text-sm font-medium',
                 pendingCount > 0 ? 'text-ctp-yellow' : 'text-ctp-subtext0'
               )}
             >
-              {pendingCount} modification{pendingCount !== 1 ? 's' : ''}
+              {t('offline.pendingChanges', { count: pendingCount })}
             </span>
           </div>
 
           {/* Last sync */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-ctp-subtext1">Derniere sync</span>
+            <span className="text-sm text-ctp-subtext1">{t('offline.lastSync')}</span>
             <span className="text-sm text-ctp-subtext0">{formatLastSync(lastSyncAt)}</span>
           </div>
 
@@ -280,12 +285,12 @@ function OfflineDetailsPopup({
               {isSyncing ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  Synchronisation...
+                  {t('offline.syncingNow')}
                 </>
               ) : (
                 <>
                   <RefreshCw className="w-4 h-4" />
-                  Synchroniser maintenant
+                  {t('offline.syncNow')}
                 </>
               )}
             </button>
@@ -294,7 +299,7 @@ function OfflineDetailsPopup({
           {/* Offline message */}
           {!isOnline && (
             <p className="text-xs text-ctp-subtext0 text-center">
-              Les modifications seront synchronisees automatiquement une fois la connexion retablie.
+              {t('offline.autoSyncMessage')}
             </p>
           )}
         </div>
@@ -308,6 +313,7 @@ function OfflineDetailsPopup({
 // ----------------------------------------------------------------------------
 
 export function OfflineBanner() {
+  const { t } = useTranslation();
   const { isOnline, pendingCount } = useOfflineStatus();
 
   if (isOnline && pendingCount === 0) {
@@ -326,12 +332,12 @@ export function OfflineBanner() {
       {!isOnline ? (
         <>
           <WifiOff className="w-4 h-4 inline-block mr-2" />
-          Vous etes hors ligne. Les modifications seront synchronisees automatiquement.
+          {t('offline.autoSyncMessage')}
         </>
       ) : (
         <>
           <CloudOff className="w-4 h-4 inline-block mr-2" />
-          {pendingCount} modification{pendingCount > 1 ? 's' : ''} en attente de synchronisation.
+          {t('offline.pendingSyncLabel', { count: pendingCount })}
         </>
       )}
     </div>

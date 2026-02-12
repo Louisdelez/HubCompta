@@ -6,6 +6,7 @@
 
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   Shield,
   Download,
@@ -70,7 +71,7 @@ interface AuditFilters {
 // ----------------------------------------------------------------------------
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('fr-FR', {
+  return new Date(dateStr).toLocaleDateString(undefined, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -79,8 +80,8 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function parseUserAgent(userAgent: string | null): string {
-  if (!userAgent) return 'Appareil inconnu';
+function parseUserAgent(userAgent: string | null, t: (key: string) => string): string {
+  if (!userAgent) return t('settings.audit.unknownDevice');
 
   // Simple parsing for common browsers/devices
   if (userAgent.includes('Chrome')) return 'Chrome';
@@ -89,7 +90,7 @@ function parseUserAgent(userAgent: string | null): string {
   if (userAgent.includes('Edge')) return 'Edge';
   if (userAgent.includes('Mobile')) return 'Mobile';
 
-  return 'Navigateur';
+  return t('settings.audit.browser');
 }
 
 function getStatusIcon(status: string) {
@@ -103,24 +104,24 @@ function getStatusIcon(status: string) {
   }
 }
 
-function getSeverityBadge(severity: string) {
+function getSeverityBadge(severity: string, t: (key: string) => string) {
   switch (severity) {
     case 'critical':
       return (
         <span className="px-2 py-0.5 text-xs font-medium bg-ctp-red/20 text-ctp-red rounded-full">
-          Critique
+          {t('settings.audit.critical')}
         </span>
       );
     case 'warning':
       return (
         <span className="px-2 py-0.5 text-xs font-medium bg-ctp-yellow/20 text-ctp-yellow rounded-full">
-          Attention
+          {t('settings.audit.warning')}
         </span>
       );
     default:
       return (
         <span className="px-2 py-0.5 text-xs font-medium bg-ctp-blue/20 text-ctp-blue rounded-full">
-          Info
+          {t('settings.audit.info')}
         </span>
       );
   }
@@ -131,6 +132,7 @@ function getSeverityBadge(severity: string) {
 // ----------------------------------------------------------------------------
 
 export function AuditLogPage() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
   const [showFilters, setShowFilters] = useState(false);
@@ -228,10 +230,10 @@ export function AuditLogPage() {
           <Shield className="h-6 w-6 text-ctp-red" />
           <div>
             <h2 className="text-xl font-semibold text-ctp-text">
-              Journal d'audit
+              {t('settings.audit.title')}
             </h2>
             <p className="text-sm text-ctp-subtext0">
-              Historique de toutes les actions sensibles sur votre compte
+              {t('settings.audit.allActionsHistory')}
             </p>
           </div>
         </div>
@@ -240,7 +242,7 @@ export function AuditLogPage() {
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-ctp-blue bg-ctp-blue/10 hover:bg-ctp-blue/20 rounded-lg transition-colors"
         >
           <Download className="h-4 w-4" />
-          Exporter CSV
+          {t('settings.audit.exportCsv')}
         </button>
       </div>
 
@@ -252,10 +254,10 @@ export function AuditLogPage() {
             className="flex items-center gap-2 text-sm font-medium text-ctp-text"
           >
             <Filter className="h-4 w-4" />
-            Filtres
+            {t('settings.audit.filters')}
             {hasActiveFilters && (
               <span className="ml-1 px-2 py-0.5 text-xs bg-ctp-blue/20 text-ctp-blue rounded-full">
-                Actifs
+                {t('settings.audit.active')}
               </span>
             )}
           </button>
@@ -264,7 +266,7 @@ export function AuditLogPage() {
               onClick={clearFilters}
               className="text-sm text-ctp-subtext0 hover:text-ctp-text"
             >
-              Effacer
+              {t('settings.audit.clear')}
             </button>
           )}
         </div>
@@ -274,14 +276,14 @@ export function AuditLogPage() {
             {/* Action Type Filter */}
             <div>
               <label className="block text-xs font-medium text-ctp-subtext0 mb-1">
-                Type d'action
+                {t('settings.audit.actionType')}
               </label>
               <select
                 value={filters.action}
                 onChange={(e) => handleFilterChange('action', e.target.value)}
                 className="w-full px-3 py-2 text-sm bg-ctp-surface0 border border-ctp-surface1 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue"
               >
-                <option value="">Toutes les actions</option>
+                <option value="">{t('settings.audit.allActions')}</option>
                 {actionTypes.map((type) => (
                   <option key={type.value} value={type.value}>
                     {type.label}
@@ -293,16 +295,16 @@ export function AuditLogPage() {
             {/* Status Filter */}
             <div>
               <label className="block text-xs font-medium text-ctp-subtext0 mb-1">
-                Statut
+                {t('settings.audit.status')}
               </label>
               <select
                 value={filters.status}
                 onChange={(e) => handleFilterChange('status', e.target.value)}
                 className="w-full px-3 py-2 text-sm bg-ctp-surface0 border border-ctp-surface1 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue"
               >
-                <option value="">Tous les statuts</option>
-                <option value="success">Succes</option>
-                <option value="failure">Echec</option>
+                <option value="">{t('settings.audit.allStatuses')}</option>
+                <option value="success">{t('settings.audit.success')}</option>
+                <option value="failure">{t('settings.audit.failure')}</option>
               </select>
             </div>
 
@@ -310,7 +312,7 @@ export function AuditLogPage() {
             <div>
               <label className="block text-xs font-medium text-ctp-subtext0 mb-1">
                 <Calendar className="h-3 w-3 inline mr-1" />
-                Date de debut
+                {t('settings.audit.startDate')}
               </label>
               <input
                 type="date"
@@ -324,7 +326,7 @@ export function AuditLogPage() {
             <div>
               <label className="block text-xs font-medium text-ctp-subtext0 mb-1">
                 <Calendar className="h-3 w-3 inline mr-1" />
-                Date de fin
+                {t('settings.audit.endDate')}
               </label>
               <input
                 type="date"
@@ -347,14 +349,14 @@ export function AuditLogPage() {
           <div className="text-center py-12">
             <Search className="h-12 w-12 text-ctp-overlay0 mx-auto mb-3" />
             <p className="text-ctp-subtext0">
-              Aucun evenement trouve
+              {t('settings.audit.noEventsFound')}
             </p>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
                 className="mt-2 text-sm text-ctp-blue hover:text-ctp-sapphire"
               >
-                Effacer les filtres
+                {t('settings.audit.clearFilters')}
               </button>
             )}
           </div>
@@ -366,22 +368,22 @@ export function AuditLogPage() {
                 <thead className="bg-ctp-surface0">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-ctp-subtext0 uppercase tracking-wider">
-                      Date
+                      {t('settings.audit.date')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-ctp-subtext0 uppercase tracking-wider">
-                      Action
+                      {t('settings.audit.action')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-ctp-subtext0 uppercase tracking-wider">
-                      Adresse IP
+                      {t('settings.audit.ipAddress')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-ctp-subtext0 uppercase tracking-wider">
-                      Appareil
+                      {t('settings.audit.device')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-ctp-subtext0 uppercase tracking-wider">
-                      Statut
+                      {t('settings.audit.status')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-ctp-subtext0 uppercase tracking-wider">
-                      Severite
+                      {t('settings.audit.severity')}
                     </th>
                   </tr>
                 </thead>
@@ -407,25 +409,25 @@ export function AuditLogPage() {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2 text-sm text-ctp-subtext0">
                           <Globe className="h-4 w-4" />
-                          {log.ipAddress ?? 'IP inconnue'}
+                          {log.ipAddress ?? t('settings.audit.unknownIP')}
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2 text-sm text-ctp-subtext0">
                           <Monitor className="h-4 w-4" />
-                          {parseUserAgent(log.userAgent)}
+                          {parseUserAgent(log.userAgent, t)}
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {getStatusIcon(log.status)}
                           <span className="text-sm text-ctp-text capitalize">
-                            {log.status === 'success' ? 'Succes' : 'Echec'}
+                            {log.status === 'success' ? t('settings.audit.success') : t('settings.audit.failure')}
                           </span>
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        {getSeverityBadge(log.severity)}
+                        {getSeverityBadge(log.severity, t)}
                       </td>
                     </tr>
                   ))}
@@ -441,7 +443,7 @@ export function AuditLogPage() {
                     <span className="text-sm font-medium text-ctp-text">
                       {log.actionLabel}
                     </span>
-                    {getSeverityBadge(log.severity)}
+                    {getSeverityBadge(log.severity, t)}
                   </div>
                   <div className="flex items-center gap-4 text-xs text-ctp-subtext0">
                     <span className="flex items-center gap-1">
@@ -450,13 +452,13 @@ export function AuditLogPage() {
                     </span>
                     <span className="flex items-center gap-1">
                       <Globe className="h-3 w-3" />
-                      {log.ipAddress ?? 'IP inconnue'}
+                      {log.ipAddress ?? t('settings.audit.unknownIP')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     {getStatusIcon(log.status)}
                     <span className="text-xs text-ctp-text capitalize">
-                      {log.status === 'success' ? 'Succes' : 'Echec'}
+                      {log.status === 'success' ? t('settings.audit.success') : t('settings.audit.failure')}
                     </span>
                   </div>
                 </div>
@@ -469,7 +471,7 @@ export function AuditLogPage() {
         {meta && meta.totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 bg-ctp-surface0 border-t border-ctp-surface1">
             <div className="text-sm text-ctp-subtext0">
-              Page {meta.page} sur {meta.totalPages} ({meta.total} evenements)
+              {t('settings.audit.pageOf', { page: meta.page, total: meta.totalPages, count: meta.total })}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -500,12 +502,10 @@ export function AuditLogPage() {
           <Shield className="h-5 w-5 text-ctp-blue flex-shrink-0 mt-0.5" />
           <div>
             <h3 className="text-sm font-medium text-ctp-text">
-              A propos du journal d'audit
+              {t('settings.audit.aboutAuditLog')}
             </h3>
             <p className="text-sm text-ctp-subtext0 mt-1">
-              Ce journal enregistre toutes les actions sensibles effectuees sur votre compte,
-              y compris les connexions, les modifications de securite et les exports de donnees.
-              Consultez-le regulierement pour detecter toute activite suspecte.
+              {t('settings.audit.auditLogDescription')}
             </p>
           </div>
         </div>

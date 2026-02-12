@@ -21,7 +21,12 @@
     "./validation": {
       "types": "./dist/validation/index.d.ts",
       "import": "./dist/validation/index.js"
-    }
+    },
+    "./locales": {
+      "types": "./dist/locales/index.d.ts",
+      "import": "./dist/locales/index.js"
+    },
+    "./src/locales/*": "./src/locales/*"
   },
   "scripts": {
     "build": "tsc",

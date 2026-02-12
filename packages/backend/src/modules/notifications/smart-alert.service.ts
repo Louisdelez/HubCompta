@@ -6,6 +6,23 @@
 import { prisma } from '@/core/database/client.js';
 import { notificationService } from './notification.service.js';
 import { logger } from '@/core/middleware/logger.js';
+import {
+  getNotificationMessage,
+  DEFAULT_LANGUAGE,
+} from '@/core/i18n/index.js';
+import type { LanguageCode } from '@finance-hub/shared';
+
+// ----------------------------------------------------------------------------
+// Helper to get user locale
+// ----------------------------------------------------------------------------
+
+async function getUserLocale(userId: string): Promise<LanguageCode> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { locale: true },
+  });
+  return (user?.locale as LanguageCode) || DEFAULT_LANGUAGE;
+}
 
 // ----------------------------------------------------------------------------
 // Types
@@ -56,11 +73,12 @@ export const smartAlertService = {
     );
 
     if (amount > avgTransaction * 3 && amount > 100) {
+      // Note: Message will be localized when notification is created
       anomalies.push({
         type: 'large_transaction',
         severity: amount > avgTransaction * 5 ? 'high' : 'medium',
-        message: `Transaction inhabituelle: ${amount.toFixed(2)} EUR (${Math.round(amount / avgTransaction)}x la moyenne)`,
-        data: { transactionId, amount, average: avgTransaction },
+        message: `anomaly.largeTransactionMessage|amount:${amount.toFixed(2)}|currency:EUR|multiplier:${Math.round(amount / avgTransaction)}`,
+        data: { transactionId, amount, average: avgTransaction, multiplier: Math.round(amount / avgTransaction) },
       });
     }
 
@@ -76,7 +94,7 @@ export const smartAlertService = {
         anomalies.push({
           type: 'category_spike',
           severity: spike.percentageAbove > 100 ? 'high' : 'medium',
-          message: `Depense elevee dans "${transaction.category?.name}": ${spike.percentageAbove}% au-dessus de la moyenne`,
+          message: `anomaly.categorySpikeMessage|categoryName:${transaction.category?.name}|percentageAbove:${spike.percentageAbove}`,
           data: {
             categoryId: transaction.categoryId,
             categoryName: transaction.category?.name,
@@ -96,7 +114,7 @@ export const smartAlertService = {
       anomalies.push({
         type: 'new_merchant',
         severity: 'low',
-        message: `Premiere transaction avec ce commercant`,
+        message: `anomaly.newMerchantMessage`,
         data: { merchant: transaction.description, amount },
       });
     }
@@ -210,35 +228,68 @@ export const smartAlertService = {
     userId: string,
     anomalies: AnomalyDetectionResult[]
   ): Promise<void> {
+    const locale = await getUserLocale(userId);
+
     for (const anomaly of anomalies) {
       if (anomaly.severity === 'low') continue; // Skip low severity
+
+      const title = this.getAnomalyTitle(anomaly, locale);
+      const message = this.getLocalizedAnomalyMessage(anomaly, locale);
 
       await notificationService.create({
         userId,
         workspaceId,
         type: 'unusual_spending',
-        title: this.getAnomalyTitle(anomaly),
-        message: anomaly.message,
+        title,
+        message,
         data: anomaly.data,
       });
     }
   },
 
   /**
+   * Get localized anomaly message
+   */
+  getLocalizedAnomalyMessage(anomaly: AnomalyDetectionResult, locale: LanguageCode): string {
+    // Parse the message format: key|var1:value1|var2:value2
+    const parts = anomaly.message.split('|');
+    const key = parts[0];
+
+    // If it's not a translation key format, return as-is
+    if (!key?.startsWith('anomaly.')) {
+      return anomaly.message;
+    }
+
+    // Parse variables
+    const variables: Record<string, string | number> = {};
+    for (let i = 1; i < parts.length; i++) {
+      const varPart = parts[i];
+      if (varPart) {
+        const [varName, varValue] = varPart.split(':');
+        if (varName && varValue) {
+          variables[varName] = varValue;
+        }
+      }
+    }
+
+    return getNotificationMessage(locale, key, variables);
+  },
+
+  /**
    * Get title for anomaly notification
    */
-  getAnomalyTitle(anomaly: AnomalyDetectionResult): string {
+  getAnomalyTitle(anomaly: AnomalyDetectionResult, locale: LanguageCode): string {
     switch (anomaly.type) {
       case 'large_transaction':
-        return '⚠️ Transaction importante detectee';
+        return getNotificationMessage(locale, 'anomaly.largeTransaction');
       case 'category_spike':
-        return '📈 Augmentation des depenses';
+        return getNotificationMessage(locale, 'anomaly.categorySpike');
       case 'unusual_spending':
-        return '🔍 Depense inhabituelle';
+        return getNotificationMessage(locale, 'anomaly.unusualSpending');
       case 'new_merchant':
-        return '🆕 Nouveau commercant';
+        return getNotificationMessage(locale, 'anomaly.newMerchant');
       default:
-        return '📊 Alerte financiere';
+        return getNotificationMessage(locale, 'anomaly.financialAlert');
     }
   },
 
@@ -306,22 +357,23 @@ export const smartAlertService = {
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 5);
 
-    // Generate insights
+    // Generate insights (these will be localized based on user locale when sent)
+    // For now, store insight keys with data for later localization
     const insights: string[] = [];
 
     if (comparedToAverage > 20) {
-      insights.push(`Vous avez depense ${comparedToAverage}% de plus que d'habitude cette semaine.`);
+      insights.push(`insights.spentMoreThanUsual|percent:${comparedToAverage}`);
     } else if (comparedToAverage < -20) {
-      insights.push(`Bravo ! Vous avez depense ${Math.abs(comparedToAverage)}% de moins que d'habitude.`);
+      insights.push(`insights.spentLessThanUsual|percent:${Math.abs(comparedToAverage)}`);
     }
 
     if (topCategories.length > 0) {
       const topCategory = topCategories[0]!;
-      insights.push(`Votre plus grande categorie de depenses: ${topCategory.name} (${topCategory.amount.toFixed(2)} EUR)`);
+      insights.push(`insights.topCategory|categoryName:${topCategory.name}|amount:${topCategory.amount.toFixed(2)}|currency:EUR`);
     }
 
     if (totalIncome > totalSpent) {
-      insights.push(`Vous etes en positif cette semaine: +${(totalIncome - totalSpent).toFixed(2)} EUR`);
+      insights.push(`insights.positiveWeek|amount:${(totalIncome - totalSpent).toFixed(2)}|currency:EUR`);
     }
 
     return {
@@ -338,18 +390,45 @@ export const smartAlertService = {
    * Send weekly summary notification
    */
   async sendWeeklySummary(workspaceId: string, userId: string): Promise<void> {
+    const locale = await getUserLocale(userId);
     const summary = await this.generateWeeklySummary(workspaceId, userId);
+    const currency = 'EUR';
 
-    const title = summary.netChange >= 0
-      ? `📊 Resume hebdomadaire: +${summary.netChange.toFixed(0)} EUR`
-      : `📊 Resume hebdomadaire: ${summary.netChange.toFixed(0)} EUR`;
+    const titleKey = summary.netChange >= 0 ? 'weeklySummary.titlePositive' : 'weeklySummary.titleNegative';
+    const title = getNotificationMessage(locale, titleKey, {
+      netChange: summary.netChange.toFixed(0),
+      currency,
+    });
+
+    // Localize insights
+    const localizedInsights = summary.insights.map((insight) => {
+      const parts = insight.split('|');
+      const key = parts[0];
+
+      if (!key?.startsWith('insights.')) {
+        return insight;
+      }
+
+      const variables: Record<string, string | number> = {};
+      for (let i = 1; i < parts.length; i++) {
+        const varPart = parts[i];
+        if (varPart) {
+          const [varName, varValue] = varPart.split(':');
+          if (varName && varValue) {
+            variables[varName] = varValue;
+          }
+        }
+      }
+
+      return getNotificationMessage(locale, key, variables);
+    });
 
     await notificationService.create({
       userId,
       workspaceId,
       type: 'weekly_summary',
       title,
-      message: summary.insights.join(' '),
+      message: localizedInsights.join(' '),
       data: {
         totalSpent: summary.totalSpent,
         totalIncome: summary.totalIncome,
@@ -368,6 +447,9 @@ export const smartAlertService = {
     userId: string,
     threshold: number = 100
   ): Promise<void> {
+    const locale = await getUserLocale(userId);
+    const currency = 'EUR';
+
     const accounts = await prisma.account.findMany({
       where: {
         workspaceId,
@@ -379,12 +461,22 @@ export const smartAlertService = {
     for (const account of accounts) {
       const balance = account.balance.toNumber();
       if (balance < threshold && balance > 0) {
+        const title = getNotificationMessage(locale, 'lowBalance.title', {
+          accountName: account.name,
+        });
+        const message = getNotificationMessage(locale, 'lowBalance.message', {
+          accountName: account.name,
+          balance: balance.toFixed(2),
+          threshold: threshold.toFixed(2),
+          currency,
+        });
+
         await notificationService.create({
           userId,
           workspaceId,
           type: 'low_balance_warning',
-          title: `⚠️ Solde bas: ${account.name}`,
-          message: `Le solde de votre compte "${account.name}" est de ${balance.toFixed(2)} EUR`,
+          title,
+          message,
           data: {
             accountId: account.id,
             accountName: account.name,
@@ -404,6 +496,7 @@ export const smartAlertService = {
     userId: string,
     goalId: string
   ): Promise<void> {
+    const locale = await getUserLocale(userId);
     const goal = await prisma.savingsGoal.findFirst({
       where: { id: goalId, workspaceId },
     });
@@ -435,16 +528,25 @@ export const smartAlertService = {
         const lastMilestone = (existingNotification?.data as { milestone?: number })?.milestone ?? 0;
 
         if (milestone > lastMilestone) {
-          const emoji = milestone === 100 ? '🎉' : milestone === 75 ? '🔥' : milestone === 50 ? '🌟' : '✨';
+          const icon = milestone === 100 ? '🎉' : milestone === 75 ? '🔥' : milestone === 50 ? '🌟' : '✨';
+
+          const title = getNotificationMessage(locale, 'savingsMilestone.title', {
+            icon,
+            goalName: goal.name,
+            milestone,
+          });
+          const messageKey = milestone === 100 ? 'savingsMilestone.messageComplete' : 'savingsMilestone.messageProgress';
+          const message = getNotificationMessage(locale, messageKey, {
+            milestone,
+            goalName: goal.name,
+          });
 
           await notificationService.create({
             userId,
             workspaceId,
             type: 'savings_milestone',
-            title: `${emoji} ${goal.name}: ${milestone}% atteint !`,
-            message: milestone === 100
-              ? `Felicitations ! Vous avez atteint votre objectif d'epargne !`
-              : `Vous avez atteint ${milestone}% de votre objectif "${goal.name}"`,
+            title,
+            message,
             data: {
               goalId,
               goalName: goal.name,
@@ -510,12 +612,24 @@ export const smartAlertService = {
 
       // Warn if significantly off track
       if (avgMonthly < requiredMonthly * 0.5 && remaining > 100) {
+        const locale = await getUserLocale(userId);
+        const currency = 'EUR';
+
+        const title = getNotificationMessage(locale, 'savingsOffTrack.title', {
+          goalName: goal.name,
+        });
+        const message = getNotificationMessage(locale, 'savingsOffTrack.message', {
+          required: requiredMonthly.toFixed(0),
+          current: avgMonthly.toFixed(0),
+          currency,
+        });
+
         await notificationService.create({
           userId,
           workspaceId,
           type: 'savings_off_track',
-          title: `📈 Objectif "${goal.name}" en retard`,
-          message: `Pour atteindre votre objectif a temps, vous devriez epargner ${requiredMonthly.toFixed(0)} EUR/mois (actuellement ${avgMonthly.toFixed(0)} EUR/mois)`,
+          title,
+          message,
           data: {
             goalId: goal.id,
             goalName: goal.name,
@@ -890,16 +1004,26 @@ export const smartAlertService = {
             const lastMilestone = (existingNotification?.data as { milestone?: number })?.milestone ?? 0;
 
             if (milestone > lastMilestone) {
-              const emoji = milestone === 100 ? '🎉' : milestone === 75 ? '🔥' : milestone === 50 ? '🌟' : '✨';
+              const locale = await getUserLocale(userId);
+              const icon = milestone === 100 ? '🎉' : milestone === 75 ? '🔥' : milestone === 50 ? '🌟' : '✨';
+
+              const title = getNotificationMessage(locale, 'savingsMilestone.title', {
+                icon,
+                goalName: goal.name,
+                milestone,
+              });
+              const messageKey = milestone === 100 ? 'savingsMilestone.messageComplete' : 'savingsMilestone.messageProgress';
+              const message = getNotificationMessage(locale, messageKey, {
+                milestone,
+                goalName: goal.name,
+              });
 
               await notificationService.create({
                 userId,
                 workspaceId,
                 type: 'savings_milestone',
-                title: `${emoji} ${goal.name}: ${milestone}% atteint !`,
-                message: milestone === 100
-                  ? `Felicitations ! Vous avez atteint votre objectif d'epargne !`
-                  : `Vous avez atteint ${milestone}% de votre objectif "${goal.name}"`,
+                title,
+                message,
                 data: {
                   goalId: goal.id,
                   goalName: goal.name,
@@ -960,12 +1084,24 @@ export const smartAlertService = {
               });
 
               if (!recentNotification) {
+                const locale = await getUserLocale(userId);
+                const currency = 'EUR';
+
+                const title = getNotificationMessage(locale, 'savingsOffTrack.title', {
+                  goalName: goal.name,
+                });
+                const message = getNotificationMessage(locale, 'savingsOffTrack.message', {
+                  required: requiredMonthly.toFixed(0),
+                  current: avgMonthly.toFixed(0),
+                  currency,
+                });
+
                 await notificationService.create({
                   userId,
                   workspaceId,
                   type: 'savings_off_track',
-                  title: `📈 Objectif "${goal.name}" en retard`,
-                  message: `Pour atteindre votre objectif a temps, vous devriez epargner ${requiredMonthly.toFixed(0)} EUR/mois (actuellement ${avgMonthly.toFixed(0)} EUR/mois)`,
+                  title,
+                  message,
                   data: {
                     goalId: goal.id,
                     goalName: goal.name,

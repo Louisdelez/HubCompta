@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Bell,
@@ -60,6 +61,7 @@ interface PriceAlertListProps {
 // ----------------------------------------------------------------------------
 
 export function PriceAlertList({ positionId, compact = false }: PriceAlertListProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const queryClient = useQueryClient();
   const [editingAlert, setEditingAlert] = useState<PriceAlert | null>(null);
@@ -103,10 +105,10 @@ export function PriceAlertList({ positionId, compact = false }: PriceAlertListPr
     return (
       <div className={cn('text-center py-8 text-ctp-subtext0', compact && 'py-4')}>
         <Bell className={cn('mx-auto text-ctp-overlay1 mb-3', compact ? 'h-8 w-8' : 'h-12 w-12')} />
-        <p>Aucune alerte de prix</p>
+        <p>{t('invest.priceAlertList.noAlerts')}</p>
         {!compact && (
           <p className="text-sm mt-1">
-            Definissez des alertes sur vos positions pour etre notifie
+            {t('invest.priceAlertList.createFirst')}
           </p>
         )}
       </div>
@@ -123,7 +125,7 @@ export function PriceAlertList({ positionId, compact = false }: PriceAlertListPr
       {activeAlerts.length > 0 && (
         <div className="space-y-2">
           {!compact && activeAlerts.length > 0 && triggeredAlerts.length > 0 && (
-            <h4 className="text-sm font-medium text-ctp-subtext0 mb-2">Alertes actives</h4>
+            <h4 className="text-sm font-medium text-ctp-subtext0 mb-2">{t('invest.priceAlertList.activeAlerts')}</h4>
           )}
           {activeAlerts.map((alert) => (
             <AlertItem
@@ -132,11 +134,12 @@ export function PriceAlertList({ positionId, compact = false }: PriceAlertListPr
               compact={compact}
               onEdit={() => setEditingAlert(alert)}
               onDelete={() => {
-                if (window.confirm('Supprimer cette alerte?')) {
+                if (window.confirm(t('invest.priceAlertList.confirmDelete'))) {
                   deleteMutation.mutate(alert.id);
                 }
               }}
               isDeleting={deleteMutation.isPending}
+              t={t}
             />
           ))}
         </div>
@@ -146,7 +149,7 @@ export function PriceAlertList({ positionId, compact = false }: PriceAlertListPr
       {triggeredAlerts.length > 0 && (
         <div className="space-y-2">
           {!compact && (
-            <h4 className="text-sm font-medium text-ctp-subtext0 mb-2">Alertes declenchees</h4>
+            <h4 className="text-sm font-medium text-ctp-subtext0 mb-2">{t('invest.priceAlertList.triggeredAlerts')}</h4>
           )}
           {triggeredAlerts.map((alert) => (
             <TriggeredAlertItem
@@ -155,12 +158,13 @@ export function PriceAlertList({ positionId, compact = false }: PriceAlertListPr
               compact={compact}
               onReset={() => resetMutation.mutate(alert.id)}
               onDelete={() => {
-                if (window.confirm('Supprimer cette alerte?')) {
+                if (window.confirm(t('invest.priceAlertList.confirmDelete'))) {
                   deleteMutation.mutate(alert.id);
                 }
               }}
               isResetting={resetMutation.isPending}
               isDeleting={deleteMutation.isPending}
+              t={t}
             />
           ))}
         </div>
@@ -196,9 +200,10 @@ interface AlertItemProps {
   onEdit: () => void;
   onDelete: () => void;
   isDeleting: boolean;
+  t: (key: string) => string;
 }
 
-function AlertItem({ alert, compact, onEdit, onDelete, isDeleting }: AlertItemProps) {
+function AlertItem({ alert, compact, onEdit, onDelete, isDeleting, t }: AlertItemProps) {
   const currency = alert.position?.asset.currency || 'EUR';
   const currentPrice = alert.position?.asset.lastPrice;
 
@@ -229,18 +234,18 @@ function AlertItem({ alert, compact, onEdit, onDelete, isDeleting }: AlertItemPr
               {alert.symbol}
             </p>
             {alert.isRecurring && (
-              <span title="Alerte recurrente">
+              <span title={t('invest.priceAlert.recurringAlert')}>
                 <RefreshCw className="h-3 w-3 text-ctp-blue" />
               </span>
             )}
           </div>
           <p className={cn('text-ctp-subtext0', compact ? 'text-xs' : 'text-sm')}>
-            {alert.direction === 'above' ? 'Au-dessus de ' : 'En-dessous de '}
+            {alert.direction === 'above' ? t('invest.priceAlert.above') + ' ' : t('invest.priceAlert.below') + ' '}
             {formatCurrency(alert.targetPrice, currency)}
           </p>
           {currentPrice && !compact && (
             <p className="text-xs text-ctp-overlay1">
-              Prix actuel: {formatCurrency(currentPrice, currency)}
+              {t('invest.priceAlert.currentPrice')}: {formatCurrency(currentPrice, currency)}
             </p>
           )}
         </div>
@@ -253,7 +258,7 @@ function AlertItem({ alert, compact, onEdit, onDelete, isDeleting }: AlertItemPr
             'text-ctp-overlay1 hover:text-ctp-blue hover:bg-ctp-blue/10 rounded-lg transition-colors',
             compact ? 'p-1.5' : 'p-2'
           )}
-          title="Modifier"
+          title={t('invest.priceAlertList.edit')}
         >
           <Edit2 className={cn(compact ? 'h-3 w-3' : 'h-4 w-4')} />
         </button>
@@ -264,7 +269,7 @@ function AlertItem({ alert, compact, onEdit, onDelete, isDeleting }: AlertItemPr
             'text-ctp-overlay1 hover:text-ctp-red hover:bg-ctp-red/10 rounded-lg transition-colors',
             compact ? 'p-1.5' : 'p-2'
           )}
-          title="Supprimer"
+          title={t('invest.priceAlertList.delete')}
         >
           <Trash2 className={cn(compact ? 'h-3 w-3' : 'h-4 w-4')} />
         </button>
@@ -280,6 +285,7 @@ interface TriggeredAlertItemProps {
   onDelete: () => void;
   isResetting: boolean;
   isDeleting: boolean;
+  t: (key: string) => string;
 }
 
 function TriggeredAlertItem({
@@ -289,6 +295,7 @@ function TriggeredAlertItem({
   onDelete,
   isResetting,
   isDeleting,
+  t,
 }: TriggeredAlertItemProps) {
   const currency = alert.position?.asset.currency || 'EUR';
 
@@ -314,16 +321,16 @@ function TriggeredAlertItem({
               {alert.symbol}
             </p>
             <span className="text-xs px-1.5 py-0.5 bg-ctp-yellow/10 text-ctp-yellow rounded">
-              Declenchee
+              {t('invest.priceAlertList.triggered')}
             </span>
           </div>
           <p className={cn('text-ctp-subtext0', compact ? 'text-xs' : 'text-sm')}>
-            {alert.direction === 'above' ? 'Au-dessus de ' : 'En-dessous de '}
+            {alert.direction === 'above' ? t('invest.priceAlert.above') + ' ' : t('invest.priceAlert.below') + ' '}
             {formatCurrency(alert.targetPrice, currency)}
           </p>
           {alert.triggeredAt && !compact && (
             <p className="text-xs text-ctp-overlay1">
-              Le {new Date(alert.triggeredAt).toLocaleDateString('fr-FR')}
+              {new Date(alert.triggeredAt).toLocaleDateString()}
             </p>
           )}
         </div>
@@ -338,7 +345,7 @@ function TriggeredAlertItem({
               'text-ctp-overlay1 hover:text-ctp-blue hover:bg-ctp-blue/10 rounded-lg transition-colors',
               compact ? 'p-1.5' : 'p-2'
             )}
-            title="Reactiver"
+            title={t('invest.priceAlertList.reactivate')}
           >
             <RefreshCw className={cn(compact ? 'h-3 w-3' : 'h-4 w-4', isResetting && 'animate-spin')} />
           </button>
@@ -350,7 +357,7 @@ function TriggeredAlertItem({
             'text-ctp-overlay1 hover:text-ctp-red hover:bg-ctp-red/10 rounded-lg transition-colors',
             compact ? 'p-1.5' : 'p-2'
           )}
-          title="Supprimer"
+          title={t('invest.priceAlertList.delete')}
         >
           {isDeleting ? (
             <X className={cn(compact ? 'h-3 w-3' : 'h-4 w-4')} />

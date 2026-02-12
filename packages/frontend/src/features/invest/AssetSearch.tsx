@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Search, TrendingUp, Bitcoin, Building2, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -47,10 +48,12 @@ interface AssetSearchProps {
 
 export function AssetSearch({
   onSelect,
-  placeholder = 'Rechercher un actif (ex: AAPL, BTC, LVMH)...',
+  placeholder,
   className,
   disabled = false,
 }: AssetSearchProps) {
+  const { t } = useTranslation();
+  const defaultPlaceholder = t('invest.assetSearch.placeholder');
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -143,17 +146,17 @@ export function AssetSearch({
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'stock':
-        return 'Action';
+        return t('invest.assetSearch.types.stock');
       case 'etf':
-        return 'ETF';
+        return t('invest.assetSearch.types.etf');
       case 'crypto':
-        return 'Crypto';
+        return t('invest.assetSearch.types.crypto');
       case 'bond':
-        return 'Obligation';
+        return t('invest.assetSearch.types.bond');
       case 'commodity':
-        return 'Matière première';
+        return t('invest.assetSearch.types.commodity');
       default:
-        return 'Autre';
+        return t('invest.assetSearch.types.other');
     }
   };
 
@@ -171,7 +174,7 @@ export function AssetSearch({
           }}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={placeholder || defaultPlaceholder}
           disabled={disabled}
           className={cn(
             'w-full pl-10 pr-4 py-2 border border-ctp-surface1 rounded-lg',
@@ -192,7 +195,7 @@ export function AssetSearch({
           {isLoading ? (
             <div className="p-4 text-center text-ctp-subtext0">
               <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
-              Recherche en cours...
+              {t('invest.assetSearch.searching')}
             </div>
           ) : results && results.length > 0 ? (
             <ul className="py-1">
@@ -226,7 +229,7 @@ export function AssetSearch({
             </ul>
           ) : (
             <div className="p-4 text-center text-ctp-subtext0">
-              Aucun résultat trouvé pour "{query}"
+              {t('invest.assetSearch.noResults')} "{query}"
             </div>
           )}
         </div>

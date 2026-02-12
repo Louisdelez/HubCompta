@@ -3,6 +3,7 @@
 // Uses Catppuccin colors that adapt to the current theme
 // ============================================================================
 
+import { useTranslation } from 'react-i18next';
 import { Check, AlertTriangle } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -74,12 +75,13 @@ function getAvatarColor(name: string): string {
 // ----------------------------------------------------------------------------
 
 export function BalanceChart({ balances, currency }: BalanceChartProps) {
+  const { t } = useTranslation();
   // Find max absolute balance for scaling
   const maxBalance = Math.max(...balances.map((b) => Math.abs(b.balance)), 1);
 
   return (
     <div className="card">
-      <h2 className="text-lg font-semibold text-ctp-text mb-4">Situation par membre</h2>
+      <h2 className="text-lg font-semibold text-ctp-text mb-4">{t('workspaces.settlement.memberStatus')}</h2>
 
       <div className="space-y-4">
         {balances.map((balance) => {
@@ -101,7 +103,7 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-ctp-text truncate">{balance.memberName}</p>
                   <p className="text-xs text-ctp-subtext0">
-                    A payé {formatCurrency(balance.totalPaid, currency)}
+                    {t('workspaces.settlement.paid')} {formatCurrency(balance.totalPaid, currency)}
                   </p>
                 </div>
                 <div className="text-right">
@@ -115,7 +117,7 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
                     {formatCurrency(balance.balance, currency)}
                   </p>
                   <p className="text-xs text-ctp-subtext0">
-                    {isPositive ? 'doit recevoir' : 'doit payer'}
+                    {isPositive ? t('workspaces.settlement.receives') : t('workspaces.settlement.owes')}
                   </p>
                 </div>
               </div>
@@ -154,11 +156,11 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
       <div className="flex justify-center gap-6 mt-6 pt-4 border-t border-ctp-surface1">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-ctp-red" />
-          <span className="text-sm text-ctp-subtext0">Doit payer</span>
+          <span className="text-sm text-ctp-subtext0">{t('workspaces.settlement.mustPay')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-ctp-green" />
-          <span className="text-sm text-ctp-subtext0">Doit recevoir</span>
+          <span className="text-sm text-ctp-subtext0">{t('workspaces.settlement.mustReceive')}</span>
         </div>
       </div>
 
@@ -167,7 +169,7 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
         <div className="mt-4 p-3 bg-ctp-surface0 rounded-lg">
           <div className="grid grid-cols-2 gap-4 text-center text-sm">
             <div>
-              <p className="text-ctp-subtext0">Total à redistribuer</p>
+              <p className="text-ctp-subtext0">{t('workspaces.settlement.totalToRedistribute')}</p>
               <p className="font-bold text-lg text-ctp-text">
                 {formatCurrency(
                   balances.filter((b) => b.balance > 0).reduce((sum, b) => sum + b.balance, 0),
@@ -176,15 +178,15 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
               </p>
             </div>
             <div>
-              <p className="text-ctp-subtext0">Équilibre</p>
+              <p className="text-ctp-subtext0">{t('workspaces.settlement.balance')}</p>
               <p className="font-bold text-lg">
                 {Math.abs(balances.reduce((sum, b) => sum + b.balance, 0)) < 0.01 ? (
                   <span className="text-ctp-green flex items-center justify-center gap-1">
-                    <Check className="w-4 h-4" /> Équilibré
+                    <Check className="w-4 h-4" /> {t('workspaces.settlement.balanced')}
                   </span>
                 ) : (
                   <span className="text-ctp-yellow flex items-center justify-center gap-1">
-                    <AlertTriangle className="w-4 h-4" /> Déséquilibre
+                    <AlertTriangle className="w-4 h-4" /> {t('workspaces.settlement.imbalanced')}
                   </span>
                 )}
               </p>

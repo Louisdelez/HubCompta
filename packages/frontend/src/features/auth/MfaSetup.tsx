@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api/client';
 import { ShieldCheck, CheckCircle, AlertTriangle } from 'lucide-react';
 
@@ -28,6 +29,7 @@ interface VerifyFormData {
 // ----------------------------------------------------------------------------
 
 export function MfaSetup() {
+  const { t } = useTranslation();
   const [step, setStep] = useState<'init' | 'verify' | 'backup' | 'complete'>('init');
   const [setupData, setSetupData] = useState<MfaSetupData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -98,9 +100,9 @@ export function MfaSetup() {
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-ctp-teal to-ctp-sky flex items-center justify-center mx-auto mb-6 shadow-lg">
             <ShieldCheck className="w-10 h-10 text-ctp-crust" />
           </div>
-          <h1 className="text-2xl font-bold text-ctp-text">Configurer l'authentification MFA</h1>
+          <h1 className="text-2xl font-bold text-ctp-text">{t('auth.mfa.setup.title')}</h1>
           <p className="text-ctp-subtext0 mt-3 mb-8">
-            L'authentification a deux facteurs est obligatoire pour securiser votre compte.
+            {t('auth.mfa.setup.mandatory')}
           </p>
 
           {error && (
@@ -117,7 +119,7 @@ export function MfaSetup() {
             disabled={isLoading}
             className="w-full py-3 px-4 rounded-xl bg-ctp-teal text-ctp-crust font-semibold hover:bg-ctp-sky focus:ring-2 focus:ring-ctp-teal/50 focus:ring-offset-2 focus:ring-offset-ctp-surface0 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-ctp-teal/25"
           >
-            {isLoading ? 'Configuration...' : 'Commencer la configuration'}
+            {isLoading ? t('auth.mfa.setup.configuring') : t('auth.mfa.setup.startSetup')}
           </button>
         </div>
       </div>
@@ -130,9 +132,9 @@ export function MfaSetup() {
       <div className="w-full max-w-md">
         <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-2xl p-8 shadow-xl">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-ctp-text">Scanner le QR code</h1>
+            <h1 className="text-2xl font-bold text-ctp-text">{t('auth.mfa.setup.scanQrCode')}</h1>
             <p className="text-ctp-subtext0 mt-2">
-              Utilisez une application comme Google Authenticator ou Authy
+              {t('auth.mfa.setup.useApp')}
             </p>
           </div>
 
@@ -155,7 +157,7 @@ export function MfaSetup() {
           <details className="mb-6 group">
             <summary className="cursor-pointer text-sm text-ctp-subtext0 hover:text-ctp-text transition-colors flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-ctp-overlay0 group-open:bg-ctp-teal transition-colors" />
-              Entrer le code manuellement
+              {t('auth.mfa.setup.enterManually')}
             </summary>
             <div className="mt-3 p-4 bg-ctp-mantle border border-ctp-surface1 rounded-xl font-mono text-sm break-all text-ctp-text">
               {setupData.secret}
@@ -174,7 +176,7 @@ export function MfaSetup() {
           <form onSubmit={handleSubmit(verifyCode)} className="space-y-5">
             <div>
               <label htmlFor="code" className="block text-sm font-medium mb-2 text-ctp-subtext1">
-                Code de verification
+                {t('auth.mfa.setup.verificationCode')}
               </label>
               <input
                 id="code"
@@ -185,10 +187,10 @@ export function MfaSetup() {
                 placeholder="000000"
                 maxLength={6}
                 {...register('code', {
-                  required: 'Code requis',
+                  required: t('auth.mfa.codeRequired'),
                   pattern: {
                     value: /^\d{6}$/,
-                    message: 'Le code doit contenir 6 chiffres',
+                    message: t('auth.mfa.codeMustBe6Digits'),
                   },
                 })}
               />
@@ -202,7 +204,7 @@ export function MfaSetup() {
               disabled={isLoading}
               className="w-full py-3 px-4 rounded-xl bg-ctp-teal text-ctp-crust font-semibold hover:bg-ctp-sky focus:ring-2 focus:ring-ctp-teal/50 focus:ring-offset-2 focus:ring-offset-ctp-surface0 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-ctp-teal/25"
             >
-              {isLoading ? 'Verification...' : 'Verifier'}
+              {isLoading ? t('auth.mfa.verifying') : t('auth.mfa.verify')}
             </button>
           </form>
         </div>
@@ -219,16 +221,16 @@ export function MfaSetup() {
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-ctp-green to-ctp-teal flex items-center justify-center mx-auto mb-4 shadow-lg shadow-ctp-green/25">
               <CheckCircle className="w-8 h-8 text-ctp-crust" />
             </div>
-            <h1 className="text-2xl font-bold text-ctp-text">MFA active !</h1>
+            <h1 className="text-2xl font-bold text-ctp-text">{t('auth.mfa.setup.mfaEnabled')}</h1>
             <p className="text-ctp-subtext0 mt-2">
-              Sauvegardez vos codes de recuperation
+              {t('auth.mfa.setup.saveBackupCodes')}
             </p>
           </div>
 
           <div className="bg-ctp-yellow/10 border border-ctp-yellow/30 rounded-xl p-4 mb-6">
             <p className="text-ctp-yellow text-sm flex items-center gap-3">
               <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-              Ces codes ne seront plus affiches. Conservez-les en lieu sur.
+              {t('auth.mfa.setup.backupWarning')}
             </p>
           </div>
 
@@ -248,10 +250,10 @@ export function MfaSetup() {
           >
             {backupCodesCopied ? (
               <span className="text-ctp-green flex items-center justify-center gap-2">
-                <CheckCircle className="w-4 h-4" /> Copie !
+                <CheckCircle className="w-4 h-4" /> {t('auth.mfa.setup.copied')}
               </span>
             ) : (
-              'Copier les codes'
+              t('auth.mfa.setup.copyCodes')
             )}
           </button>
 
@@ -259,7 +261,7 @@ export function MfaSetup() {
             onClick={finishSetup}
             className="w-full py-3 px-4 rounded-xl bg-ctp-green text-ctp-crust font-semibold hover:bg-ctp-teal focus:ring-2 focus:ring-ctp-green/50 focus:ring-offset-2 focus:ring-offset-ctp-surface0 transition-all duration-200 shadow-lg shadow-ctp-green/25"
           >
-            J'ai sauvegarde mes codes
+            {t('auth.mfa.setup.savedCodes')}
           </button>
         </div>
       </div>

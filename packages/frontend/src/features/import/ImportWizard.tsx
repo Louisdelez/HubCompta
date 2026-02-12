@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, CheckCircle } from 'lucide-react';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { FileUploadStep } from './FileUploadStep';
@@ -65,15 +66,16 @@ interface ImportState {
 // ----------------------------------------------------------------------------
 
 export function ImportWizard() {
+  const { t } = useTranslation();
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [step, setStep] = useState<WizardStep>('upload');
   const [importState, setImportState] = useState<ImportState>({});
 
   const steps = [
-    { key: 'upload', label: 'Fichier' },
-    { key: 'mapping', label: 'Colonnes' },
-    { key: 'preview', label: 'Aperçu' },
-    { key: 'importing', label: 'Import' },
+    { key: 'upload', label: t('import.wizard.file') },
+    { key: 'mapping', label: t('import.wizard.columns') },
+    { key: 'preview', label: t('import.wizard.preview') },
+    { key: 'importing', label: t('import.wizard.import') },
   ];
 
   const currentStepIndex = steps.findIndex((s) => s.key === step);
@@ -81,7 +83,7 @@ export function ImportWizard() {
   if (!workspaceId) {
     return (
       <div className="p-6 text-center text-ctp-subtext0">
-        Sélectionnez un espace de travail
+        {t('import.selectWorkspace')}
       </div>
     );
   }
@@ -90,9 +92,9 @@ export function ImportWizard() {
     <div className="p-6 max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Importer des transactions</h1>
+        <h1 className="text-2xl font-bold">{t('import.importTransactions')}</h1>
         <p className="text-ctp-subtext0">
-          Importez vos relevés bancaires au format CSV
+          {t('import.importBankStatements')}
         </p>
       </div>
 
@@ -218,11 +220,11 @@ export function ImportWizard() {
         {step === 'complete' && (
           <div className="text-center py-8">
             <CheckCircle className="w-12 h-12 mx-auto mb-4 text-ctp-green" />
-            <h2 className="text-xl font-bold mb-2">Import terminé !</h2>
+            <h2 className="text-xl font-bold mb-2">{t('import.complete.title')}</h2>
             <p className="text-ctp-subtext0 mb-6">
-              {importState.result?.imported} transactions importées
+              {t('import.complete.transactionsImported', { count: importState.result?.imported ?? 0 })}
               {importState.result?.duplicates && importState.result.duplicates > 0 && (
-                <>, {importState.result.duplicates} doublons ignorés</>
+                <>, {t('import.complete.duplicatesIgnored', { count: importState.result.duplicates })}</>
               )}
             </p>
 
@@ -232,19 +234,19 @@ export function ImportWizard() {
                   {importState.result?.imported}
                 </p>
                 <p className="text-sm text-ctp-green">
-                  Importées
+                  {t('import.complete.imported')}
                 </p>
               </div>
               <div className="p-4 bg-ctp-surface0 rounded-lg">
                 <p className="text-2xl font-bold">{importState.result?.skipped}</p>
-                <p className="text-sm text-ctp-subtext0">Ignorées</p>
+                <p className="text-sm text-ctp-subtext0">{t('import.complete.skipped')}</p>
               </div>
               <div className="p-4 bg-ctp-yellow/10 border border-ctp-yellow/30 rounded-lg">
                 <p className="text-2xl font-bold text-ctp-yellow">
                   {importState.result?.duplicates}
                 </p>
                 <p className="text-sm text-ctp-yellow">
-                  Doublons
+                  {t('import.complete.duplicates')}
                 </p>
               </div>
               <div className="p-4 bg-ctp-red/10 border border-ctp-red/30 rounded-lg">
@@ -252,7 +254,7 @@ export function ImportWizard() {
                   {importState.result?.errors}
                 </p>
                 <p className="text-sm text-ctp-red">
-                  Erreurs
+                  {t('import.complete.errors')}
                 </p>
               </div>
             </div>
@@ -265,10 +267,10 @@ export function ImportWizard() {
                 }}
                 className="btn-secondary"
               >
-                Nouvel import
+                {t('import.complete.newImport')}
               </button>
               <a href="/transactions" className="btn-primary">
-                Voir les transactions
+                {t('import.complete.viewTransactions')}
               </a>
             </div>
           </div>

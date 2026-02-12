@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Lightbulb, Folder, Tag, FileText, ClipboardList, Sparkles, Brain, CheckCheck, List } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
@@ -45,14 +46,14 @@ interface Rule {
 // Constants
 // ----------------------------------------------------------------------------
 
-const OPERATOR_LABELS: Record<string, string> = {
-  contains: 'contient',
-  equals: 'égal à',
-  starts_with: 'commence par',
-  ends_with: 'termine par',
-  regex: 'correspond à (regex)',
-  greater_than: 'supérieur à',
-  less_than: 'inférieur à',
+const OPERATOR_LABEL_KEYS: Record<string, string> = {
+  contains: 'rules.operators.contains',
+  equals: 'rules.operators.equals',
+  starts_with: 'rules.operators.starts_with',
+  ends_with: 'rules.operators.ends_with',
+  regex: 'rules.operators.regex',
+  greater_than: 'rules.operators.greater_than',
+  less_than: 'rules.operators.less_than',
 };
 
 // ----------------------------------------------------------------------------
@@ -62,6 +63,7 @@ const OPERATOR_LABELS: Record<string, string> = {
 type TabType = 'rules' | 'suggestions' | 'patterns' | 'bulk';
 
 export function RulesPage() {
+  const { t } = useTranslation();
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>('rules');
@@ -99,7 +101,7 @@ export function RulesPage() {
   };
 
   const handleDelete = (rule: Rule) => {
-    if (confirm(`Supprimer la règle "${rule.name}" ?`)) {
+    if (confirm(t('rules.deleteConfirm', { name: rule.name }))) {
       deleteMutation.mutate(rule.id);
     }
   };
@@ -112,7 +114,7 @@ export function RulesPage() {
   if (!workspaceId) {
     return (
       <div className="p-6 text-center text-ctp-subtext0">
-        Sélectionnez un espace de travail
+        {t('rules.selectWorkspace')}
       </div>
     );
   }
@@ -130,10 +132,10 @@ export function RulesPage() {
   }
 
   const tabs = [
-    { id: 'rules' as const, label: 'Regles', icon: List },
-    { id: 'suggestions' as const, label: 'Suggestions', icon: Sparkles },
-    { id: 'patterns' as const, label: 'Patterns', icon: Brain },
-    { id: 'bulk' as const, label: 'Categoriser', icon: CheckCheck },
+    { id: 'rules' as const, labelKey: 'rules.tabs.rules', icon: List },
+    { id: 'suggestions' as const, labelKey: 'rules.tabs.suggestions', icon: Sparkles },
+    { id: 'patterns' as const, labelKey: 'rules.tabs.patterns', icon: Brain },
+    { id: 'bulk' as const, labelKey: 'rules.tabs.categorize', icon: CheckCheck },
   ];
 
   return (
@@ -141,14 +143,14 @@ export function RulesPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Regles et auto-categorisation</h1>
+          <h1 className="text-2xl font-bold">{t('rules.title')}</h1>
           <p className="text-ctp-subtext0">
-            Categorisez automatiquement vos transactions
+            {t('rules.subtitle')}
           </p>
         </div>
         {activeTab === 'rules' && (
           <button onClick={() => setShowEditor(true)} className="btn-primary">
-            + Nouvelle regle
+            {t('rules.newRule')}
           </button>
         )}
       </div>
@@ -167,7 +169,7 @@ export function RulesPage() {
             )}
           >
             <tab.icon className="w-4 h-4" />
-            {tab.label}
+            {t(tab.labelKey)}
           </button>
         ))}
       </div>
@@ -185,12 +187,10 @@ export function RulesPage() {
           <Lightbulb className="w-6 h-6 text-ctp-blue flex-shrink-0" />
           <div>
             <p className="font-medium text-ctp-blue">
-              Comment fonctionnent les règles ?
+              {t('rules.howRulesWork')}
             </p>
             <p className="text-sm text-ctp-blue/80 mt-1">
-              Les règles sont appliquées automatiquement lors de l'import de transactions.
-              Elles permettent de catégoriser, ajouter des tags ou des notes selon des critères
-              que vous définissez.
+              {t('rules.rulesExplanation')}
             </p>
           </div>
         </div>
@@ -231,7 +231,7 @@ export function RulesPage() {
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="font-medium">{rule.name}</h3>
                     <span className="text-xs text-ctp-overlay1">
-                      Priorité: {rule.priority}
+                      {t('rules.priority')}: {rule.priority}
                     </span>
                   </div>
 
@@ -240,9 +240,9 @@ export function RulesPage() {
                     {rule.conditions.map((condition, i) => (
                       <div key={i} className="flex items-center gap-2 text-ctp-subtext0">
                         <span className="font-medium">
-                          {condition.field === 'description' ? 'Description' : 'Montant'}
+                          {condition.field === 'description' ? t('rules.fields.description') : t('rules.fields.amount')}
                         </span>
-                        <span>{OPERATOR_LABELS[condition.operator] ?? condition.operator}</span>
+                        <span>{t(OPERATOR_LABEL_KEYS[condition.operator] ?? condition.operator)}</span>
                         <span className="font-mono bg-ctp-blue/20 text-ctp-blue px-1 rounded">
                           {condition.value}
                         </span>
@@ -257,9 +257,9 @@ export function RulesPage() {
                         key={i}
                         className="text-xs px-2 py-1 rounded-full bg-ctp-mauve/20 text-ctp-mauve inline-flex items-center gap-1"
                       >
-                        {action.type === 'set_category' && <><Folder className="w-3 h-3" /> Catégorie</>}
-                        {action.type === 'add_tag' && <><Tag className="w-3 h-3" /> Tag</>}
-                        {action.type === 'set_notes' && <><FileText className="w-3 h-3" /> Note</>}
+                        {action.type === 'set_category' && <><Folder className="w-3 h-3" /> {t('rules.category')}</>}
+                        {action.type === 'add_tag' && <><Tag className="w-3 h-3" /> {t('rules.tag')}</>}
+                        {action.type === 'set_notes' && <><FileText className="w-3 h-3" /> {t('rules.note')}</>}
                       </span>
                     ))}
                   </div>
@@ -267,9 +267,9 @@ export function RulesPage() {
                   {/* Stats */}
                   {rule.matchCount > 0 && (
                     <p className="text-xs text-ctp-overlay1 mt-2">
-                      {rule.matchCount} correspondance{rule.matchCount > 1 ? 's' : ''}
+                      {t('rules.matchCount', { count: rule.matchCount })}
                       {rule.lastMatchedAt && (
-                        <> • Dernière: {new Date(rule.lastMatchedAt).toLocaleDateString('fr-FR')}</>
+                        <> • {t('rules.lastMatch')} {new Date(rule.lastMatchedAt).toLocaleDateString()}</>
                       )}
                     </p>
                   )}
@@ -281,13 +281,13 @@ export function RulesPage() {
                     onClick={() => handleEdit(rule)}
                     className="btn-ghost text-sm"
                   >
-                    Modifier
+                    {t('rules.edit')}
                   </button>
                   <button
                     onClick={() => handleDelete(rule)}
                     className="btn-ghost text-ctp-red text-sm"
                   >
-                    Supprimer
+                    {t('rules.delete')}
                   </button>
                 </div>
               </div>
@@ -297,9 +297,9 @@ export function RulesPage() {
       ) : (
         <div className="card text-center py-12">
           <ClipboardList className="w-12 h-12 mx-auto mb-4 text-ctp-overlay1" />
-          <p className="text-ctp-subtext0 mb-4">Aucune règle configurée</p>
+          <p className="text-ctp-subtext0 mb-4">{t('rules.noRules')}</p>
           <button onClick={() => setShowEditor(true)} className="btn-primary">
-            Créer votre première règle
+            {t('rules.createFirstRule')}
           </button>
         </div>
       )}

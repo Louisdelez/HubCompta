@@ -1,0 +1,289 @@
+{
+  "navigation": {
+    "dashboard": "Panou de control",
+    "transactions": "Tranzactii",
+    "accounts": "Conturi",
+    "budgets": "Bugete",
+    "savings": "Economii",
+    "loans": "Imprumuturi",
+    "investments": "Investitii",
+    "netWorth": "Valoare Neta",
+    "documents": "Documente",
+    "banking": "Banca",
+    "recurrences": "Recurente",
+    "scheduled": "Programate",
+    "bills": "Facturi",
+    "settlement": "Decontare",
+    "forecast": "Prognoza",
+    "tax": "Taxe",
+    "import": "Importa",
+    "export": "Exporta",
+    "rules": "Reguli",
+    "ai": "IA",
+    "reports": "Rapoarte",
+    "currencies": "Valute",
+    "search": "Cauta",
+    "achievements": "Realizari",
+    "activity": "Activitate",
+    "settings": "Setari",
+    "administration": "Administrare",
+    "logout": "Deconectare",
+    "skipToMain": "Sari la continutul principal"
+  },
+  "auth": {
+    "login": "Autentificare",
+    "register": "Inregistrare",
+    "logout": "Deconectare",
+    "email": "Adresa de email",
+    "password": "Parola",
+    "confirmPassword": "Confirma parola",
+    "forgotPassword": "Ai uitat parola?",
+    "resetPassword": "Reseteaza parola",
+    "rememberMe": "Tine-ma minte",
+    "signIn": "Conecteaza-te",
+    "signUp": "Inregistreaza-te",
+    "createAccount": "Creeaza cont",
+    "alreadyHaveAccount": "Ai deja un cont?",
+    "dontHaveAccount": "Nu ai un cont?",
+    "displayName": "Nume afisat",
+    "authenticating": "Se autentifica..."
+  },
+  "dashboard": {
+    "title": "Panou de control",
+    "welcome": "Bine ai venit",
+    "overview": "Prezentare generala",
+    "recentTransactions": "Tranzactii recente",
+    "upcomingBills": "Facturi viitoare",
+    "budgetStatus": "Stare buget",
+    "netWorth": "Valoare neta",
+    "monthlyIncome": "Venituri lunare",
+    "monthlyExpenses": "Cheltuieli lunare",
+    "savings": "Economii",
+    "thisMonth": "Luna aceasta",
+    "lastMonth": "Luna trecuta",
+    "thisYear": "Anul acesta",
+    "customRange": "Interval personalizat",
+    "income": "Venituri",
+    "expenses": "Cheltuieli",
+    "noUpcomingBills": "Nicio factura viitoare",
+    "viewAll": "Vezi tot"
+  },
+  "transactions": {
+    "title": "Tranzactii",
+    "newTransaction": "Tranzactie noua",
+    "addTransaction": "Adauga tranzactie",
+    "editTransaction": "Editeaza tranzactie",
+    "deleteTransaction": "Sterge tranzactie",
+    "transactionDetails": "Detalii tranzactie",
+    "income": "Venit",
+    "expense": "Cheltuiala",
+    "transfer": "Transfer",
+    "date": "Data",
+    "amount": "Suma",
+    "category": "Categorie",
+    "account": "Cont",
+    "payee": "Beneficiar",
+    "notes": "Note",
+    "tags": "Etichete",
+    "recurring": "Recurent",
+    "pending": "In asteptare",
+    "cleared": "Procesat",
+    "reconciled": "Reconciliat",
+    "filterByAccount": "Filtreaza dupa cont",
+    "filterByCategory": "Filtreaza dupa categorie",
+    "filterByDate": "Filtreaza dupa data",
+    "noTransactions": "Nicio tranzactie",
+    "confirmDelete": "Esti sigur ca vrei sa stergi aceasta tranzactie?"
+  },
+  "accounts": {
+    "title": "Conturi",
+    "newAccount": "Cont nou",
+    "addAccount": "Adauga cont",
+    "editAccount": "Editeaza cont",
+    "deleteAccount": "Sterge cont",
+    "accountDetails": "Detalii cont",
+    "accountName": "Nume cont",
+    "accountType": "Tip cont",
+    "initialBalance": "Sold initial",
+    "currentBalance": "Sold curent",
+    "currency": "Valuta",
+    "checking": "Cont curent",
+    "savings": "Economii",
+    "creditCard": "Card de credit",
+    "cash": "Numerar",
+    "investment": "Investitie",
+    "loan": "Imprumut",
+    "asset": "Activ",
+    "liability": "Pasiv",
+    "institution": "Institutie",
+    "accountNumber": "Numar cont",
+    "noAccounts": "Niciun cont",
+    "confirmDelete": "Esti sigur ca vrei sa stergi acest cont?",
+    "totalBalance": "Sold total"
+  },
+  "budgets": {
+    "title": "Bugete",
+    "newBudget": "Buget nou",
+    "addBudget": "Adauga buget",
+    "editBudget": "Editeaza buget",
+    "deleteBudget": "Sterge buget",
+    "budgetName": "Nume buget",
+    "budgetAmount": "Suma buget",
+    "spent": "Cheltuit",
+    "remaining": "Ramas",
+    "overBudget": "Buget depasit",
+    "onTrack": "In grafic",
+    "period": "Perioada",
+    "monthly": "Lunar",
+    "weekly": "Saptamanal",
+    "yearly": "Anual",
+    "categories": "Categorii",
+    "noBudgets": "Niciun buget",
+    "progress": "Progres",
+    "percentUsed": "{{percent}}% utilizat"
+  },
+  "settings": {
+    "title": "Setari",
+    "manageAccount": "Gestioneaza contul si preferintele tale",
+    "backToDashboard": "Inapoi la panoul de control",
+    "profile": {
+      "title": "Profil",
+      "description": "Informatii personale si preferinte"
+    },
+    "display": {
+      "title": "Afisare",
+      "description": "Tema, format si panou de control",
+      "theme": "Tema",
+      "themeDescription": "Alege dintre 4 arome Catppuccin",
+      "activeTheme": "Tema activa",
+      "automatic": "automat",
+      "systemTheme": "Sistem",
+      "compactMode": "Mod compact",
+      "compactModeDescription": "Afisare mai densa cu mai putin spatiu",
+      "showBalance": "Afiseaza soldurile",
+      "showBalanceDescription": "Afiseaza soldurile conturilor in lista",
+      "defaultCurrency": "Valuta implicita",
+      "dateFormat": "Format data",
+      "numberFormat": "Format numar",
+      "startOfWeek": "Inceputul saptamanii",
+      "monday": "Luni",
+      "sunday": "Duminica",
+      "currencies": {
+        "eur": "Euro (EUR)",
+        "usd": "Dolar american (USD)",
+        "gbp": "Lira sterlina (GBP)",
+        "chf": "Franc elvetian (CHF)",
+        "cad": "Dolar canadian (CAD)"
+      },
+      "dateFormats": {
+        "dmy": "ZZ/LL/AAAA (31/12/2024)",
+        "mdy": "LL/ZZ/AAAA (12/31/2024)",
+        "ymd": "AAAA-LL-ZZ (2024-12-31)"
+      },
+      "numberFormats": {
+        "fr": "Francez (1 234,56)",
+        "en": "Engleza americana (1,234.56)",
+        "de": "German (1.234,56)"
+      }
+    },
+    "notifications": {
+      "title": "Notificari",
+      "description": "Email, push si alerte"
+    },
+    "security": {
+      "title": "Securitate",
+      "description": "MFA, dispozitive si sesiuni"
+    },
+    "audit": {
+      "title": "Jurnal de audit",
+      "description": "Istoric actiuni sensibile"
+    },
+    "data": {
+      "title": "Date",
+      "description": "Export si stergere cont"
+    },
+    "dashboard": {
+      "title": "Panou de control",
+      "description": "Configureaza panoul de control",
+      "defaultPeriod": "Perioada implicita",
+      "periods": {
+        "month": "Luna",
+        "quarter": "Trimestru",
+        "year": "An"
+      },
+      "showNetWorth": "Afiseaza valoarea neta",
+      "showNetWorthDescription": "Afiseaza totalul activelor minus pasivele",
+      "showBudgets": "Afiseaza bugetele",
+      "showBudgetsDescription": "Afiseaza starea bugetelor pe panoul de control",
+      "showRecentTransactions": "Afiseaza tranzactiile recente",
+      "showRecentTransactionsDescription": "Afiseaza ultimele tranzactii",
+      "showUpcomingBills": "Afiseaza facturile viitoare",
+      "showUpcomingBillsDescription": "Afiseaza platile programate"
+    },
+    "privacy": {
+      "title": "Confidentialitate",
+      "description": "Optiuni de confidentialitate si securitate a sesiunii",
+      "hideAmounts": "Ascunde sumele",
+      "hideAmountsDescription": "Ascunde sumele pana la trecerea mouse-ului",
+      "lockOnInactivity": "Blocheaza la inactivitate",
+      "lockOnInactivityDescription": "Blocheaza sesiunea dupa o perioada de inactivitate",
+      "inactivityTimeout": "Timp de inactivitate (minute)",
+      "sessionTimeout": "Timp sesiune (minute)",
+      "timeouts": {
+        "1min": "1 minut",
+        "5min": "5 minute",
+        "10min": "10 minute",
+        "15min": "15 minute",
+        "30min": "30 minute",
+        "1hour": "1 ora",
+        "2hours": "2 ore",
+        "8hours": "8 ore",
+        "24hours": "24 ore"
+      }
+    },
+    "help": {
+      "title": "Ajutor si tutorial",
+      "description": "Reporneste turul ghidat pentru a descoperi toate functiile"
+    },
+    "language": {
+      "title": "Limba",
+      "description": "Alege limba preferata",
+      "select": "Selecteaza limba",
+      "current": "Limba curenta"
+    },
+    "workspace": {
+      "title": "Setari spatiu de lucru",
+      "description": "Configureaza setarile specifice spatiului de lucru",
+      "manage": "Gestioneaza spatiile de lucru"
+    }
+  },
+  "workspace": {
+    "title": "Spatiu de lucru",
+    "create": "Creeaza spatiu de lucru",
+    "select": "Selecteaza spatiu de lucru",
+    "switch": "Schimba spatiul de lucru",
+    "members": "Membri",
+    "settings": "Setari spatiu de lucru",
+    "noWorkspace": "Niciun spatiu de lucru"
+  },
+  "confirmation": {
+    "delete": "Esti sigur ca vrei sa stergi?",
+    "unsavedChanges": "Ai modificari nesalvate. Vrei sa pleci?",
+    "logout": "Esti sigur ca vrei sa te deconectezi?"
+  },
+  "time": {
+    "today": "Azi",
+    "yesterday": "Ieri",
+    "tomorrow": "Maine",
+    "thisWeek": "Saptamana aceasta",
+    "lastWeek": "Saptamana trecuta",
+    "thisMonth": "Luna aceasta",
+    "lastMonth": "Luna trecuta",
+    "thisYear": "Anul acesta",
+    "lastYear": "Anul trecut"
+  },
+  "notFoundPage": {
+    "title": "404",
+    "message": "Pagina nu a fost gasita"
+  }
+}

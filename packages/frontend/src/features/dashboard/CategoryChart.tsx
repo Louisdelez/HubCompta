@@ -3,6 +3,7 @@
 // Uses full Catppuccin color palette for categories
 // ============================================================================
 
+import { useTranslation } from 'react-i18next';
 import { clsx } from 'clsx';
 
 // ----------------------------------------------------------------------------
@@ -61,6 +62,7 @@ function formatCurrency(amount: number, currency = 'EUR'): string {
 // ----------------------------------------------------------------------------
 
 export function CategoryChart({ categories, title }: CategoryChartProps) {
+  const { t } = useTranslation();
   const total = categories.reduce((sum, cat) => sum + cat.total, 0);
   const topCategories = categories.slice(0, 7);
   const otherTotal = categories.slice(7).reduce((sum, cat) => sum + cat.total, 0);
@@ -68,7 +70,7 @@ export function CategoryChart({ categories, title }: CategoryChartProps) {
   if (otherTotal > 0) {
     topCategories.push({
       categoryId: 'other',
-      categoryName: 'Autres',
+      categoryName: t('categories.other'),
       total: otherTotal,
     });
   }
@@ -86,7 +88,7 @@ export function CategoryChart({ categories, title }: CategoryChartProps) {
           <div className="w-12 h-12 bg-ctp-surface1 rounded-full flex items-center justify-center mb-3">
             <span className="text-2xl text-ctp-overlay1">--</span>
           </div>
-          <p className="text-ctp-subtext0">Aucune donnee pour cette periode</p>
+          <p className="text-ctp-subtext0">{t('categories.noDataForPeriod')}</p>
         </div>
       </div>
     );
@@ -143,7 +145,7 @@ export function CategoryChart({ categories, title }: CategoryChartProps) {
 
       {/* Total */}
       <div className="mt-4 pt-4 border-t border-ctp-surface1 flex justify-between items-center">
-        <span className="font-medium text-ctp-text">Total</span>
+        <span className="font-medium text-ctp-text">{t('common.total')}</span>
         <span className="font-bold text-lg text-ctp-red">{formatCurrency(total)}</span>
       </div>
     </div>

@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { ShieldCheck, Smartphone, Key } from 'lucide-react';
 import type { MFAType } from '@finance-hub/shared';
 
@@ -35,6 +36,7 @@ export function MfaVerify({
   isLoading,
   error,
 }: MfaVerifyProps) {
+  const { t } = useTranslation();
   const [selectedMethod, setSelectedMethod] = useState<MFAType>(methods[0] ?? 'totp');
   const [showBackupInput, setShowBackupInput] = useState(false);
 
@@ -55,9 +57,9 @@ export function MfaVerify({
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-ctp-sapphire to-ctp-blue flex items-center justify-center mx-auto shadow-lg">
             <ShieldCheck className="w-10 h-10 text-ctp-crust" />
           </div>
-          <h1 className="text-2xl font-bold mt-6 text-ctp-text">Verification MFA</h1>
+          <h1 className="text-2xl font-bold mt-6 text-ctp-text">{t('auth.mfa.title')}</h1>
           <p className="text-ctp-subtext0 mt-2">
-            Entrez le code de votre application d'authentification
+            {t('auth.mfa.enterCode')}
           </p>
         </div>
 
@@ -94,7 +96,7 @@ export function MfaVerify({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
             <label htmlFor="code" className="block text-sm font-medium mb-2 text-ctp-subtext1">
-              {showBackupInput ? 'Code de recuperation' : 'Code a 6 chiffres'}
+              {showBackupInput ? t('auth.mfa.recoveryCode') : t('auth.mfa.sixDigitCode')}
             </label>
             <input
               id="code"
@@ -106,15 +108,15 @@ export function MfaVerify({
               placeholder={showBackupInput ? 'XXXX-XXXX' : '000000'}
               maxLength={showBackupInput ? 9 : 6}
               {...register('code', {
-                required: 'Code requis',
+                required: t('auth.mfa.codeRequired'),
                 pattern: showBackupInput
                   ? {
                       value: /^[A-Z0-9]{4}-?[A-Z0-9]{4}$/i,
-                      message: 'Format invalide',
+                      message: t('auth.mfa.invalidFormat'),
                     }
                   : {
                       value: /^\d{6}$/,
-                      message: 'Le code doit contenir 6 chiffres',
+                      message: t('auth.mfa.codeMustBe6Digits'),
                     },
               })}
             />
@@ -149,10 +151,10 @@ export function MfaVerify({
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                   />
                 </svg>
-                Verification...
+                {t('auth.mfa.verifying')}
               </span>
             ) : (
-              'Verifier'
+              t('auth.mfa.verify')
             )}
           </button>
         </form>
@@ -163,8 +165,8 @@ export function MfaVerify({
             className="text-sm text-ctp-subtext0 hover:text-ctp-blue transition-colors"
           >
             {showBackupInput
-              ? 'Utiliser le code authenticator'
-              : 'Utiliser un code de recuperation'}
+              ? t('auth.mfa.useAuthenticatorCode')
+              : t('auth.mfa.useRecoveryCode')}
           </button>
 
           <div>
@@ -172,7 +174,7 @@ export function MfaVerify({
               onClick={onCancel}
               className="text-sm text-ctp-overlay1 hover:text-ctp-text transition-colors flex items-center justify-center gap-1 mx-auto"
             >
-              <span className="text-lg leading-none">&larr;</span> Retour
+              <span className="text-lg leading-none">&larr;</span> {t('auth.mfa.back')}
             </button>
           </div>
         </div>

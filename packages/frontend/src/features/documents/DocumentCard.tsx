@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { memo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { Image, BookOpen, Sheet, FileSpreadsheet, FileText, Lock, Inbox, Link2, Archive, X, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -93,6 +94,8 @@ function DocumentCardComponent({
   onLink,
   onAction,
 }: DocumentCardProps) {
+  const { t } = useTranslation();
+
   // Archive mutation
   const archiveMutation = useMutation({
     mutationFn: () => api.post(`/workspaces/${workspaceId}/documents/${document.id}/archive`),
@@ -113,16 +116,16 @@ function DocumentCardComponent({
   });
 
   const handleDelete = useCallback(() => {
-    if (confirm(`Supprimer "${document.filename}" ?`)) {
+    if (confirm(t('documents.card.confirmDelete', { filename: document.filename }))) {
       deleteMutation.mutate();
     }
-  }, [document.filename, deleteMutation]);
+  }, [document.filename, deleteMutation, t]);
 
   const handleUnlink = useCallback((transactionId: string) => {
-    if (confirm('Délier ce document de la transaction ?')) {
+    if (confirm(t('documents.card.confirmUnlink'))) {
       unlinkMutation.mutate(transactionId);
     }
-  }, [unlinkMutation]);
+  }, [unlinkMutation, t]);
 
   return (
     <div
@@ -146,7 +149,7 @@ function DocumentCardComponent({
           </p>
         </div>
         {document.isVault && (
-          <span title="Document chiffré"><Lock className="w-5 h-5 text-ctp-subtext0" /></span>
+          <span title={t('documents.card.encryptedDocument')}><Lock className="w-5 h-5 text-ctp-subtext0" /></span>
         )}
       </div>
 
@@ -154,17 +157,17 @@ function DocumentCardComponent({
       <div className="mb-3">
         {document.status === 'inbox' && (
           <span className="px-2 py-1 text-xs rounded-full bg-ctp-yellow/20 text-ctp-yellow inline-flex items-center gap-1">
-            <Inbox className="w-3 h-3" /> À traiter
+            <Inbox className="w-3 h-3" /> {t('documents.card.toProcess')}
           </span>
         )}
         {document.status === 'linked' && (
           <span className="px-2 py-1 text-xs rounded-full bg-ctp-green/20 text-ctp-green inline-flex items-center gap-1">
-            <Link2 className="w-3 h-3" /> Lié ({document.links.length})
+            <Link2 className="w-3 h-3" /> {t('documents.card.linked')} ({document.links.length})
           </span>
         )}
         {document.status === 'archived' && (
           <span className="px-2 py-1 text-xs rounded-full bg-ctp-surface1 text-ctp-subtext0 inline-flex items-center gap-1">
-            <Archive className="w-3 h-3" /> Archivé
+            <Archive className="w-3 h-3" /> {t('documents.card.archived')}
           </span>
         )}
       </div>
@@ -190,7 +193,7 @@ function DocumentCardComponent({
               <button
                 onClick={() => handleUnlink(link.transaction.id)}
                 className="ml-2 text-ctp-overlay1 hover:text-ctp-red"
-                title="Délier"
+                title={t('documents.card.unlink')}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -198,7 +201,7 @@ function DocumentCardComponent({
           ))}
           {document.links.length > 2 && (
             <p className="text-xs text-ctp-subtext0 text-center">
-              + {document.links.length - 2} autre(s)
+              {t('documents.card.moreLinks', { count: document.links.length - 2 })}
             </p>
           )}
         </div>
@@ -211,19 +214,19 @@ function DocumentCardComponent({
       >
         {document.status === 'inbox' && (
           <button onClick={onLink} className="btn-primary text-sm flex-1 inline-flex items-center justify-center gap-1">
-            <Link2 className="w-4 h-4" /> Lier
+            <Link2 className="w-4 h-4" /> {t('documents.card.link')}
           </button>
         )}
         {document.status !== 'inbox' && (
           <button onClick={onLink} className="btn-secondary text-sm flex-1">
-            + Lier
+            + {t('documents.card.link')}
           </button>
         )}
         {document.status !== 'archived' && (
           <button
             onClick={() => archiveMutation.mutate()}
             className="btn-ghost text-sm"
-            title="Archiver"
+            title={t('documents.card.archive')}
           >
             <Archive className="w-4 h-4" />
           </button>
@@ -231,7 +234,7 @@ function DocumentCardComponent({
         <button
           onClick={handleDelete}
           className="btn-ghost text-ctp-red text-sm"
-          title="Supprimer"
+          title={t('documents.card.delete')}
         >
           <Trash2 className="w-4 h-4" />
         </button>

@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { User, Users, Home, Building2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
 
@@ -33,35 +34,35 @@ interface CreateWorkspaceModalProps {
 const WORKSPACE_TYPES = [
   {
     value: 'personal',
-    label: 'Personnel',
+    labelKey: 'workspaces.types.personal',
     icon: User,
-    description: 'Pour gérer vos finances personnelles',
+    descriptionKey: 'workspaces.typeDescriptions.personal',
   },
   {
     value: 'family',
-    label: 'Famille',
+    labelKey: 'workspaces.types.family',
     icon: Users,
-    description: 'Partagez avec votre famille (max 10 membres)',
+    descriptionKey: 'workspaces.typeDescriptions.family',
   },
   {
     value: 'flatshare',
-    label: 'Colocation',
+    labelKey: 'workspaces.types.flatshare',
     icon: Home,
-    description: 'Gérez les dépenses communes (max 20 membres)',
+    descriptionKey: 'workspaces.typeDescriptions.flatshare',
   },
   {
     value: 'company',
-    label: 'Entreprise',
+    labelKey: 'workspaces.types.company',
     icon: Building2,
-    description: 'Pour les auto-entrepreneurs et TPE (max 50 membres)',
+    descriptionKey: 'workspaces.typeDescriptions.company',
   },
 ] as const;
 
 const CURRENCIES = [
-  { value: 'EUR', label: 'Euro' },
-  { value: 'USD', label: '$ Dollar US' },
-  { value: 'GBP', label: 'Livre Sterling' },
-  { value: 'CHF', label: 'CHF Franc Suisse' },
+  { value: 'EUR', labelKey: 'workspaces.currencies.eur' },
+  { value: 'USD', labelKey: 'workspaces.currencies.usd' },
+  { value: 'GBP', labelKey: 'workspaces.currencies.gbp' },
+  { value: 'CHF', labelKey: 'workspaces.currencies.chf' },
 ];
 
 // ----------------------------------------------------------------------------
@@ -73,6 +74,7 @@ export function CreateWorkspaceModal({
   onClose,
   onCreated,
 }: CreateWorkspaceModalProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
@@ -101,7 +103,7 @@ export function CreateWorkspaceModal({
       onClose();
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la création');
+      setError(err instanceof Error ? err.message : t('workspaces.creationError'));
     },
   });
 
@@ -123,7 +125,7 @@ export function CreateWorkspaceModal({
       {/* Modal */}
       <div className="relative bg-ctp-base rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-auto animate-scale-in">
         <div className="p-6">
-          <h2 className="text-xl font-bold mb-4">Créer un espace de travail</h2>
+          <h2 className="text-xl font-bold mb-4">{t('workspaces.createWorkspaceTitle')}</h2>
 
           {error && (
             <div className="p-3 rounded-lg bg-ctp-red/10 text-ctp-red text-sm mb-4">
@@ -134,7 +136,7 @@ export function CreateWorkspaceModal({
           <form onSubmit={(e) => { e.preventDefault(); void handleSubmit(onSubmit)(e); }} className="space-y-6">
             {/* Workspace Type */}
             <div>
-              <label className="label">Type d&apos;espace</label>
+              <label className="label">{t('workspaces.workspaceType')}</label>
               <div className="grid grid-cols-2 gap-3">
                 {WORKSPACE_TYPES.map((type) => (
                   <label
@@ -162,9 +164,9 @@ export function CreateWorkspaceModal({
                           : 'text-ctp-mauve'
                         : 'text-ctp-subtext0'
                     )} />
-                    <span className="font-medium text-sm">{type.label}</span>
+                    <span className="font-medium text-sm">{t(type.labelKey)}</span>
                     <span className="text-xs text-ctp-subtext0 text-center mt-1">
-                      {type.description}
+                      {t(type.descriptionKey)}
                     </span>
                   </label>
                 ))}
@@ -174,17 +176,17 @@ export function CreateWorkspaceModal({
             {/* Name */}
             <div>
               <label htmlFor="name" className="label">
-                Nom de l&apos;espace
+                {t('workspaces.workspaceName')}
               </label>
               <input
                 id="name"
                 type="text"
                 className="input"
-                placeholder="Mon espace"
+                placeholder={t('workspaces.namePlaceholder')}
                 {...register('name', {
-                  required: 'Nom requis',
-                  minLength: { value: 1, message: 'Nom trop court' },
-                  maxLength: { value: 100, message: 'Nom trop long' },
+                  required: t('workspaces.nameRequired'),
+                  minLength: { value: 1, message: t('workspaces.nameTooShort') },
+                  maxLength: { value: 100, message: t('workspaces.nameTooLong') },
                 })}
               />
               {errors.name && (
@@ -195,7 +197,7 @@ export function CreateWorkspaceModal({
             {/* Currency */}
             <div>
               <label htmlFor="currency" className="label">
-                Devise
+                {t('workspaces.currency')}
               </label>
               <select
                 id="currency"
@@ -204,7 +206,7 @@ export function CreateWorkspaceModal({
               >
                 {CURRENCIES.map((c) => (
                   <option key={c.value} value={c.value}>
-                    {c.label}
+                    {t(c.labelKey)}
                   </option>
                 ))}
               </select>
@@ -217,14 +219,14 @@ export function CreateWorkspaceModal({
                 onClick={onClose}
                 className="btn-secondary flex-1"
               >
-                Annuler
+                {t('workspaces.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={createMutation.isPending}
                 className="btn-primary flex-1"
               >
-                {createMutation.isPending ? 'Création...' : 'Créer'}
+                {createMutation.isPending ? t('workspaces.creating') : t('workspaces.create')}
               </button>
             </div>
           </form>

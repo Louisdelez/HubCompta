@@ -1,0 +1,76 @@
+{
+  "greeting": "Zdravstvujte {{displayName}},",
+  "footer": "Eto pis'mo bylo otpravleno avtomaticheski servisom HubCompta.",
+  "footerIgnore": "Esli vy ne zaprashivali eto pis'mo, vy mozhete ego bezopasno proignorirovat'.",
+  "welcome": {
+    "subject": "Dobro pozhalovat' v HubCompta!",
+    "title": "Dobro pozhalovat' v HubCompta",
+    "intro": "Dobro pozhalovat' v HubCompta! Vash akkaunt byl uspeshno sozdan.",
+    "body": "HubCompta pomogaet vam legko upravlyat' lichnymi i delovymi finansami:",
+    "features": {
+      "tracking": "Otslezhivajte svoi dohody i rashody",
+      "budgets": "Sozdavajte i upravlyajte svoimi byudzhetami",
+      "reports": "Generitrujte podrobnye otchoty",
+      "invoicing": "Vystavlyajte scheta klientam (rezhim Pro)"
+    },
+    "cta": "Perejti na moju panel' upravleniya",
+    "closing": "Do skoroj vstrechi na HubCompta!"
+  },
+  "passwordReset": {
+    "subject": "Sbros parolya HubCompta",
+    "title": "Sbros parolya",
+    "intro": "Vy zaprosili sbros parolya.",
+    "body": "Nazhmite knopku nizhe, chtoby vybrat' novyj parol':",
+    "cta": "Sbrosit' moj parol'",
+    "expiry": "Vazhno: Srok dejstviya etoj ssylki istekaet cherez {{expiresIn}}.",
+    "ignoreNote": "Esli vy ne zaprashivali sbros parolya, proignoritrujte eto pis'mo. Vash parol' ostanetsya bez izmenenij."
+  },
+  "invoiceOverdue": {
+    "subject": "Schet {{invoiceNumber}} prosrochen",
+    "title": "Prosrochennyj schet",
+    "alertTitle": "Schet prosrochen",
+    "intro": "Sleduyushchij schet prosrochen na {{daysOverdue}} dnej:",
+    "invoiceNumber": "Nomer schota",
+    "client": "Klient",
+    "amount": "Summa",
+    "dueDate": "Srok oplaty",
+    "cta": "Posmotret' schet",
+    "recommendation": "My rekomenduem svyazat'sya s vashim klientom dlya polucheniya oplaty."
+  },
+  "budgetAlert": {
+    "subjectExceeded": "Byudzhet \"{{budgetName}}\" prevyshen",
+    "subjectWarning": "Byudzhet \"{{budgetName}}\" na {{percentUsed}}%",
+    "titleExceeded": "Byudzhet prevyshen!",
+    "titleWarning": "Byudzhet pochti dostignut",
+    "messageExceeded": "Vash byudzhet \"{{budgetName}}\" byl prevyshen.",
+    "messageWarning": "Vash byudzhet \"{{budgetName}}\" priblizhaetsya k limitu.",
+    "budget": "Byudzhet",
+    "category": "Kategoriya",
+    "spent": "Potracheno",
+    "limit": "Limit",
+    "usage": "Ispol'zovanie",
+    "cta": "Posmotret' byudzhet"
+  },
+  "exportReady": {
+    "subject": "Vash eksport {{exportType}} gotov",
+    "title": "Eksport gotov",
+    "alertTitle": "Vash eksport gotov!",
+    "intro": "Vash eksport {{exportType}} teper' dostupen dlya skachivaniya.",
+    "exportType": "Tip eksporta",
+    "filename": "Fajl",
+    "expiresAt": "Deystvitelen do",
+    "cta": "Skachat' eksport",
+    "expiryNote": "Srok dejstviya etoj ssylki dlya skachivaniya istekaet {{expiresAt}}."
+  },
+  "weeklySummary": {
+    "subject": "Nedel'nyj otchot - {{weekStart}} po {{weekEnd}}",
+    "title": "Nedel'nyj otchot",
+    "intro": "Vot vash otchot za nedelyu s {{weekStart}} po {{weekEnd}}:",
+    "income": "Dohod",
+    "expenses": "Rashody",
+    "balance": "Balans",
+    "topCategories": "Osnovnye kategorii rashodov",
+    "budgetAlerts": "Preduprezhdenniya po byudzhetu",
+    "cta": "Posmotret' panel' upravleniya"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "greeting": "Buna {{displayName}},",
+  "footer": "Acest email a fost trimis automat de HubCompta.",
+  "footerIgnore": "Daca nu ati solicitat acest email, il puteti ignora in siguranta.",
+  "welcome": {
+    "subject": "Bine ai venit la HubCompta!",
+    "title": "Bine ai venit la HubCompta",
+    "intro": "Bine ai venit la HubCompta! Contul tau a fost creat cu succes.",
+    "body": "HubCompta te ajuta sa iti gestionezi finantele personale si de afaceri cu usurinta:",
+    "features": {
+      "tracking": "Urmareste-ti veniturile si cheltuielile",
+      "budgets": "Creeaza si gestioneaza bugetele tale",
+      "reports": "Genereaza rapoarte detaliate",
+      "invoicing": "Factureaza clientii (modul Pro)"
+    },
+    "cta": "Acceseaza panoul de control",
+    "closing": "Ne vedem curand pe HubCompta!"
+  },
+  "passwordReset": {
+    "subject": "Reseteaza parola HubCompta",
+    "title": "Resetare Parola",
+    "intro": "Ai solicitat resetarea parolei.",
+    "body": "Apasa butonul de mai jos pentru a alege o parola noua:",
+    "cta": "Reseteaza parola mea",
+    "expiry": "Important: Acest link expira in {{expiresIn}}.",
+    "ignoreNote": "Daca nu ai solicitat aceasta resetare, ignora acest email. Parola ta va ramane neschimbata."
+  },
+  "invoiceOverdue": {
+    "subject": "Factura {{invoiceNumber}} restanta",
+    "title": "Factura Restanta",
+    "alertTitle": "Factura restanta",
+    "intro": "Urmatoarea factura este restanta de {{daysOverdue}} zi/zile:",
+    "invoiceNumber": "Numar factura",
+    "client": "Client",
+    "amount": "Suma",
+    "dueDate": "Data scadenta",
+    "cta": "Vezi factura",
+    "recommendation": "Va recomandam sa contactati clientul pentru plata."
+  },
+  "budgetAlert": {
+    "subjectExceeded": "Bugetul \"{{budgetName}}\" a fost depasit",
+    "subjectWarning": "Bugetul \"{{budgetName}}\" la {{percentUsed}}%",
+    "titleExceeded": "Buget depasit!",
+    "titleWarning": "Buget aproape atins",
+    "messageExceeded": "Bugetul tau \"{{budgetName}}\" a fost depasit.",
+    "messageWarning": "Bugetul tau \"{{budgetName}}\" se apropie de limita.",
+    "budget": "Buget",
+    "category": "Categorie",
+    "spent": "Cheltuit",
+    "limit": "Limita",
+    "usage": "Utilizare",
+    "cta": "Vezi bugetul"
+  },
+  "exportReady": {
+    "subject": "Exportul tau {{exportType}} este gata",
+    "title": "Export Gata",
+    "alertTitle": "Exportul tau este gata!",
+    "intro": "Exportul tau {{exportType}} este acum disponibil pentru descarcare.",
+    "exportType": "Tip export",
+    "filename": "Fisier",
+    "expiresAt": "Expira la",
+    "cta": "Descarca exportul",
+    "expiryNote": "Acest link de descarcare va expira la {{expiresAt}}."
+  },
+  "weeklySummary": {
+    "subject": "Rezumat saptamanal - {{weekStart}} pana la {{weekEnd}}",
+    "title": "Rezumat Saptamanal",
+    "intro": "Iata rezumatul tau pentru saptamana {{weekStart}} pana la {{weekEnd}}:",
+    "income": "Venituri",
+    "expenses": "Cheltuieli",
+    "balance": "Sold",
+    "topCategories": "Categorii principale de cheltuieli",
+    "budgetAlerts": "Alerte de buget",
+    "cta": "Vezi panoul de control"
+  }
+}

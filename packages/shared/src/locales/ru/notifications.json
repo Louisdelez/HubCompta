@@ -1,0 +1,84 @@
+{
+  "title": "Uvedomleniya",
+  "markAllRead": "Otmetit' vse kak prochitannoe",
+  "noNotifications": "Net uvedomlenij",
+  "viewAll": "Posmotret' vse uvedomleniya",
+  "budgetExceeded": {
+    "title": "Byudzhet \"{{budgetName}}\" prevyshen",
+    "message": "Byudzhet dlya \"{{categoryName}}\" byl prevyshen ({{percentUsed}}% ispol'zovano)."
+  },
+  "budgetWarning": {
+    "title": "Byudzhet \"{{budgetName}}\" pochti dostignut",
+    "message": "Byudzhet dlya \"{{categoryName}}\" dostig {{percentUsed}}% ot limita."
+  },
+  "importComplete": {
+    "title": "Import zavershon",
+    "message": "{{imported}} tranzakcij importirovano{{skipped}}{{errors}}.",
+    "skipped": ", {{count}} propushcheno",
+    "errors": ", {{count}} oshibok"
+  },
+  "importCompleteWithErrors": {
+    "title": "Import zavershon s oshibkami",
+    "message": "{{imported}} tranzakcij importirovano, {{skipped}} propushcheno, {{errors}} oshibok."
+  },
+  "exportReady": {
+    "title": "Eksport gotov",
+    "message": "Vash eksport {{exportType}} gotov k zagruzke."
+  },
+  "invoiceOverdue": {
+    "title": "Schet {{invoiceNumber}} prosrochen",
+    "message": "Schet {{invoiceNumber}} dlya {{clientName}} ({{amount}} {{currency}}) prosrochen."
+  },
+  "invoicePaid": {
+    "title": "Schet {{invoiceNumber}} oplachen",
+    "message": "Schet {{invoiceNumber}} dlya {{clientName}} ({{amount}} {{currency}}) otmechen kak oplachennyj."
+  },
+  "quoteAccepted": {
+    "title": "Predlozhenie {{quoteNumber}} prinyato",
+    "message": "Predlozhenie {{quoteNumber}} dlya {{clientName}} ({{amount}} {{currency}}) bylo prinyato."
+  },
+  "quoteExpiring": {
+    "title": "Predlozhenie {{quoteNumber}} skoro istekaet",
+    "message": "Srok dejstviya predlozheniya {{quoteNumber}} dlya {{clientName}} istekaet cherez {{daysLeft}} dnej."
+  },
+  "priceAlert": {
+    "title": "Opoveshchenie o cene: {{assetSymbol}}",
+    "messageAbove": "{{assetName}} podnyalsya vyshe {{targetPrice}} {{currency}} (sejchas {{currentPrice}} {{currency}}).",
+    "messageBelow": "{{assetName}} opustilsya nizhe {{targetPrice}} {{currency}} (sejchas {{currentPrice}} {{currency}})."
+  },
+  "billReminder": {
+    "title": "Napominanie ob oplate",
+    "message": "\"{{description}}\" ({{amount}} {{currency}}) dolzhno byt' oplacheno cherez {{daysUntil}} dnej."
+  },
+  "unusualSpending": {
+    "title": "Neobychnye traты v \"{{categoryName}}\"",
+    "titleGeneric": "Obnaruzheny neobychnye traty",
+    "message": "{{description}}: {{amount}} {{currency}} ({{percentAboveAverage}}% vyshe srednego)"
+  },
+  "weeklySummary": {
+    "titlePositive": "Nedel'nyj otchot: +{{netChange}} {{currency}}",
+    "titleNegative": "Nedel'nyj otchot: {{netChange}} {{currency}}"
+  },
+  "monthlyReport": {
+    "title": "Ezhemesyachnyj otchot - {{month}}",
+    "message": "Rashody: {{totalSpent}} {{currency}} | Dohod: {{totalIncome}} {{currency}}"
+  },
+  "lowBalance": {
+    "title": "Nizkij balans: {{accountName}}",
+    "message": "Balans vashego schota \"{{accountName}}\" sostavlyaet {{balance}} {{currency}} (porog: {{threshold}} {{currency}})"
+  },
+  "billUpcoming": {
+    "titleToday": "Schet k oplate segodnya",
+    "titleTomorrow": "Schet k oplate zavtra",
+    "titleDays": "Schet k oplate cherez {{daysUntilDue}} dnej",
+    "message": "\"{{description}}\" - {{amount}} {{currency}}"
+  },
+  "achievementUnlocked": {
+    "title": "{{icon}} Dostizhenie razblokirovano!",
+    "message": "Vy poluchili \"{{achievementName}}\" - {{description}}"
+  },
+  "levelUp": {
+    "title": "Novyj uroven'!",
+    "message": "Pozdravlyaem! Vy dostigli urovnya {{level}}!"
+  }
+}

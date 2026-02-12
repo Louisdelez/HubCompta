@@ -1,0 +1,76 @@
+{
+  "greeting": "Ola {{displayName}},",
+  "footer": "Este email foi enviado automaticamente pelo HubCompta.",
+  "footerIgnore": "Se nao solicitou este email, pode ignora-lo com seguranca.",
+  "welcome": {
+    "subject": "Bem-vindo ao HubCompta!",
+    "title": "Bem-vindo ao HubCompta",
+    "intro": "Bem-vindo ao HubCompta! A sua conta foi criada com sucesso.",
+    "body": "O HubCompta ajuda-o a gerir as suas financas pessoais e empresariais com facilidade:",
+    "features": {
+      "tracking": "Acompanhe as suas receitas e despesas",
+      "budgets": "Crie e gira os seus orcamentos",
+      "reports": "Gere relatorios detalhados",
+      "invoicing": "Fature os seus clientes (modo Pro)"
+    },
+    "cta": "Aceder ao meu painel",
+    "closing": "Ate breve no HubCompta!"
+  },
+  "passwordReset": {
+    "subject": "Repor a sua palavra-passe do HubCompta",
+    "title": "Reposicao de Palavra-passe",
+    "intro": "Solicitou a reposicao da sua palavra-passe.",
+    "body": "Clique no botao abaixo para escolher uma nova palavra-passe:",
+    "cta": "Repor a minha palavra-passe",
+    "expiry": "Importante: Este link expira em {{expiresIn}}.",
+    "ignoreNote": "Se nao solicitou esta reposicao, ignore este email. A sua palavra-passe permanecera inalterada."
+  },
+  "invoiceOverdue": {
+    "subject": "Fatura {{invoiceNumber}} em atraso",
+    "title": "Fatura em Atraso",
+    "alertTitle": "Fatura em atraso",
+    "intro": "A seguinte fatura esta {{daysOverdue}} dia(s) em atraso:",
+    "invoiceNumber": "Numero da fatura",
+    "client": "Cliente",
+    "amount": "Montante",
+    "dueDate": "Data de vencimento",
+    "cta": "Ver fatura",
+    "recommendation": "Recomendamos que contacte o seu cliente para proceder ao pagamento."
+  },
+  "budgetAlert": {
+    "subjectExceeded": "Orcamento \"{{budgetName}}\" excedido",
+    "subjectWarning": "Orcamento \"{{budgetName}}\" a {{percentUsed}}%",
+    "titleExceeded": "Orcamento excedido!",
+    "titleWarning": "Orcamento quase atingido",
+    "messageExceeded": "O seu orcamento \"{{budgetName}}\" foi excedido.",
+    "messageWarning": "O seu orcamento \"{{budgetName}}\" esta a aproximar-se do limite.",
+    "budget": "Orcamento",
+    "category": "Categoria",
+    "spent": "Gasto",
+    "limit": "Limite",
+    "usage": "Utilizacao",
+    "cta": "Ver orcamento"
+  },
+  "exportReady": {
+    "subject": "A sua exportacao {{exportType}} esta pronta",
+    "title": "Exportacao Pronta",
+    "alertTitle": "A sua exportacao esta pronta!",
+    "intro": "A sua exportacao {{exportType}} esta agora disponivel para descarregar.",
+    "exportType": "Tipo de exportacao",
+    "filename": "Ficheiro",
+    "expiresAt": "Expira em",
+    "cta": "Descarregar exportacao",
+    "expiryNote": "Este link de descarga expira em {{expiresAt}}."
+  },
+  "weeklySummary": {
+    "subject": "Resumo semanal - {{weekStart}} a {{weekEnd}}",
+    "title": "Resumo Semanal",
+    "intro": "Aqui esta o seu resumo da semana de {{weekStart}} a {{weekEnd}}:",
+    "income": "Receitas",
+    "expenses": "Despesas",
+    "balance": "Saldo",
+    "topCategories": "Principais categorias de despesa",
+    "budgetAlerts": "Alertas de orcamento",
+    "cta": "Ver painel"
+  }
+}

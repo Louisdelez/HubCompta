@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { formatCurrency, formatPercent, cn } from '@/lib/utils';
 import { useTheme } from '@/providers/ThemeProvider';
@@ -160,6 +161,7 @@ export function AllocationChart({
   showLegend = true,
   className,
 }: AllocationChartProps) {
+  const { t } = useTranslation();
   const colors = useCatppuccinColors();
 
   // Prepare chart data with Catppuccin colors
@@ -177,7 +179,7 @@ export function AllocationChart({
   if (data.length === 0) {
     return (
       <div className={cn('flex items-center justify-center h-64 text-ctp-overlay1', className)}>
-        Aucune donnée disponible
+        {t('invest.allocationChart.noData')}
       </div>
     );
   }
@@ -211,7 +213,7 @@ export function AllocationChart({
         {/* Center text */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <p className="text-sm text-ctp-overlay1">Total</p>
+            <p className="text-sm text-ctp-overlay1">{t('invest.allocationChart.total')}</p>
             <p className="text-lg font-semibold text-ctp-text">{formatCurrency(total, currency)}</p>
           </div>
         </div>

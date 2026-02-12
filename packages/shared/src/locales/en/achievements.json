@@ -1,0 +1,124 @@
+{
+  "title": "Achievements",
+  "secretAchievement": "Secret achievement",
+  "unlocked": "Unlocked",
+  "progress": "Progress",
+  "xpReward": "{{xp}} XP",
+  "level": "Level {{level}}",
+  "levelUp": "Level Up!",
+  "congratulations": "Congratulations! You reached level {{level}}!",
+  "categories": {
+    "onboarding": "Getting Started",
+    "transactions": "Transactions",
+    "budgeting": "Budgeting",
+    "savings": "Savings",
+    "streaks": "Streaks",
+    "milestones": "Milestones"
+  },
+  "achievements": {
+    "first_steps": {
+      "name": "First Steps",
+      "description": "Add your first transaction"
+    },
+    "first_budget": {
+      "name": "Budgeting Beginner",
+      "description": "Create your first budget"
+    },
+    "first_goal": {
+      "name": "Goal Setter",
+      "description": "Create your first savings goal"
+    },
+    "account_setup": {
+      "name": "Well Equipped",
+      "description": "Add 3 accounts"
+    },
+    "tracker_10": {
+      "name": "Regular Tracker",
+      "description": "Record 10 transactions"
+    },
+    "tracker_50": {
+      "name": "Dedicated Tracker",
+      "description": "Record 50 transactions"
+    },
+    "tracker_100": {
+      "name": "Tracking Master",
+      "description": "Record 100 transactions"
+    },
+    "tracker_500": {
+      "name": "Accounting Expert",
+      "description": "Record 500 transactions"
+    },
+    "categorizer": {
+      "name": "Organizer",
+      "description": "Categorize 25 transactions"
+    },
+    "budget_keeper": {
+      "name": "Budget Keeper",
+      "description": "Finish a month under budget"
+    },
+    "budget_master_3": {
+      "name": "Discipline",
+      "description": "Stay on budget for 3 consecutive months"
+    },
+    "budget_master_6": {
+      "name": "Budget Mastery",
+      "description": "Stay on budget for 6 consecutive months"
+    },
+    "multi_budget": {
+      "name": "Multi-Budget",
+      "description": "Manage 5 budgets simultaneously"
+    },
+    "saver_first": {
+      "name": "First Savings Step",
+      "description": "Reach 10% of your first goal"
+    },
+    "saver_half": {
+      "name": "Halfway There",
+      "description": "Reach 50% of a goal"
+    },
+    "saver_complete": {
+      "name": "Goal Achieved",
+      "description": "Complete a savings goal"
+    },
+    "saver_3_goals": {
+      "name": "Triple Success",
+      "description": "Complete 3 savings goals"
+    },
+    "saver_1000": {
+      "name": "Thousand Saved",
+      "description": "Save 1,000 EUR total"
+    },
+    "saver_10000": {
+      "name": "Ten Thousand",
+      "description": "Save 10,000 EUR total"
+    },
+    "streak_7": {
+      "name": "Active Week",
+      "description": "7 consecutive days of activity"
+    },
+    "streak_30": {
+      "name": "Full Month",
+      "description": "30 consecutive days of activity"
+    },
+    "streak_100": {
+      "name": "Centurion",
+      "description": "100 consecutive days of activity"
+    },
+    "streak_365": {
+      "name": "Marathoner",
+      "description": "365 consecutive days of activity"
+    },
+    "night_owl": {
+      "name": "Night Owl",
+      "description": "Add a transaction after midnight"
+    },
+    "early_bird": {
+      "name": "Early Bird",
+      "description": "Add a transaction before 6 AM"
+    },
+    "perfect_month": {
+      "name": "Perfect Month",
+      "description": "Categorize all transactions for a month"
+    }
+  }
+}

@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle, Check, Lightbulb } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -63,6 +64,7 @@ function getAvatarColor(name: string): string {
 // ----------------------------------------------------------------------------
 
 export function TransferSuggestions({ transfers, currency }: TransferSuggestionsProps) {
+  const { t } = useTranslation();
   const [completedTransfers, setCompletedTransfers] = useState<Set<number>>(new Set());
 
   const toggleCompleted = (index: number) => {
@@ -79,9 +81,9 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
     return (
       <div className="card text-center py-8">
         <CheckCircle className="w-10 h-10 mx-auto mb-3 text-ctp-green" />
-        <h3 className="text-lg font-semibold text-ctp-green">Tout est équilibré !</h3>
+        <h3 className="text-lg font-semibold text-ctp-green">{t('workspaces.settlement.allSettled')}</h3>
         <p className="text-ctp-subtext0 mt-1">
-          Personne ne doit d&apos;argent à personne
+          {t('workspaces.settlement.noOneOwes')}
         </p>
       </div>
     );
@@ -93,14 +95,14 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
     <div className="card">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-semibold">Transferts suggérés</h2>
+          <h2 className="text-lg font-semibold">{t('workspaces.settlement.suggestedTransfers')}</h2>
           <p className="text-sm text-ctp-subtext0">
-            {transfers.length} transfert{transfers.length > 1 ? 's' : ''} pour équilibrer les comptes
+            {t('workspaces.settlement.transferCount', { count: transfers.length })}
           </p>
         </div>
         {allCompleted && (
           <span className="px-3 py-1 bg-ctp-green/20 text-ctp-green rounded-full text-sm font-medium">
-            Tout réglé
+            {t('workspaces.settlement.allSettled')}
           </span>
         )}
       </div>
@@ -182,14 +184,14 @@ export function TransferSuggestions({ transfers, currency }: TransferSuggestions
       <div className="mt-4 p-3 bg-ctp-blue/10 rounded-lg">
         <p className="text-sm text-ctp-blue flex items-start gap-2">
           <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" />
-          <span>Cliquez sur un transfert pour le marquer comme effectué. Ces transferts minimisent le nombre d&apos;échanges nécessaires.</span>
+          <span>{t('workspaces.settlement.clickToMark')}</span>
         </p>
       </div>
 
       {/* Total */}
       <div className="mt-4 pt-4 border-t border-ctp-surface1">
         <div className="flex justify-between items-center">
-          <span className="text-ctp-subtext0">Total à transférer</span>
+          <span className="text-ctp-subtext0">{t('workspaces.settlement.totalToTransfer')}</span>
           <span className="text-xl font-bold">
             {formatCurrency(
               transfers.reduce((sum, t) => sum + t.amount, 0),

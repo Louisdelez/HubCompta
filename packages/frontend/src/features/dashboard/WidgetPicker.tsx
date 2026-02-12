@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   X,
   Plus,
@@ -58,13 +59,14 @@ const ICON_MAP: Record<string, typeof Wallet> = {
   briefcase: Briefcase,
 };
 
-const CATEGORY_LABELS: Record<WidgetCategory, string> = {
-  all: 'Tous',
-  finance: 'Finance',
-  planning: 'Planification',
-  analytics: 'Analytique',
-  utilities: 'Utilitaires',
-  invest: 'Investissements',
+// Category label keys for i18n
+const CATEGORY_LABEL_KEYS: Record<WidgetCategory, string> = {
+  all: 'widgets.categories.all',
+  finance: 'widgets.categories.finance',
+  planning: 'widgets.categories.planning',
+  analytics: 'widgets.categories.analytics',
+  utilities: 'widgets.categories.utilities',
+  invest: 'widgets.categories.invest',
 };
 
 const CATEGORY_COLORS: Record<WidgetCategory, string> = {
@@ -86,6 +88,7 @@ export function WidgetPicker({
   onAddWidget,
   existingWidgets,
 }: WidgetPickerProps) {
+  const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState<WidgetCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -162,15 +165,15 @@ export function WidgetPicker({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-ctp-surface1">
           <div>
-            <h2 className="text-lg font-semibold text-ctp-text">Ajouter un widget</h2>
+            <h2 className="text-lg font-semibold text-ctp-text">{t('widgets.addWidget')}</h2>
             <p className="text-sm text-ctp-subtext0">
-              Choisissez un widget a ajouter a votre tableau de bord
+              {t('widgets.chooseWidget')}
             </p>
           </div>
           <button
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-ctp-surface0 transition-colors"
-            aria-label="Fermer"
+            aria-label={t('common.close')}
           >
             <X className="w-5 h-5 text-ctp-text" />
           </button>
@@ -184,7 +187,7 @@ export function WidgetPicker({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher un widget..."
+              placeholder={t('widgets.searchWidget')}
               className="w-full pl-10 pr-4 py-2 bg-ctp-surface0 border border-ctp-surface1 rounded-lg text-sm text-ctp-text placeholder:text-ctp-overlay1 focus:outline-none focus:ring-2 focus:ring-ctp-blue/50"
             />
           </div>
@@ -192,7 +195,7 @@ export function WidgetPicker({
 
         {/* Categories */}
         <div className="px-6 py-3 border-b border-ctp-surface1 flex gap-2 flex-wrap">
-          {(Object.keys(CATEGORY_LABELS) as WidgetCategory[]).map((category) => (
+          {(Object.keys(CATEGORY_LABEL_KEYS) as WidgetCategory[]).map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
@@ -203,7 +206,7 @@ export function WidgetPicker({
                   : 'bg-ctp-surface0 text-ctp-text hover:bg-ctp-surface1'
               )}
             >
-              {CATEGORY_LABELS[category]}
+              {t(CATEGORY_LABEL_KEYS[category])}
             </button>
           ))}
         </div>
@@ -233,7 +236,7 @@ export function WidgetPicker({
                       CATEGORY_COLORS[widget.category]
                     )}
                   >
-                    {CATEGORY_LABELS[widget.category]}
+                    {t(CATEGORY_LABEL_KEYS[widget.category])}
                   </div>
 
                   {/* Icon */}
@@ -249,13 +252,13 @@ export function WidgetPicker({
 
                   {/* Size Info */}
                   <p className="text-xs text-ctp-overlay1 mt-2">
-                    Taille: {widget.defaultSize.w}x{widget.defaultSize.h}
+                    {t('widgets.size')}: {widget.defaultSize.w}x{widget.defaultSize.h}
                   </p>
 
                   {/* Add/Added Indicator */}
                   {isAdded ? (
                     <div className="absolute bottom-3 right-3 text-xs text-ctp-overlay1">
-                      Deja ajoute
+                      {t('widgets.alreadyAdded')}
                     </div>
                   ) : (
                     <div className="absolute bottom-3 right-3 p-1 rounded-full bg-ctp-blue/20 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -270,9 +273,9 @@ export function WidgetPicker({
           {filteredWidgets.length === 0 && (
             <div className="text-center py-12">
               <Search className="w-10 h-10 mx-auto text-ctp-overlay1 mb-3" />
-              <p className="text-ctp-subtext0">Aucun widget trouve</p>
+              <p className="text-ctp-subtext0">{t('widgets.noWidgetFound')}</p>
               <p className="text-sm text-ctp-overlay1 mt-1">
-                Essayez une autre recherche ou categorie
+                {t('widgets.tryAnotherSearch')}
               </p>
             </div>
           )}
@@ -284,7 +287,7 @@ export function WidgetPicker({
             onClick={onClose}
             className="px-4 py-2 bg-ctp-surface0 text-ctp-text rounded-lg hover:bg-ctp-surface1 transition-colors"
           >
-            Fermer
+            {t('common.close')}
           </button>
         </div>
       </div>

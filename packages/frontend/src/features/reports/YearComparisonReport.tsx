@@ -4,9 +4,10 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import {
   TrendingUp,
   TrendingDown,
@@ -114,6 +115,8 @@ function ChangeIndicator({ value, inverse = false }: { value: number; inverse?: 
 }
 
 export function YearComparisonReport() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'fr' ? fr : enUS;
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const currentYear = new Date().getFullYear();
   const [compareYear, setCompareYear] = useState(currentYear - 1);
@@ -149,7 +152,7 @@ export function YearComparisonReport() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Export error:', err);
-      alert("Erreur lors de l'export PDF");
+      alert(t('reports.pdfExport.error'));
     } finally {
       setIsExporting(false);
     }
@@ -165,7 +168,7 @@ export function YearComparisonReport() {
   });
 
   const chartData = data?.monthly.map((m) => ({
-    name: format(new Date(currentYear, m.month - 1), 'MMM', { locale: fr }),
+    name: format(new Date(currentYear, m.month - 1), 'MMM', { locale: dateLocale }),
     [`${currentYear}`]: m.currentYear.net,
     [`${compareYear}`]: m.previousYear.net,
   }));
@@ -178,7 +181,7 @@ export function YearComparisonReport() {
     return (
       <div className="card p-8 text-center">
         <Loader2 className="w-8 h-8 mx-auto animate-spin text-ctp-blue mb-4" />
-        <p className="text-ctp-subtext0">Chargement de la comparaison...</p>
+        <p className="text-ctp-subtext0">{t('reports.yearComparisonReport.loading')}</p>
       </div>
     );
   }
@@ -187,9 +190,9 @@ export function YearComparisonReport() {
     return (
       <div className="card p-8 text-center">
         <Calendar className="w-12 h-12 mx-auto text-ctp-overlay1 mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Aucune donnee</h3>
+        <h3 className="text-lg font-semibold mb-2">{t('reports.yearComparisonReport.noData')}</h3>
         <p className="text-ctp-subtext0">
-          Pas assez de donnees pour comparer les annees
+          {t('reports.yearComparisonReport.notEnoughData')}
         </p>
       </div>
     );
@@ -231,7 +234,7 @@ export function YearComparisonReport() {
             ) : (
               <Download className="w-4 h-4" />
             )}
-            Exporter PDF
+            {t('reports.pdfExport.exportPdf')}
           </button>
         </div>
       </div>
@@ -242,7 +245,7 @@ export function YearComparisonReport() {
         <div className="card">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="w-5 h-5 text-ctp-green" />
-            <span className="text-sm text-ctp-subtext0">Revenus</span>
+            <span className="text-sm text-ctp-subtext0">{t('reports.yearComparisonReport.income')}</span>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -267,7 +270,7 @@ export function YearComparisonReport() {
         <div className="card">
           <div className="flex items-center gap-2 mb-3">
             <TrendingDown className="w-5 h-5 text-ctp-red" />
-            <span className="text-sm text-ctp-subtext0">Depenses</span>
+            <span className="text-sm text-ctp-subtext0">{t('reports.yearComparisonReport.expenses')}</span>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -292,7 +295,7 @@ export function YearComparisonReport() {
         <div className="card bg-gradient-to-br from-ctp-blue/10 to-ctp-mauve/10">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="w-5 h-5 text-ctp-blue" />
-            <span className="text-sm text-ctp-subtext0">Epargne nette</span>
+            <span className="text-sm text-ctp-subtext0">{t('reports.yearComparisonReport.netSavings')}</span>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -332,7 +335,7 @@ export function YearComparisonReport() {
 
       {/* Monthly Comparison Chart */}
       <div className="card">
-        <h3 className="font-semibold mb-4">Comparaison mensuelle - Epargne nette</h3>
+        <h3 className="font-semibold mb-4">{t('reports.yearComparisonReport.monthlyComparison')}</h3>
         {chartData && chartData.length > 0 ? (
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -373,20 +376,20 @@ export function YearComparisonReport() {
           </div>
         ) : (
           <div className="h-80 flex items-center justify-center text-ctp-subtext0">
-            Pas assez de donnees
+            {t('reports.yearComparisonReport.notEnoughData')}
           </div>
         )}
       </div>
 
       {/* Category Comparison */}
       <div className="card">
-        <h3 className="font-semibold mb-4">Comparaison par categorie</h3>
+        <h3 className="font-semibold mb-4">{t('reports.yearComparisonReport.categoryComparison')}</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-ctp-surface1">
                 <th className="text-left text-xs font-medium text-ctp-subtext0 py-2">
-                  Categorie
+                  {t('reports.yearComparisonReport.category')}
                 </th>
                 <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">
                   {currentYear}
@@ -395,7 +398,7 @@ export function YearComparisonReport() {
                   {compareYear}
                 </th>
                 <th className="text-right text-xs font-medium text-ctp-subtext0 py-2">
-                  Evolution
+                  {t('reports.yearComparisonReport.evolution')}
                 </th>
               </tr>
             </thead>

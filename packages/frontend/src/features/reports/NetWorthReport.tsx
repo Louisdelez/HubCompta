@@ -4,9 +4,10 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS } from 'date-fns/locale';
 import {
   TrendingUp,
   TrendingDown,
@@ -87,6 +88,8 @@ const assetTypeIcons: Record<string, typeof Wallet> = {
 };
 
 export function NetWorthReport() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'fr' ? fr : enUS;
   const { currentWorkspaceId: workspaceId } = useWorkspace();
   const [period, setPeriod] = useState<'6m' | '1y' | '2y' | 'all'>('1y');
   const [isExporting, setIsExporting] = useState(false);
@@ -123,7 +126,7 @@ export function NetWorthReport() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Export error:', err);
-      alert("Erreur lors de l'export PDF");
+      alert(t('reports.pdfExport.error'));
     } finally {
       setIsExporting(false);
     }
@@ -139,10 +142,10 @@ export function NetWorthReport() {
   });
 
   const chartData = data?.history.map((point) => ({
-    date: format(new Date(point.date), 'MMM yy', { locale: fr }),
-    actifs: point.assets,
-    passifs: point.liabilities,
-    patrimoine: point.netWorth,
+    date: format(new Date(point.date), 'MMM yy', { locale: dateLocale }),
+    [t('reports.netWorthReport.assets')]: point.assets,
+    [t('reports.netWorthReport.liabilities')]: point.liabilities,
+    [t('reports.netWorthReport.netWorth')]: point.netWorth,
   }));
 
   if (!workspaceId) {
@@ -153,7 +156,7 @@ export function NetWorthReport() {
     return (
       <div className="card p-8 text-center">
         <Loader2 className="w-8 h-8 mx-auto animate-spin text-ctp-blue mb-4" />
-        <p className="text-ctp-subtext0">Chargement du patrimoine...</p>
+        <p className="text-ctp-subtext0">{t('reports.netWorthReport.loading')}</p>
       </div>
     );
   }
@@ -162,9 +165,9 @@ export function NetWorthReport() {
     return (
       <div className="card p-8 text-center">
         <Wallet className="w-12 h-12 mx-auto text-ctp-overlay1 mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Aucune donnee</h3>
+        <h3 className="text-lg font-semibold mb-2">{t('reports.netWorthReport.noData')}</h3>
         <p className="text-ctp-subtext0">
-          Ajoutez des comptes pour suivre votre patrimoine
+          {t('reports.netWorthReport.addAccountsToTrack')}
         </p>
       </div>
     );
@@ -179,7 +182,7 @@ export function NetWorthReport() {
         {/* Net Worth */}
         <div className="card col-span-2 bg-gradient-to-br from-ctp-blue/10 to-ctp-mauve/10">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-ctp-subtext0">Patrimoine net</span>
+            <span className="text-sm text-ctp-subtext0">{t('reports.netWorthReport.netWorth')}</span>
             <div
               className={clsx(
                 'flex items-center gap-1 text-sm font-medium',
@@ -200,7 +203,7 @@ export function NetWorthReport() {
           </p>
           <p className="text-sm text-ctp-subtext0 mt-1">
             {isPositiveChange ? '+' : ''}
-            {formatCurrency(data.change)} ce mois
+            {formatCurrency(data.change)} {t('reports.netWorthReport.thisMonth')}
           </p>
         </div>
 
@@ -208,7 +211,7 @@ export function NetWorthReport() {
         <div className="card">
           <div className="flex items-center gap-2 text-ctp-green mb-2">
             <TrendingUp className="w-4 h-4" />
-            <span className="text-sm">Total actifs</span>
+            <span className="text-sm">{t('reports.netWorthReport.totalAssets')}</span>
           </div>
           <p className="text-2xl font-bold text-ctp-text">
             {formatCurrency(data.assets.total)}
@@ -219,7 +222,7 @@ export function NetWorthReport() {
         <div className="card">
           <div className="flex items-center gap-2 text-ctp-red mb-2">
             <TrendingDown className="w-4 h-4" />
-            <span className="text-sm">Total passifs</span>
+            <span className="text-sm">{t('reports.netWorthReport.totalLiabilities')}</span>
           </div>
           <p className="text-2xl font-bold text-ctp-text">
             {formatCurrency(data.liabilities.total)}
@@ -230,7 +233,7 @@ export function NetWorthReport() {
       {/* Period Selector & Chart */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold">Evolution du patrimoine</h3>
+          <h3 className="font-semibold">{t('reports.netWorthReport.evolution')}</h3>
           <div className="flex items-center gap-3">
             <button
               onClick={handleExportPDF}
@@ -261,12 +264,12 @@ export function NetWorthReport() {
                 )}
               >
                 {p === '6m'
-                  ? '6 mois'
+                  ? t('reports.netWorthReport.period6m')
                   : p === '1y'
-                  ? '1 an'
+                  ? t('reports.netWorthReport.period1y')
                   : p === '2y'
-                  ? '2 ans'
-                  : 'Tout'}
+                  ? t('reports.netWorthReport.period2y')
+                  : t('reports.netWorthReport.periodAll')}
               </button>
             ))}
             </div>
@@ -303,8 +306,8 @@ export function NetWorthReport() {
                 />
                 <Area
                   type="monotone"
-                  dataKey="patrimoine"
-                  name="Patrimoine"
+                  dataKey={t('reports.netWorthReport.netWorth')}
+                  name={t('reports.netWorthReport.netWorth')}
                   stroke="var(--ctp-blue)"
                   fillOpacity={1}
                   fill="url(#colorPatrimoine)"
@@ -314,7 +317,7 @@ export function NetWorthReport() {
           </div>
         ) : (
           <div className="h-80 flex items-center justify-center text-ctp-subtext0">
-            Pas assez de donnees
+            {t('reports.netWorthReport.notEnoughData')}
           </div>
         )}
       </div>
@@ -325,7 +328,7 @@ export function NetWorthReport() {
         <div className="card">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-ctp-green" />
-            Actifs
+            {t('reports.netWorthReport.assets')}
           </h3>
           <div className="space-y-3">
             {data.assets.breakdown.map((asset) => {
@@ -369,7 +372,7 @@ export function NetWorthReport() {
         <div className="card">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-ctp-red" />
-            Passifs
+            {t('reports.netWorthReport.liabilities')}
           </h3>
           {data.liabilities.breakdown.length > 0 ? (
             <div className="space-y-3">
@@ -408,7 +411,7 @@ export function NetWorthReport() {
           ) : (
             <div className="text-center py-8 text-ctp-subtext0">
               <CreditCard className="w-8 h-8 mx-auto mb-2 text-ctp-overlay1" />
-              <p>Aucun passif enregistre</p>
+              <p>{t('reports.netWorthReport.noLiabilities')}</p>
             </div>
           )}
         </div>

@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { FileText, Upload } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -46,6 +47,7 @@ interface FileUploadStepProps {
 // ----------------------------------------------------------------------------
 
 export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps) {
+  const { t } = useTranslation();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +79,7 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error?.message ?? 'Erreur lors du téléchargement');
+        throw new Error(data.error?.message ?? t('import.upload.uploadError'));
       }
 
       return response.json();
@@ -101,7 +103,7 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
       });
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Erreur lors du téléchargement');
+      setError(err instanceof Error ? err.message : t('import.upload.uploadError'));
     },
   });
 
@@ -124,9 +126,9 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
       setSelectedFile(file);
       setError(null);
     } else {
-      setError('Veuillez sélectionner un fichier CSV');
+      setError(t('import.upload.selectCsvError'));
     }
-  }, []);
+  }, [t]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -138,11 +140,11 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
 
   const handleSubmit = () => {
     if (!selectedFile) {
-      setError('Veuillez sélectionner un fichier');
+      setError(t('import.upload.selectFileError'));
       return;
     }
     if (!selectedAccountId) {
-      setError('Veuillez sélectionner un compte');
+      setError(t('import.upload.selectAccountError'));
       return;
     }
 
@@ -152,10 +154,9 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold mb-2">Sélectionnez un fichier CSV</h2>
+        <h2 className="text-lg font-semibold mb-2">{t('import.upload.title')}</h2>
         <p className="text-ctp-subtext0 text-sm">
-          Formats supportés : relevés de Boursorama, Crédit Agricole, BNP, Société Générale,
-          La Banque Postale, N26, Revolut et autres formats CSV standard.
+          {t('import.upload.supportedFormats')}
         </p>
       </div>
 
@@ -168,7 +169,7 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
       {/* Account Selection */}
       <div>
         <label htmlFor="account" className="label">
-          Compte de destination
+          {t('import.upload.destinationAccount')}
         </label>
         <select
           id="account"
@@ -176,7 +177,7 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
           onChange={(e) => setSelectedAccountId(e.target.value)}
           className="input"
         >
-          <option value="">Sélectionner un compte</option>
+          <option value="">{t('import.upload.selectAccount')}</option>
           {accounts?.map((account) => (
             <option key={account.id} value={account.id}>
               {account.name}
@@ -208,18 +209,18 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
               onClick={() => setSelectedFile(null)}
               className="text-sm text-ctp-red mt-2 hover:underline"
             >
-              Supprimer
+              {t('import.upload.remove')}
             </button>
           </div>
         ) : (
           <div>
             <Upload className="w-10 h-10 mx-auto mb-2 text-ctp-overlay1" />
             <p className="font-medium mb-1">
-              Glissez-déposez votre fichier CSV ici
+              {t('import.upload.dragAndDrop')}
             </p>
-            <p className="text-sm text-ctp-subtext0 mb-4">ou</p>
+            <p className="text-sm text-ctp-subtext0 mb-4">{t('import.upload.or')}</p>
             <label className="btn-secondary cursor-pointer">
-              Parcourir
+              {t('import.upload.browse')}
               <input
                 type="file"
                 accept=".csv,text/csv"
@@ -237,7 +238,7 @@ export function FileUploadStep({ workspaceId, onComplete }: FileUploadStepProps)
         disabled={!selectedFile || !selectedAccountId || uploadMutation.isPending}
         className="btn-primary w-full"
       >
-        {uploadMutation.isPending ? 'Analyse en cours...' : 'Continuer'}
+        {uploadMutation.isPending ? t('import.upload.analyzing') : t('import.upload.continue')}
       </button>
     </div>
   );

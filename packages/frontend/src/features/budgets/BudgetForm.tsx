@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 
@@ -49,6 +50,7 @@ interface BudgetFormProps {
 // ----------------------------------------------------------------------------
 
 export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormProps) {
+  const { t } = useTranslation();
   const isEditing = !!budget;
 
   const [categoryId, setCategoryId] = useState(budget?.category.id ?? '');
@@ -103,7 +105,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
     },
     onSuccess: onSave,
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+      setError(err instanceof Error ? err.message : t('budgets.savingError'));
     },
   });
 
@@ -113,15 +115,15 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
 
     // Validate
     if (!categoryId && !isEditing) {
-      setError('Sélectionnez une catégorie');
+      setError(t('budgets.selectCategory'));
       return;
     }
     if (!name.trim()) {
-      setError('Entrez un nom pour le budget');
+      setError(t('budgets.enterBudgetName'));
       return;
     }
     if (!amount || parseFloat(amount) <= 0) {
-      setError('Entrez un montant valide');
+      setError(t('budgets.enterValidAmount'));
       return;
     }
 
@@ -139,7 +141,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
     }
   };
 
-  const modalTitle = isEditing ? 'Modifier le budget' : 'Nouveau budget';
+  const modalTitle = isEditing ? t('budgets.editBudget') : t('budgets.newBudget');
 
   return (
     <div
@@ -169,7 +171,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
             {!isEditing && (
               <div>
                 <label htmlFor="category" className="label">
-                  Catégorie <span className="text-ctp-red">*</span>
+                  {t('transactions.category')} <span className="text-ctp-red">*</span>
                 </label>
                 <select
                   id="category"
@@ -178,7 +180,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
                   className="input"
                   required
                 >
-                  <option value="">Sélectionner une catégorie</option>
+                  <option value="">{t('budgets.selectCategory')}</option>
                   {categories?.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.icon} {cat.name}
@@ -191,14 +193,14 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
             {/* Name */}
             <div>
               <label htmlFor="name" className="label">
-                Nom du budget <span className="text-ctp-red">*</span>
+                {t('budgets.budgetName')} <span className="text-ctp-red">*</span>
               </label>
               <input
                 id="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ex: Budget courses"
+                placeholder={t('budgets.budgetNamePlaceholder')}
                 className="input"
                 required
               />
@@ -207,7 +209,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
             {/* Amount */}
             <div>
               <label htmlFor="amount" className="label">
-                Montant <span className="text-ctp-red">*</span>
+                {t('budgets.budgetAmount')} <span className="text-ctp-red">*</span>
               </label>
               <div className="relative">
                 <input
@@ -230,7 +232,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
             {/* Period */}
             {!isEditing && (
               <div>
-                <label className="label">Période</label>
+                <label className="label">{t('budgets.period')}</label>
                 <div className="flex gap-3">
                   <label className="flex items-center gap-2 flex-1 p-3 rounded-lg border border-ctp-surface1 cursor-pointer hover:bg-ctp-surface0">
                     <input
@@ -241,7 +243,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
                       onChange={() => setPeriod('monthly')}
                       className="text-ctp-blue"
                     />
-                    <span>Mensuel</span>
+                    <span>{t('budgets.monthly')}</span>
                   </label>
                   <label className="flex items-center gap-2 flex-1 p-3 rounded-lg border border-ctp-surface1 cursor-pointer hover:bg-ctp-surface0">
                     <input
@@ -252,7 +254,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
                       onChange={() => setPeriod('yearly')}
                       className="text-ctp-blue"
                     />
-                    <span>Annuel</span>
+                    <span>{t('budgets.yearly')}</span>
                   </label>
                 </div>
               </div>
@@ -261,7 +263,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
             {/* Alert Threshold */}
             <div>
               <label htmlFor="threshold" className="label">
-                Seuil d'alerte
+                {t('budgets.alertThreshold')}
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -277,7 +279,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
                 <span className="w-12 text-right font-medium">{alertThreshold}%</span>
               </div>
               <p className="text-xs text-ctp-subtext0 mt-1">
-                Vous serez alerté lorsque ce pourcentage sera atteint
+                {t('budgets.alertThresholdDescription')}
               </p>
             </div>
 
@@ -287,10 +289,10 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
                 <div className="flex items-center justify-between">
                   <div>
                     <label htmlFor="envelopeMode" className="font-medium text-ctp-text cursor-pointer">
-                      Mode Enveloppes
+                      {t('budgets.envelopeMode')}
                     </label>
                     <p className="text-xs text-ctp-subtext0 mt-0.5">
-                      Gerez votre budget comme une enveloppe avec report automatique
+                      {t('budgets.envelopeModeDescription')}
                     </p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
@@ -309,10 +311,10 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
                   <div className="flex items-center justify-between pt-2 border-t border-ctp-surface1">
                     <div>
                       <label htmlFor="rolloverEnabled" className="font-medium text-ctp-text cursor-pointer">
-                        Report automatique
+                        {t('budgets.automaticRollover')}
                       </label>
                       <p className="text-xs text-ctp-subtext0 mt-0.5">
-                        Les fonds non utilises sont reportes au mois suivant
+                        {t('budgets.automaticRolloverDescription')}
                       </p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -335,7 +337,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
               {!isEditing && (
                 <div>
                   <label htmlFor="startDate" className="label">
-                    Date de début
+                    {t('budgets.startDate')}
                   </label>
                   <input
                     id="startDate"
@@ -348,7 +350,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
               )}
               <div className={isEditing ? 'col-span-2' : ''}>
                 <label htmlFor="endDate" className="label">
-                  Date de fin (optionnel)
+                  {t('budgets.endDate')}
                 </label>
                 <input
                   id="endDate"
@@ -364,7 +366,7 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
           {/* Actions */}
           <div className="flex gap-3 mt-6">
             <button type="button" onClick={onClose} className="btn-secondary flex-1">
-              Annuler
+              {t('budgets.cancel')}
             </button>
             <button
               type="submit"
@@ -374,10 +376,10 @@ export function BudgetForm({ workspaceId, budget, onClose, onSave }: BudgetFormP
               className="btn-primary flex-1"
             >
               {saveMutation.isPending
-                ? 'Enregistrement...'
+                ? t('budgets.saving')
                 : isEditing
-                  ? 'Enregistrer'
-                  : 'Creer'}
+                  ? t('budgets.save')
+                  : t('budgets.create')}
             </button>
           </div>
         </form>

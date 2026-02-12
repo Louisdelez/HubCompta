@@ -1,6 +1,6 @@
 // ============================================================================
 // EMAIL TEMPLATES - Finance Hub
-// Professional HTML email templates with inline CSS
+// Professional HTML email templates with i18n support
 // ============================================================================
 
 import type {
@@ -13,6 +13,7 @@ import type {
   ExportReadyEmailData,
   WeeklySummaryEmailData,
 } from './types.js';
+import { getEmailString, getLanguageMetadata, DEFAULT_LANGUAGE, type LanguageCode } from '../i18n/index.js';
 
 // ----------------------------------------------------------------------------
 // Base Template
@@ -123,10 +124,14 @@ const baseStyles = `
   }
 `;
 
-function wrapInBaseTemplate(content: string, title: string): string {
+function wrapInBaseTemplate(content: string, title: string, locale: LanguageCode): string {
+  const langCode = locale.split('-')[0];
+  const footer = getEmailString(locale, 'footer');
+  const footerIgnore = getEmailString(locale, 'footerIgnore');
+
   return `
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="${langCode}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -142,9 +147,9 @@ function wrapInBaseTemplate(content: string, title: string): string {
       ${content}
     </div>
     <div class="footer">
-      <p>Cet email a ete envoye automatiquement par HubCompta.</p>
+      <p>${footer}</p>
       <p class="small-text">
-        Si vous n'avez pas demande cet email, vous pouvez l'ignorer en toute securite.
+        ${footerIgnore}
       </p>
     </div>
   </div>
@@ -157,175 +162,186 @@ function wrapInBaseTemplate(content: string, title: string): string {
 // Template Generators
 // ----------------------------------------------------------------------------
 
-function generateWelcomeEmail(data: WelcomeEmailData): { subject: string; html: string } {
+function generateWelcomeEmail(data: WelcomeEmailData, locale: LanguageCode): { subject: string; html: string } {
+  const t = (key: string, vars?: Record<string, string | number>) => getEmailString(locale, key, vars);
+
   const content = `
-    <p class="greeting">Bonjour ${escapeHtml(data.displayName)},</p>
-    <p>Bienvenue sur HubCompta ! Votre compte a ete cree avec succes.</p>
-    <p>HubCompta vous aide a gerer vos finances personnelles et professionnelles en toute simplicite :</p>
+    <p class="greeting">${t('greeting', { displayName: escapeHtml(data.displayName) })}</p>
+    <p>${t('welcome.intro')}</p>
+    <p>${t('welcome.body')}</p>
     <ul>
-      <li>Suivez vos revenus et depenses</li>
-      <li>Creez et gerez vos budgets</li>
-      <li>Generez des rapports detailles</li>
-      <li>Facturez vos clients (mode Pro)</li>
+      <li>${t('welcome.features.tracking')}</li>
+      <li>${t('welcome.features.budgets')}</li>
+      <li>${t('welcome.features.reports')}</li>
+      <li>${t('welcome.features.invoicing')}</li>
     </ul>
     <p style="text-align: center;">
-      <a href="${escapeHtml(data.loginUrl)}" class="button">Acceder a mon espace</a>
+      <a href="${escapeHtml(data.loginUrl)}" class="button">${t('welcome.cta')}</a>
     </p>
-    <p>A bientot sur HubCompta !</p>
+    <p>${t('welcome.closing')}</p>
   `;
 
   return {
-    subject: 'Bienvenue sur HubCompta !',
-    html: wrapInBaseTemplate(content, 'Bienvenue sur HubCompta'),
+    subject: t('welcome.subject'),
+    html: wrapInBaseTemplate(content, t('welcome.title'), locale),
   };
 }
 
-function generatePasswordResetEmail(data: PasswordResetEmailData): { subject: string; html: string } {
+function generatePasswordResetEmail(data: PasswordResetEmailData, locale: LanguageCode): { subject: string; html: string } {
+  const t = (key: string, vars?: Record<string, string | number>) => getEmailString(locale, key, vars);
+
   const content = `
-    <p class="greeting">Bonjour ${escapeHtml(data.displayName)},</p>
-    <p>Vous avez demande la reinitialisation de votre mot de passe.</p>
-    <p>Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe :</p>
+    <p class="greeting">${t('greeting', { displayName: escapeHtml(data.displayName) })}</p>
+    <p>${t('passwordReset.intro')}</p>
+    <p>${t('passwordReset.body')}</p>
     <p style="text-align: center;">
-      <a href="${escapeHtml(data.resetUrl)}" class="button">Reinitialiser mon mot de passe</a>
+      <a href="${escapeHtml(data.resetUrl)}" class="button">${t('passwordReset.cta')}</a>
     </p>
     <div class="alert-box alert-warning">
-      <strong>Important :</strong> Ce lien expire dans ${escapeHtml(data.expiresIn)}.
+      <strong>${t('passwordReset.expiry', { expiresIn: escapeHtml(data.expiresIn) })}</strong>
     </div>
     <p class="small-text">
-      Si vous n'avez pas demande cette reinitialisation, ignorez cet email.
-      Votre mot de passe restera inchange.
+      ${t('passwordReset.ignoreNote')}
     </p>
   `;
 
   return {
-    subject: 'Reinitialisation de votre mot de passe HubCompta',
-    html: wrapInBaseTemplate(content, 'Reinitialisation de mot de passe'),
+    subject: t('passwordReset.subject'),
+    html: wrapInBaseTemplate(content, t('passwordReset.title'), locale),
   };
 }
 
-function generateInvoiceOverdueEmail(data: InvoiceOverdueEmailData): { subject: string; html: string } {
+function generateInvoiceOverdueEmail(data: InvoiceOverdueEmailData, locale: LanguageCode): { subject: string; html: string } {
+  const t = (key: string, vars?: Record<string, string | number>) => getEmailString(locale, key, vars);
+
   const content = `
-    <p class="greeting">Bonjour ${escapeHtml(data.displayName)},</p>
+    <p class="greeting">${t('greeting', { displayName: escapeHtml(data.displayName) })}</p>
     <div class="alert-box alert-danger">
-      <strong>Facture en retard de paiement</strong>
+      <strong>${t('invoiceOverdue.alertTitle')}</strong>
     </div>
-    <p>La facture suivante est en retard de ${data.daysOverdue} jour(s) :</p>
+    <p>${t('invoiceOverdue.intro', { daysOverdue: data.daysOverdue })}</p>
     <table class="stats-table">
       <tr>
-        <td class="label">Numero de facture</td>
+        <td class="label">${t('invoiceOverdue.invoiceNumber')}</td>
         <td class="value">${escapeHtml(data.invoiceNumber)}</td>
       </tr>
       <tr>
-        <td class="label">Client</td>
+        <td class="label">${t('invoiceOverdue.client')}</td>
         <td class="value">${escapeHtml(data.clientName)}</td>
       </tr>
       <tr>
-        <td class="label">Montant</td>
+        <td class="label">${t('invoiceOverdue.amount')}</td>
         <td class="value">${escapeHtml(data.amount)} ${escapeHtml(data.currency)}</td>
       </tr>
       <tr>
-        <td class="label">Date d'echeance</td>
+        <td class="label">${t('invoiceOverdue.dueDate')}</td>
         <td class="value">${escapeHtml(data.dueDate)}</td>
       </tr>
     </table>
     <p style="text-align: center;">
-      <a href="${escapeHtml(data.invoiceUrl)}" class="button">Voir la facture</a>
+      <a href="${escapeHtml(data.invoiceUrl)}" class="button">${t('invoiceOverdue.cta')}</a>
     </p>
-    <p>Nous vous recommandons de relancer votre client pour le paiement.</p>
+    <p>${t('invoiceOverdue.recommendation')}</p>
   `;
 
   return {
-    subject: `Facture ${data.invoiceNumber} en retard de paiement`,
-    html: wrapInBaseTemplate(content, 'Facture en retard'),
+    subject: t('invoiceOverdue.subject', { invoiceNumber: data.invoiceNumber }),
+    html: wrapInBaseTemplate(content, t('invoiceOverdue.title'), locale),
   };
 }
 
-function generateBudgetAlertEmail(data: BudgetAlertEmailData): { subject: string; html: string } {
+function generateBudgetAlertEmail(data: BudgetAlertEmailData, locale: LanguageCode): { subject: string; html: string } {
+  const t = (key: string, vars?: Record<string, string | number>) => getEmailString(locale, key, vars);
+
   const alertClass = data.isExceeded ? 'alert-danger' : 'alert-warning';
-  const alertTitle = data.isExceeded ? 'Budget depasse !' : 'Budget bientot atteint';
+  const alertTitle = data.isExceeded ? t('budgetAlert.titleExceeded') : t('budgetAlert.titleWarning');
   const alertMessage = data.isExceeded
-    ? `Votre budget "${escapeHtml(data.budgetName)}" a ete depasse.`
-    : `Votre budget "${escapeHtml(data.budgetName)}" approche de sa limite.`;
+    ? t('budgetAlert.messageExceeded', { budgetName: escapeHtml(data.budgetName) })
+    : t('budgetAlert.messageWarning', { budgetName: escapeHtml(data.budgetName) });
 
   const content = `
-    <p class="greeting">Bonjour ${escapeHtml(data.displayName)},</p>
+    <p class="greeting">${t('greeting', { displayName: escapeHtml(data.displayName) })}</p>
     <div class="alert-box ${alertClass}">
       <strong>${alertTitle}</strong>
     </div>
     <p>${alertMessage}</p>
     <table class="stats-table">
       <tr>
-        <td class="label">Budget</td>
+        <td class="label">${t('budgetAlert.budget')}</td>
         <td class="value">${escapeHtml(data.budgetName)}</td>
       </tr>
       <tr>
-        <td class="label">Categorie</td>
+        <td class="label">${t('budgetAlert.category')}</td>
         <td class="value">${escapeHtml(data.categoryName)}</td>
       </tr>
       <tr>
-        <td class="label">Depense</td>
+        <td class="label">${t('budgetAlert.spent')}</td>
         <td class="value">${escapeHtml(data.amountSpent)} ${escapeHtml(data.currency)}</td>
       </tr>
       <tr>
-        <td class="label">Limite</td>
+        <td class="label">${t('budgetAlert.limit')}</td>
         <td class="value">${escapeHtml(data.budgetLimit)} ${escapeHtml(data.currency)}</td>
       </tr>
       <tr>
-        <td class="label">Utilisation</td>
+        <td class="label">${t('budgetAlert.usage')}</td>
         <td class="value" style="color: ${data.isExceeded ? '#ef4444' : '#f59e0b'};">${data.percentUsed.toFixed(0)}%</td>
       </tr>
     </table>
     <p style="text-align: center;">
-      <a href="${escapeHtml(data.budgetUrl)}" class="button">Voir le budget</a>
+      <a href="${escapeHtml(data.budgetUrl)}" class="button">${t('budgetAlert.cta')}</a>
     </p>
   `;
 
   const subject = data.isExceeded
-    ? `Budget "${data.budgetName}" depasse`
-    : `Budget "${data.budgetName}" a ${data.percentUsed.toFixed(0)}%`;
+    ? t('budgetAlert.subjectExceeded', { budgetName: data.budgetName })
+    : t('budgetAlert.subjectWarning', { budgetName: data.budgetName, percentUsed: data.percentUsed.toFixed(0) });
 
   return {
     subject,
-    html: wrapInBaseTemplate(content, 'Alerte budget'),
+    html: wrapInBaseTemplate(content, alertTitle, locale),
   };
 }
 
-function generateExportReadyEmail(data: ExportReadyEmailData): { subject: string; html: string } {
+function generateExportReadyEmail(data: ExportReadyEmailData, locale: LanguageCode): { subject: string; html: string } {
+  const t = (key: string, vars?: Record<string, string | number>) => getEmailString(locale, key, vars);
+
   const content = `
-    <p class="greeting">Bonjour ${escapeHtml(data.displayName)},</p>
+    <p class="greeting">${t('greeting', { displayName: escapeHtml(data.displayName) })}</p>
     <div class="alert-box alert-success">
-      <strong>Votre export est pret !</strong>
+      <strong>${t('exportReady.alertTitle')}</strong>
     </div>
-    <p>Votre export ${escapeHtml(data.exportType)} est maintenant disponible au telechargement.</p>
+    <p>${t('exportReady.intro', { exportType: escapeHtml(data.exportType) })}</p>
     <table class="stats-table">
       <tr>
-        <td class="label">Type d'export</td>
+        <td class="label">${t('exportReady.exportType')}</td>
         <td class="value">${escapeHtml(data.exportType)}</td>
       </tr>
       <tr>
-        <td class="label">Fichier</td>
+        <td class="label">${t('exportReady.filename')}</td>
         <td class="value">${escapeHtml(data.filename)}</td>
       </tr>
       <tr>
-        <td class="label">Expire le</td>
+        <td class="label">${t('exportReady.expiresAt')}</td>
         <td class="value">${escapeHtml(data.expiresAt)}</td>
       </tr>
     </table>
     <p style="text-align: center;">
-      <a href="${escapeHtml(data.downloadUrl)}" class="button">Telecharger l'export</a>
+      <a href="${escapeHtml(data.downloadUrl)}" class="button">${t('exportReady.cta')}</a>
     </p>
     <p class="small-text">
-      Ce lien de telechargement expirera le ${escapeHtml(data.expiresAt)}.
+      ${t('exportReady.expiryNote', { expiresAt: escapeHtml(data.expiresAt) })}
     </p>
   `;
 
   return {
-    subject: `Votre export ${data.exportType} est pret`,
-    html: wrapInBaseTemplate(content, 'Export pret'),
+    subject: t('exportReady.subject', { exportType: data.exportType }),
+    html: wrapInBaseTemplate(content, t('exportReady.title'), locale),
   };
 }
 
-function generateWeeklySummaryEmail(data: WeeklySummaryEmailData): { subject: string; html: string } {
+function generateWeeklySummaryEmail(data: WeeklySummaryEmailData, locale: LanguageCode): { subject: string; html: string } {
+  const t = (key: string, vars?: Record<string, string | number>) => getEmailString(locale, key, vars);
+
   const topCategoriesHtml = data.topCategories
     .map(
       (cat) => `
@@ -341,7 +357,7 @@ function generateWeeklySummaryEmail(data: WeeklySummaryEmailData): { subject: st
     data.budgetAlerts.length > 0
       ? `
         <div class="alert-box alert-warning" style="margin-top: 24px;">
-          <strong>Alertes budget</strong>
+          <strong>${t('weeklySummary.budgetAlerts')}</strong>
           <ul style="margin: 8px 0 0 0; padding-left: 20px;">
             ${data.budgetAlerts.map((b) => `<li>${escapeHtml(b.name)}: ${b.percentUsed.toFixed(0)}%</li>`).join('')}
           </ul>
@@ -350,22 +366,22 @@ function generateWeeklySummaryEmail(data: WeeklySummaryEmailData): { subject: st
       : '';
 
   const content = `
-    <p class="greeting">Bonjour ${escapeHtml(data.displayName)},</p>
-    <p>Voici le resume de votre semaine du ${escapeHtml(data.weekStart)} au ${escapeHtml(data.weekEnd)} :</p>
+    <p class="greeting">${t('greeting', { displayName: escapeHtml(data.displayName) })}</p>
+    <p>${t('weeklySummary.intro', { weekStart: escapeHtml(data.weekStart), weekEnd: escapeHtml(data.weekEnd) })}</p>
 
     <div class="alert-box alert-info">
       <table style="width: 100%;">
         <tr>
           <td style="text-align: center; padding: 8px;">
-            <div style="font-size: 12px; color: #6b7280;">Revenus</div>
+            <div style="font-size: 12px; color: #6b7280;">${t('weeklySummary.income')}</div>
             <div style="font-size: 20px; font-weight: 600; color: #10b981;">+${escapeHtml(data.totalIncome)}</div>
           </td>
           <td style="text-align: center; padding: 8px;">
-            <div style="font-size: 12px; color: #6b7280;">Depenses</div>
+            <div style="font-size: 12px; color: #6b7280;">${t('weeklySummary.expenses')}</div>
             <div style="font-size: 20px; font-weight: 600; color: #ef4444;">-${escapeHtml(data.totalExpenses)}</div>
           </td>
           <td style="text-align: center; padding: 8px;">
-            <div style="font-size: 12px; color: #6b7280;">Solde</div>
+            <div style="font-size: 12px; color: #6b7280;">${t('weeklySummary.balance')}</div>
             <div style="font-size: 20px; font-weight: 600;">${escapeHtml(data.netChange)} ${escapeHtml(data.currency)}</div>
           </td>
         </tr>
@@ -375,7 +391,7 @@ function generateWeeklySummaryEmail(data: WeeklySummaryEmailData): { subject: st
     ${
       data.topCategories.length > 0
         ? `
-      <h3 style="margin-top: 24px; margin-bottom: 12px;">Top categories de depenses</h3>
+      <h3 style="margin-top: 24px; margin-bottom: 12px;">${t('weeklySummary.topCategories')}</h3>
       <table class="stats-table">
         ${topCategoriesHtml}
       </table>
@@ -386,13 +402,13 @@ function generateWeeklySummaryEmail(data: WeeklySummaryEmailData): { subject: st
     ${budgetAlertsHtml}
 
     <p style="text-align: center; margin-top: 24px;">
-      <a href="${escapeHtml(data.dashboardUrl)}" class="button">Voir le tableau de bord</a>
+      <a href="${escapeHtml(data.dashboardUrl)}" class="button">${t('weeklySummary.cta')}</a>
     </p>
   `;
 
   return {
-    subject: `Resume de votre semaine - ${data.weekStart} au ${data.weekEnd}`,
-    html: wrapInBaseTemplate(content, 'Resume hebdomadaire'),
+    subject: t('weeklySummary.subject', { weekStart: data.weekStart, weekEnd: data.weekEnd }),
+    html: wrapInBaseTemplate(content, t('weeklySummary.title'), locale),
   };
 }
 
@@ -417,21 +433,22 @@ function escapeHtml(text: string): string {
 
 export function generateEmailTemplate<T extends EmailTemplateName>(
   templateName: T,
-  data: EmailTemplateData[T]
+  data: EmailTemplateData[T],
+  locale: LanguageCode = DEFAULT_LANGUAGE
 ): { subject: string; html: string } {
   switch (templateName) {
     case 'welcome':
-      return generateWelcomeEmail(data as WelcomeEmailData);
+      return generateWelcomeEmail(data as WelcomeEmailData, locale);
     case 'password_reset':
-      return generatePasswordResetEmail(data as PasswordResetEmailData);
+      return generatePasswordResetEmail(data as PasswordResetEmailData, locale);
     case 'invoice_overdue':
-      return generateInvoiceOverdueEmail(data as InvoiceOverdueEmailData);
+      return generateInvoiceOverdueEmail(data as InvoiceOverdueEmailData, locale);
     case 'budget_alert':
-      return generateBudgetAlertEmail(data as BudgetAlertEmailData);
+      return generateBudgetAlertEmail(data as BudgetAlertEmailData, locale);
     case 'export_ready':
-      return generateExportReadyEmail(data as ExportReadyEmailData);
+      return generateExportReadyEmail(data as ExportReadyEmailData, locale);
     case 'weekly_summary':
-      return generateWeeklySummaryEmail(data as WeeklySummaryEmailData);
+      return generateWeeklySummaryEmail(data as WeeklySummaryEmailData, locale);
     default:
       throw new Error(`Unknown email template: ${templateName}`);
   }

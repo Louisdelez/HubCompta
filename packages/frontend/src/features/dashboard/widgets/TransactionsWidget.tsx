@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeftRight, CreditCard } from 'lucide-react';
 import { api } from '@/lib/api/client';
 import { clsx } from 'clsx';
@@ -48,6 +49,7 @@ function formatDate(date: string): string {
 // ----------------------------------------------------------------------------
 
 export function TransactionsWidget({ workspaceId, config }: WidgetProps) {
+  const { t } = useTranslation();
   const limit = (config.limit as number) || 8;
 
   const { data, isLoading } = useQuery({
@@ -87,7 +89,7 @@ export function TransactionsWidget({ workspaceId, config }: WidgetProps) {
         {transactions.length === 0 ? (
           <div className="text-center py-8">
             <CreditCard className="w-8 h-8 mx-auto text-ctp-overlay1 mb-2" />
-            <p className="text-sm text-ctp-subtext0">Aucune transaction</p>
+            <p className="text-sm text-ctp-subtext0">{t('widgets.transactions.noTransactions')}</p>
           </div>
         ) : (
           transactions.map((txn) => (
@@ -122,7 +124,7 @@ export function TransactionsWidget({ workspaceId, config }: WidgetProps) {
                   {txn.description}
                 </p>
                 <p className="text-xs text-ctp-subtext0 truncate">
-                  {txn.category?.name ?? 'Non categorise'}
+                  {txn.category?.name ?? t('widgets.transactions.uncategorized')}
                 </p>
               </div>
 
@@ -154,7 +156,7 @@ export function TransactionsWidget({ workspaceId, config }: WidgetProps) {
           to="/transactions"
           className="mt-2 pt-2 border-t border-ctp-surface1 text-center text-sm text-ctp-blue hover:text-ctp-sapphire transition-colors"
         >
-          Voir toutes les transactions
+          {t('widgets.transactions.viewAll')}
         </Link>
       )}
     </div>

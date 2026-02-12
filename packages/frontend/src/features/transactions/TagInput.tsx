@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 
@@ -29,6 +30,7 @@ interface TagInputProps {
 // ----------------------------------------------------------------------------
 
 export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -92,7 +94,7 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
 
   return (
     <div>
-      <label className="label">Tags</label>
+      <label className="label">{t('transactions.tags')}</label>
       <div className="relative">
         {/* Selected Tags */}
         <div className="flex flex-wrap gap-1 mb-2">
@@ -125,7 +127,7 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
           onChange={(e) => setSearchQuery(e.target.value)}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Ajouter un tag..."
+          placeholder={t('transactions.addTag')}
           className="input"
         />
 
@@ -140,7 +142,7 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
               {/* Popular tags */}
               {!searchQuery && (popularTags?.length ?? 0) > 0 && (
                 <div className="p-2 border-b border-ctp-surface1">
-                  <p className="text-xs text-ctp-subtext0 mb-1">Populaires</p>
+                  <p className="text-xs text-ctp-subtext0 mb-1">{t('transactions.popular')}</p>
                   <div className="flex flex-wrap gap-1">
                     {popularTags
                       ?.filter((t) => !value.includes(t.id))
@@ -186,7 +188,7 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
 
               {/* Create new tag */}
               {searchQuery && !filteredTags.some(
-                (t) => t.name.toLowerCase() === searchQuery.toLowerCase()
+                (tag) => tag.name.toLowerCase() === searchQuery.toLowerCase()
               ) && (
                 <button
                   type="button"
@@ -195,9 +197,9 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
                   className="w-full px-3 py-2 text-left text-ctp-blue hover:bg-ctp-surface0"
                 >
                   {createTagMutation.isPending ? (
-                    'Création...'
+                    t('transactions.creating')
                   ) : (
-                    <>Créer "{searchQuery}"</>
+                    t('transactions.createTag', { name: searchQuery })
                   )}
                 </button>
               )}
@@ -205,7 +207,7 @@ export function TagInput({ workspaceId, value, onChange }: TagInputProps) {
               {/* Empty state */}
               {!searchQuery && filteredTags.length === 0 && (popularTags?.length ?? 0) === 0 && (
                 <p className="px-3 py-2 text-ctp-subtext0 text-sm">
-                  Tapez pour créer un nouveau tag
+                  {t('transactions.typeToCreateTag')}
                 </p>
               )}
             </div>

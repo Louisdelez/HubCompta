@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { X, Loader2, TrendingUp, Bitcoin, Building2, AlertCircle, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -54,6 +55,7 @@ interface AddPositionProps {
 // ----------------------------------------------------------------------------
 
 export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const queryClient = useQueryClient();
 
@@ -137,7 +139,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
       onClose();
     },
     onError: (err: Error) => {
-      setError(err.message || "Erreur lors de l'ajout de la position");
+      setError(err.message || t('invest.addPosition.error'));
     },
   });
 
@@ -159,12 +161,12 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
     setError(null);
 
     if (!selectedAsset) {
-      setError('Veuillez sélectionner un actif');
+      setError(t('invest.addPosition.selectAssetError'));
       return;
     }
 
     if (!formData.accountId) {
-      setError('Veuillez sélectionner un compte');
+      setError(t('invest.addPosition.selectAccountError'));
       return;
     }
 
@@ -173,12 +175,12 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
     const fees = parseFloat(formData.fees) || 0;
 
     if (isNaN(quantity) || quantity <= 0) {
-      setError('La quantité doit être un nombre positif');
+      setError(t('invest.addPosition.quantityError'));
       return;
     }
 
     if (isNaN(price) || price <= 0) {
-      setError('Le prix doit être un nombre positif');
+      setError(t('invest.addPosition.priceError'));
       return;
     }
 
@@ -212,17 +214,17 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'stock':
-        return 'Action';
+        return t('invest.assetSearch.types.stock');
       case 'etf':
-        return 'ETF';
+        return t('invest.assetSearch.types.etf');
       case 'crypto':
-        return 'Crypto';
+        return t('invest.assetSearch.types.crypto');
       case 'bond':
-        return 'Obligation';
+        return t('invest.assetSearch.types.bond');
       case 'commodity':
-        return 'Matière première';
+        return t('invest.assetSearch.types.commodity');
       default:
-        return 'Autre';
+        return t('invest.assetSearch.types.other');
     }
   };
 
@@ -239,7 +241,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
       <div className="bg-ctp-base rounded-lg shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-ctp-surface1">
-          <h2 className="text-lg font-semibold text-ctp-text">Ajouter une position</h2>
+          <h2 className="text-lg font-semibold text-ctp-text">{t('invest.addPosition.title')}</h2>
           <button
             onClick={onClose}
             className="p-1 text-ctp-overlay1 hover:text-ctp-subtext0 rounded-full hover:bg-ctp-surface0"
@@ -261,7 +263,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
           {/* Asset search */}
           <div>
             <label className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Actif <span className="text-ctp-red">*</span>
+              {t('invest.addPosition.asset')} <span className="text-ctp-red">*</span>
             </label>
             {selectedAsset ? (
               <div className="flex items-center justify-between p-3 bg-ctp-surface0 rounded-lg border border-ctp-surface1">
@@ -282,7 +284,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
                   onClick={() => setSelectedAsset(null)}
                   className="text-sm text-ctp-blue hover:text-ctp-blue/80"
                 >
-                  Changer
+                  {t('invest.addPosition.change')}
                 </button>
               </div>
             ) : (
@@ -293,7 +295,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
           {/* Account selection */}
           <div>
             <label htmlFor="accountId" className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Compte <span className="text-ctp-red">*</span>
+              {t('invest.addPosition.account')} <span className="text-ctp-red">*</span>
             </label>
             <select
               id="accountId"
@@ -302,7 +304,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
               className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg focus:outline-none focus:ring-2 focus:ring-ctp-blue bg-ctp-mantle text-ctp-text"
               required
             >
-              <option value="">Sélectionner un compte...</option>
+              <option value="">{t('invest.addPosition.selectAccount')}</option>
               {accounts?.map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.name}
@@ -311,7 +313,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
             </select>
             {accounts?.length === 0 && (
               <p className="mt-1 text-sm text-ctp-yellow">
-                Aucun compte d'investissement. Créez-en un d'abord.
+                {t('invest.addPosition.noInvestmentAccount')}
               </p>
             )}
           </div>
@@ -320,7 +322,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="quantity" className="block text-sm font-medium text-ctp-subtext1 mb-1">
-                Quantité <span className="text-ctp-red">*</span>
+                {t('invest.addPosition.quantity')} <span className="text-ctp-red">*</span>
               </label>
               <input
                 id="quantity"
@@ -336,7 +338,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
             </div>
             <div>
               <label htmlFor="price" className="block text-sm font-medium text-ctp-subtext1 mb-1">
-                Prix unitaire <span className="text-ctp-red">*</span>
+                {t('invest.addPosition.unitPrice')} <span className="text-ctp-red">*</span>
               </label>
               <div className="relative">
                 <input
@@ -375,7 +377,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
               </div>
               {currentPrice !== null && (
                 <p className="mt-1 text-xs text-ctp-subtext0">
-                  Prix actuel : {currentPrice.toFixed(2)} {quoteData?.asset?.currency || selectedAsset?.currency || 'USD'}
+                  {t('invest.priceAlert.currentPrice')} : {currentPrice.toFixed(2)} {quoteData?.asset?.currency || selectedAsset?.currency || 'USD'}
                   {quoteData?.quote && (
                     <span className={cn(
                       'ml-2',
@@ -394,7 +396,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="date" className="block text-sm font-medium text-ctp-subtext1 mb-1">
-                Date d'achat <span className="text-ctp-red">*</span>
+                {t('invest.addPosition.purchaseDate')} <span className="text-ctp-red">*</span>
               </label>
               <input
                 id="date"
@@ -408,7 +410,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
             </div>
             <div>
               <label htmlFor="fees" className="block text-sm font-medium text-ctp-subtext1 mb-1">
-                Frais
+                {t('invest.addPosition.fees')}
               </label>
               <div className="relative">
                 <input
@@ -431,13 +433,13 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
           {/* Notes */}
           <div>
             <label htmlFor="notes" className="block text-sm font-medium text-ctp-subtext1 mb-1">
-              Notes
+              {t('invest.addPosition.notes')}
             </label>
             <textarea
               id="notes"
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Notes optionnelles..."
+              placeholder={t('invest.addPosition.notesPlaceholder')}
               rows={2}
               className="w-full px-3 py-2 border border-ctp-surface1 rounded-lg focus:outline-none focus:ring-2 focus:ring-ctp-blue resize-none bg-ctp-mantle text-ctp-text placeholder-ctp-overlay1"
             />
@@ -454,12 +456,12 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
               </div>
               {fees > 0 && (
                 <div className="flex justify-between text-sm text-ctp-subtext0 mt-1">
-                  <span>Frais</span>
+                  <span>{t('invest.addPosition.fees')}</span>
                   <span>{fees.toFixed(2)} €</span>
                 </div>
               )}
               <div className="flex justify-between font-medium text-ctp-text mt-2 pt-2 border-t border-ctp-blue/20">
-                <span>Coût total</span>
+                <span>{t('invest.addPosition.totalCost')}</span>
                 <span>{totalCost.toFixed(2)} €</span>
               </div>
             </div>
@@ -472,7 +474,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
               onClick={onClose}
               className="px-4 py-2 text-ctp-subtext1 bg-ctp-surface0 rounded-lg hover:bg-ctp-surface1"
             >
-              Annuler
+              {t('invest.addPosition.cancel')}
             </button>
             <button
               type="submit"
@@ -484,7 +486,7 @@ export function AddPosition({ isOpen, onClose, onSuccess }: AddPositionProps) {
               )}
             >
               {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              Ajouter la position
+              {createMutation.isPending ? t('invest.addPosition.adding') : t('invest.addPosition.add')}
             </button>
           </div>
         </form>

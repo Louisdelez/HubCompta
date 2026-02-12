@@ -1,0 +1,144 @@
+{
+  "title": "Notifications",
+  "markAllRead": "Tout marquer comme lu",
+  "noNotifications": "Aucune notification",
+  "viewAll": "Voir toutes les notifications",
+  "budgetExceeded": {
+    "title": "Budget \"{{budgetName}}\" depasse",
+    "message": "Le budget pour \"{{categoryName}}\" a ete depasse ({{percentUsed}}% utilise)."
+  },
+  "budgetWarning": {
+    "title": "Budget \"{{budgetName}}\" bientot atteint",
+    "message": "Le budget pour \"{{categoryName}}\" est a {{percentUsed}}% de sa limite."
+  },
+  "importComplete": {
+    "title": "Import termine",
+    "message": "{{imported}} transaction(s) importee(s){{skipped}}{{errors}}.",
+    "skipped": ", {{count}} ignoree(s)",
+    "errors": ", {{count}} erreur(s)"
+  },
+  "importCompleteWithErrors": {
+    "title": "Import termine avec des erreurs",
+    "message": "{{imported}} transaction(s) importee(s), {{skipped}} ignoree(s), {{errors}} erreur(s)."
+  },
+  "exportReady": {
+    "title": "Export pret",
+    "message": "Votre export {{exportType}} est pret a etre telecharge."
+  },
+  "invoiceOverdue": {
+    "title": "Facture {{invoiceNumber}} en retard",
+    "message": "La facture {{invoiceNumber}} pour {{clientName}} ({{amount}} {{currency}}) est en retard de paiement."
+  },
+  "invoicePaid": {
+    "title": "Facture {{invoiceNumber}} payee",
+    "message": "La facture {{invoiceNumber}} pour {{clientName}} ({{amount}} {{currency}}) a ete marquee comme payee."
+  },
+  "quoteAccepted": {
+    "title": "Devis {{quoteNumber}} accepte",
+    "message": "Le devis {{quoteNumber}} pour {{clientName}} ({{amount}} {{currency}}) a ete accepte."
+  },
+  "quoteExpiring": {
+    "title": "Devis {{quoteNumber}} expire bientot",
+    "message": "Le devis {{quoteNumber}} pour {{clientName}} expire dans {{daysLeft}} jour(s)."
+  },
+  "priceAlert": {
+    "title": "Alerte prix: {{assetSymbol}}",
+    "messageAbove": "{{assetName}} est passe au-dessus de {{targetPrice}} {{currency}} (actuellement {{currentPrice}} {{currency}}).",
+    "messageBelow": "{{assetName}} est passe en-dessous de {{targetPrice}} {{currency}} (actuellement {{currentPrice}} {{currency}})."
+  },
+  "billReminder": {
+    "title": "Rappel de paiement",
+    "message": "\"{{description}}\" ({{amount}} {{currency}}) est du dans {{daysUntil}} jour(s)."
+  },
+  "unusualSpending": {
+    "title": "Depense inhabituelle dans \"{{categoryName}}\"",
+    "titleGeneric": "Depense inhabituelle detectee",
+    "message": "{{description}}: {{amount}} {{currency}} ({{percentAboveAverage}}% au-dessus de la moyenne)"
+  },
+  "weeklySummary": {
+    "titlePositive": "Resume hebdomadaire: +{{netChange}} {{currency}}",
+    "titleNegative": "Resume hebdomadaire: {{netChange}} {{currency}}"
+  },
+  "monthlyReport": {
+    "title": "Rapport mensuel - {{month}}",
+    "message": "Depenses: {{totalSpent}} {{currency}} | Revenus: {{totalIncome}} {{currency}}"
+  },
+  "lowBalance": {
+    "title": "Solde bas: {{accountName}}",
+    "message": "Le solde de votre compte \"{{accountName}}\" est de {{balance}} {{currency}} (seuil: {{threshold}} {{currency}})"
+  },
+  "billUpcoming": {
+    "titleToday": "Facture due aujourd'hui",
+    "titleTomorrow": "Facture due demain",
+    "titleDays": "Facture due dans {{daysUntilDue}} jours",
+    "message": "\"{{description}}\" - {{amount}} {{currency}}"
+  },
+  "achievementUnlocked": {
+    "title": "{{icon}} Achievement Debloque !",
+    "message": "Vous avez obtenu \"{{achievementName}}\" - {{description}}"
+  },
+  "levelUp": {
+    "title": "Niveau Superieur !",
+    "message": "Felicitations ! Vous avez atteint le niveau {{level}} !"
+  },
+  "anomaly": {
+    "largeTransaction": "Transaction importante detectee",
+    "categorySpike": "Augmentation des depenses",
+    "unusualSpending": "Depense inhabituelle",
+    "newMerchant": "Nouveau commercant",
+    "financialAlert": "Alerte financiere",
+    "largeTransactionMessage": "Transaction inhabituelle: {{amount}} {{currency}} ({{multiplier}}x la moyenne)",
+    "categorySpikeMessage": "Depense elevee dans \"{{categoryName}}\": {{percentageAbove}}% au-dessus de la moyenne",
+    "newMerchantMessage": "Premiere transaction avec ce commercant"
+  },
+  "savingsMilestone": {
+    "title": "{{icon}} {{goalName}}: {{milestone}}% atteint !",
+    "messageComplete": "Felicitations ! Vous avez atteint votre objectif d'epargne !",
+    "messageProgress": "Vous avez atteint {{milestone}}% de votre objectif \"{{goalName}}\""
+  },
+  "savingsOffTrack": {
+    "title": "Objectif \"{{goalName}}\" en retard",
+    "message": "Pour atteindre votre objectif a temps, vous devriez epargner {{required}} {{currency}}/mois (actuellement {{current}} {{currency}}/mois)"
+  },
+  "insights": {
+    "spendingUp": "Depenses en hausse de {{changePercent}}%",
+    "spendingDown": "Depenses en baisse de {{changePercent}}%",
+    "spendingUpMessage": "Vos depenses quotidiennes moyennes sont plus elevees que le mois dernier.",
+    "spendingDownMessage": "Vous depensez moins que le mois dernier. Continuez !",
+    "savingOpportunity": "Opportunite d'epargne: {{categoryName}}",
+    "savingOpportunityMessage": "Vous avez depense {{amount}} {{currency}} en \"{{categoryName}}\" ce mois-ci. Une reduction de 10% vous ferait economiser {{savings}} {{currency}}.",
+    "spentMoreThanUsual": "Vous avez depense {{percent}}% de plus que d'habitude cette semaine.",
+    "spentLessThanUsual": "Bravo ! Vous avez depense {{percent}}% de moins que d'habitude.",
+    "topCategory": "Votre plus grande categorie de depenses: {{categoryName}} ({{amount}} {{currency}})",
+    "positiveWeek": "Vous etes en positif cette semaine: +{{amount}} {{currency}}"
+  },
+  "tips": {
+    "automateSavings": {
+      "title": "Conseil: Automatisez votre epargne",
+      "message": "Configurez un virement automatique vers votre compte epargne chaque mois pour atteindre vos objectifs plus facilement."
+    },
+    "trackSubscriptions": {
+      "title": "Conseil: Suivez vos abonnements",
+      "message": "Passez en revue vos abonnements regulierement. Vous pourriez economiser en annulant ceux que vous n'utilisez plus."
+    },
+    "categoryBudgets": {
+      "title": "Conseil: Budget par categorie",
+      "message": "Definir des budgets par categorie vous aide a controler vos depenses et a identifier les postes a optimiser."
+    },
+    "emergencyFund": {
+      "title": "Conseil: Fonds d'urgence",
+      "message": "Visez a avoir 3 a 6 mois de depenses en reserve pour faire face aux imprevu."
+    }
+  },
+  "actions": {
+    "viewTransaction": "Voir la transaction",
+    "viewDashboard": "Voir le tableau de bord",
+    "viewReport": "Voir le rapport",
+    "viewAccount": "Voir le compte",
+    "viewSchedule": "Voir les echeances",
+    "viewBudget": "Voir le budget",
+    "viewGoal": "Voir l'objectif",
+    "viewReports": "Voir les rapports",
+    "viewTransactions": "Voir les transactions"
+  }
+}

@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Image, BookOpen, FileText, Download, X } from 'lucide-react';
 import { api } from '@/lib/api/client';
@@ -54,6 +55,7 @@ function getFileIcon(mimeType: string): LucideIcon {
 // ----------------------------------------------------------------------------
 
 export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttachmentProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showPicker, setShowPicker] = useState(false);
 
@@ -116,11 +118,11 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
 
   return (
     <div>
-      <label className="label">Justificatifs</label>
+      <label className="label">{t('transactions.documents')}</label>
 
       {/* Attached Documents */}
       {isLoading ? (
-        <div className="text-sm text-ctp-subtext0">Chargement...</div>
+        <div className="text-sm text-ctp-subtext0">{t('transactions.loadingDocuments')}</div>
       ) : attachedDocs && attachedDocs.length > 0 ? (
         <div className="space-y-2 mb-3">
           {attachedDocs.map((doc) => (
@@ -151,14 +153,14 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
           ))}
         </div>
       ) : (
-        <p className="text-sm text-ctp-subtext0 mb-3">Aucun justificatif attaché</p>
+        <p className="text-sm text-ctp-subtext0 mb-3">{t('transactions.noDocumentsAttached')}</p>
       )}
 
       {/* Add Button / Picker */}
       {showPicker ? (
         <div className="bg-ctp-surface0 border border-ctp-surface1 rounded-lg p-3">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-ctp-text">Sélectionner un document</span>
+            <span className="text-sm font-medium text-ctp-text">{t('transactions.selectDocument')}</span>
             <button
               type="button"
               onClick={() => setShowPicker(false)}
@@ -188,7 +190,7 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
             </div>
           ) : (
             <p className="text-sm text-ctp-subtext0 text-center py-4">
-              Aucun document dans la boite de reception
+              {t('transactions.noDocumentsInInbox')}
             </p>
           )}
         </div>
@@ -198,7 +200,7 @@ export function DocumentAttachment({ workspaceId, transactionId }: DocumentAttac
           onClick={() => setShowPicker(true)}
           className="w-full py-2 bg-ctp-surface0 border-2 border-dashed border-ctp-surface1 rounded-lg text-ctp-subtext0 hover:border-ctp-blue hover:text-ctp-blue transition-colors text-sm"
         >
-          + Ajouter un justificatif
+          {t('transactions.addDocument')}
         </button>
       )}
     </div>
